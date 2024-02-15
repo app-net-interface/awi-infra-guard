@@ -1,0 +1,259 @@
+// Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+// All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http:www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+package infra;
+import "types.proto";
+
+option go_package = "./;infrapb";
+
+// CloudProvider service definition
+service CloudProviderService {
+    rpc ListAccounts (ListAccountsRequest) returns (ListAccountsResponse) {}
+
+    rpc ListVPC (ListVPCRequest) returns (ListVPCResponse) {}
+
+    rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse) {}
+
+    rpc GetSubnet (GetSubnetRequest) returns (GetSubnetResponse) {}
+
+    rpc ListSubnets (ListSubnetsRequest) returns (ListSubnetsResponse) {}
+
+    rpc ListACLs (ListACLsRequest) returns (ListACLsResponse) {}
+
+    rpc ListSecurityGroups (ListSecurityGroupsRequest) returns (ListSecurityGroupsResponse) {}
+
+    rpc ListRouteTables (ListRouteTablesRequest) returns (ListRouteTablesResponse) {}
+
+    rpc GetVPCIDForCIDR (GetVPCIDForCIDRRequest) returns (GetVPCIDForCIDRResponse) {}
+
+    rpc GetCIDRsForLabels (GetCIDRsForLabelsRequest) returns (GetCIDRsForLabelsResponse) {}
+
+    rpc GetIPsForLabels (GetIPsForLabelsRequest) returns (GetIPsForLabelsResponse) {}
+
+    rpc GetInstancesForLabels (GetInstancesForLabelsRequest) returns (GetInstancesForLabelsResponse) {}
+
+    rpc GetVPCIDWithTag (GetVPCIDWithTagRequest) returns (GetVPCIDWithTagResponse) {}
+
+    rpc ListCloudClusters (ListCloudClustersRequest) returns (ListCloudClustersResponse) {}
+
+    rpc Summary(SummaryRequest) returns (SummaryResponse);
+}
+
+message ListAccountsRequest {
+    string provider = 1;
+}
+
+message ListAccountsResponse {
+    repeated Account accounts = 1;
+}
+
+// ListVPC
+message ListVPCRequest {
+    string provider = 1;
+    string region = 2;
+    map<string, string> labels = 3;
+    string account_id = 4;
+}
+
+message ListVPCResponse {
+    repeated VPC vpcs = 1;
+    string last_sync_time = 2;
+}
+
+// ListInstances
+message ListInstancesRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string zone = 3;
+    map<string, string> labels = 4;
+    string region = 5;
+    string account_id = 6;
+}
+
+message ListInstancesResponse {
+    repeated Instance instances = 1;
+    string last_sync_time = 2;
+}
+
+message ListACLsRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 4;
+    string account_id = 5;
+}
+
+message ListACLsResponse {
+    repeated ACL acls = 1;
+    string last_sync_time = 2;
+}
+
+message ListSecurityGroupsRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 4;
+    string account_id = 5;
+}
+
+message ListSecurityGroupsResponse {
+    repeated SecurityGroup security_groups = 1;
+    string last_sync_time = 2;
+}
+
+message ListRouteTablesRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 4;
+    string account_id = 5;
+}
+
+message ListRouteTablesResponse {
+    repeated RouteTable route_tables = 1;
+    string last_sync_time = 2;
+}
+
+// GetSubnet
+message GetSubnetRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string id = 3;
+    string region = 4;
+    string account_id = 5;
+}
+
+message GetSubnetResponse {
+    Subnet subnet = 1;
+}
+
+// ListSubnets
+message ListSubnetsRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string zone = 3;
+    string cidr = 4;
+    map<string, string> labels = 5;
+    string region = 6;
+    string account_id = 7;
+}
+
+message ListSubnetsResponse {
+    repeated Subnet subnets = 1;
+    string last_sync_time = 2;
+}
+
+// GetVPCIDForCIDR
+message GetVPCIDForCIDRRequest {
+    string provider = 1;
+    string cidr = 2;
+    string region = 3;
+    string account_id = 4;
+}
+
+message GetVPCIDForCIDRResponse {
+    string vpc_id = 1;
+}
+
+// GetCIDRsForLabels
+message GetCIDRsForLabelsRequest {
+    string provider = 1;
+    map<string, string> labels = 2;
+    string region = 3;
+    string account_id = 4;
+}
+
+message GetCIDRsForLabelsResponse {
+    repeated string cidrs = 1;
+}
+
+// GetIPsForLabels
+message GetIPsForLabelsRequest {
+    string provider = 1;
+    map<string, string> labels = 2;
+    string region = 3;
+    string account_id = 4;
+}
+
+message GetIPsForLabelsResponse {
+    repeated string ips = 1;
+}
+
+// GetInstancesForLabels
+message GetInstancesForLabelsRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    map<string, string> labels = 3;
+    string region = 4;
+    string account_id = 5;
+}
+
+message GetInstancesForLabelsResponse {
+    repeated Instance instances = 1;
+}
+
+// GetVPCIDWithTag
+message GetVPCIDWithTagRequest {
+    string provider = 1;
+    string key = 2;
+    string value = 3;
+    string region = 4;
+    string account_id = 5;
+}
+
+message GetVPCIDWithTagResponse {
+    string vpc_id = 1;
+}
+
+message ListCloudClustersRequest {
+    string provider = 1;
+    string region = 2;
+    string vpc_id = 3;
+    map<string, string> labels = 4;
+    string account_id = 5;
+}
+
+message ListCloudClustersResponse {
+    repeated Cluster clusters = 1;
+    string last_sync_time = 2;
+}
+
+message SummaryRequest {
+    string provider = 1;
+}
+
+message Counters {
+    int32 accounts = 1;
+    int32 vpc = 2;
+    int32 subnets = 3;
+    int32 route_tables = 4;
+    int32 instances = 5;
+    int32 clusters = 6;
+    int32 pods = 7;
+    int32 services = 8;
+    int32 namespaces = 9;
+    int32 acls = 10;
+    int32 security_groups = 11;
+}
+
+message StatusSummary {
+    map<string, int32> vm_status = 1;
+    map<string, int32> pod_status = 2;
+}
+
+message SummaryResponse {
+    Counters count = 1;
+    StatusSummary statuses = 2;
+}

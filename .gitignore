@@ -1,0 +1,6 @@
+infra.db
+
+# CSP Connector specific files
+connections.db
+
+bin/*

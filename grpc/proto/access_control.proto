@@ -1,0 +1,198 @@
+// Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+// All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http:www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+package infra;
+option go_package = "./;infrapb";
+
+import "types.proto";
+
+service AccessControlService {
+  // AddInboundAllowRuleInVPC allows given cidrs in all VPC instances. Security rules are created with name ruleName
+  // and tags if they are allowed in given cloud.
+  rpc AddInboundAllowRuleInVPC (AddInboundAllowRuleInVPCRequest)
+      returns (AddInboundAllowRuleInVPCResponse) {}
+  // AddInboundAllowRuleByLabelsMatch allows cidrsToAllow with protocolsAndPorts to all instances which match to labels
+  rpc AddInboundAllowRuleByLabelsMatch(AddInboundAllowRuleByLabelsMatchRequest)
+     returns (AddInboundAllowRuleByLabelsMatchResponse) {}
+  // AddInboundAllowRuleBySubnetMatch allows cidrsToAllow with protocolsAndPorts to all instances which are within provided cloud subnets
+  rpc     AddInboundAllowRuleBySubnetMatch(AddInboundAllowRuleBySubnetMatchRequest)
+      returns (AddInboundAllowRuleBySubnetMatchResponse) {}
+  // AddInboundAllowRuleByInstanceIPMatch allows cidrsToAllow with protocolsAndPorts to all instances which have provided instancesIPs
+  rpc AddInboundAllowRuleByInstanceIPMatch(AddInboundAllowRuleByInstanceIPMatchRequest)
+      returns (AddInboundAllowRuleByInstanceIPMatchResponse) {}
+  // AddInboundAllowRuleForLoadBalancerByDNS allows cidrsToAllow with protocolsAndPorts to load balancer with given DNS
+  rpc AddInboundAllowRuleForLoadBalancerByDNS(AddInboundAllowRuleForLoadBalancerByDNSRequest)
+      returns (AddInboundAllowRuleForLoadBalancerByDNSResponse) {}
+  rpc RemoveInboundAllowRuleFromVPCByName(RemoveInboundAllowRuleFromVPCByNameRequest)
+      returns (RemoveInboundAllowRuleFromVPCByNameResponse) {}
+  rpc RemoveInboundAllowRulesFromVPCById(RemoveInboundAllowRulesFromVPCByIdRequest)
+      returns (RemoveInboundAllowRulesFromVPCByIdResponse) {}
+  rpc RemoveInboundAllowRuleRulesByTags(RemoveInboundAllowRuleRulesByTagsRequest)
+      returns (RemoveInboundAllowRuleRulesByTagsResponse) {}
+  // RefreshInboundAllowRule adds and removes CIDRs in rule rules and applies rule in instances matching
+  // to destinationLabels or destinationPrefixes
+  rpc  RefreshInboundAllowRule(RefreshInboundAllowRuleRequest)
+      returns (RefreshInboundAllowRuleResponse) {}
+}
+
+message Ports {
+  repeated string ports = 1;
+}
+
+// AddInboundAllowRuleInVPC
+message AddInboundAllowRuleInVPCRequest {
+    string provider = 1;
+    string destination_vpc_id = 2;
+    repeated string cidrs_to_allow = 3;
+    string rule_name = 4;
+    map<string, string> tags = 5;
+    string region = 6;
+    string account_id = 7;
+}
+
+message AddInboundAllowRuleInVPCResponse {
+    // Response fields
+}
+
+// AddInboundAllowRuleByLabelsMatch
+message AddInboundAllowRuleByLabelsMatchRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string rule_name = 3;
+    map<string, string> labels = 4;
+    repeated string cidrs_to_allow = 5;
+    map<string, Ports> protocols_and_ports = 6;
+    string region = 7;
+    string account_id = 8;
+}
+
+message AddInboundAllowRuleByLabelsMatchResponse {
+    string rule_id = 1;
+    repeated Instance instances = 2;
+    // Response fields
+}
+
+// AddInboundAllowRuleBySubnetMatch
+message AddInboundAllowRuleBySubnetMatchRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string rule_name = 3;
+    repeated string subnet_cidrs = 4;
+    repeated string cidrs_to_allow = 5;
+    map<string, Ports> protocols_and_ports = 6;
+    string region = 7;
+    string account_id = 8;
+}
+
+message AddInboundAllowRuleBySubnetMatchResponse {
+    string rule_id = 1;
+    repeated Instance instances = 2;
+    repeated Subnet subnets = 3;
+}
+
+// AddInboundAllowRuleByInstanceIPMatch
+message AddInboundAllowRuleByInstanceIPMatchRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string rule_name = 3;
+    repeated string instances_ips = 4;
+    repeated string cidrs_to_allow = 5;
+    map<string, Ports> protocols_and_ports = 6;
+    string region = 7;
+    string account_id = 8;
+}
+
+message AddInboundAllowRuleByInstanceIPMatchResponse {
+    string rule_id = 1;
+    repeated Instance instances = 2;
+}
+
+// AddInboundAllowRuleForLoadBalancerByDNS
+message AddInboundAllowRuleForLoadBalancerByDNSRequest {
+    string provider = 1;
+    string load_balancer_dns = 2;
+    string vpc_id = 3;
+    string rule_name = 4;
+    repeated string cidrs_to_allow = 5;
+    map<string, Ports> protocols_and_ports = 6;
+    string region = 7;
+    string account_id = 8;
+}
+
+message AddInboundAllowRuleForLoadBalancerByDNSResponse {
+    string load_balancer_id = 1;
+    string rule_id = 2;
+}
+
+// RemoveInboundAllowRuleFromVPCByName
+message RemoveInboundAllowRuleFromVPCByNameRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string rule_name = 3;
+    string region = 4;
+    string account_id = 5;
+}
+
+message RemoveInboundAllowRuleFromVPCByNameResponse {
+}
+
+// RemoveInboundAllowRulesFromVPCById
+message RemoveInboundAllowRulesFromVPCByIdRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    repeated string instance_ids = 3;
+    repeated string load_balancer_ids = 4;
+    string rule_id = 5;
+    string region = 6;
+    string account_id = 7;
+}
+
+message RemoveInboundAllowRulesFromVPCByIdResponse {
+}
+
+// RemoveInboundAllowRuleRulesByTags
+message RemoveInboundAllowRuleRulesByTagsRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string rule_name = 3;
+    map<string, string> tags = 4;
+    string region = 5;
+    string account_id = 6;
+}
+
+message RemoveInboundAllowRuleRulesByTagsResponse {
+}
+
+// RefreshInboundAllowRule
+message RefreshInboundAllowRuleRequest {
+    string provider = 1;
+    string rule_id = 2;
+    repeated string cidrs_to_add = 3;
+    repeated string cidrs_to_remove = 4;
+    map<string, string> destination_labels = 5;
+    repeated string destination_prefixes = 6;
+    string destination_vpc_id = 7;
+    map<string, Ports> protocols_and_ports = 8;
+    string region = 9;
+    string account_id = 10;
+}
+
+message RefreshInboundAllowRuleResponse {
+    repeated Instance instances = 1;
+    repeated Subnet subnets = 2;
+}
