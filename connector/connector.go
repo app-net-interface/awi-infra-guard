@@ -25,7 +25,6 @@ import (
 	"github.com/app-net-interface/awi-infra-guard/connector/db"
 	"github.com/app-net-interface/awi-infra-guard/connector/provider"
 	"github.com/app-net-interface/awi-infra-guard/connector/types"
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -35,10 +34,6 @@ type Connector struct {
 	config          *Config
 	logger          *logrus.Entry
 	mainLogger      *logrus.Logger
-	// Variables obtained during Connection Creation
-	connectionID     string
-	sourceCIDRs      []string
-	destinationCIDRs []string
 }
 
 func NewConnector(ctx context.Context, logger *logrus.Logger, config *Config) (*Connector, error) {
@@ -108,21 +103,19 @@ type createConnectionBGPFullConfig struct {
 	ASN        uint64
 }
 
-func (c *Connector) createConnectionWithBGPMasterMind(
+type gateways struct {
+	SourceGateway       types.Gateway
+	DestinationGateway  types.Gateway
+	SourceProvider      provider.Provider
+	DestinationProvider provider.Provider
+}
+
+func (c *Connector) createConnectionWithBGPAuthoritarian(
 	ctx context.Context,
-	sourceConfig createConnectionBGPFullConfig,
-	destConfig createConnectionBGPFullConfig,
+	firstConfig createConnectionBGPFullConfig,
+	secondConfig createConnectionBGPFullConfig,
 	NumberOfTunnels uint8,
 ) error {
-	var firstConfig, secondConfig createConnectionBGPFullConfig
-
-	if sourceConfig.Setting.BGPSetting.PickOtherIPAddress {
-		firstConfig = sourceConfig
-		secondConfig = destConfig
-	} else {
-		firstConfig = destConfig
-		secondConfig = sourceConfig
-	}
 	resultFromFirstProvider, err := firstConfig.Provider.AttachToExternalGatewayWithBGP(
 		ctx,
 		firstConfig.Gateway,
@@ -157,7 +150,7 @@ func (c *Connector) createConnectionWithBGPMasterMind(
 		ctx,
 		secondConfig.Gateway,
 		firstConfig.Gateway,
-		types.AttachModeAttachOtherIP,
+		types.AttachModeAcceptOtherIP,
 		types.CreateBGPConnectionConfig{
 			OutsideInterfaces: firstConfig.Interfaces,
 			ASN:               secondConfig.ASN,
@@ -171,16 +164,16 @@ func (c *Connector) createConnectionWithBGPMasterMind(
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create attachment resources for gateway %s with mode %d: %w",
-			secondConfig.Gateway.Name, types.AttachModeAttachOtherIP, err,
+			secondConfig.Gateway.Name, types.AttachModeAcceptOtherIP, err,
 		)
 	}
 	return nil
 }
 
-func (c *Connector) createConnectionWithBGPRegular(
+func (c *Connector) createConnectionWithBGPCooperative(
 	ctx context.Context,
-	sourceConfig createConnectionBGPFullConfig,
-	destConfig createConnectionBGPFullConfig,
+	firstConfig createConnectionBGPFullConfig,
+	secondConfig createConnectionBGPFullConfig,
 	NumberOfTunnels uint8,
 ) error {
 	// TODO: Implement the logic.
@@ -189,125 +182,258 @@ func (c *Connector) createConnectionWithBGPRegular(
 
 func (c *Connector) createConnectionWithBGP(
 	ctx context.Context,
-	sourceGateway,
-	destinationGateway types.Gateway,
-	sourceProvider,
-	destinationProvider provider.Provider,
-	sourceSetting,
-	destinationSetting types.GatewayConnectionSettings,
+	gateways gateways,
+	sourceInterfaces,
+	destinationInterfaces []string,
 	numberOfTunnels uint8,
 ) error {
-	sourceInterfaces, err := sourceProvider.InitializeGatewayInterfaces(ctx, sourceGateway, destinationGateway)
+	sourceASN, err := gateways.SourceProvider.InitializeASN(
+		ctx, gateways.SourceGateway, gateways.DestinationGateway)
 	if err != nil {
-		return fmt.Errorf("failed to initialize Gateway %s interfaces: %w", sourceGateway.Name, err)
+		return fmt.Errorf(
+			"failed to initialize Gateway %s ASN: %w",
+			gateways.SourceGateway.Name, err)
 	}
-	destInterfaces, err := destinationProvider.InitializeGatewayInterfaces(ctx, destinationGateway, sourceGateway)
+	destASN, err := gateways.DestinationProvider.InitializeASN(
+		ctx, gateways.DestinationGateway, gateways.SourceGateway)
 	if err != nil {
-		return fmt.Errorf("failed to initialize Gateway %s interfaces: %w", destinationGateway.Name, err)
+		return fmt.Errorf(
+			"failed to initialize Gateway %s ASN: %w",
+			gateways.DestinationGateway.Name, err)
 	}
 
-	sourceASN, err := sourceProvider.InitializeASN(ctx, sourceGateway, destinationGateway)
+	bgpScenario, err := c.getBGPScenario(ctx, gateways)
 	if err != nil {
-		return fmt.Errorf("failed to initialize Gateway %s ASN: %w", sourceGateway.Name, err)
-	}
-	destASN, err := destinationProvider.InitializeASN(ctx, destinationGateway, sourceGateway)
-	if err != nil {
-		return fmt.Errorf("failed to initialize Gateway %s ASN: %w", destinationGateway.Name, err)
+		return fmt.Errorf(
+			"failed to obtain a scenario for creating BGP Session: %w",
+			err,
+		)
 	}
 
-	sourceConfig := createConnectionBGPFullConfig{
-		Gateway:    sourceGateway,
-		Provider:   sourceProvider,
-		Setting:    sourceSetting,
-		Interfaces: sourceInterfaces,
-		ASN:        sourceASN,
+	configs := []createConnectionBGPFullConfig{
+		{
+			Gateway:    gateways.SourceGateway,
+			Provider:   gateways.SourceProvider,
+			Interfaces: sourceInterfaces,
+			ASN:        sourceASN,
+		},
+		{
+			Gateway:    gateways.DestinationGateway,
+			Provider:   gateways.DestinationProvider,
+			Interfaces: destinationInterfaces,
+			ASN:        destASN,
+		},
 	}
-	destConfig := createConnectionBGPFullConfig{
-		Gateway:    destinationGateway,
-		Provider:   destinationProvider,
-		Setting:    destinationSetting,
-		Interfaces: destInterfaces,
-		ASN:        destASN,
+	if !bgpScenario.SourceSideStarts {
+		configs[0], configs[1] = configs[1], configs[0]
 	}
 
-	if (sourceSetting.BGPSetting.PickOwnIPAddress && sourceSetting.BGPSetting.PickOtherIPAddress) ||
-		(destinationSetting.BGPSetting.PickOwnIPAddress && destinationSetting.BGPSetting.PickOtherIPAddress) {
-		return c.createConnectionWithBGPMasterMind(ctx, sourceConfig, destConfig, numberOfTunnels)
+	if bgpScenario.StarterGeneratesBothAddresses {
+		return c.createConnectionWithBGPAuthoritarian(
+			ctx,
+			configs[0],
+			configs[1],
+			numberOfTunnels)
 	}
-	return c.createConnectionWithBGPRegular(ctx, sourceConfig, destConfig, numberOfTunnels)
+	return c.createConnectionWithBGPCooperative(
+		ctx,
+		configs[0],
+		configs[1],
+		numberOfTunnels)
 }
 
 func (c *Connector) createConnectionWithStaticRouting(
 	ctx context.Context,
-	sourceGateway,
-	destinationGateway types.Gateway,
-	sourceProvider,
-	destinationProvider provider.Provider,
-	sourceSetting,
-	destinationSetting types.GatewayConnectionSettings,
+	gateways gateways,
+	sourceInterfaces,
+	destinationInterfaces []string,
 	numberOfTunnels uint8,
 ) error {
 	return errors.New("NOT IMPLEMENTED")
 }
 
-func (c *Connector) createConnection(
+type connectionType int
+
+const (
+	connectionTypeBGP connectionType = iota
+	connectionTypeStatic
+	connectionTypeNone
+)
+
+func (c *Connector) getBGPScenario(
 	ctx context.Context,
-	sourceGateway,
-	destinationGateway types.Gateway,
-	sourceProvider,
-	destinationProvider provider.Provider,
-) error {
-	sourceSetting, err := sourceProvider.GetGatewayConnectionSettings(ctx, sourceGateway)
+	gateways gateways,
+) (types.BGPScenario, error) {
+	sourceSetting, err := gateways.SourceProvider.GetGatewayConnectionSettings(
+		ctx, gateways.SourceGateway)
 	if err != nil {
-		return fmt.Errorf(
+		return types.BGPScenario{}, fmt.Errorf(
 			"failed to get connection settings for gateway %s from provider %s: %w",
-			sourceGateway.Name, sourceProvider.Name(), err,
+			gateways.SourceGateway.Name, gateways.SourceProvider.Name(), err,
 		)
 	}
-	destinationSetting, err := destinationProvider.GetGatewayConnectionSettings(ctx, destinationGateway)
+	if sourceSetting.BGPSetting == nil {
+		return types.BGPScenario{}, fmt.Errorf(
+			"failed to get BGP settings for gateway %s from provider %s. "+
+				"Options don't specify any BGP setting: %v",
+			gateways.SourceGateway.Name, gateways.SourceProvider.Name(),
+			sourceSetting,
+		)
+	}
+	destinationSetting, err := gateways.DestinationProvider.GetGatewayConnectionSettings(
+		ctx, gateways.DestinationGateway)
 	if err != nil {
-		return fmt.Errorf(
+		return types.BGPScenario{}, fmt.Errorf(
 			"failed to get connection settings for gateway %s from provider %s: %w",
-			destinationGateway.Name, destinationProvider.Name(), err,
+			gateways.DestinationGateway.Name, gateways.DestinationProvider.Name(), err,
+		)
+	}
+	if destinationSetting.BGPSetting == nil {
+		return types.BGPScenario{}, fmt.Errorf(
+			"failed to get BGP settings for gateway %s from provider %s. "+
+				"Options don't specify any BGP setting: %v",
+			gateways.DestinationGateway.Name, gateways.DestinationProvider.Name(),
+			destinationSetting,
+		)
+	}
+	scenario := types.BGPScenarioFromBothConfigs(
+		&sourceSetting.BGPSetting.Addressing, &destinationSetting.BGPSetting.Addressing)
+	if scenario != nil {
+		return types.BGPScenario{}, fmt.Errorf(
+			"failed to obtain BGP Scenario between gateways. It seems their "+
+				"BGP settings are incompatible. Source %s:%s has setting: %v "+
+				"and Destination %s:%s has setting: %v",
+			gateways.SourceProvider.Name(),
+			gateways.SourceGateway.Name,
+			sourceSetting.BGPSetting,
+			gateways.DestinationProvider.Name(),
+			gateways.DestinationGateway.Name,
+			destinationSetting.BGPSetting,
+		)
+	}
+	return *scenario, nil
+}
+
+// checkConnectionTypeThatCanBeEstablished verifies setting of
+// both sides of the possible connection, checks if the connection
+// can be established and if so it returns what kind of connection
+// can be established and how many tunnels.
+func (c *Connector) checkConnectionTypeThatCanBeEstablished(
+	ctx context.Context,
+	gateways gateways,
+) (connectionType, uint8, error) {
+	sourceSetting, err := gateways.SourceProvider.GetGatewayConnectionSettings(
+		ctx, gateways.SourceGateway)
+	if err != nil {
+		return connectionTypeNone, 0, fmt.Errorf(
+			"failed to get connection settings for gateway %s from provider %s: %w",
+			gateways.SourceGateway.Name, gateways.SourceProvider.Name(), err,
+		)
+	}
+	destinationSetting, err := gateways.DestinationProvider.GetGatewayConnectionSettings(
+		ctx, gateways.DestinationGateway)
+	if err != nil {
+		return connectionTypeNone, 0, fmt.Errorf(
+			"failed to get connection settings for gateway %s from provider %s: %w",
+			gateways.DestinationGateway.Name, gateways.DestinationProvider.Name(), err,
 		)
 	}
 	numberOfTunnels, err := calculateNumberOfTunnels(sourceSetting, destinationSetting)
 	if err != nil {
-		return fmt.Errorf("failed to calculate number of desired tunnels: %w", err)
+		return connectionTypeNone, 0, fmt.Errorf("failed to calculate number of desired tunnels: %w", err)
 	}
+
 	if sourceSetting.BGPSetting != nil && destinationSetting.BGPSetting != nil {
+		scenario := types.BGPScenarioFromBothConfigs(
+			&sourceSetting.BGPSetting.Addressing, &destinationSetting.BGPSetting.Addressing)
+		if scenario != nil {
+			return connectionTypeBGP, numberOfTunnels, nil
+		}
+		c.logger.Infof(
+			"both sides of connection support BGP but their configuration "+
+				"do not match with each other. Trying Static Routing Setting."+
+				"Source Gateway: %s:%s and DestinationGateway: %s:%s",
+			gateways.SourceProvider.Name(),
+			gateways.SourceGateway.Name,
+			gateways.DestinationProvider.Name(),
+			gateways.DestinationGateway.Name,
+		)
+	}
+
+	if sourceSetting.StaticRoutingSetting != nil && destinationSetting.StaticRoutingSetting != nil {
+		return connectionTypeStatic, numberOfTunnels, nil
+	}
+
+	return connectionTypeNone, 0, nil
+}
+
+func (c *Connector) createConnection(
+	ctx context.Context,
+	gateways gateways,
+) error {
+	connType, numberOfTunnels, err := c.checkConnectionTypeThatCanBeEstablished(ctx, gateways)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to verify what kind of connection can be established between gateways "+
+				"%s:%s and %s:%s: %w",
+			gateways.SourceGateway.CloudProvider, gateways.SourceGateway.Name,
+			gateways.DestinationGateway.CloudProvider, gateways.DestinationGateway.Name,
+			err,
+		)
+	}
+	if connType == connectionTypeNone {
+		return fmt.Errorf(
+			"cannot establish a connection between gateways %s:%s and %s:%s. Based on "+
+				"gateways settings its not possible to establish either Connection with "+
+				"static routing nor dynamic routing using BGP",
+			gateways.SourceGateway.CloudProvider, gateways.SourceGateway.Name,
+			gateways.DestinationGateway.CloudProvider, gateways.DestinationGateway.Name,
+		)
+	}
+
+	sourceInterfaces, err := gateways.SourceProvider.InitializeGatewayInterfaces(
+		ctx, gateways.SourceGateway, gateways.DestinationGateway)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to initialize Gateway %s interfaces: %w",
+			gateways.SourceGateway.Name, err)
+	}
+	destInterfaces, err := gateways.DestinationProvider.InitializeGatewayInterfaces(
+		ctx, gateways.DestinationGateway, gateways.SourceGateway)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to initialize Gateway %s interfaces: %w",
+			gateways.DestinationGateway.Name, err)
+	}
+
+	if connType == connectionTypeBGP {
 		return c.createConnectionWithBGP(
 			ctx,
-			sourceGateway,
-			destinationGateway,
-			sourceProvider,
-			destinationProvider,
-			sourceSetting,
-			destinationSetting,
+			gateways,
+			sourceInterfaces,
+			destInterfaces,
 			numberOfTunnels,
 		)
 	}
-	if sourceSetting.StaticRoutingSetting != nil && destinationSetting.StaticRoutingSetting != nil {
-		return c.createConnectionWithStaticRouting(
-			ctx,
-			sourceGateway,
-			destinationGateway,
-			sourceProvider,
-			destinationProvider,
-			sourceSetting,
-			destinationSetting,
-			numberOfTunnels,
-		)
-	}
-	return fmt.Errorf(
-		"cannot create a connection between providers since they cannot match routing setting. "+
-			"Source gateway: %s, source provider: %s, destination gateway: %s, destination provider: %s",
-		sourceGateway.Name, sourceProvider.Name(), destinationGateway.Name, destinationProvider.Name(),
+	return c.createConnectionWithStaticRouting(
+		ctx,
+		gateways,
+		sourceInterfaces,
+		destInterfaces,
+		numberOfTunnels,
 	)
 }
 
 func (c *Connector) Connect(ctx context.Context, request types.Request) error {
-	connection, err := c.getConnectionEntryIfExists(ctx, request)
+	var connectionID string
+	var connectionDetails types.ConnectionDetails
+
+	connection, err := getConnectionEntryIfExists(
+		ctx,
+		c.db,
+		c.logger,
+		request,
+	)
 	if err != nil {
 		return fmt.Errorf(
 			"got error while trying to find a Connection entry in the DB for configuration: %v",
@@ -315,6 +441,10 @@ func (c *Connector) Connect(ctx context.Context, request types.Request) error {
 	}
 	if connection == nil {
 		c.logger.Debugf("connection does not exist yet")
+		if request.ConnectionDetails == nil {
+			return errors.New("cannot create a connection without connection ID or details provided")
+		}
+		connectionDetails = *request.ConnectionDetails
 	} else if connection.State == db.StateActive {
 		c.logger.Infof("connection already exists and has active state. Nothing to do")
 		// TODO: Consider returning an error here.
@@ -325,25 +455,37 @@ func (c *Connector) Connect(ctx context.Context, request types.Request) error {
 		c.logger.Infof(
 			"found connection with state: %s. Trying to reestablish the connection",
 			connection.State)
-		c.connectionID = connection.ID
+		connectionID = connection.ID
+		connectionDetails = connectionDetailsFromConnection(*connection)
 	}
 
 	c.logger.Debugf("Starting to create a Connection: %v", request)
 
-	sourceProvider, destinationProvider, err := c.initializeProviders(ctx, request)
+	sourceProvider, destinationProvider, err := c.initializeProviders(ctx, connectionDetails)
 	if err != nil {
 		return fmt.Errorf("cannot create connection due to provider failure: %w", err)
 	}
-	sourceGW, destGW, err := c.getGateways(ctx, request, sourceProvider, destinationProvider)
+	sourceGW, destGW, err := c.getGateways(ctx, connectionDetails, sourceProvider, destinationProvider)
 	if err != nil {
 		return fmt.Errorf("validation of requested gateways to be connected failed: %w", err)
 	}
 
-	if err := c.createConnectionEntryInDB(ctx, sourceGW, destGW, sourceProvider, destinationProvider); err != nil {
-		return fmt.Errorf("connection could not be stored in the DB: %w", err)
+	if connectionID == "" {
+		connectionID, err = createConnectionEntryInDB(
+			ctx, c.db, c.logger, sourceGW, destGW,
+		)
+		if err != nil {
+			return fmt.Errorf("connection could not be stored in the DB: %w", err)
+		}
 	}
 
-	err = c.createConnection(ctx, sourceGW, destGW, sourceProvider, destinationProvider)
+	err = c.createConnection(
+		ctx, gateways{
+			SourceGateway:       sourceGW,
+			DestinationGateway:  destGW,
+			SourceProvider:      sourceProvider,
+			DestinationProvider: destinationProvider,
+		})
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create a connection between %s:%s and %s:%s: %w",
@@ -351,12 +493,7 @@ func (c *Connector) Connect(ctx context.Context, request types.Request) error {
 			err)
 	}
 
-	if err = c.updateConnectionEntryInDBWithCIDRs(ctx, sourceGW, destGW, sourceProvider, destinationProvider); err != nil {
-		c.logger.Warn("Resources were create successfully but failed to update DB Connection Entry with CIDRs")
-		return fmt.Errorf("failed to update connection DB Entry with CIDRs: %w", err)
-	}
-
-	if err = c.updateConnectionCreationEntryInDB(ctx, db.StateActive, "", sourceGW, destGW, sourceProvider, destinationProvider); err != nil {
+	if err = updateConnectionEntryStateInDB(ctx, c.db, c.logger, connectionID, db.StateActive, ""); err != nil {
 		c.logger.Warn("Resources were create successfully but failed to update DB Connection Entry with Active state")
 		return fmt.Errorf("failed to update connection DB Entry with Active state: %w", err)
 	}
@@ -365,25 +502,11 @@ func (c *Connector) Connect(ctx context.Context, request types.Request) error {
 	return nil
 }
 
-func (c *Connector) getConnectionEntryIfExists(
-	ctx context.Context, request types.Request,
-) (*db.Connection, error) {
-	if request.ConnectionID != nil {
-		return c.db.GetConnection(*request.ConnectionID)
-	}
-	return c.db.GetConnectionWithGateways(
-		request.ConnectionDetails.Source.GatewayID,
-		request.ConnectionDetails.Source.Provider,
-		request.ConnectionDetails.Destination.GatewayID,
-		request.ConnectionDetails.Destination.Provider,
-	)
-}
-
 func (c *Connector) initializeProviders(
-	ctx context.Context, request types.Request,
+	ctx context.Context, connectionDetails types.ConnectionDetails,
 ) (provider.Provider, provider.Provider, error) {
 	sourceConfig := ""
-	sourceProviderName := request.ConnectionDetails.Source.Provider
+	sourceProviderName := connectionDetails.Source.Provider
 	if config, ok := c.config.Providers[sourceProviderName]; ok {
 		sourceConfig = config.(string)
 	} else {
@@ -395,7 +518,7 @@ func (c *Connector) initializeProviders(
 		return nil, nil, fmt.Errorf("failed to initialize source provider '%s': %w", sourceProviderName, err)
 	}
 	destConfig := ""
-	destProviderName := request.ConnectionDetails.Destination.Provider
+	destProviderName := connectionDetails.Destination.Provider
 	if config, ok := c.config.Providers[destProviderName]; ok {
 		destConfig = config.(string)
 	} else {
@@ -409,235 +532,108 @@ func (c *Connector) initializeProviders(
 	return sourceProvider, destProvider, nil
 }
 
-func (c *Connector) SetConnectionID(id string) {
-	c.connectionID = id
-}
-
-func (c *Connector) updateConnectionEntryInDBWithCIDRs(
-	ctx context.Context,
-	sourceGateway, destGateway types.Gateway,
-	sourceProvider, destProvider provider.Provider,
-) error {
-	sourceCIDRs, err := sourceProvider.GetCIDRs(ctx, sourceGateway)
-	if err != nil {
-		return fmt.Errorf("failed to get Connection CIDRs for source Provider: %w", err)
+func connectionDetailsFromConnection(connection db.Connection) types.ConnectionDetails {
+	// TODO: Source/Destination Details are not part of a DB.
+	//
+	// Adjust model to properly use that field or remove it.
+	return types.ConnectionDetails{
+		Source: types.GatewayIdentifier{
+			GatewayID: connection.SourceID,
+			Region:    connection.SourceRegion,
+			Provider:  connection.SourceProvider,
+		},
+		Destination: types.GatewayIdentifier{
+			GatewayID: connection.DestinationID,
+			Region:    connection.DestinationRegion,
+			Provider:  connection.DestinationProvider,
+		},
 	}
-	destinationCIDRs, err := destProvider.GetCIDRs(ctx, destGateway)
-	if err != nil {
-		return fmt.Errorf("failed to get Connection CIDRs for Destination Provider: %w", err)
-	}
-
-	c.sourceCIDRs = sourceCIDRs
-	c.destinationCIDRs = destinationCIDRs
-
-	if err = c.updateConnectionCreationEntryInDB(
-		ctx,
-		db.StateCreationInProgress,
-		"",
-		sourceGateway,
-		destGateway,
-		sourceProvider,
-		destProvider); err != nil {
-		return fmt.Errorf(
-			"failed to perform an update for connection in DB with connection CIDRs: %w",
-			err)
-	}
-
-	return nil
-}
-
-func (c *Connector) createConnectionEntryInDB(
-	ctx context.Context,
-	sourceGateway, destGateway types.Gateway,
-	sourceProvider, destProvider provider.Provider,
-) error {
-	if c.connectionID != "" {
-		c.logger.Debugf("connection already exists. Skipping creating new entry in DB")
-	} else {
-		c.logger.Debugf("Creating new entry for the connection in DB")
-		c.connectionID = string(uuid.New().String())
-	}
-	err := c.updateConnectionCreationEntryInDB(
-		ctx,
-		db.StateCreationInProgress,
-		"",
-		sourceGateway,
-		destGateway,
-		sourceProvider,
-		destProvider,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create entry about the connection in the DB: %w", err)
-	}
-	return nil
-}
-
-func (c *Connector) updateConnectionCreationEntryInDB(
-	ctx context.Context,
-	state db.ConnectionState,
-	creationError string,
-	sourceGateway, destGateway types.Gateway,
-	sourceProvider, destProvider provider.Provider) error {
-	if c.connectionID == "" {
-		return errors.New("trying to update connection when connection ID is not set yet")
-	}
-	if state != db.StateCreationInProgress && state != db.StatePartiallyCreated && state != db.StateActive {
-		return fmt.Errorf(
-			"this method should be used only for updates regarding Connection Creation."+
-				"Got state: %s", state,
-		)
-	}
-	if creationError != "" && state != db.StatePartiallyCreated {
-		return fmt.Errorf(
-			"trying to store information about error for different state than partially created. "+
-				"If the state is either in the progress or it was created successfully then no error "+
-				"should appear. Got state: %s and error: %s",
-			state, creationError,
-		)
-	}
-	sourceVPC, err := sourceProvider.GetVPCForGateway(ctx, sourceGateway)
-	if err != nil {
-		c.logger.Warnf(
-			"failed to obtain the ID of VPC attached to Gateway: %v", err)
-	}
-	destinationVPC, err := destProvider.GetVPCForGateway(ctx, destGateway)
-	if err != nil {
-		c.logger.Warnf(
-			"failed to obtain the ID of VPC attached to Gateway: %v", err)
-	}
-	err = c.db.PutConnection(db.Connection{
-		ID:                  c.connectionID,
-		SourceID:            sourceGateway.Name,
-		SourceProvider:      sourceGateway.CloudProvider,
-		SourceVPC:           sourceVPC,
-		SourceCIDRs:         c.sourceCIDRs,
-		SourceRegion:        sourceGateway.Region,
-		DestinationID:       destGateway.Name,
-		DestinationProvider: destGateway.CloudProvider,
-		DestinationVPC:      destinationVPC,
-		DestinationCIDRs:    c.destinationCIDRs,
-		DestinationRegion:   destGateway.Region,
-		State:               state,
-		Error:               creationError,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to update entry about the connection in the DB: %w", err)
-	}
-	return nil
-}
-
-func (c *Connector) updateConnectionDeletionEntryInDB(
-	ctx context.Context,
-	state db.ConnectionState,
-	deletionError string,
-	sourceGateway, destGateway types.Gateway,
-	sourceProvider, destProvider provider.Provider,
-) error {
-	if c.connectionID == "" {
-		return errors.New("cannot figure out which connection is being updated. Missing connectionID")
-	}
-	if state != db.StateDeletionInProgress && state != db.StatePartiallyDeleted && state != db.StateDeleted {
-		return fmt.Errorf(
-			"this method should be used only for updates regarding Connection Deletion."+
-				"Got state: %s", state,
-		)
-	}
-	if deletionError != "" && state != db.StatePartiallyDeleted {
-		return fmt.Errorf(
-			"trying to store information about error for different state than partially deleted. "+
-				"If the state is either in the progress or it was deleted successfully then no error "+
-				"should appear. Got state: %s and error: %s",
-			state, deletionError,
-		)
-	}
-	sourceVPC, err := sourceProvider.GetVPCForGateway(ctx, sourceGateway)
-	if err != nil {
-		c.logger.Warnf(
-			"failed to obtain the ID of VPC attached to Gateway: %v", err)
-	}
-	destinationVPC, err := destProvider.GetVPCForGateway(ctx, destGateway)
-	if err != nil {
-		c.logger.Warnf(
-			"failed to obtain the ID of VPC attached to Gateway: %v", err)
-	}
-	err = c.db.PutConnection(db.Connection{
-		ID:                  c.connectionID,
-		SourceID:            sourceGateway.Name,
-		SourceProvider:      sourceGateway.CloudProvider,
-		SourceVPC:           sourceVPC,
-		SourceCIDRs:         c.sourceCIDRs,
-		SourceRegion:        sourceGateway.Region,
-		DestinationID:       destGateway.Name,
-		DestinationProvider: destGateway.CloudProvider,
-		DestinationVPC:      destinationVPC,
-		DestinationCIDRs:    c.destinationCIDRs,
-		DestinationRegion:   destGateway.Region,
-		State:               state,
-		Error:               deletionError,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to update entry about the connection in the DB: %w", err)
-	}
-	if state == db.StateDeleted {
-		if err := c.db.DeleteConnection(c.connectionID); err != nil {
-			return fmt.Errorf(
-				"cannot delete a connection entry %s from DB: %w",
-				c.connectionID, err,
-			)
-		}
-	}
-	return nil
-}
-
-func (c *Connector) StoreErrorFromConnectionCreationInDB(
-	ctx context.Context,
-	creationError error,
-	sourceGateway, destGateway types.Gateway,
-	sourceProvider, destProvider provider.Provider,
-) error {
-	if c.connectionID == "" {
-		c.logger.Debug(
-			"Connection was not registered in the DB. Nothing to update",
-		)
-	}
-	err := c.updateConnectionCreationEntryInDB(
-		ctx,
-		db.StatePartiallyCreated,
-		creationError.Error(),
-		sourceGateway,
-		destGateway,
-		sourceProvider,
-		destProvider,
-	)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to update DB with information about received error. Got issue: %w",
-			err)
-	}
-	return nil
 }
 
 func (c *Connector) Disconnect(ctx context.Context, request types.Request) error {
 	c.logger.Debugf("Starting to delete a Connection with the configuration: %v", c.config)
 
-	sourceProvider, destinationProvider, err := c.initializeProviders(ctx, request)
+	var connectionDetails types.ConnectionDetails
+	var connectionID string
+
+	if request.ConnectionID != nil {
+		connection, err := getConnectionEntryIfExists(ctx, c.db, c.logger, request)
+		if err != nil {
+			return fmt.Errorf(
+				"cannot remove the connection as obtaining connection with ID '%s'"+
+					"from DB failed. If the connection is not present in the DB you can provide "+
+					"source and destination details directly instead of providing connection ID: %w",
+				*request.ConnectionID, err,
+			)
+		}
+		if connection == nil {
+			return fmt.Errorf(
+				"cannot remove the connection as obtaining connection with ID '%s'"+
+					"from DB failed - got nil connection. If the connection is not present "+
+					"in the DB you can provide source and destination details directly instead "+
+					"of providing connection ID.",
+				*request.ConnectionID,
+			)
+		}
+		connectionDetails = connectionDetailsFromConnection(*connection)
+		connectionID = connection.ID
+	} else {
+		if request.ConnectionDetails == nil {
+			return errors.New(
+				"cannot remove the connection without Connection ID or details provided")
+		}
+		connection, err := c.db.GetConnectionWithGateways(
+			request.ConnectionDetails.Source.GatewayID,
+			request.ConnectionDetails.Source.Provider,
+			request.ConnectionDetails.Destination.GatewayID,
+			request.ConnectionDetails.Destination.Provider,
+		)
+		if err != nil {
+			c.logger.Warnf(
+				"failed to find a connection for %s:%s and %s:%s in the database. "+
+					"Will attempt to delete a connection without DB entry. Got error: %v",
+				request.ConnectionDetails.Source.Provider,
+				request.ConnectionDetails.Source.GatewayID,
+				request.ConnectionDetails.Destination.Provider,
+				request.ConnectionDetails.Destination.GatewayID,
+				err,
+			)
+		} else {
+			if connection == nil {
+				c.logger.Warnf(
+					"failed to find a connection for %s:%s and %s:%s in the database. "+
+						"Will attempt to delete a connection without DB entry. Got nil object",
+					request.ConnectionDetails.Source.Provider,
+					request.ConnectionDetails.Source.GatewayID,
+					request.ConnectionDetails.Destination.Provider,
+					request.ConnectionDetails.Destination.GatewayID,
+				)
+			} else {
+				connectionID = connection.ID
+			}
+		}
+		connectionDetails = *request.ConnectionDetails
+	}
+
+	sourceProvider, destinationProvider, err := c.initializeProviders(ctx, connectionDetails)
 	if err != nil {
 		return fmt.Errorf("cannot create connection due to provider failure: %w", err)
 	}
-	sourceGW, destGW, err := c.getGateways(ctx, request, sourceProvider, destinationProvider)
+	sourceGW, destGW, err := c.getGateways(ctx, connectionDetails, sourceProvider, destinationProvider)
 	if err != nil {
 		return fmt.Errorf("validation of requested gateways to be connected failed: %w", err)
 	}
 
-	if err := c.updateConnectionDeletionEntryInDB(
-		ctx,
-		db.StateDeletionInProgress,
-		"",
-		sourceGW,
-		destGW,
-		sourceProvider,
-		destinationProvider); err != nil {
-		return fmt.Errorf("failed to mark connection DB Entry as in process of deletion: %w", err)
+	if connectionID != "" {
+		err = updateConnectionEntryStateInDB(
+			ctx, c.db, c.logger, connectionID, db.StateDeletionInProgress, "",
+		)
+		if err != nil {
+			return fmt.Errorf(
+				"failed to update deletion state in the DB of connection: %s: %w",
+				connectionID, err,
+			)
+		}
 	}
 
 	if err := sourceProvider.DeleteConnectionResources(ctx, sourceGW, destGW); err != nil {
@@ -647,18 +643,21 @@ func (c *Connector) Disconnect(ctx context.Context, request types.Request) error
 		return fmt.Errorf("failed to create resources for Destination Gateway %s: %w", destGW.Name, err)
 	}
 
-	if err := c.updateConnectionDeletionEntryInDB(
-		ctx,
-		db.StateDeleted,
-		"",
-		sourceGW,
-		destGW,
-		sourceProvider,
-		destinationProvider); err != nil {
-		c.logger.Warn("Resources were removed successfully but failed to remove DB Connection Entry")
-		return fmt.Errorf("failed to remove connection DB Entry: %w", err)
+	if connectionID != "" {
+		if err := deleteConnectionEntryInDB(ctx, c.db, c.logger, connectionID); err != nil {
+			c.logger.Warn("Resources were removed successfully but failed to remove DB Connection Entry")
+			return fmt.Errorf("failed to remove connection DB Entry: %w", err)
+		}
+		c.logger.Infof("Connection '%s' removed successfully", connectionID)
+	} else {
+		c.logger.Infof("Connection %s:%s - %s:%s removed successfully",
+			request.ConnectionDetails.Source.Provider,
+			request.ConnectionDetails.Source.GatewayID,
+			request.ConnectionDetails.Destination.Provider,
+			request.ConnectionDetails.Destination.GatewayID,
+		)
 	}
-	c.logger.Info("Connection removed successfully")
+
 	return nil
 }
 
@@ -688,33 +687,33 @@ func (c *Connector) ListConnections() ([]db.Connection, error) {
 
 func (c *Connector) getGateways(
 	ctx context.Context,
-	request types.Request,
+	connectionDetails types.ConnectionDetails,
 	sourceProvider, destProvider provider.Provider,
 ) (types.Gateway, types.Gateway, error) {
 	c.logger.Debug("Checking the presence of requested Gateways")
-	sourceGW, err := sourceProvider.GetGateway(ctx, request.ConnectionDetails.Source)
+	sourceGW, err := sourceProvider.GetGateway(ctx, connectionDetails.Source)
 	if err != nil {
 		return types.Gateway{}, types.Gateway{}, fmt.Errorf(
 			"The Source Gateway %v not found: %w",
-			request.ConnectionDetails.Source,
+			connectionDetails.Source,
 			err)
 	}
 	if sourceGW == nil {
 		return types.Gateway{}, types.Gateway{}, fmt.Errorf(
 			"The Source Gateway %v not found",
-			request.ConnectionDetails.Source)
+			connectionDetails.Source)
 	}
-	destGW, err := destProvider.GetGateway(ctx, request.ConnectionDetails.Destination)
+	destGW, err := destProvider.GetGateway(ctx, connectionDetails.Destination)
 	if err != nil {
 		return types.Gateway{}, types.Gateway{}, fmt.Errorf(
 			"The Destination Gateway %v not found: %w",
-			request.ConnectionDetails.Destination,
+			connectionDetails.Destination,
 			err)
 	}
 	if destGW == nil {
 		return types.Gateway{}, types.Gateway{}, fmt.Errorf(
 			"The Destination Gateway %v not found",
-			request.ConnectionDetails.Destination)
+			connectionDetails.Destination)
 	}
 	return *sourceGW, *destGW, nil
 }

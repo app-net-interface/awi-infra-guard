@@ -121,10 +121,22 @@ func (c *GCPConnector) GetGatewayConnectionSettings(ctx context.Context, gateway
 	return types.GatewayConnectionSettings{
 		NumberOfInterfaces: 2,
 		BGPSetting: &types.BGPSetting{
-			PickOwnIPAddress:   false,
-			PickOtherIPAddress: false,
-			AllowedIPRanges:    []string{"192.254.0.0/16"},
-			// TODO: fix that
+			Addressing: types.BGPAddressing{
+				AcceptsBothAddresses: true,
+				// TODO: Add an implementation for generating
+				// both IP Addresses.
+				GeneratesBothAddresses: false,
+				// TODO: Add an implementation for generating
+				// own IP Address and accepting the second
+				// address.
+				//
+				// This can be used for creating a connection
+				// with Azure provider.
+				GeneratesOwnAndAcceptsPeerAddress: false,
+			},
+			AllowedIPRanges: []string{"192.254.0.0/16"},
+			// TODO: Add excluded IP Ranges that are disallowed by
+			// the GCP provider.
 			ExcludedIPRanges: []string{},
 		},
 	}, nil
@@ -172,9 +184,9 @@ func (c *GCPConnector) AttachToExternalGatewayWithBGP(
 	attachMode types.AttachBGPConnectionMode,
 	config types.CreateBGPConnectionConfig,
 ) (types.OutputForConnectionWithBGP, error) {
-	if attachMode != types.AttachModeAttachOtherIP {
+	if attachMode != types.AttachModeAcceptOtherIP {
 		return types.OutputForConnectionWithBGP{}, errors.New(
-			"currently provider gcp doesn't support BGP mode other than AttachModeAttachOtherIP",
+			"currently provider gcp doesn't support BGP mode other than AttachModeAcceptOtherIP",
 		)
 	}
 
@@ -398,45 +410,6 @@ func (c *GCPConnector) deleteExternalVPNGatewaysForConnection(ctx context.Contex
 		c.logger.Debugf("External VPN Gateway %v deleted successfully", gateways[i])
 	}
 	return nil
-}
-
-func (c *GCPConnector) GetCIDRs(ctx context.Context, gateway types.Gateway) ([]string, error) {
-	router, err := c.gcpClient.GetRouter(ctx, c.config.Region, gateway.Name)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get GCP Cloud Router %s: %w", gateway.Name, err)
-	}
-	if router == nil {
-		return nil, fmt.Errorf(
-			"failed to get GCP Cloud Router %s. Doesn't exist: %w",
-			gateway.Name, err)
-	}
-	if router.Network == "" {
-		c.logger.Debugf(
-			"Cloud Router %s has no VPC associated: no CIDRs found",
-			gateway.Name)
-		return nil, nil
-	}
-	network, err := c.gcpClient.GetNetwork(ctx, router.Network)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get Network %s: %w", router.Network, err)
-	}
-	if network == nil {
-		return nil, fmt.Errorf("failed to get Network %s: got empty Network object", router.Network)
-	}
-
-	cidrs := []string{}
-	for _, subnetworkID := range network.Subnets {
-		subnetwork, err := c.gcpClient.GetSubnetwork(ctx, c.config.Region, subnetworkID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get Subnetwork %s: %w", subnetwork, err)
-		}
-		if subnetwork == nil {
-			return nil, fmt.Errorf("failed to get Subnetwork %s: got empty Subnetwork object", subnetwork)
-		}
-		cidrs = append(cidrs, subnetwork.CIDR)
-	}
-
-	return cidrs, nil
 }
 
 // GetInterfaces returns two interfaces that can be used for creating the connection

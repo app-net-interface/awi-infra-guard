@@ -19,6 +19,7 @@ package client
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/app-net-interface/awi-infra-guard/connector/helper"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
@@ -29,16 +30,93 @@ type TransitGateway struct {
 	// TODO: Fix a bug, where Transit Gateway holds only one
 	// VPC Attached. The loop going through TGW VPC Attachments
 	// overrides VPC when found.
-	VPCID  string
-	ASN    string
-	Region string
+	VPCID string
+	ASN   string
+
+	// All these options will be set to enable when creating
+	// a connection with a BGP.
+	//
+	// This is required to automatically accept routes discovered
+	// from the second side of connection.
+	AutoAcceptSharedAttachments  bool
+	DefaultRouteTableAssociation bool
+	DefaultRouteTablePropagation bool
+	VpnEcmpSupport               bool
+	DnsSupport                   bool
 }
 
 func (tgw TransitGateway) String() string {
 	return fmt.Sprintf(
-		"TransitGateway {ID: '%s', VPCID: '%s', ASN: '%s', Region: '%s'}",
-		tgw.ID, tgw.VPCID, tgw.ASN, tgw.Region,
+		"TransitGateway {ID: '%s', VPCID: '%s', ASN: '%s', "+
+			"AutoAcceptSharedAttachments: %v, "+
+			"DefaultRouteTableAssociation: %v, "+
+			"DefaultRouteTablePropagation: %v, "+
+			"VpnEcmpSupport: %v, "+
+			"DnsSupport: %v}",
+		tgw.ID, tgw.VPCID, tgw.ASN, tgw.AutoAcceptSharedAttachments,
+		tgw.DefaultRouteTableAssociation, tgw.DefaultRouteTablePropagation,
+		tgw.VpnEcmpSupport, tgw.DnsSupport,
 	)
+}
+
+func transitGatewayFromAWS(tgw *types.TransitGateway) *TransitGateway {
+	if tgw == nil {
+		return nil
+	}
+	return &TransitGateway{
+		ID:                           helper.StringPointerToString(tgw.TransitGatewayId),
+		ASN:                          strconv.FormatInt(*tgw.Options.AmazonSideAsn, 10),
+		AutoAcceptSharedAttachments:  tgw.Options.AutoAcceptSharedAttachments == types.AutoAcceptSharedAttachmentsValueEnable,
+		DefaultRouteTableAssociation: tgw.Options.DefaultRouteTableAssociation == types.DefaultRouteTableAssociationValueEnable,
+		DefaultRouteTablePropagation: tgw.Options.DefaultRouteTablePropagation == types.DefaultRouteTablePropagationValueEnable,
+		VpnEcmpSupport:               tgw.Options.VpnEcmpSupport == types.VpnEcmpSupportValueEnable,
+		DnsSupport:                   tgw.Options.DnsSupport == types.DnsSupportValueEnable,
+	}
+}
+
+func transitGatewayToModifyOptionsAWS(tgw *TransitGateway) *types.ModifyTransitGatewayOptions {
+	if tgw == nil {
+		return nil
+	}
+	options := &types.ModifyTransitGatewayOptions{}
+
+	if tgw.AutoAcceptSharedAttachments {
+		options.AutoAcceptSharedAttachments = types.AutoAcceptSharedAttachmentsValueEnable
+	} else {
+		options.AutoAcceptSharedAttachments = types.AutoAcceptSharedAttachmentsValueDisable
+	}
+
+	if tgw.DefaultRouteTableAssociation {
+		options.DefaultRouteTableAssociation = types.DefaultRouteTableAssociationValueEnable
+	} else {
+		options.DefaultRouteTableAssociation = types.DefaultRouteTableAssociationValueDisable
+	}
+
+	if tgw.DefaultRouteTablePropagation {
+		options.DefaultRouteTablePropagation = types.DefaultRouteTablePropagationValueEnable
+	} else {
+		options.DefaultRouteTablePropagation = types.DefaultRouteTablePropagationValueDisable
+	}
+
+	if tgw.VpnEcmpSupport {
+		options.VpnEcmpSupport = types.VpnEcmpSupportValueEnable
+	} else {
+		options.VpnEcmpSupport = types.VpnEcmpSupportValueDisable
+	}
+
+	if tgw.DnsSupport {
+		options.DnsSupport = types.DnsSupportValueEnable
+	} else {
+		options.DnsSupport = types.DnsSupportValueDisable
+	}
+
+	asn, err := strconv.ParseInt(tgw.ASN, 10, 64)
+	if err != nil {
+		asn = 0
+	}
+	options.AmazonSideAsn = &asn
+
+	return options
 }
 
 type CustomerGateway struct {

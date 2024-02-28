@@ -36,10 +36,16 @@ type Gateway struct {
 	// The Region where resources were created.
 	Region string
 	// Number of Connections using that particular Gateway.
+	//
+	// NOT IMPLEMENTED
 	ConnectionsCount uint64
 	// The limit of Connections that can use this particular Gateway.
 	// 0 indicates no limit.
+	//
+	// NOT IMPLEMENTED
 	ConnectionsLimit uint64
 	// Additional information available per provider.
+	//
+	// NOT IMPLEMENTED
 	Data map[string]string
 }

@@ -80,9 +80,15 @@ func (c *AWSConnector) GetGatewayConnectionSettings(
 	return types.GatewayConnectionSettings{
 		NumberOfInterfaces: 4,
 		BGPSetting: &types.BGPSetting{
-			PickOwnIPAddress:   true,
-			PickOtherIPAddress: true,
-			AllowedIPRanges:    []string{"192.254.0.0/16"},
+			// Currently, AWS SDK doesn't support providing
+			// custom IP Addresses for BGP for either Own
+			// IP Address or Peer.
+			Addressing: types.BGPAddressing{
+				GeneratesBothAddresses:            true,
+				AcceptsBothAddresses:              false,
+				GeneratesOwnAndAcceptsPeerAddress: false,
+			},
+			AllowedIPRanges: []string{"192.254.0.0/16"},
 			// TODO: Specify Excluded IP Ranges by checking
 			// already used IP Ranges and including provider
 			// reserved IP Ranges.
@@ -92,7 +98,7 @@ func (c *AWSConnector) GetGatewayConnectionSettings(
 }
 
 func (c *AWSConnector) ListGateways(ctx context.Context) ([]types.Gateway, error) {
-	transitGateways, err := c.awsClient.GetTransitGateways(ctx)
+	transitGateways, err := c.awsClient.ListTransitGateways(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("could not list Transit Gateways from AWS: %w", err)
 	}
@@ -103,7 +109,10 @@ func (c *AWSConnector) ListGateways(ctx context.Context) ([]types.Gateway, error
 				"got empty Transit Gateway object in the list of transit gateways: %v",
 				transitGateways)
 		}
-		gateways = append(gateways, c.transitGatewayToGateway(*transitGateways[i]))
+		// TODO: Handle multi-region configuration when it is implemented.
+		//
+		// Currently, the CSP Connector works in a single region context.
+		gateways = append(gateways, c.transitGatewayToGateway(*transitGateways[i], c.config.Region))
 	}
 	return gateways, nil
 }
@@ -141,7 +150,7 @@ func (c *AWSConnector) GetGateway(ctx context.Context, gateway types.GatewayIden
 		return nil, fmt.Errorf(
 			"The AWS Transit Gateway '%s' object is empty", gateway.GatewayID)
 	}
-	gw := c.transitGatewayToGateway(*transitGateway)
+	gw := c.transitGatewayToGateway(*transitGateway, gateway.Region)
 	return &gw, nil
 }
 
@@ -167,7 +176,7 @@ func (c *AWSConnector) AttachToExternalGatewayWithStaticRouting() error {
 	return errors.New("AttachToExternalGatewayWithStaticRouting not implemented in aws")
 }
 
-func XMLVpnConnectionToGeneratedBGPAddresses(connections []client.XMLVpnConnection) types.OutputForConnectionWithBGP {
+func xmlVpnConnectionToGeneratedBGPAddresses(connections []client.XMLVpnConnection) types.OutputForConnectionWithBGP {
 	bgpAddresses := types.OutputForConnectionWithBGP{
 		BGPAddresses:     []string{},
 		PeerBGPAddresses: []string{},
@@ -191,6 +200,59 @@ func XMLVpnConnectionToGeneratedBGPAddresses(connections []client.XMLVpnConnecti
 	return bgpAddresses
 }
 
+func (c *AWSConnector) ensureTransitGatewayPropagatesRoutes(
+	ctx context.Context, transitGatewayName string,
+) error {
+	transitGateway, err := c.awsClient.GetTransitGateway(ctx, transitGatewayName)
+	if err != nil {
+		return fmt.Errorf(
+			"The AWS Transit Gateway '%s' was not found: %w",
+			transitGatewayName, err)
+	}
+	if transitGateway == nil {
+		return fmt.Errorf(
+			"The AWS Transit Gateway '%s' returned nil object", transitGatewayName)
+	}
+	if transitGateway.AutoAcceptSharedAttachments &&
+		transitGateway.DefaultRouteTableAssociation &&
+		transitGateway.DefaultRouteTablePropagation &&
+		transitGateway.DnsSupport &&
+		transitGateway.VpnEcmpSupport {
+		c.logger.Debugf(
+			"The Transit Gateway '%s' propagating options are as expected. "+
+				"Nothing to do", transitGatewayName,
+		)
+		return nil
+	}
+
+	c.logger.Warnf(
+		"The Transit Gateway '%s' options need to be readjusted. Got: "+
+			"AutoAcceptSharedAttachments: '%v', "+
+			"DefaultRouteTableAssociation: '%v', "+
+			"DefaultRouteTablePropagation: '%v', "+
+			"DnsSupport: '%v', "+
+			"VpnEcmpSupport: '%v', "+
+			"but AWS Provider expects them to be all set to true for "+
+			"establishing the connection with BGP Session. Updating Transit Gateway",
+		transitGatewayName, transitGateway.AutoAcceptSharedAttachments,
+		transitGateway.DefaultRouteTableAssociation,
+		transitGateway.DefaultRouteTablePropagation,
+		transitGateway.DnsSupport, transitGateway.VpnEcmpSupport,
+	)
+	transitGateway.AutoAcceptSharedAttachments = true
+	transitGateway.DefaultRouteTableAssociation = true
+	transitGateway.DefaultRouteTablePropagation = true
+	transitGateway.DnsSupport = true
+	transitGateway.VpnEcmpSupport = true
+
+	if err := c.awsClient.UpdateTransitGateway(ctx, *transitGateway); err != nil {
+		return fmt.Errorf(
+			"the update of Transit Gateway '%s' propagation options failed: %w",
+			transitGatewayName, err)
+	}
+	return nil
+}
+
 func (c *AWSConnector) AttachToExternalGatewayWithBGP(
 	ctx context.Context,
 	gateway, peerGateway types.Gateway,
@@ -199,8 +261,26 @@ func (c *AWSConnector) AttachToExternalGatewayWithBGP(
 ) (types.OutputForConnectionWithBGP, error) {
 	if attachMode != types.AttachModeGenerateBothIPs {
 		return types.OutputForConnectionWithBGP{}, errors.New(
-			"currently the only supported mode for aws gateway is types.AttachModeGenerateBothIPs",
+			"AWS SDK doesn't support accepting custom IP Addresses for BGP. " +
+				"The only supported Attach Mode is AttachModeGenerateBothIPs. " +
+				"This error indicates that CSP Connector, due to unknown reason, " +
+				"has specified a scenario where AWS Provider serves different role" +
+				"than Authoritarian Address provider - it should NOT happen.",
 		)
+	}
+	if err := c.ensureTransitGatewayPropagatesRoutes(ctx, gateway.Name); err != nil {
+		return types.OutputForConnectionWithBGP{}, fmt.Errorf(
+			"failed to perform attachment to External Gateway since Transit Gateway "+
+				"'%s' could not be prepared for propagating routes: %v",
+			gateway.Name, err,
+		)
+	}
+
+	transitGateway, err := c.awsClient.GetTransitGateway(ctx, gateway.Name)
+	if err != nil {
+		return types.OutputForConnectionWithBGP{}, fmt.Errorf(
+			"The AWS Transit Gateway '%s' was not found: %w",
+			gateway.Name, err)
 	}
 
 	customerGateways, err := c.createCustomerGatewaysIfNeeded(
@@ -212,12 +292,6 @@ func (c *AWSConnector) AttachToExternalGatewayWithBGP(
 		)
 	}
 
-	transitGateway, err := c.awsClient.GetTransitGateway(ctx, gateway.Name)
-	if err != nil {
-		return types.OutputForConnectionWithBGP{}, fmt.Errorf(
-			"The AWS Transit Gateway '%s' was not found: %w",
-			gateway.Name, err)
-	}
 	vpnConnections, err := c.createVPNConnectionsIfNeeded(
 		ctx, transitGateway.ID, transitGateway.VPCID, customerGateways,
 	)
@@ -242,7 +316,7 @@ func (c *AWSConnector) AttachToExternalGatewayWithBGP(
 		configurations = append(configurations, *config)
 	}
 
-	return XMLVpnConnectionToGeneratedBGPAddresses(configurations), nil
+	return xmlVpnConnectionToGeneratedBGPAddresses(configurations), nil
 }
 
 func (c *AWSConnector) DeleteConnectionResources(
@@ -265,41 +339,9 @@ func (c *AWSConnector) DeleteConnectionResources(
 	return nil
 }
 
-func (c *AWSConnector) GetCIDRs(ctx context.Context, gateway types.Gateway) ([]string, error) {
-	tgw, err := c.awsClient.GetTransitGateway(ctx, gateway.Name)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get Transit Gateway '%s': %w",
-			gateway.Name, err,
-		)
-	}
-	if tgw.VPCID == "" {
-		c.logger.Debugf(
-			"Transit Gateway %s has no VPC associated: no CIDRs found",
-			gateway.Name,
-		)
-		return nil, nil
-	}
-	vpc, err := c.awsClient.GetVPC(ctx, tgw.VPCID)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get VPC '%s' which is associated with Transit Gateway '%s': %w",
-			tgw.VPCID, gateway.Name, err,
-		)
-	}
-	if vpc == nil {
-		return nil, fmt.Errorf(
-			"failed to get VPC '%s' which is associated with Transit Gateway '%s': "+
-				"the VPC object is nil",
-			tgw.VPCID, gateway.Name,
-		)
-	}
-	return []string{vpc.CIDR}, nil
-}
-
 func (c *AWSConnector) deleteVPNConnectionsForConnection(ctx context.Context) error {
 	c.logger.Debug("Looking for VPN Connections that should be deleted")
-	connections, err := c.awsClient.GetVPNConnections(ctx)
+	connections, err := c.awsClient.ListVPNConnections(ctx)
 	if err != nil {
 		return fmt.Errorf(
 			"cannot get existing VPN Connections due to: %w", err,
@@ -323,7 +365,7 @@ func (c *AWSConnector) deleteVPNConnectionsForConnection(ctx context.Context) er
 
 func (c *AWSConnector) deleteCustomerGatewaysForConnection(ctx context.Context) error {
 	c.logger.Debug("Looking for Customer Gateways that should be deleted")
-	gateways, err := c.awsClient.GetCustomerGateways(ctx)
+	gateways, err := c.awsClient.ListCustomerGateways(ctx)
 	if err != nil {
 		return fmt.Errorf(
 			"cannot get existing Customer Gateways due to: %w", err,
@@ -348,12 +390,12 @@ func (c *AWSConnector) deleteCustomerGatewaysForConnection(ctx context.Context) 
 	return nil
 }
 
-func (c *AWSConnector) transitGatewayToGateway(tgw client.TransitGateway) types.Gateway {
+func (c *AWSConnector) transitGatewayToGateway(tgw client.TransitGateway, region string) types.Gateway {
 	return types.Gateway{
 		Name:          tgw.ID,
 		Kind:          "TransitGateway",
 		CloudProvider: c.Name(),
-		Region:        tgw.Region,
+		Region:        region,
 		VPC:           tgw.VPCID,
 		ASN:           tgw.ASN,
 	}
@@ -464,7 +506,7 @@ func (c *AWSConnector) createCustomerGatewaysIfNeeded(
 	ctx context.Context, interfaces []string, ASN string,
 ) ([]string, error) {
 	c.logger.Debug("Checking existing AWS Customer Gateways")
-	gateways, err := c.awsClient.GetCustomerGateways(ctx)
+	gateways, err := c.awsClient.ListCustomerGateways(ctx)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"cannot verify current state of AWS Customer Gateways due to: %w", err,
@@ -590,7 +632,7 @@ func (c *AWSConnector) getIDsOfTransitGatewaysBelongingToVPC(
 func (c *AWSConnector) getTunnelCIDRsInUseForVPCTransitGateway(
 	ctx context.Context, vpc string, vpnConnections []*client.VPNConnection,
 ) ([]string, error) {
-	transitGateways, err := c.awsClient.GetTransitGateways(ctx)
+	transitGateways, err := c.awsClient.ListTransitGateways(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("cannot obtain list of Transit Gateways: %w", err)
 	}
@@ -686,7 +728,7 @@ func (c *AWSConnector) createVPNConnectionsIfNeeded(
 			customerGatewayIDs,
 		)
 	}
-	connections, err := c.awsClient.GetVPNConnections(ctx)
+	connections, err := c.awsClient.ListVPNConnections(ctx)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"cannot verify current state of AWS VPN Connections due to: %w", err,

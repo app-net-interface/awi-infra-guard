@@ -127,16 +127,6 @@ const (
 	// have been deleted, but there was an error during handling
 	// requests and it should be investigated.
 	StatePartiallyDeleted ConnectionState = "PARTIALLY_DELETED"
-	// StateDeleted shouldn't occur in the actual Database.
-	// It is used for as an argument for Updating to let the DB
-	// know that we want to remove the Connection Entry.
-	//
-	// If you notice DELETED state in your Connection resource it
-	// most likely means that the last part of deleting the connection,
-	// which is responsible for removing DB Connection entry, failed.
-	// Such connection entries can be safely deleted on your own, since
-	// all CSP resources have been already removed.
-	StateDeleted ConnectionState = "DELETED"
 )
 
 const (

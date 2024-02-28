@@ -152,8 +152,6 @@ type Provider interface {
 		peerGateway types.Gateway,
 	) error
 
-	GetCIDRs(ctx context.Context, gateway types.Gateway) ([]string, error)
-
 	// Returns the ID of a VPC where associated with Gateway resource.
 	GetVPCForGateway(ctx context.Context, gateway types.Gateway) (string, error)
 

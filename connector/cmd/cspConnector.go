@@ -317,7 +317,6 @@ func disconnectCSPs(
 		os.Exit(1)
 	}
 	defer closeConnector(c)
-	c.SetConnectionID(connection.ID)
 	if err = c.Disconnect(
 		ctx,
 		types.Request{

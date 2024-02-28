@@ -68,7 +68,7 @@ func NewClient(ctx context.Context, logger *logrus.Entry, region string) (*Clien
 }
 
 func (c *Client) GetTransitGateway(ctx context.Context, name string) (*TransitGateway, error) {
-	gateways, err := c.GetTransitGateways(ctx)
+	gateways, err := c.ListTransitGateways(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,23 @@ func (c *Client) GetTransitGateway(ctx context.Context, name string) (*TransitGa
 	)
 }
 
-func (c *Client) GetTransitGateways(ctx context.Context) ([]*TransitGateway, error) {
+func (c *Client) UpdateTransitGateway(ctx context.Context, tgw TransitGateway) error {
+	// TODO: Verify if modification doesn't require recreating existing Transit
+	// Gateway attachments.
+	_, err := c.awsClient.ModifyTransitGateway(
+		ctx,
+		&ec2.ModifyTransitGatewayInput{
+			TransitGatewayId: &tgw.ID,
+			Options:          transitGatewayToModifyOptionsAWS(&tgw),
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update Transit Gateway %s: %w", tgw.ID, err)
+	}
+	return nil
+}
+
+func (c *Client) ListTransitGateways(ctx context.Context) ([]*TransitGateway, error) {
 	gateways := map[string]*TransitGateway{}
 
 	output, err := c.awsClient.DescribeTransitGateways(ctx, &ec2.DescribeTransitGatewaysInput{})
@@ -102,9 +118,13 @@ func (c *Client) GetTransitGateways(ctx context.Context) ([]*TransitGateway, err
 
 	for _, gw := range output.TransitGateways {
 		gateways[helper.StringPointerToString(gw.TransitGatewayId)] = &TransitGateway{
-			ID:     helper.StringPointerToString(gw.TransitGatewayId),
-			ASN:    strconv.FormatInt(*gw.Options.AmazonSideAsn, 10),
-			Region: c.region,
+			ID:                           helper.StringPointerToString(gw.TransitGatewayId),
+			ASN:                          strconv.FormatInt(*gw.Options.AmazonSideAsn, 10),
+			AutoAcceptSharedAttachments:  gw.Options.AutoAcceptSharedAttachments == types.AutoAcceptSharedAttachmentsValueEnable,
+			DefaultRouteTableAssociation: gw.Options.DefaultRouteTableAssociation == types.DefaultRouteTableAssociationValueEnable,
+			DefaultRouteTablePropagation: gw.Options.DefaultRouteTablePropagation == types.DefaultRouteTablePropagationValueEnable,
+			VpnEcmpSupport:               gw.Options.VpnEcmpSupport == types.VpnEcmpSupportValueEnable,
+			DnsSupport:                   gw.Options.DnsSupport == types.DnsSupportValueEnable,
 		}
 	}
 
@@ -174,7 +194,7 @@ func (c *Client) GetVPC(ctx context.Context, name string) (*VPC, error) {
 	return vpcFromAWS(&vpcs.Vpcs[0]), nil
 }
 
-func (c *Client) GetCustomerGateways(ctx context.Context) ([]CustomerGateway, error) {
+func (c *Client) ListCustomerGateways(ctx context.Context) ([]CustomerGateway, error) {
 	gateways := []CustomerGateway{}
 	output, err := c.awsClient.DescribeCustomerGateways(ctx, &ec2.DescribeCustomerGatewaysInput{})
 	if err != nil {
@@ -242,7 +262,7 @@ type TunnelOption struct {
 	PreSharedKey string
 }
 
-func (c *Client) GetVPNConnections(ctx context.Context) ([]*VPNConnection, error) {
+func (c *Client) ListVPNConnections(ctx context.Context) ([]*VPNConnection, error) {
 	connections := []*VPNConnection{}
 	output, err := c.awsClient.DescribeVpnConnections(ctx, &ec2.DescribeVpnConnectionsInput{})
 	if err != nil {
@@ -282,6 +302,7 @@ func (c *Client) CreateVPNConnection(
 		Options: &types.VpnConnectionOptionsSpecification{
 			TunnelOptions: vpnTunnelOptions,
 		},
+
 		TagSpecifications: addTag(types.ResourceTypeVpnConnection, tag),
 	})
 	if err != nil {

@@ -80,11 +80,3 @@ type ConnectionDetails struct {
 	// The Destination Gateway
 	Destination GatewayIdentifier
 }
-
-// The Provider Interface describes necessary information
-// required for establishing the connection with other
-// Cloud Service Providers.
-//
-// The Interface provides information
-type ProviderInterface struct {
-}
