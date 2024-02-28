@@ -15,7 +15,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.21.4-alpine3.18 AS builder
+FROM golang:1.21.6-alpine3.18 AS builder
 
 ARG SSH_PRIVATE_KEY
 
@@ -27,11 +27,11 @@ RUN echo "StrictHostKeyChecking no" >> /root/.ssh/config
 
 # Force git to use SSH over HTTPS to avoid password prompt
 RUN apk add git openssh
-RUN git config --global --add url."git@wwwin-github.cisco.com:".insteadOf "https://wwwin-github.cisco.com/"
+RUN git config --global --add url."git@github.com:".insteadOf "https://github.com/"
 
-RUN mkdir -p /root/go/src/wwwin-github.cisco.com/awi-infra-guard
+RUN mkdir -p /root/go/src/github.com/awi-infra-guard
 
-WORKDIR /root/go/src/wwwin-github.cisco.com/awi-infra-guard
+WORKDIR /root/go/src/github.com/awi-infra-guard
 COPY . .
 
 RUN go build -o awi-infra-guard .
@@ -40,7 +40,7 @@ RUN go build -o awi-infra-guard .
 FROM alpine:3.18.4
 
 WORKDIR /root/
-COPY --from=builder /root/go/src/wwwin-github.cisco.com/awi-infra-guard/awi-infra-guard .
+COPY --from=builder /root/go/src/github.com/awi-infra-guard/awi-infra-guard .
 
 # As k8s mounting makes it hard to create a file from a config map
 # within the directory with already present files, we create a symlink
