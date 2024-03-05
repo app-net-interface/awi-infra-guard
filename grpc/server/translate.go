@@ -28,9 +28,7 @@ func grpcProtocolsAndPortToTypes(in map[string]*infrapb.Ports) types.ProtocolsAn
 	out := make(types.ProtocolsAndPorts, len(in))
 	for k, v := range in {
 		ports := make([]string, 0, len(v.GetPorts()))
-		for _, port := range v.GetPorts() {
-			ports = append(ports, port)
-		}
+		ports = append(ports, v.GetPorts()...)
 		out[k] = ports
 	}
 	return out

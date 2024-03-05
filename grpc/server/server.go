@@ -55,6 +55,35 @@ type Config struct {
 	DbFileName   string
 	SyncWaitTime string
 	UseLocalDB   bool
+	LogLevel     string
+}
+
+func setLoggingLevel(config Config, logger *logrus.Logger) error {
+	switch config.LogLevel {
+	case "PANIC":
+		logger.SetLevel(logrus.PanicLevel)
+	case "FATAL":
+		logger.SetLevel(logrus.FatalLevel)
+	case "ERROR":
+		logger.SetLevel(logrus.ErrorLevel)
+	case "WARN":
+		logger.SetLevel(logrus.WarnLevel)
+	case "INFO":
+		logger.SetLevel(logrus.InfoLevel)
+	case "DEBUG":
+		logger.SetLevel(logrus.DebugLevel)
+	case "TRACE":
+		logger.SetLevel(logrus.TraceLevel)
+	default:
+		{
+			return fmt.Errorf(
+				"invalid log level '%s' in configuration. Supported levels are: "+
+					"PANIC, FATAL, ERROR, WARN, INFO, DEBUG, TRACE",
+				config.LogLevel,
+			)
+		}
+	}
+	return nil
 }
 
 func parseConfig(logger *logrus.Logger) Config {
@@ -64,10 +93,14 @@ func parseConfig(logger *logrus.Logger) Config {
 		DbFileName:   "infra.db",
 		SyncWaitTime: "60s",
 		UseLocalDB:   true,
+		LogLevel:     "INFO",
 	}
 	err := initConfig(configPath, &config)
 	if err != nil {
-		logger.Errorf("Failed to parse config, using default values...")
+		logger.Errorf("Failed to parse config: %v using default values...", err)
+	}
+	if err = setLoggingLevel(config, logger); err != nil {
+		logger.Errorf("Failed to set logging level: %v", err)
 	}
 	logger.Infof("Using configuration: %+v", config)
 	return config
@@ -88,6 +121,10 @@ func initConfig(configFilePath string, config *Config) error {
 	port := viper.GetString("port")
 	if port != "" {
 		config.Port = port
+	}
+	logLevel := viper.GetString("logLevel")
+	if logLevel != "" {
+		config.LogLevel = logLevel
 	}
 	hostname := viper.GetString("hostname")
 	if hostname != "" {
@@ -169,7 +206,6 @@ func Run() {
 	if err := grpcServer.Serve(lis); err != nil {
 		logger.Fatalf("failed to serve: %v", err)
 	}
-	return
 }
 
 func (s *Server) refreshClusters(ctx context.Context, interval time.Duration) {
