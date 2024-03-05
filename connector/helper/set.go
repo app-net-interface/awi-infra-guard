@@ -15,23 +15,21 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package gcp
+package helper
 
-const (
-	REQUESTED_CIDR_SIZE          uint8 = 30
-	NUMBER_OF_GATEWAY_INTERFACES uint8 = 2
-)
+type Set[T comparable] struct {
+	values map[T]struct{}
+}
 
-type Config struct {
-	// The GCP Project ID, which will be used for interactions with
-	// Google Cloud.
-	//
-	// If empty, the GCP Client will check the list of projects, which
-	// the user has access to - if there is only one project, the script
-	// will use that project automatically, otherwise, the user will be
-	// instructed to specify the exact project.
-	Project string
-	// The Region, where GCP resources such as Routers and Subnets
-	// will be created.
-	Region string
+func SetFromSlice[T comparable](s []T) Set[T] {
+	v := make(map[T]struct{})
+	for i := range s {
+		v[s[i]] = struct{}{}
+	}
+	return Set[T]{values: v}
+}
+
+func (s *Set[T]) Has(v T) bool {
+	_, ok := s.values[v]
+	return ok
 }

@@ -110,6 +110,35 @@ func updateConnectionEntryWithGatewaysInDB(
 	return nil
 }
 
+func updateConnectionEntryWithGatewayCIDRsInDB(
+	ctx context.Context,
+	dbClient *db.Client,
+	logger *logrus.Entry,
+	connectionID string,
+	sourceCIDRs, destCIDRs []string) error {
+	if connectionID == "" {
+		return errors.New("cannot update connection without ID provided")
+	}
+	conn, err := dbClient.GetConnection(connectionID)
+	if err != nil {
+		return fmt.Errorf(
+			"cannot get connection with ID %s: %w", connectionID, err,
+		)
+	}
+	if conn == nil {
+		return fmt.Errorf(
+			"cannot get connection with ID %s: got nil object", connectionID,
+		)
+	}
+	conn.SourceCIDRs = sourceCIDRs
+	conn.DestinationCIDRs = destCIDRs
+	err = dbClient.PutConnection(*conn)
+	if err != nil {
+		return fmt.Errorf("failed to update entry about the connection in the DB: %w", err)
+	}
+	return nil
+}
+
 func updateConnectionEntryStateInDB(
 	ctx context.Context,
 	dbClient *db.Client,

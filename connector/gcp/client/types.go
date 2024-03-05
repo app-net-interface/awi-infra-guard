@@ -333,8 +333,14 @@ func externalVPNGatewayToGCP(gateway *ExternalVPNGateway) *computepb.ExternalVpn
 	if gateway == nil {
 		return nil
 	}
+
+	redundancyType := "TWO_IPS_REDUNDANCY"
+	if len(gateway.Interfaces) == 4 {
+		redundancyType = "FOUR_IPS_REDUNDANCY"
+	}
+
 	gcpGateway := &computepb.ExternalVpnGateway{
-		RedundancyType: helper.StringToStringPointer("FOUR_IPS_REDUNDANCY"),
+		RedundancyType: helper.StringToStringPointer(redundancyType),
 		Name:           &gateway.Name,
 		SelfLink:       helper.StringToStringPointer(gateway.URL),
 	}

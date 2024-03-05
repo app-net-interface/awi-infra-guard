@@ -31,6 +31,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// TODO: Add multi-region support to AWS Client.
 type Client struct {
 	region           string
 	defaultAccountID string
@@ -57,6 +58,9 @@ func NewClient(ctx context.Context, logger *logrus.Entry, region string) (*Clien
 	}
 
 	client := ec2.NewFromConfig(cfg)
+	if client == nil {
+		return nil, fmt.Errorf("got nil AWS client")
+	}
 
 	logger.Debug("AWS Client created successfully")
 	return &Client{
@@ -88,9 +92,9 @@ func (c *Client) GetTransitGateway(ctx context.Context, name string) (*TransitGa
 	)
 }
 
+// TODO: Verify if modification doesn't require recreating existing Transit
+// Gateway attachments.
 func (c *Client) UpdateTransitGateway(ctx context.Context, tgw TransitGateway) error {
-	// TODO: Verify if modification doesn't require recreating existing Transit
-	// Gateway attachments.
 	_, err := c.awsClient.ModifyTransitGateway(
 		ctx,
 		&ec2.ModifyTransitGatewayInput{
@@ -113,19 +117,11 @@ func (c *Client) ListTransitGateways(ctx context.Context) ([]*TransitGateway, er
 	}
 	if output == nil {
 		return nil, errors.New(
-			"Unexpected empty Transit Gateways after attempting to Describe Transit Gateways")
+			"unexpected empty Transit Gateways after attempting to Describe Transit Gateways")
 	}
 
-	for _, gw := range output.TransitGateways {
-		gateways[helper.StringPointerToString(gw.TransitGatewayId)] = &TransitGateway{
-			ID:                           helper.StringPointerToString(gw.TransitGatewayId),
-			ASN:                          strconv.FormatInt(*gw.Options.AmazonSideAsn, 10),
-			AutoAcceptSharedAttachments:  gw.Options.AutoAcceptSharedAttachments == types.AutoAcceptSharedAttachmentsValueEnable,
-			DefaultRouteTableAssociation: gw.Options.DefaultRouteTableAssociation == types.DefaultRouteTableAssociationValueEnable,
-			DefaultRouteTablePropagation: gw.Options.DefaultRouteTablePropagation == types.DefaultRouteTablePropagationValueEnable,
-			VpnEcmpSupport:               gw.Options.VpnEcmpSupport == types.VpnEcmpSupportValueEnable,
-			DnsSupport:                   gw.Options.DnsSupport == types.DnsSupportValueEnable,
-		}
+	for i, gw := range output.TransitGateways {
+		gateways[helper.StringPointerToString(gw.TransitGatewayId)] = transitGatewayFromAWS(&output.TransitGateways[i])
 	}
 
 	vpcAttachments, err := c.awsClient.DescribeTransitGatewayVpcAttachments(ctx, &ec2.DescribeTransitGatewayVpcAttachmentsInput{})
@@ -134,7 +130,7 @@ func (c *Client) ListTransitGateways(ctx context.Context) ([]*TransitGateway, er
 	}
 	if vpcAttachments == nil {
 		return nil, errors.New(
-			"Unexpected empty VPC Attachments after attempting to Describe " +
+			"unexpected empty VPC Attachments after attempting to Describe " +
 				"Transit Gateway Vpc Attachments")
 	}
 
@@ -151,7 +147,7 @@ func (c *Client) ListTransitGateways(ctx context.Context) ([]*TransitGateway, er
 		tgw, ok := gateways[*attachment.TransitGatewayId]
 		if !ok {
 			return nil, fmt.Errorf(
-				"Found Transit Gateway Attachment '%s' to non existing Transit Gateway '%s'",
+				"found Transit Gateway Attachment '%s' to non existing Transit Gateway '%s'",
 				helper.StringPointerToString(attachment.TransitGatewayAttachmentId),
 				*attachment.TransitGatewayId,
 			)
@@ -179,7 +175,7 @@ func (c *Client) GetVPC(ctx context.Context, name string) (*VPC, error) {
 	}
 	if vpcs == nil {
 		return nil, errors.New(
-			"Unexpected empty VPC after attempting to Describe VPCs")
+			"unexpected empty VPC after attempting to Describe VPCs")
 	}
 	if len(vpcs.Vpcs) == 0 {
 		return nil, fmt.Errorf(
@@ -188,22 +184,30 @@ func (c *Client) GetVPC(ctx context.Context, name string) (*VPC, error) {
 	}
 	if len(vpcs.Vpcs) > 1 {
 		return nil, fmt.Errorf(
-			"Unexpectedly there is more than 1 VPC with name %s", name,
+			"unexpectedly there is more than 1 VPC with name %s", name,
 		)
 	}
 	return vpcFromAWS(&vpcs.Vpcs[0]), nil
 }
 
-func (c *Client) ListCustomerGateways(ctx context.Context) ([]CustomerGateway, error) {
-	gateways := []CustomerGateway{}
-	output, err := c.awsClient.DescribeCustomerGateways(ctx, &ec2.DescribeCustomerGatewaysInput{})
+func (c *Client) ListCustomerGateways(ctx context.Context, filters ...ListCustomerGatewayFilter) ([]CustomerGateway, error) {
+	var awsFilters []types.Filter
+	for _, f := range filters {
+		awsFilters = append(awsFilters, f.GetCustomerGatewayListFilter())
+	}
+
+	output, err := c.awsClient.DescribeCustomerGateways(ctx, &ec2.DescribeCustomerGatewaysInput{
+		Filters: awsFilters,
+	})
 	if err != nil {
 		return nil, err
 	}
 	if output == nil {
 		return nil, errors.New(
-			"Unexpected empty Customer Gateways after attempting to Describe Customer Gateways")
+			"unexpected empty Customer Gateways after attempting to Describe Customer Gateways")
 	}
+
+	gateways := []CustomerGateway{}
 	for _, cgw := range output.CustomerGateways {
 		customerGateway := customerGatewayFromAWS(&cgw)
 		if customerGateway != nil {
@@ -212,6 +216,7 @@ func (c *Client) ListCustomerGateways(ctx context.Context) ([]CustomerGateway, e
 			c.logger.Warn("Got empty Customer Gateway object")
 		}
 	}
+
 	return gateways, nil
 }
 
@@ -234,7 +239,7 @@ func (c *Client) CreateCustomerGateway(ctx context.Context, ip, asn, tag string)
 	}
 	if output == nil {
 		return nil, fmt.Errorf(
-			"Unexpected empty Customer Gateway object from creating Customer Gateway with "+
+			"unexpected empty Customer Gateway object from creating Customer Gateway with "+
 				"Public IP '%s' and ASN '%s'", ip, asn,
 		)
 	}
@@ -262,16 +267,23 @@ type TunnelOption struct {
 	PreSharedKey string
 }
 
-func (c *Client) ListVPNConnections(ctx context.Context) ([]*VPNConnection, error) {
-	connections := []*VPNConnection{}
-	output, err := c.awsClient.DescribeVpnConnections(ctx, &ec2.DescribeVpnConnectionsInput{})
+func (c *Client) ListVPNConnections(ctx context.Context, filters ...ListVPNConnectionFilter) ([]*VPNConnection, error) {
+	var awsFilters []types.Filter
+	for _, f := range filters {
+		awsFilters = append(awsFilters, f.GetVPNConnectionListFilter())
+	}
+
+	output, err := c.awsClient.DescribeVpnConnections(ctx, &ec2.DescribeVpnConnectionsInput{
+		Filters: awsFilters,
+	})
 	if err != nil {
 		return nil, err
 	}
 	if output == nil {
 		return nil, errors.New(
-			"Unexpected empty VPN Connections after attempting to Describe VPN Connections")
+			"unexpected empty VPN Connections after attempting to Describe VPN Connections")
 	}
+	connections := []*VPNConnection{}
 	for _, conn := range output.VpnConnections {
 		connections = append(connections, vpnConnectionFromAWS(&conn))
 	}
@@ -282,7 +294,7 @@ func (c *Client) CreateVPNConnection(
 	ctx context.Context,
 	customerGatewayID,
 	transitGatewayID string,
-	tunnelOptions []TunnelOption,
+	tunnelOptions [2]TunnelOption,
 	tag string,
 ) (*VPNConnection, error) {
 	c.logger.Debugf(
@@ -293,6 +305,7 @@ func (c *Client) CreateVPNConnection(
 	for i := range tunnelOptions {
 		vpnTunnelOptions = append(vpnTunnelOptions, types.VpnTunnelOptionsSpecification{
 			TunnelInsideCidr: &tunnelOptions[i].CIDR,
+			PreSharedKey:     &tunnelOptions[i].PreSharedKey,
 		})
 	}
 	output, err := c.awsClient.CreateVpnConnection(ctx, &ec2.CreateVpnConnectionInput{
@@ -310,7 +323,7 @@ func (c *Client) CreateVPNConnection(
 	}
 	if output == nil {
 		return nil, fmt.Errorf(
-			"Unexpected empty VPN Connection object after attempting to create VPN Connection "+
+			"unexpected empty VPN Connection object after attempting to create VPN Connection "+
 				"for Customer Gateway '%s' and VPN Gateway '%s'", customerGatewayID, transitGatewayID,
 		)
 	}

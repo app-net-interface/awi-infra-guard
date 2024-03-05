@@ -199,6 +199,36 @@ func (c *Client) connectionMatches(connection db.Connection, input t.SingleVPCCo
 	return true
 }
 
+// getRoutesFromConnection returns a list of CIDRs that can
+// be reached through CSP Connection.
+func (c *Client) getRoutesFromConnection(input t.SingleVPCConnectionParams) ([]string, error) {
+	client, err := db.NewClient(db.DefaultDBFile, c.logger.WithField("logger", "cloud-connection-db"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to obtain the Client for DB storing CSP Connections: %w", err)
+	}
+	defer closeCSPDB(client, c.logger)
+
+	connections, err := client.ListConnections()
+	if err != nil {
+		return nil, fmt.Errorf("failed to obtain the Client for DB storing CSP Connections: %w", err)
+	}
+
+	for _, conn := range connections {
+		if !c.connectionMatches(conn, input) {
+			continue
+		}
+		if strings.ToLower(conn.SourceProvider) == "aws" {
+			return conn.DestinationCIDRs, nil
+		}
+		return conn.SourceCIDRs, nil
+	}
+
+	return nil, fmt.Errorf(
+		"could not find a connection between Transit Gateway %s and Destination VPC: %v",
+		transitGatewayName, input.Destination,
+	)
+}
+
 func (c *Client) connectOneSideVPCOp(ctx context.Context, input t.SingleVPCConnectionParams, account string) error {
 	// 1. create transit gateway
 	tgwID, err := c.createTransitGateway(ctx, account, input.Region)
@@ -217,6 +247,23 @@ func (c *Client) connectOneSideVPCOp(ctx context.Context, input t.SingleVPCConne
 	}
 	// 4. associate RouteTable with transit gateway attachments
 	err = c.associateRouteTable(ctx, account, input.Region, tgwRT, tgwAttachmentId)
+	if err != nil {
+		return err
+	}
+
+	cidrs, err := c.getRoutesFromConnection(input)
+	if err != nil {
+		return fmt.Errorf("failed to obtain CIDR for the AWS Transit Gateway: %w", err)
+	}
+	for _, cidr := range cidrs {
+		err = c.attachRoutesToVPC(ctx, account, input.Region, input.VpcID, tgwID, &cidr)
+		if err != nil {
+			return err
+		}
+	}
+
+	cidrTagValue := strings.Join(cidrs, ",")
+	err = c.addCIDRsTagToVPCRouteTable(ctx, input.ConnID, account, input.Region, input.VpcID, &cidrTagValue)
 	if err != nil {
 		return err
 	}

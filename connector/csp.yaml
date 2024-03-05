@@ -11,3 +11,7 @@ providers:
     region: "us-west-1"
   gcp:
     region: "us-east4"
+    project: "GCP-PROJECT"
+  azure:
+    location: "westus2"
+    resourceGroup: "RESOURCE-GROUP"

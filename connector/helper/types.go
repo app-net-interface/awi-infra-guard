@@ -45,13 +45,45 @@ func StringToUInt32Pointer(value string) *uint32 {
 	if value == "" {
 		return nil
 	}
-	converted, err := strconv.Atoi(value)
+	converted, err := strconv.ParseUint(value, 10, 32)
 	if err != nil {
 		// Consider returning error here.
 		return nil
 	}
 	converted32 := uint32(converted)
 	return &converted32
+}
+
+// If string is empty, returns nil, otherwise
+// returns a pointer to int64 variable casted
+// from a given string.
+func StringToInt64Pointer(value string) *int64 {
+	// TODO: Consider handling integer overload.
+	if value == "" {
+		return nil
+	}
+	converted, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		// Consider returning error here.
+		return nil
+	}
+	return &converted
+}
+
+// If string is empty, returns nil, otherwise
+// returns a pointer to uint64 variable casted
+// from a given string.
+func StringToUInt64Pointer(value string) *uint64 {
+	// TODO: Consider handling integer overload.
+	if value == "" {
+		return nil
+	}
+	converted, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		// Consider returning error here.
+		return nil
+	}
+	return &converted
 }
 
 // If the value is nil, returns empty string,
@@ -62,4 +94,27 @@ func UInt32PointerToString(value *uint32) string {
 		return ""
 	}
 	return strconv.FormatUint(uint64(*value), 10)
+}
+
+// If the value is nil, returns empty string,
+// otherwise converts the int64 to a string
+// number.
+func Int64PointerToString(value *int64) string {
+	if value == nil {
+		return ""
+	}
+	return strconv.FormatInt(*value, 10)
+}
+
+// Takes a slice of pointers to strings and returns
+// a slice of regular strings (empty strings for
+// nil pointers).
+func SliceStringPointersToSliceStrings(s []*string) []string {
+	output := make([]string, len(s))
+	for i := range s {
+		if s[i] != nil {
+			output[i] = *s[i]
+		}
+	}
+	return output
 }

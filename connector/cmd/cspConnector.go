@@ -19,17 +19,28 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+	"gopkg.in/yaml.v2"
 
 	"github.com/app-net-interface/awi-infra-guard/connector"
 	"github.com/app-net-interface/awi-infra-guard/connector/db"
 	"github.com/app-net-interface/awi-infra-guard/connector/types"
 )
+
+var emptyStr string = ""
+
+var connectionRequest types.Request = types.Request{
+	ConnectionID:      &emptyStr,
+	ConnectionDetails: &types.ConnectionDetails{},
+}
+var connectionRequestFile string
 
 func main() {
 	ctx := context.Background()
@@ -39,6 +50,7 @@ func main() {
 		fmt.Printf("Failed to initialize configuration: %v\n", err)
 		os.Exit(1)
 	}
+
 	// TODO: Adjust logger to match the provided configuration.
 	logger := configureLogger()
 
@@ -211,21 +223,20 @@ func addConnectCommand(
 	parent *cobra.Command,
 ) {
 	cmd := &cobra.Command{
-		Use:   "connect <Connection Name> <Source CSP> <Source ID> <Source Region> <Destination CSP> <Destination ID> <Destination Region>",
+		Use:   "connect",
 		Short: "creates connection between CSPs",
-		Args:  cobra.ExactArgs(6),
 		Run: func(cmd *cobra.Command, args []string) {
-			connectCSPs(ctx, logger, cmd, args, *config)
+			connectCSPs(ctx, logger, *config)
 		},
 	}
 	parent.AddCommand(cmd)
+	addConnectionRequestFlags(cmd.Flags())
+
 }
 
 func connectCSPs(
 	ctx context.Context,
 	logger *logrus.Logger,
-	cmd *cobra.Command,
-	args []string,
 	config connector.Config,
 ) {
 	c, err := connector.NewConnector(ctx, logger, &config)
@@ -234,25 +245,16 @@ func connectCSPs(
 		os.Exit(1)
 	}
 	defer closeConnector(c)
-	source := types.GatewayIdentifier{
-		Provider:  args[0],
-		GatewayID: args[1],
-		Region:    args[2],
-	}
-	dest := types.GatewayIdentifier{
-		Provider:  args[3],
-		GatewayID: args[4],
-		Region:    args[5],
+
+	req, err := parseRequest()
+	if err != nil {
+		logger.Errorf("Failed to parse Connection Request: %v", err)
+		os.Exit(1)
 	}
 
 	if err = c.Connect(
 		ctx,
-		types.Request{
-			ConnectionDetails: &types.ConnectionDetails{
-				Source:      source,
-				Destination: dest,
-			},
-		},
+		req,
 	); err != nil {
 		logger.Errorf("Failed to create a Connection: %v", err)
 		// TODO: Handle saving the error from creating the connection.
@@ -264,8 +266,6 @@ func connectCSPs(
 	}
 }
 
-// TODO: Handle disconnecting CSP when
-// there is no entry in the Database
 func addDisconnectCommand(
 	ctx context.Context,
 	logger *logrus.Logger,
@@ -273,42 +273,71 @@ func addDisconnectCommand(
 	parent *cobra.Command,
 ) {
 	cmd := &cobra.Command{
-		Use:   "disconnect <Connection ID>",
+		Use:   "disconnect",
 		Short: "removes connection between CSPs",
-		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			disconnectCSPs(ctx, logger, cmd, args, *config)
+			disconnectCSPs(ctx, logger, *config)
 		},
 	}
 	parent.AddCommand(cmd)
+	addConnectionRequestFlags(cmd.Flags())
+}
+
+func gwIdentifiersFromConnection(
+	logger *logrus.Logger, connectionID string,
+) (types.GatewayIdentifier, types.GatewayIdentifier, error) {
+	dbClient, err := db.NewClient(db.DefaultDBFile, logger.WithField("logger", "db"))
+	if err != nil {
+		return types.GatewayIdentifier{}, types.GatewayIdentifier{}, fmt.Errorf(
+			"could not create DB Client for checking the connection: %w", err,
+		)
+	}
+	defer dbClient.Close()
+	connection, err := dbClient.GetConnection(connectionID)
+	if err != nil {
+		return types.GatewayIdentifier{}, types.GatewayIdentifier{}, fmt.Errorf(
+			"failed to obtain information about connection '%s': %w",
+			connectionID, err,
+		)
+	}
+	if connection == nil {
+		return types.GatewayIdentifier{}, types.GatewayIdentifier{}, fmt.Errorf(
+			"connection with ID not found '%s'. Aborting it",
+			connectionID,
+		)
+	}
+	return types.GatewayIdentifier{
+			GatewayID: connection.SourceID,
+			Region:    connection.SourceRegion,
+			Provider:  connection.SourceProvider,
+		}, types.GatewayIdentifier{
+			GatewayID: connection.DestinationID,
+			Region:    connection.DestinationRegion,
+			Provider:  connection.DestinationProvider,
+		}, nil
 }
 
 func disconnectCSPs(
 	ctx context.Context,
 	logger *logrus.Logger,
-	cmd *cobra.Command,
-	args []string,
 	config connector.Config,
 ) {
-	dbClient, err := db.NewClient(db.DefaultDBFile, logger.WithField("logger", "db"))
+	req, err := parseRequest()
 	if err != nil {
-		logger.Errorf("Could not create DB Client for checking the connection: %v", err)
-		return
+		logger.Errorf("Failed to parse Connection Request: %v", err)
+		os.Exit(1)
 	}
-	connection, err := dbClient.GetConnection(args[0])
-	if err != nil {
-		logger.Errorf(
-			"failed to obtain information about connection '%s': %v",
-			args[0], err,
-		)
-		return
-	}
-	dbClient.Close()
-	if connection == nil {
-		logger.Errorf(
-			"connection with ID not found '%s'. Aborting it",
-			args[0],
-		)
+
+	if req.ConnectionID != nil {
+		source, destination, err := gwIdentifiersFromConnection(logger, *req.ConnectionID)
+		if err != nil {
+			logger.Errorf("Failed to load Gateway info: %v", err)
+			return
+		}
+		req.ConnectionDetails = &types.ConnectionDetails{
+			Source:      source,
+			Destination: destination,
+		}
 	}
 
 	c, err := connector.NewConnector(ctx, logger, &config)
@@ -317,23 +346,111 @@ func disconnectCSPs(
 		os.Exit(1)
 	}
 	defer closeConnector(c)
-	if err = c.Disconnect(
-		ctx,
-		types.Request{
-			ConnectionDetails: &types.ConnectionDetails{
-				Source: types.GatewayIdentifier{
-					GatewayID: connection.SourceID,
-					Region:    connection.SourceRegion,
-					Provider:  connection.SourceProvider,
-				},
-				Destination: types.GatewayIdentifier{
-					GatewayID: connection.DestinationID,
-					Region:    connection.DestinationRegion,
-					Provider:  connection.DestinationProvider,
-				},
-			},
-		}); err != nil {
+
+	if err = c.Disconnect(ctx, req); err != nil {
 		logger.Errorf("Failed to remove a Connection: %v", err)
 		os.Exit(1)
 	}
+}
+
+func parseRequest() (types.Request, error) {
+	if connectionRequestFile != "" {
+		req, err := requestFromFile(connectionRequestFile)
+		if err != nil {
+			return types.Request{}, fmt.Errorf(
+				"failed to parse Connection Request from a file: %w", err,
+			)
+		}
+		return req, nil
+	}
+	if *connectionRequest.ConnectionID != "" {
+		return types.Request{
+			ConnectionID: connectionRequest.ConnectionID,
+		}, nil
+	}
+
+	// Clean Connection ID
+	connectionRequest.ConnectionID = nil
+	if connectionRequest.ConnectionDetails.Source.GatewayID == "" &&
+		connectionRequest.ConnectionDetails.Source.Provider == "" &&
+		connectionRequest.ConnectionDetails.Source.Region == "" {
+		return types.Request{}, errors.New(
+			"failed to parse Connection Request - no handler for the source",
+		)
+	}
+	if connectionRequest.ConnectionDetails.Destination.GatewayID == "" &&
+		connectionRequest.ConnectionDetails.Destination.Provider == "" &&
+		connectionRequest.ConnectionDetails.Destination.Region == "" {
+		return types.Request{}, errors.New(
+			"failed to parse Connection Request - no handler for the destination",
+		)
+	}
+	return connectionRequest, nil
+}
+
+func addConnectionRequestFlags(flagSet *pflag.FlagSet) {
+	flagSet.StringVarP(
+		&connectionRequestFile,
+		"from-file",
+		"f",
+		"",
+		"Accepts a filepath to the yaml file containing "+
+			"Connect/Disconnect request.",
+	)
+	flagSet.StringVar(
+		&connectionRequest.ConnectionDetails.Source.GatewayID,
+		"src-id",
+		"",
+		"ID of Source Gateway for the connection",
+	)
+	flagSet.StringVar(
+		&connectionRequest.ConnectionDetails.Source.Provider,
+		"src-provider",
+		"",
+		"The provider holding Source Gateway",
+	)
+	flagSet.StringVar(
+		&connectionRequest.ConnectionDetails.Source.Region,
+		"src-region",
+		"",
+		"The region of the Source Gateway",
+	)
+	flagSet.StringVar(
+		&connectionRequest.ConnectionDetails.Destination.GatewayID,
+		"dest-id",
+		"",
+		"ID of Destination Gateway for the connection",
+	)
+	flagSet.StringVar(
+		&connectionRequest.ConnectionDetails.Destination.Provider,
+		"dest-provider",
+		"",
+		"The provider holding Destination Gateway",
+	)
+	flagSet.StringVar(
+		&connectionRequest.ConnectionDetails.Destination.Region,
+		"dest-region",
+		"",
+		"The region of the Destination Gateway",
+	)
+	flagSet.StringVar(
+		connectionRequest.ConnectionID,
+		"connection-id",
+		"",
+		"The ID of a connection to recreate/delete",
+	)
+}
+
+func requestFromFile(filepath string) (types.Request, error) {
+	yamlFile, err := os.ReadFile(filepath)
+	if err != nil {
+		return types.Request{}, fmt.Errorf("error reading YAML file: %w", err)
+	}
+
+	request := types.Request{}
+	if err = yaml.Unmarshal(yamlFile, &request); err != nil {
+		return types.Request{}, fmt.Errorf("error parsing YAML file: %w", err)
+	}
+
+	return request, nil
 }

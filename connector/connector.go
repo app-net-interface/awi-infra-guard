@@ -24,6 +24,7 @@ import (
 
 	"github.com/app-net-interface/awi-infra-guard/connector/db"
 	"github.com/app-net-interface/awi-infra-guard/connector/provider"
+	"github.com/app-net-interface/awi-infra-guard/connector/secret"
 	"github.com/app-net-interface/awi-infra-guard/connector/types"
 	"github.com/sirupsen/logrus"
 )
@@ -43,7 +44,7 @@ func NewConnector(ctx context.Context, logger *logrus.Logger, config *Config) (*
 	}
 	dbClient, err := db.NewClient(db.DefaultDBFile, logger.WithField("logger", "db"))
 	if err != nil {
-		return nil, fmt.Errorf("Could not create DB Client: %w", err)
+		return nil, fmt.Errorf("could not create DB Client: %w", err)
 	}
 	return &Connector{
 		providerManager: &providerManager,
@@ -75,6 +76,18 @@ func calculateNumberOfTunnels(source, destination types.GatewayConnectionSetting
 			source.NumberOfInterfaces, destination.NumberOfInterfaces,
 		)
 	}
+
+	var MaxNumberOfTunnels uint8
+	if source.MaxNumberOfTunnels != 0 && destination.MaxNumberOfTunnels != 0 {
+		MaxNumberOfTunnels = min(source.MaxNumberOfTunnels, destination.MaxNumberOfTunnels)
+	} else {
+		MaxNumberOfTunnels = max(source.MaxNumberOfTunnels, destination.MaxNumberOfTunnels)
+	}
+	if MaxNumberOfTunnels != 0 {
+		source.NumberOfInterfaces = min(MaxNumberOfTunnels, source.NumberOfInterfaces)
+		destination.NumberOfInterfaces = min(MaxNumberOfTunnels, destination.NumberOfInterfaces)
+	}
+
 	if destination.NumberOfInterfaces > source.NumberOfInterfaces {
 		if destination.NumberOfInterfaces%source.NumberOfInterfaces != 0 {
 			return 0, fmt.Errorf(
@@ -95,14 +108,6 @@ func calculateNumberOfTunnels(source, destination types.GatewayConnectionSetting
 	return source.NumberOfInterfaces, nil
 }
 
-type createConnectionBGPFullConfig struct {
-	Gateway    types.Gateway
-	Provider   provider.Provider
-	Setting    types.GatewayConnectionSettings
-	Interfaces []string
-	ASN        uint64
-}
-
 type gateways struct {
 	SourceGateway       types.Gateway
 	DestinationGateway  types.Gateway
@@ -110,136 +115,18 @@ type gateways struct {
 	DestinationProvider provider.Provider
 }
 
-func (c *Connector) createConnectionWithBGPAuthoritarian(
-	ctx context.Context,
-	firstConfig createConnectionBGPFullConfig,
-	secondConfig createConnectionBGPFullConfig,
-	NumberOfTunnels uint8,
-) error {
-	resultFromFirstProvider, err := firstConfig.Provider.AttachToExternalGatewayWithBGP(
-		ctx,
-		firstConfig.Gateway,
-		secondConfig.Gateway,
-		types.AttachModeGenerateBothIPs,
-		types.CreateBGPConnectionConfig{
-			OutsideInterfaces: secondConfig.Interfaces,
-			ASN:               firstConfig.ASN,
-			PeerASN:           secondConfig.ASN,
-			NumberOfTunnels:   NumberOfTunnels,
-		},
-	)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to create attachment resources for gateway %s with mode %d: %w",
-			firstConfig.Gateway.Name, types.AttachModeGenerateBothIPs, err,
-		)
-	}
-
-	if len(firstConfig.Interfaces) == 0 {
-		c.logger.Info("Late Interfaces. Trying to obtain from previous operation")
-		if len(resultFromFirstProvider.Interfaces) == 0 {
-			return fmt.Errorf(
-				"cannot create attachment for gateway %s as no interfaces were returned "+
-					"from first gateway %s", secondConfig.Gateway.Name, firstConfig.Gateway.Name,
+func (c *Connector) generateSecrets(numberOfInterfaces uint8) ([]string, error) {
+	secrets := make([]string, numberOfInterfaces)
+	for i := range secrets {
+		var err error
+		secrets[i], err = secret.GeneratePSK()
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to generate Shared Secret: %w", err,
 			)
 		}
-		firstConfig.Interfaces = resultFromFirstProvider.Interfaces
 	}
-
-	_, err = secondConfig.Provider.AttachToExternalGatewayWithBGP(
-		ctx,
-		secondConfig.Gateway,
-		firstConfig.Gateway,
-		types.AttachModeAcceptOtherIP,
-		types.CreateBGPConnectionConfig{
-			OutsideInterfaces: firstConfig.Interfaces,
-			ASN:               secondConfig.ASN,
-			PeerASN:           firstConfig.ASN,
-			NumberOfTunnels:   NumberOfTunnels,
-			BGPAddresses:      resultFromFirstProvider.PeerBGPAddresses,
-			PeerBGPAddresses:  resultFromFirstProvider.BGPAddresses,
-			SharedSecrets:     resultFromFirstProvider.SharedSecrets,
-		},
-	)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to create attachment resources for gateway %s with mode %d: %w",
-			secondConfig.Gateway.Name, types.AttachModeAcceptOtherIP, err,
-		)
-	}
-	return nil
-}
-
-func (c *Connector) createConnectionWithBGPCooperative(
-	ctx context.Context,
-	firstConfig createConnectionBGPFullConfig,
-	secondConfig createConnectionBGPFullConfig,
-	NumberOfTunnels uint8,
-) error {
-	// TODO: Implement the logic.
-	return errors.New("createConnectionWithBGPRegular NOT IMPLEMENTED")
-}
-
-func (c *Connector) createConnectionWithBGP(
-	ctx context.Context,
-	gateways gateways,
-	sourceInterfaces,
-	destinationInterfaces []string,
-	numberOfTunnels uint8,
-) error {
-	sourceASN, err := gateways.SourceProvider.InitializeASN(
-		ctx, gateways.SourceGateway, gateways.DestinationGateway)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to initialize Gateway %s ASN: %w",
-			gateways.SourceGateway.Name, err)
-	}
-	destASN, err := gateways.DestinationProvider.InitializeASN(
-		ctx, gateways.DestinationGateway, gateways.SourceGateway)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to initialize Gateway %s ASN: %w",
-			gateways.DestinationGateway.Name, err)
-	}
-
-	bgpScenario, err := c.getBGPScenario(ctx, gateways)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to obtain a scenario for creating BGP Session: %w",
-			err,
-		)
-	}
-
-	configs := []createConnectionBGPFullConfig{
-		{
-			Gateway:    gateways.SourceGateway,
-			Provider:   gateways.SourceProvider,
-			Interfaces: sourceInterfaces,
-			ASN:        sourceASN,
-		},
-		{
-			Gateway:    gateways.DestinationGateway,
-			Provider:   gateways.DestinationProvider,
-			Interfaces: destinationInterfaces,
-			ASN:        destASN,
-		},
-	}
-	if !bgpScenario.SourceSideStarts {
-		configs[0], configs[1] = configs[1], configs[0]
-	}
-
-	if bgpScenario.StarterGeneratesBothAddresses {
-		return c.createConnectionWithBGPAuthoritarian(
-			ctx,
-			configs[0],
-			configs[1],
-			numberOfTunnels)
-	}
-	return c.createConnectionWithBGPCooperative(
-		ctx,
-		configs[0],
-		configs[1],
-		numberOfTunnels)
+	return secrets, nil
 }
 
 func (c *Connector) createConnectionWithStaticRouting(
@@ -248,6 +135,7 @@ func (c *Connector) createConnectionWithStaticRouting(
 	sourceInterfaces,
 	destinationInterfaces []string,
 	numberOfTunnels uint8,
+	secrets []string,
 ) error {
 	return errors.New("NOT IMPLEMENTED")
 }
@@ -259,60 +147,6 @@ const (
 	connectionTypeStatic
 	connectionTypeNone
 )
-
-func (c *Connector) getBGPScenario(
-	ctx context.Context,
-	gateways gateways,
-) (types.BGPScenario, error) {
-	sourceSetting, err := gateways.SourceProvider.GetGatewayConnectionSettings(
-		ctx, gateways.SourceGateway)
-	if err != nil {
-		return types.BGPScenario{}, fmt.Errorf(
-			"failed to get connection settings for gateway %s from provider %s: %w",
-			gateways.SourceGateway.Name, gateways.SourceProvider.Name(), err,
-		)
-	}
-	if sourceSetting.BGPSetting == nil {
-		return types.BGPScenario{}, fmt.Errorf(
-			"failed to get BGP settings for gateway %s from provider %s. "+
-				"Options don't specify any BGP setting: %v",
-			gateways.SourceGateway.Name, gateways.SourceProvider.Name(),
-			sourceSetting,
-		)
-	}
-	destinationSetting, err := gateways.DestinationProvider.GetGatewayConnectionSettings(
-		ctx, gateways.DestinationGateway)
-	if err != nil {
-		return types.BGPScenario{}, fmt.Errorf(
-			"failed to get connection settings for gateway %s from provider %s: %w",
-			gateways.DestinationGateway.Name, gateways.DestinationProvider.Name(), err,
-		)
-	}
-	if destinationSetting.BGPSetting == nil {
-		return types.BGPScenario{}, fmt.Errorf(
-			"failed to get BGP settings for gateway %s from provider %s. "+
-				"Options don't specify any BGP setting: %v",
-			gateways.DestinationGateway.Name, gateways.DestinationProvider.Name(),
-			destinationSetting,
-		)
-	}
-	scenario := types.BGPScenarioFromBothConfigs(
-		&sourceSetting.BGPSetting.Addressing, &destinationSetting.BGPSetting.Addressing)
-	if scenario != nil {
-		return types.BGPScenario{}, fmt.Errorf(
-			"failed to obtain BGP Scenario between gateways. It seems their "+
-				"BGP settings are incompatible. Source %s:%s has setting: %v "+
-				"and Destination %s:%s has setting: %v",
-			gateways.SourceProvider.Name(),
-			gateways.SourceGateway.Name,
-			sourceSetting.BGPSetting,
-			gateways.DestinationProvider.Name(),
-			gateways.DestinationGateway.Name,
-			destinationSetting.BGPSetting,
-		)
-	}
-	return *scenario, nil
-}
 
 // checkConnectionTypeThatCanBeEstablished verifies setting of
 // both sides of the possible connection, checks if the connection
@@ -391,6 +225,24 @@ func (c *Connector) createConnection(
 		)
 	}
 
+	err = gateways.SourceProvider.InitializeCreation(
+		ctx, gateways.SourceGateway, gateways.DestinationGateway,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to initialize Gateway %s: %w",
+			gateways.SourceGateway.Name, err)
+	}
+
+	err = gateways.DestinationProvider.InitializeCreation(
+		ctx, gateways.DestinationGateway, gateways.SourceGateway,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to initialize Gateway %s: %w",
+			gateways.DestinationGateway.Name, err)
+	}
+
 	sourceInterfaces, err := gateways.SourceProvider.InitializeGatewayInterfaces(
 		ctx, gateways.SourceGateway, gateways.DestinationGateway)
 	if err != nil {
@@ -406,6 +258,13 @@ func (c *Connector) createConnection(
 			gateways.DestinationGateway.Name, err)
 	}
 
+	secrets, err := c.generateSecrets(numberOfTunnels)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to prepare pre-shared secrets: %w", err,
+		)
+	}
+
 	if connType == connectionTypeBGP {
 		return c.createConnectionWithBGP(
 			ctx,
@@ -413,6 +272,7 @@ func (c *Connector) createConnection(
 			sourceInterfaces,
 			destInterfaces,
 			numberOfTunnels,
+			secrets,
 		)
 	}
 	return c.createConnectionWithStaticRouting(
@@ -421,6 +281,7 @@ func (c *Connector) createConnection(
 		sourceInterfaces,
 		destInterfaces,
 		numberOfTunnels,
+		secrets,
 	)
 }
 
@@ -491,6 +352,27 @@ func (c *Connector) Connect(ctx context.Context, request types.Request) error {
 			"failed to create a connection between %s:%s and %s:%s: %w",
 			sourceProvider.Name(), sourceGW.Name, destinationProvider.Name(), destGW.Name,
 			err)
+	}
+
+	sourceCIDRs, err := sourceProvider.GetCIDRs(ctx, sourceGW)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to obtain list of CIDRs behind Source Gateway %s:%s: %w",
+			sourceProvider.Name(), sourceGW.Name, err)
+	}
+	destinationCIDRs, err := destinationProvider.GetCIDRs(ctx, destGW)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to obtain list of CIDRs behind Destination Gateway %s:%s: %w",
+			destinationProvider.Name(), destGW.Name, err,
+		)
+	}
+
+	if err = updateConnectionEntryWithGatewayCIDRsInDB(
+		ctx, c.db, c.logger, connectionID, sourceCIDRs, destinationCIDRs,
+	); err != nil {
+		c.logger.Warn("Resources were create successfully but failed to update DB Connection Entry with CIDRs")
+		return fmt.Errorf("failed to update connection DB Entry with CIDRs: %w", err)
 	}
 
 	if err = updateConnectionEntryStateInDB(ctx, c.db, c.logger, connectionID, db.StateActive, ""); err != nil {
@@ -571,7 +453,7 @@ func (c *Connector) Disconnect(ctx context.Context, request types.Request) error
 				"cannot remove the connection as obtaining connection with ID '%s'"+
 					"from DB failed - got nil connection. If the connection is not present "+
 					"in the DB you can provide source and destination details directly instead "+
-					"of providing connection ID.",
+					"of providing connection ID",
 				*request.ConnectionID,
 			)
 		}
@@ -694,25 +576,25 @@ func (c *Connector) getGateways(
 	sourceGW, err := sourceProvider.GetGateway(ctx, connectionDetails.Source)
 	if err != nil {
 		return types.Gateway{}, types.Gateway{}, fmt.Errorf(
-			"The Source Gateway %v not found: %w",
+			"the Source Gateway %v not found: %w",
 			connectionDetails.Source,
 			err)
 	}
 	if sourceGW == nil {
 		return types.Gateway{}, types.Gateway{}, fmt.Errorf(
-			"The Source Gateway %v not found",
+			"the Source Gateway %v not found",
 			connectionDetails.Source)
 	}
 	destGW, err := destProvider.GetGateway(ctx, connectionDetails.Destination)
 	if err != nil {
 		return types.Gateway{}, types.Gateway{}, fmt.Errorf(
-			"The Destination Gateway %v not found: %w",
+			"the Destination Gateway %v not found: %w",
 			connectionDetails.Destination,
 			err)
 	}
 	if destGW == nil {
 		return types.Gateway{}, types.Gateway{}, fmt.Errorf(
-			"The Destination Gateway %v not found",
+			"the Destination Gateway %v not found",
 			connectionDetails.Destination)
 	}
 	return *sourceGW, *destGW, nil

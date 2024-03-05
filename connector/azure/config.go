@@ -15,23 +15,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package gcp
-
-const (
-	REQUESTED_CIDR_SIZE          uint8 = 30
-	NUMBER_OF_GATEWAY_INTERFACES uint8 = 2
-)
+package azure
 
 type Config struct {
-	// The GCP Project ID, which will be used for interactions with
-	// Google Cloud.
-	//
-	// If empty, the GCP Client will check the list of projects, which
-	// the user has access to - if there is only one project, the script
-	// will use that project automatically, otherwise, the user will be
-	// instructed to specify the exact project.
-	Project string
-	// The Region, where GCP resources such as Routers and Subnets
-	// will be created.
-	Region string
+	// The name of the Location, where the resources will be spawned or
+	// modified.
+	Location string `yaml:"location"`
+	// The Resource Group acting as a container for Azure resources.
+	ResourceGroup string `yaml:"resourceGroup"`
 }

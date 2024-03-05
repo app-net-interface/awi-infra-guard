@@ -17,6 +17,10 @@
 
 package types
 
+import (
+	"github.com/app-net-interface/awi-infra-guard/connector/cidrpool"
+)
+
 // A structure defining instructions how to perform establishing
 // a connection between two sides of connection.
 type BGPScenario struct {
@@ -238,6 +242,8 @@ type CreateBGPConnectionConfig struct {
 	PeerBGPAddresses []string
 	// Shared Secrets.
 	SharedSecrets []string
+	// The BGP CIDR Pools for all VPN Tunnels.
+	BGPCIDRPools []*cidrpool.CIDRV4Pool
 }
 
 // The data obtained during creating provider specific resources.

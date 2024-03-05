@@ -1,0 +1,10 @@
+connectionDetails:
+  source:
+    provider: aws
+    id: tgw-05835f0c1f3556def
+    region: us-west-1
+
+  destination:
+    provider: gcp
+    id: ios-csp-gcp-router
+    region: us-east4

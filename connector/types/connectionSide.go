@@ -60,4 +60,7 @@ type GatewayConnectionSettings struct {
 	// from both Gateways. The greater value need to be multiple of
 	// the lesser value.
 	NumberOfInterfaces uint8
+	// The upper limit for number of tunnels for a Gateway. If set
+	// to 0 the limit is turned off.
+	MaxNumberOfTunnels uint8
 }

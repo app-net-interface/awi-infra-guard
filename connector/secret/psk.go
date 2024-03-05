@@ -15,23 +15,22 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package gcp
+package secret
 
-const (
-	REQUESTED_CIDR_SIZE          uint8 = 30
-	NUMBER_OF_GATEWAY_INTERFACES uint8 = 2
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 )
 
-type Config struct {
-	// The GCP Project ID, which will be used for interactions with
-	// Google Cloud.
-	//
-	// If empty, the GCP Client will check the list of projects, which
-	// the user has access to - if there is only one project, the script
-	// will use that project automatically, otherwise, the user will be
-	// instructed to specify the exact project.
-	Project string
-	// The Region, where GCP resources such as Routers and Subnets
-	// will be created.
-	Region string
+// GeneratePSK generates a pre-shared key for VPN tunnels.
+//
+// TODO: GeneratePSK generates keys that sometimes don't
+// meet AWS criterias - inspect that.
+func GeneratePSK() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", fmt.Errorf("failed to generate PreSharedKey: %v", err)
+	}
+	return hex.EncodeToString(bytes), nil
 }

@@ -27,9 +27,7 @@ import (
 
 type TransitGateway struct {
 	ID string
-	// TODO: Fix a bug, where Transit Gateway holds only one
-	// VPC Attached. The loop going through TGW VPC Attachments
-	// overrides VPC when found.
+	// TODO: Replace VPC ID with the list of IDs.
 	VPCID string
 	ASN   string
 
@@ -63,14 +61,18 @@ func transitGatewayFromAWS(tgw *types.TransitGateway) *TransitGateway {
 	if tgw == nil {
 		return nil
 	}
+	options := tgw.Options
+	if options == nil {
+		options = &types.TransitGatewayOptions{}
+	}
 	return &TransitGateway{
 		ID:                           helper.StringPointerToString(tgw.TransitGatewayId),
-		ASN:                          strconv.FormatInt(*tgw.Options.AmazonSideAsn, 10),
-		AutoAcceptSharedAttachments:  tgw.Options.AutoAcceptSharedAttachments == types.AutoAcceptSharedAttachmentsValueEnable,
-		DefaultRouteTableAssociation: tgw.Options.DefaultRouteTableAssociation == types.DefaultRouteTableAssociationValueEnable,
-		DefaultRouteTablePropagation: tgw.Options.DefaultRouteTablePropagation == types.DefaultRouteTablePropagationValueEnable,
-		VpnEcmpSupport:               tgw.Options.VpnEcmpSupport == types.VpnEcmpSupportValueEnable,
-		DnsSupport:                   tgw.Options.DnsSupport == types.DnsSupportValueEnable,
+		ASN:                          helper.Int64PointerToString(options.AmazonSideAsn),
+		AutoAcceptSharedAttachments:  options.AutoAcceptSharedAttachments == types.AutoAcceptSharedAttachmentsValueEnable,
+		DefaultRouteTableAssociation: options.DefaultRouteTableAssociation == types.DefaultRouteTableAssociationValueEnable,
+		DefaultRouteTablePropagation: options.DefaultRouteTablePropagation == types.DefaultRouteTablePropagationValueEnable,
+		VpnEcmpSupport:               options.VpnEcmpSupport == types.VpnEcmpSupportValueEnable,
+		DnsSupport:                   options.DnsSupport == types.DnsSupportValueEnable,
 	}
 }
 

@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/app-net-interface/awi-infra-guard/connector/aws"
+	"github.com/app-net-interface/awi-infra-guard/connector/azure"
 	"github.com/app-net-interface/awi-infra-guard/connector/gcp"
 	"github.com/app-net-interface/awi-infra-guard/connector/provider"
 	"github.com/sirupsen/logrus"
@@ -66,6 +67,7 @@ func (p *ProviderManager) allProvidersInitialized() bool {
 func (p *ProviderManager) loadDefaultProviders() error {
 	p.availableProviders["aws"] = aws.NewConnector
 	p.availableProviders["gcp"] = gcp.NewConnector
+	p.availableProviders["azure"] = azure.NewConnector
 	return nil
 }
 
@@ -96,7 +98,7 @@ func (p *ProviderManager) InitializeProvider(
 	if !ok {
 		return nil, fmt.Errorf("cannot initialize provider '%s'. No implementation found", providerName)
 	}
-	provider, err := providerInitialize(ctx, logger, config.(string))
+	provider, err := providerInitialize(ctx, logger.WithField("logger", providerName), config.(string))
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize provider '%s': %w", providerName, err)
 	}
