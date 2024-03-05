@@ -47,8 +47,3 @@ docker-push:
 .PHONY: build
 build: ## Build awi-infra-guard grpc server 
 	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH} go build -ldflags="-w -s" -o bin/${BIN_NAME}
-
-.PHONY: build_csp_connector
-build_csp_connector:
-	CGO_ENABLED=0 GOOS=${OS} GOARCH=${ARCH} go build -ldflags="-w -s" -o bin/cspConnector cmd/cspConnector.go
-
