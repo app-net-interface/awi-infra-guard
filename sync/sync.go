@@ -47,17 +47,21 @@ type Syncer struct {
 }
 
 func (s *Syncer) Sync() {
-	s.syncVPC()
-	s.syncInstances()
-	s.syncSubnets()
-	s.syncACLs()
-	s.syncRouteTables()
+	//s.syncVPC()
+	//s.syncInstances()
+	//s.syncSubnets()
+	//s.syncRouteTables()
+	//s.syncACLs()
 	s.syncSecurityGroups()
-	s.syncClusters()
-	s.syncPods()
-	s.syncNamespaces()
-	s.syncK8SSsNodes()
-	s.syncK8SServices()
+
+	/*
+
+		s.syncClusters()
+		s.syncPods()
+		s.syncNamespaces()
+		s.syncK8SSsNodes()
+		s.syncK8SServices()
+	*/
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
@@ -157,10 +161,10 @@ func genericCloudSync[P interface {
 	var allRemoteObj []P
 	syncTime := make(map[string]types.SyncTime)
 	for _, cloudProvider := range s.strategy.GetAllProviders() {
-		s.logger.Infof("Syncing %s in provider %s", typeName, cloudProvider.GetName())
 		t := time.Now().UTC().Format(time.RFC3339)
 		ok := false
 		for _, account := range cloudProvider.ListAccounts() {
+			s.logger.Infof("Syncing instances in account %s and provider %s", account.ID, cloudProvider.GetName())
 			remoteObjs, err := listF(ctx, cloudProvider, account.ID)
 			if err != nil {
 				s.logger.Errorf("Sync error: failed to List %s in provider %s: %v",

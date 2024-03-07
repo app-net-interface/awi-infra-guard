@@ -273,9 +273,12 @@ func (v *RouteTable) GetProvider() string {
 }
 
 type Route struct {
+	Name 		string
 	Destination string
 	Status      string
 	Target      string
+	NextHopType string
+	NextHopIP   string
 }
 
 type SecurityGroup struct {
