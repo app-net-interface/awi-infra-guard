@@ -21,7 +21,7 @@ func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecu
 			vNetName = parts[len(parts)-1]
 		}
 	}
-	c.logger.Infof("Retrieving security groups for account %s and VPC %s", input.AccountId, vNetName)
+	//c.logger.Infof("Retrieving security groups for account %s and VPC %s", input.AccountId, vNetName)
 	vmClient, err := armcompute.NewVirtualMachinesClient(input.AccountId, c.cred, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create VM client: %w", err)
@@ -62,7 +62,7 @@ func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecu
 					// Extract VNet ID from the subnet ID
 					subnetID := *ipConf.Properties.Subnet.ID
 					vNetID := extractVNetIDFromSubnetID(subnetID)
-					c.logger.Debugf("Azure security group %+v", nic.Interface.Properties.NetworkSecurityGroup)
+					//c.logger.Debugf("Azure security group %+v", nic.Interface.Properties.NetworkSecurityGroup)
 					secGroup := types.SecurityGroup{
 
 						ID: *nic.Interface.Properties.NetworkSecurityGroup.ID,
@@ -76,7 +76,7 @@ func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecu
 					}
 
 					//secGroup.Rules = convertToSecurityGroupRule(nic.Interface.Properties.NetworkSecurityGroup.Properties.SecurityRules)
-					c.logger.Debugf("Azure security group = %v", secGroup)
+					//c.logger.Debugf("Azure security group = %v", secGroup)
 					secGroups = append(secGroups, secGroup)
 					break // Assuming a single NIC per VM for simplicity
 				}

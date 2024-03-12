@@ -47,21 +47,22 @@ type Syncer struct {
 }
 
 func (s *Syncer) Sync() {
-	//s.syncVPC()
-	//s.syncInstances()
-	//s.syncSubnets()
-	//s.syncRouteTables()
-	//s.syncACLs()
+
+	// Cloud Infrastructure
+	s.syncVPC()
+	s.syncInstances()
+	s.syncSubnets()
+	s.syncRouteTables()
+	s.syncACLs()
 	s.syncSecurityGroups()
 
-	/*
+	// Kubernetes
+	s.syncClusters()
+	s.syncPods()
+	s.syncNamespaces()
+	s.syncK8SSsNodes()
+	s.syncK8SServices()
 
-		s.syncClusters()
-		s.syncPods()
-		s.syncNamespaces()
-		s.syncK8SSsNodes()
-		s.syncK8SServices()
-	*/
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
@@ -164,7 +165,7 @@ func genericCloudSync[P interface {
 		t := time.Now().UTC().Format(time.RFC3339)
 		ok := false
 		for _, account := range cloudProvider.ListAccounts() {
-			s.logger.Infof("Syncing instances in account %s and provider %s", account.ID, cloudProvider.GetName())
+			//s.logger.Infof("Syncing instances in account %s and provider %s", account.ID, cloudProvider.GetName())
 			remoteObjs, err := listF(ctx, cloudProvider, account.ID)
 			if err != nil {
 				s.logger.Errorf("Sync error: failed to List %s in provider %s: %v",
@@ -263,7 +264,7 @@ func genericK8sSync[P interface {
 	}
 	syncTime := make(map[string]types.SyncTime)
 	for _, cluster := range clusters {
-		s.logger.Infof("Syncing pods in cluster %s", cluster.Name)
+		//s.logger.Infof("Syncing pods in cluster %s", cluster.Name)
 		t := time.Now().UTC().Format(time.RFC3339)
 		remoteObjs, err := listF(ctx, k8sProvider, cluster.Name)
 		if err != nil {

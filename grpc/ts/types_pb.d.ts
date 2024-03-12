@@ -1,22 +1,3 @@
-/**
- * Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http:www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import * as jspb from 'google-protobuf'
 
 
@@ -154,6 +135,12 @@ export class VPC extends jspb.Message {
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): VPC;
 
+  getIpv4Cidr(): string;
+  setIpv4Cidr(value: string): VPC;
+
+  getIpv6Cidr(): string;
+  setIpv6Cidr(value: string): VPC;
+
   getProvider(): string;
   setProvider(value: string): VPC;
 
@@ -177,6 +164,8 @@ export namespace VPC {
     name: string,
     region: string,
     labelsMap: Array<[string, string]>,
+    ipv4Cidr: string,
+    ipv6Cidr: string,
     provider: string,
     accountId: string,
     lastSyncTime: string,

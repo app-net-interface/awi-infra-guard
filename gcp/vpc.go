@@ -20,6 +20,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 
@@ -217,10 +218,19 @@ func (c *Client) vpcIdToSingleNetwork(ctx context.Context, project, vpcID string
 
 func convertVPC(projectID string, network *computepb.Network) types.VPC {
 	return types.VPC{
-		ID:        strconv.FormatUint(network.GetId(), 10),
-		Name:      network.GetName(),
-		Region:    "global",
+		ID:     strconv.FormatUint(network.GetId(), 10),
+		Name:   network.GetName(),
+		Region: "global",
+
 		AccountID: projectID,
 		Provider:  providerName,
 	}
+}
+
+func isIPv4CIDR(cidr string) bool {
+	ip, _, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return false // Not a valid CIDR notation
+	}
+	return ip.To4() != nil // Returns true if CIDR is IPv4
 }

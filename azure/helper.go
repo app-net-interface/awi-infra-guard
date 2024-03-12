@@ -3,6 +3,7 @@ package azure
 import (
 	"context"
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -197,4 +198,26 @@ func convertToSecurityGroupRule(rules []*armnetwork.SecurityRule) (sgRules []typ
 		sgRules = append(sgRules, sgRule)
 	}
 	return sgRules
+}
+
+func joinPointerStrings(slice []*string, separator string) string {
+	var elements []string
+	for _, ptr := range slice {
+		if ptr != nil {
+			elements = append(elements, *ptr)
+		}
+	}
+	return strings.Join(elements, separator)
+}
+
+func isIPv6(ip string) bool {
+	return len(ip) > 0 && ip[0] == '2' && ip[1] == '0'
+}
+
+func isIPv4CIDR(cidr string) bool {
+	ip, _, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return false // Not a valid CIDR notation
+	}
+	return ip.To4() != nil // Returns true if CIDR is IPv4
 }

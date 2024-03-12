@@ -13,6 +13,7 @@ import (
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
 
 	var vpclist []types.VPC
+	var ipv4Cidr, ipv6Cidr string
 	accounts := c.ListAccounts()
 
 	for _, account := range accounts {
@@ -38,16 +39,30 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 						labels[k] = *v
 					}
 				}
+
+				for _, addressPrefix := range vnet.Properties.AddressSpace.AddressPrefixes {
+					if isIPv4CIDR(*addressPrefix) {
+						ipv4Cidr = fmt.Sprintf("%s,%s", *addressPrefix, ipv4Cidr)
+					} else {
+						ipv6Cidr = fmt.Sprintf("%s,%s", *addressPrefix, ipv6Cidr)
+					}
+				}
+
 				vpc := types.VPC{
 					ID:        *vnet.ID,
 					Name:      *vnet.Name,
 					Region:    *vnet.Location,
 					Labels:    labels,
+					IPv4CIDR:  ipv4Cidr,
+					IPv6CIDR:  ipv6Cidr,
 					Provider:  "Azure",
 					AccountID: account.ID,
-					// LastSyncTime is not directly available from the VNet properties; you may need a custom approach
 				}
+
 				vpclist = append(vpclist, vpc)
+				// Reset ip prefix string for the next VPC
+				ipv4Cidr = ""
+				ipv6Cidr = ""
 			}
 		}
 	}

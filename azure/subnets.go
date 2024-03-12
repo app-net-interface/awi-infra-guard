@@ -67,7 +67,7 @@ func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsReq
 						AccountID: params.AccountId,
 						Labels:    labels, // Update this as needed
 					})
-					c.logger.Infof("Added subnet %+v", subnets[i])
+					c.logger.Debugf("Added subnet %+v", subnets[i])
 				}
 			}
 		}

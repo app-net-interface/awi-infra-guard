@@ -1,22 +1,3 @@
-/**
- * Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http:www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 // source: access_control.proto
 /**
  * @fileoverview
@@ -32,13 +13,7 @@
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global =
-    (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof window !== 'undefined' && window) ||
-    (typeof global !== 'undefined' && global) ||
-    (typeof self !== 'undefined' && self) ||
-    (function () { return this; }).call(null) ||
-    Function('return this')();
+var global = (function() { return this || window || global || self || Function('return this')(); }).call(null);
 
 var types_pb = require('./types_pb.js');
 goog.object.extend(proto, types_pb);
@@ -916,8 +891,7 @@ proto.infra.AddInboundAllowRuleInVPCRequest.prototype.getTagsMap = function(opt_
  */
 proto.infra.AddInboundAllowRuleInVPCRequest.prototype.clearTagsMap = function() {
   this.getTagsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -1331,8 +1305,7 @@ proto.infra.AddInboundAllowRuleByLabelsMatchRequest.prototype.getLabelsMap = fun
  */
 proto.infra.AddInboundAllowRuleByLabelsMatchRequest.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -1391,8 +1364,7 @@ proto.infra.AddInboundAllowRuleByLabelsMatchRequest.prototype.getProtocolsAndPor
  */
 proto.infra.AddInboundAllowRuleByLabelsMatchRequest.prototype.clearProtocolsAndPortsMap = function() {
   this.getProtocolsAndPortsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -1970,8 +1942,7 @@ proto.infra.AddInboundAllowRuleBySubnetMatchRequest.prototype.getProtocolsAndPor
  */
 proto.infra.AddInboundAllowRuleBySubnetMatchRequest.prototype.clearProtocolsAndPortsMap = function() {
   this.getProtocolsAndPortsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -2602,8 +2573,7 @@ proto.infra.AddInboundAllowRuleByInstanceIPMatchRequest.prototype.getProtocolsAn
  */
 proto.infra.AddInboundAllowRuleByInstanceIPMatchRequest.prototype.clearProtocolsAndPortsMap = function() {
   this.getProtocolsAndPortsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -3162,8 +3132,7 @@ proto.infra.AddInboundAllowRuleForLoadBalancerByDNSRequest.prototype.getProtocol
  */
 proto.infra.AddInboundAllowRuleForLoadBalancerByDNSRequest.prototype.clearProtocolsAndPortsMap = function() {
   this.getProtocolsAndPortsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -4413,8 +4382,7 @@ proto.infra.RemoveInboundAllowRuleRulesByTagsRequest.prototype.getTagsMap = func
  */
 proto.infra.RemoveInboundAllowRuleRulesByTagsRequest.prototype.clearTagsMap = function() {
   this.getTagsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -4908,8 +4876,7 @@ proto.infra.RefreshInboundAllowRuleRequest.prototype.getDestinationLabelsMap = f
  */
 proto.infra.RefreshInboundAllowRuleRequest.prototype.clearDestinationLabelsMap = function() {
   this.getDestinationLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -4986,8 +4953,7 @@ proto.infra.RefreshInboundAllowRuleRequest.prototype.getProtocolsAndPortsMap = f
  */
 proto.infra.RefreshInboundAllowRuleRequest.prototype.clearProtocolsAndPortsMap = function() {
   this.getProtocolsAndPortsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**

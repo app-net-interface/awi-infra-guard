@@ -45,9 +45,5 @@ func (c *Client) ListAccounts() []types.Account {
 		}
 	}
 
-	for _, account := range accounts {
-		c.logger.Debugf("Azure Account ID = %s", account.ID)
-	}
-
 	return accounts
 }

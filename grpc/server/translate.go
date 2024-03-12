@@ -85,6 +85,8 @@ func typesVpcsToGrpc(in []types.VPC) []*infrapb.VPC {
 			Name:         vpc.Name,
 			Region:       vpc.Region,
 			Labels:       vpc.Labels,
+			Ipv4Cidr:     vpc.IPv4CIDR,
+			Ipv6Cidr:     vpc.IPv6CIDR,
 			Provider:     vpc.Provider,
 			AccountId:    vpc.AccountID,
 			LastSyncTime: vpc.LastSyncTime,

@@ -76,6 +76,22 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 							publicIP = *pip.Properties.IPAddress
 						}
 					}
+					var vmStatus string = "unknown"
+					if vm.Properties.InstanceView != nil {
+						for _, status := range vm.Properties.InstanceView.Statuses {
+							if status.Code != nil && *status.Code == "PowerState/running" {
+								vmStatus = "Running"
+							} else if status.Code != nil && *status.Code == "PowerState/deallocated" {
+								vmStatus = "Terminated"
+							} else if status.Code != nil && *status.Code == "PowerState/stopped" {
+								vmStatus = "Stopped"
+							} else if status.Code != nil && *status.Code == "PowerState/starting" {
+								vmStatus = "Starting"
+							} else if status.Code != nil && *status.Code == "PowerState/stopping" {
+								vmStatus = "Stopping"
+							}
+						}
+					}
 
 					// Construct and append the instance
 					instance := types.Instance{
@@ -86,7 +102,7 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 						SubnetID:  *ipConf.Properties.Subnet.ID,
 						VPCID:     vNetID,
 						Labels:    convertToStringMap(vm.Tags),
-						//State:     string(*vm.Properties.InstanceView.Statuses[0].Code),
+						State:     vmStatus,
 						Region:    *vm.Location,
 						Provider:  "Azure",
 						AccountID: input.AccountId,
@@ -101,4 +117,3 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 	}
 	return instances, nil
 }
-

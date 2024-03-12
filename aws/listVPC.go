@@ -106,11 +106,19 @@ func convertVPCs(vpcs []awstypes.Vpc, defaultAccount, defaultRegion, account, re
 	}
 	result := make([]types.VPC, 0, len(vpcs))
 	for _, vpc := range vpcs {
+		var ipv6CIDR string
+		if len(vpc.Ipv6CidrBlockAssociationSet) > 0 {
+			for _, ipv6Association := range vpc.Ipv6CidrBlockAssociationSet {
+				ipv6CIDR = fmt.Sprintf("%s,%s", *ipv6Association.Ipv6CidrBlock, ipv6CIDR)
+			}
+		}
 		result = append(result, types.VPC{
 			Name:      convertString(getTagName(vpc.Tags)),
 			ID:        convertString(vpc.VpcId),
 			Region:    region,
 			Labels:    convertTags(vpc.Tags),
+			IPv4CIDR:  *vpc.CidrBlock,
+			IPv6CIDR:  ipv6CIDR,
 			AccountID: account,
 			Provider:  providerName,
 		})

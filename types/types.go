@@ -50,6 +50,8 @@ type VPC struct {
 	Name         string
 	Region       string
 	Labels       map[string]string
+	IPv4CIDR     string
+	IPv6CIDR     string
 	Provider     string
 	AccountID    string
 	LastSyncTime string
@@ -273,7 +275,7 @@ func (v *RouteTable) GetProvider() string {
 }
 
 type Route struct {
-	Name 		string
+	Name        string
 	Destination string
 	Status      string
 	Target      string

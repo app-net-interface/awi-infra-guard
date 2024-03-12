@@ -1,22 +1,3 @@
-/**
- * Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http:www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 // source: types.proto
 /**
  * @fileoverview
@@ -32,13 +13,7 @@
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global =
-    (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof window !== 'undefined' && window) ||
-    (typeof global !== 'undefined' && global) ||
-    (typeof self !== 'undefined' && self) ||
-    (function () { return this; }).call(null) ||
-    Function('return this')();
+var global = (function() { return this || window || global || self || Function('return this')(); }).call(null);
 
 goog.exportSymbol('proto.infra.ACL', null, global);
 goog.exportSymbol('proto.infra.ACL.ACLRule', null, global);
@@ -810,8 +785,7 @@ proto.infra.Instance.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.Instance.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -1214,8 +1188,7 @@ proto.infra.Subnet.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.Subnet.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -1326,6 +1299,8 @@ proto.infra.VPC.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    ipv4Cidr: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    ipv6Cidr: jspb.Message.getFieldWithDefault(msg, 6, ""),
     provider: jspb.Message.getFieldWithDefault(msg, 10, ""),
     accountId: jspb.Message.getFieldWithDefault(msg, 11, ""),
     lastSyncTime: jspb.Message.getFieldWithDefault(msg, 12, "")
@@ -1382,6 +1357,14 @@ proto.infra.VPC.deserializeBinaryFromReader = function(msg, reader) {
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setIpv4Cidr(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setIpv6Cidr(value);
       break;
     case 10:
       var value = /** @type {string} */ (reader.readString());
@@ -1448,6 +1431,20 @@ proto.infra.VPC.serializeBinaryToWriter = function(message, writer) {
   f = message.getLabelsMap(true);
   if (f && f.getLength() > 0) {
     f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getIpv4Cidr();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+  f = message.getIpv6Cidr();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
   }
   f = message.getProvider();
   if (f.length > 0) {
@@ -1546,7 +1543,42 @@ proto.infra.VPC.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.VPC.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
+  return this;};
+
+
+/**
+ * optional string ipv4_cidr = 5;
+ * @return {string}
+ */
+proto.infra.VPC.prototype.getIpv4Cidr = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.VPC} returns this
+ */
+proto.infra.VPC.prototype.setIpv4Cidr = function(value) {
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional string ipv6_cidr = 6;
+ * @return {string}
+ */
+proto.infra.VPC.prototype.getIpv6Cidr = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.VPC} returns this
+ */
+proto.infra.VPC.prototype.setIpv6Cidr = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -1962,8 +1994,7 @@ proto.infra.Cluster.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.Cluster.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -2516,8 +2547,7 @@ proto.infra.Namespace.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.Namespace.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -2812,8 +2842,7 @@ proto.infra.Pod.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.Pod.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -3372,8 +3401,7 @@ proto.infra.K8sService.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.K8sService.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -4369,8 +4397,7 @@ proto.infra.ACL.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.ACL.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -5019,8 +5046,7 @@ proto.infra.SecurityGroup.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.SecurityGroup.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
@@ -5613,8 +5639,7 @@ proto.infra.RouteTable.prototype.getLabelsMap = function(opt_noLazyCreate) {
  */
 proto.infra.RouteTable.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 /**
