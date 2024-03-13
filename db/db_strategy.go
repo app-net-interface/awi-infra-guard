@@ -279,12 +279,14 @@ func (p *providerWithDB) ListSecurityGroups(ctx context.Context, params *infrapb
 		if params.GetAccountId() != "" && params.GetAccountId() != securityGroup.AccountID {
 			continue
 		}
-		if params.GetRegion() != "global" {
+		/* if params.GetRegion() != "global" {
 			if params.GetRegion() != "" && params.GetRegion() != securityGroup.Region {
+				fmt.Printf("Security group regions don't match %s  --- %s \n", params.GetRegion(), securityGroup.Region)
 				continue
 			}
-		}
+		} */
 		if params.GetVpcId() != "" && params.GetVpcId() != securityGroup.VpcID {
+			//fmt.Printf("VPC don't match %s  --- %s \n", params.GetVpcId(), securityGroup.VpcID)
 			continue
 		}
 
