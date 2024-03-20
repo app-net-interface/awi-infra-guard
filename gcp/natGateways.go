@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -15,79 +16,60 @@ import (
 func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGatewaysRequest) ([]types.NATGateway, error) {
 
 	var natGateways []types.NATGateway
-	return nil, nil
 
-	cc, err := compute.NewRoutersRESTClient(ctx)
+	client, err := compute.NewRoutersRESTClient(ctx)
 	if err != nil {
-		c.logger.Errorf("Failed to create client: %v", err)
+		c.logger.Errorf("compute.NewRoutersRESTClient: %v", err)
 		return natGateways, err
 	}
-	defer cc.Close()
+	defer client.Close()
 
-	// Regions client
-	var partialResponse bool = true
-
-	rc, err := compute.NewRegionsRESTClient(ctx)
-	if err != nil {
-		c.logger.Errorf("Failed to create regions client: %v", err)
+	// List all routers in the project
+	req := &computepb.AggregatedListRoutersRequest{
+		Project: params.AccountId,
 	}
-	defer rc.Close()
-	iter := rc.List(ctx, &computepb.ListRegionsRequest{Project: params.AccountId, ReturnPartialSuccess: &partialResponse}, nil)
+
+	it := client.AggregatedList(ctx, req)
 
 	for {
-		// List all routers in the project
-		region, err := iter.Next()
-
+		resp, err := it.Next()
 		if err == iterator.Done {
 			break
 		}
 		if err != nil {
-			c.logger.Warnf("Region iteration error %v ", err)
-			break
+			c.logger.Errorf("Failed to list routers: %v", err)
+			return natGateways, err
 		}
-		it := cc.List(ctx, &computepb.ListRoutersRequest{
-			Project: params.AccountId,
-			Region:  *region.Name,
-		})
-		c.logger.Infof("Listing NAT Gateway for GCP project %s ", params.AccountId)
-	LOOP:
-		for {
-			router, err := it.Next()
-			if err != nil {
-				c.logger.Errorf("Error listing routers %v", err)
-				break LOOP
-			}
-			c.logger.Infof("Router = %+v ", router)
-			// A router that doesn't have Nats configuration is not a NAT router
-			if len(router.Nats) == 0 {
-				break
-			}
-			var subnetName, routerName string
-			for _, nat := range router.Nats {
-				// Assuming the first subnet is the primary one for simplicity
-				if len(nat.Subnetworks) > 0 {
-					subnetResourceID := nat.Subnetworks[0]
-					subnetName = extractResourceID(*subnetResourceID.Name)
+
+		for _, router := range resp.Value.GetRouters() {
+			//c.logger.Infof("Router [%d] = %+v %+v ", *router.Name, *&router.Id)
+			for i, nat := range router.GetNats() {
+				if nat != nil {
+					var routerName, subnetName string
+					if router.Name != nil {
+						routerName = *router.Name
+					}
+					if len(nat.Subnetworks) > 0 {
+						subnetResourceID := nat.Subnetworks[0]
+						subnetName = extractResourceID(*subnetResourceID.Name)
+					}
+					natGateway := types.NATGateway{
+						ID:        strconv.FormatUint(*router.Id, 10),
+						Provider:  c.GetName(),
+						Name:      routerName,
+						AccountId: params.AccountId,
+						VpcId:     *router.Network,
+						Region:    *router.Region,
+						State:     "Available", // Assuming ACTIVE
+						//CreatedAt:    timestamppb.New(router.GetCreationTimestamp()),
+						LastSyncTime: time.Now().Format(time.RFC3339),
+						SubnetId:     subnetName,
+					}
+					c.logger.Debugf("GCP NAT GW [%d]  = %+v ", i, natGateway)
+					natGateways = append(natGateways, natGateway)
 				}
 			}
-			if router.Name != nil {
-				routerName = *router.Name
-			}
-			natGateway := types.NATGateway{
-				ID:        string(*router.Id),
-				Provider:  c.GetName(),
-				Name:      routerName,
-				AccountId: params.AccountId,
-				VpcId:     *router.Network,
-				Region:    *router.Region,
-				State:     "Unknown", // Assuming ACTIVE
-				//CreatedAt:    timestamppb.New(router.GetCreationTimestamp()),
-				LastSyncTime: time.Now().Format(time.RFC3339),
-				SubnetId:     subnetName,
-			}
 
-			c.logger.Infof("NAT Gateway: %+v\n", natGateway)
-			natGateways = append(natGateways, natGateway)
 		}
 	}
 	return natGateways, err

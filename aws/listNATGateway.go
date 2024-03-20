@@ -38,7 +38,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 		c.logger.Errorf("Unable to describe regions, %v", err)
 	}
 	for _, region := range regionResult.Regions {
-		c.logger.Infof("Listing NAT Gateways for AWS account %s and region %s ", params.AccountId, *region.RegionName)
+		c.logger.Debugf("Listing NAT Gateways for AWS account %s and region %s ", params.AccountId, *region.RegionName)
 		regionalCfg, err := config.LoadDefaultConfig(ctx,
 			config.WithRegion(*region.RegionName),
 		)
@@ -61,7 +61,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 	}
 	//c.logger.Infof("NAT GW to be writtend %+v ", natGateways)
 	for i, _ := range natGateways {
-		c.logger.Infof("NAT GW [%d] %+v\n", i, natGateways[i])
+		c.logger.Debugf("NAT GW [%d] %+v\n", i, natGateways[i])
 		natGateways[i].AccountId = params.AccountId
 	}
 	return natGateways, err
