@@ -383,6 +383,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListRouteTables);
   }
 
+  methodDescriptorListNATGateways = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListNATGateways',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListNATGatewaysRequest,
+    cloud_pb.ListNATGatewaysResponse,
+    (request: cloud_pb.ListNATGatewaysRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListNATGatewaysResponse.deserializeBinary
+  );
+
+  listNATGateways(
+    request: cloud_pb.ListNATGatewaysRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListNATGatewaysResponse>;
+
+  listNATGateways(
+    request: cloud_pb.ListNATGatewaysRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListNATGatewaysResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListNATGatewaysResponse>;
+
+  listNATGateways(
+    request: cloud_pb.ListNATGatewaysRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListNATGatewaysResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListNATGateways',
+        request,
+        metadata || {},
+        this.methodDescriptorListNATGateways,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListNATGateways',
+    request,
+    metadata || {},
+    this.methodDescriptorListNATGateways);
+  }
+
   methodDescriptorGetVPCIDForCIDR = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/GetVPCIDForCIDR',
     grpcWeb.MethodType.UNARY,

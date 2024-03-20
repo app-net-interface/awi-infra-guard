@@ -170,31 +170,6 @@ func (p *providerWithDB) ListInstances(ctx context.Context, params *infrapb.List
 	return providersInstances, nil
 }
 
-func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {
-	dbSubnet, err := p.dbClient.GetSubnet(types.CloudID(p.realProvider.GetName(), params.GetId()))
-	if err != nil {
-		return types.Subnet{}, err
-	}
-	if strings.ToLower(dbSubnet.Provider) != strings.ToLower(p.realProvider.GetName()) {
-		return types.Subnet{}, fmt.Errorf("subnet with ID %s not found", params.GetId())
-	}
-	if params.GetAccountId() != "" && params.GetAccountId() != dbSubnet.AccountID {
-		return types.Subnet{}, fmt.Errorf("subnet with ID %s does not belong to account %s", params.GetId(), params.GetAccountId())
-	}
-
-	if params.GetRegion() != "global" {
-		if params.GetRegion() != "" && params.GetRegion() != dbSubnet.Region {
-			return types.Subnet{}, fmt.Errorf("subnet with ID %s is not in region %s", params.GetId(), params.GetRegion())
-		}
-	}
-
-	if params.GetVpcId() != "" && params.GetVpcId() != dbSubnet.VpcId {
-		return types.Subnet{}, fmt.Errorf("subnet with ID %s does not belong to VPC with ID %s", params.GetId(), params.GetVpcId())
-	}
-
-	return *dbSubnet, nil
-}
-
 func (p *providerWithDB) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsRequest) ([]types.Subnet, error) {
 	dbSubnets, err := p.dbClient.ListSubnets()
 	if err != nil {
@@ -320,6 +295,57 @@ func (p *providerWithDB) ListRouteTables(ctx context.Context, params *infrapb.Li
 		providersRouteTables = append(providersRouteTables, *routeTable)
 	}
 	return providersRouteTables, nil
+}
+
+func (p *providerWithDB) ListNATGateways(ctx context.Context, params *infrapb.ListNATGatewaysRequest) ([]types.NATGateway, error) {
+	dbNATGateways, err := p.dbClient.ListNATGateways()
+	if err != nil {
+		return nil, err
+	}
+	var providerNATGateways []types.NATGateway
+	for _, natGateway := range dbNATGateways {
+		if strings.ToLower(natGateway.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != natGateway.AccountId {
+			continue
+		}
+		//if params.GetRegion() != "global" {
+		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
+		//		continue
+		//	}
+		//}
+		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
+		//	continue
+		//}
+		providerNATGateways = append(providerNATGateways, *natGateway)
+	}
+	return providerNATGateways, nil
+}
+
+func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {
+	dbSubnet, err := p.dbClient.GetSubnet(types.CloudID(p.realProvider.GetName(), params.GetId()))
+	if err != nil {
+		return types.Subnet{}, err
+	}
+	if strings.ToLower(dbSubnet.Provider) != strings.ToLower(p.realProvider.GetName()) {
+		return types.Subnet{}, fmt.Errorf("subnet with ID %s not found", params.GetId())
+	}
+	if params.GetAccountId() != "" && params.GetAccountId() != dbSubnet.AccountID {
+		return types.Subnet{}, fmt.Errorf("subnet with ID %s does not belong to account %s", params.GetId(), params.GetAccountId())
+	}
+
+	if params.GetRegion() != "global" {
+		if params.GetRegion() != "" && params.GetRegion() != dbSubnet.Region {
+			return types.Subnet{}, fmt.Errorf("subnet with ID %s is not in region %s", params.GetId(), params.GetRegion())
+		}
+	}
+
+	if params.GetVpcId() != "" && params.GetVpcId() != dbSubnet.VpcId {
+		return types.Subnet{}, fmt.Errorf("subnet with ID %s does not belong to VPC with ID %s", params.GetId(), params.GetVpcId())
+	}
+
+	return *dbSubnet, nil
 }
 
 func (p *providerWithDB) GetVPCIDForCIDR(ctx context.Context, params *infrapb.GetVPCIDForCIDRRequest) (string, error) {

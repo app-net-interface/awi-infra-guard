@@ -29,6 +29,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
 
 	"github.com/app-net-interface/awi-infra-guard/db"
@@ -156,7 +157,9 @@ func Run() {
 	if err != nil {
 		logger.Fatalf("failed to listen: %v", err)
 	}
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(s.unaryServerInterceptor),
+	)
 	// Register reflection service on gRPC server.
 	reflection.Register(grpcServer)
 
@@ -329,6 +332,31 @@ func (s *Server) ListRouteTables(ctx context.Context, in *infrapb.ListRouteTable
 	return &infrapb.ListRouteTablesResponse{
 		LastSyncTime: t,
 		RouteTables:  typesRouteTableToGrpc(l),
+	}, nil
+}
+
+func (s *Server) ListNATGateways(ctx context.Context, in *infrapb.ListNATGatewaysRequest) (*infrapb.ListNATGatewaysResponse, error) {
+
+	
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	l, err := cloudProvider.ListNATGateways(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failure to retreive NAT GW %s", err.Error())
+		return nil, err
+	}
+	var t string
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.NATGatewayType))
+	if err != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.NATGatewayType, cloudProvider.GetName())
+	} else {
+		t = syncTime.Time
+	}
+	return &infrapb.ListNATGatewaysResponse{
+		LastSyncTime: t,
+		NatGateways:  typesNATGatewaysToGrpc(l),
 	}, nil
 }
 
@@ -575,6 +603,12 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 	if err != nil {
 		return nil, err
 	}
+
+	/* natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{})
+	if err != nil {
+		return nil, err
+	} */
+
 	clusters, err := cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{})
 	if err != nil {
 		return nil, err
@@ -631,10 +665,11 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 			Instances:      int32(len(instances)),
 			Acls:           int32(len(acls)),
 			SecurityGroups: int32(len(sgs)),
-			Clusters:       int32(len(clusters)),
-			Pods:           int32(podsCount),
-			Services:       int32(servicesCount),
-			Namespaces:     int32(namespacesCount),
+			//NATGateways:    int32(len(natGateways)),
+			Clusters:   int32(len(clusters)),
+			Pods:       int32(podsCount),
+			Services:   int32(servicesCount),
+			Namespaces: int32(namespacesCount),
 		},
 		Statuses: &infrapb.StatusSummary{
 			VmStatus:  vmStateSummary,
@@ -764,4 +799,22 @@ func (s *Server) ListServicesCIDRs(ctx context.Context, in *infrapb.ListServices
 		return nil, err
 	}
 	return &infrapb.ListServicesCIDRsResponse{Cidr: cidrs}, nil
+}
+
+// unaryServerInterceptor logs the details of the unary RPC calls
+func (s *Server) unaryServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	p, ok := peer.FromContext(ctx)
+	if ok {
+		s.logger.Infof("Unary Request - Method:%s, Peer:%s\n", info.FullMethod, p.Addr)
+	} else {
+		s.logger.Infof("Unary Request - Method:%s\n", info.FullMethod)
+	}
+
+	// Call the handler to complete the RPC
+	resp, err := handler(ctx, req)
+
+	// Log response
+	s.logger.Infof("Request = %+v \n Unary Response - Method:%s, Response:%v, Error:%v\n", req, info.FullMethod, resp, err)
+
+	return resp, err
 }

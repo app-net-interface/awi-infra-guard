@@ -35,6 +35,8 @@ func NewClient(ctx context.Context, logger *logrus.Logger) (*Client, error) {
 	return client, nil
 }
 
+
+
 func (c *Client) GetName() string {
 	return providerName
 }
@@ -42,7 +44,6 @@ func (c *Client) GetName() string {
 func (c *Client) GetSyncTime(id string) (types.SyncTime, error) {
 	return types.SyncTime{}, nil
 }
-
 
 func (c *Client) GetSubnet(ctx context.Context, input *infrapb.GetSubnetRequest) (types.Subnet, error) {
 	// TBD

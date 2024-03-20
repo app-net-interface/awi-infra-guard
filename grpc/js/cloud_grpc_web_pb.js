@@ -567,6 +567,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listRouteTables =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListNATGatewaysRequest,
+ *   !proto.infra.ListNATGatewaysResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListNATGateways = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListNATGateways',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListNATGatewaysRequest,
+  proto.infra.ListNATGatewaysResponse,
+  /**
+   * @param {!proto.infra.ListNATGatewaysRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListNATGatewaysResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListNATGatewaysRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListNATGatewaysResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListNATGatewaysResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listNATGateways =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListNATGateways',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListNATGateways,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListNATGatewaysRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListNATGatewaysResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listNATGateways =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListNATGateways',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListNATGateways);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.GetVPCIDForCIDRRequest,
  *   !proto.infra.GetVPCIDForCIDRResponse>}
  */

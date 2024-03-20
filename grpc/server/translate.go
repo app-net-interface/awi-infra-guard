@@ -22,6 +22,7 @@ import (
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func grpcProtocolsAndPortToTypes(in map[string]*infrapb.Ports) types.ProtocolsAndPorts {
@@ -90,6 +91,69 @@ func typesVpcsToGrpc(in []types.VPC) []*infrapb.VPC {
 			Provider:     vpc.Provider,
 			AccountId:    vpc.AccountID,
 			LastSyncTime: vpc.LastSyncTime,
+		})
+	}
+	return out
+}
+
+func typesGatewaysToGrpc(in []types.Gateway) []*infrapb.Gateway {
+	out := make([]*infrapb.Gateway, 0, len(in))
+	for _, gateway := range in {
+		out = append(out, &infrapb.Gateway{
+			Id:           gateway.ID,
+			Name:         gateway.Name,
+			Provider:     gateway.Provider,
+			Region:       gateway.Region,
+			State:        gateway.State,
+			Labels:       gateway.Labels,
+			AccountId:    gateway.AccountId,
+			LastSyncTime: gateway.LastSyncTime,
+		})
+	}
+	return out
+}
+
+/*
+type NATGateway struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id                   string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name                 string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Provider             string                 `protobuf:"bytes,3,opt,name=provider,proto3" json:"provider,omitempty"`
+	AccountId            string                 `protobuf:"bytes,4,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	VpcId                string                 `protobuf:"bytes,5,opt,name=vpc_id,json=vpcId,proto3" json:"vpc_id,omitempty"`
+	Region               string                 `protobuf:"bytes,6,opt,name=region,proto3" json:"region,omitempty"`
+	State                string                 `protobuf:"bytes,7,opt,name=state,proto3" json:"state,omitempty"`
+	PublicIp             string                 `protobuf:"bytes,8,opt,name=public_ip,json=publicIp,proto3" json:"public_ip,omitempty"`
+	PrivateIp            string                 `protobuf:"bytes,9,opt,name=private_ip,json=privateIp,proto3" json:"private_ip,omitempty"`
+	SubnetId             string                 `protobuf:"bytes,10,opt,name=subnet_id,json=subnetId,proto3" json:"subnet_id,omitempty"`
+	Labels               map[string]string      `protobuf:"bytes,11,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt            *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt            *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	LastSyncTime         string                 `protobuf:"bytes,14,opt,name=last_sync_time,json=lastSyncTime,proto3" json:"last_sync_time,omitempty"`
+	AdditionalProperties map[string]string      `protobuf:"bytes,15,rep,name=additional_properties,json=additionalProperties,proto3" json:"additional_properties,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+*/
+
+func typesNATGatewaysToGrpc(in []types.NATGateway) []*infrapb.NATGateway {
+	out := make([]*infrapb.NATGateway, 0, len(in))
+	for _, gateway := range in {
+		out = append(out, &infrapb.NATGateway{
+			Id:           gateway.ID,
+			Name:         gateway.Name,
+			Provider:     gateway.Provider,
+			VpcId:        gateway.VpcId,
+			Region:       gateway.Region,
+			State:        gateway.State,
+			Labels:       gateway.Labels,
+			AccountId:    gateway.AccountId,
+			PublicIp:     gateway.PublicIp,
+			PrivateIp:    gateway.PrivateIp,
+			SubnetId:     gateway.SubnetId,
+			CreatedAt:    timestamppb.New(gateway.CreatedAt),
+			LastSyncTime: gateway.LastSyncTime,
 		})
 	}
 	return out

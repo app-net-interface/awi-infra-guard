@@ -48,20 +48,24 @@ type Syncer struct {
 
 func (s *Syncer) Sync() {
 
-	// Cloud Infrastructure
-	s.syncVPC()
-	s.syncInstances()
-	s.syncSubnets()
-	s.syncRouteTables()
-	s.syncACLs()
-	s.syncSecurityGroups()
+	s.syncNATGateways()
 
-	// Kubernetes
-	s.syncClusters()
-	s.syncPods()
-	s.syncNamespaces()
-	s.syncK8SSsNodes()
-	s.syncK8SServices()
+	// Cloud Infrastructure
+	/*
+		s.syncVPC()
+		s.syncInstances()
+		s.syncSubnets()
+		s.syncRouteTables()
+		s.syncACLs()
+		s.syncSecurityGroups()
+
+		// Kubernetes
+		s.syncClusters()
+		s.syncPods()
+		s.syncNamespaces()
+		s.syncK8SSsNodes()
+		s.syncK8SServices()
+	*/
 
 }
 
@@ -113,6 +117,12 @@ func (s *Syncer) syncRouteTables() {
 	genericCloudSync[*types.RouteTable](s, types.RouteTableType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.RouteTable, error) {
 		return cloudProvider.ListRouteTables(ctx, &infrapb.ListRouteTablesRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListRouteTables, s.dbClient.PutRouteTable, s.dbClient.DeleteRouteTable)
+}
+
+func (s *Syncer) syncNATGateways() {
+	genericCloudSync[*types.NATGateway](s, types.NATGatewayType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.NATGateway, error) {
+		return cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListNATGateways, s.dbClient.PutNATGateway, s.dbClient.DeleteNATGateway)
 }
 
 func (s *Syncer) syncClusters() {

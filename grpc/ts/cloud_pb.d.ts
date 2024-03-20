@@ -319,6 +319,114 @@ export namespace ListRouteTablesResponse {
   }
 }
 
+export class ListNATGatewaysRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListNATGatewaysRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListNATGatewaysRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListNATGatewaysRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListNATGatewaysRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListNATGatewaysRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListNATGatewaysRequest): ListNATGatewaysRequest.AsObject;
+  static serializeBinaryToWriter(message: ListNATGatewaysRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListNATGatewaysRequest;
+  static deserializeBinaryFromReader(message: ListNATGatewaysRequest, reader: jspb.BinaryReader): ListNATGatewaysRequest;
+}
+
+export namespace ListNATGatewaysRequest {
+  export type AsObject = {
+    provider: string,
+    vpcId: string,
+    region: string,
+    accountId: string,
+  }
+}
+
+export class ListNATGatewaysResponse extends jspb.Message {
+  getNatGatewaysList(): Array<types_pb.NATGateway>;
+  setNatGatewaysList(value: Array<types_pb.NATGateway>): ListNATGatewaysResponse;
+  clearNatGatewaysList(): ListNATGatewaysResponse;
+  addNatGateways(value?: types_pb.NATGateway, index?: number): types_pb.NATGateway;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListNATGatewaysResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListNATGatewaysResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListNATGatewaysResponse): ListNATGatewaysResponse.AsObject;
+  static serializeBinaryToWriter(message: ListNATGatewaysResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListNATGatewaysResponse;
+  static deserializeBinaryFromReader(message: ListNATGatewaysResponse, reader: jspb.BinaryReader): ListNATGatewaysResponse;
+}
+
+export namespace ListNATGatewaysResponse {
+  export type AsObject = {
+    natGatewaysList: Array<types_pb.NATGateway.AsObject>,
+    lastSyncTime: string,
+  }
+}
+
+export class ListGatewaysRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListGatewaysRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListGatewaysRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListGatewaysRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListGatewaysRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListGatewaysRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListGatewaysRequest): ListGatewaysRequest.AsObject;
+  static serializeBinaryToWriter(message: ListGatewaysRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListGatewaysRequest;
+  static deserializeBinaryFromReader(message: ListGatewaysRequest, reader: jspb.BinaryReader): ListGatewaysRequest;
+}
+
+export namespace ListGatewaysRequest {
+  export type AsObject = {
+    provider: string,
+    vpcId: string,
+    region: string,
+    accountId: string,
+  }
+}
+
+export class ListGatewaysResponse extends jspb.Message {
+  getGatewayList(): Array<types_pb.Gateway>;
+  setGatewayList(value: Array<types_pb.Gateway>): ListGatewaysResponse;
+  clearGatewayList(): ListGatewaysResponse;
+  addGateway(value?: types_pb.Gateway, index?: number): types_pb.Gateway;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListGatewaysResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListGatewaysResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListGatewaysResponse): ListGatewaysResponse.AsObject;
+  static serializeBinaryToWriter(message: ListGatewaysResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListGatewaysResponse;
+  static deserializeBinaryFromReader(message: ListGatewaysResponse, reader: jspb.BinaryReader): ListGatewaysResponse;
+}
+
+export namespace ListGatewaysResponse {
+  export type AsObject = {
+    gatewayList: Array<types_pb.Gateway.AsObject>,
+    lastSyncTime: string,
+  }
+}
+
 export class GetSubnetRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetSubnetRequest;
@@ -803,6 +911,9 @@ export class Counters extends jspb.Message {
   getSecurityGroups(): number;
   setSecurityGroups(value: number): Counters;
 
+  getNatGateways(): number;
+  setNatGateways(value: number): Counters;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Counters.AsObject;
   static toObject(includeInstance: boolean, msg: Counters): Counters.AsObject;
@@ -824,6 +935,7 @@ export namespace Counters {
     namespaces: number,
     acls: number,
     securityGroups: number,
+    natGateways: number,
   }
 }
 

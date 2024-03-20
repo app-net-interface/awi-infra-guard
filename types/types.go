@@ -20,6 +20,7 @@ package types
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	v1 "k8s.io/api/core/v1"
 )
@@ -38,6 +39,7 @@ const (
 	ACLType           = "ACL"
 	SecurityGroupType = "SecurityGroup"
 	RouteTableType    = "RouteTable"
+	NATGatewayType    = "NATGateway"
 	ClusterType       = "Cluster"
 	PodsType          = "Pod"
 	K8sServiceType    = "K8sService"
@@ -281,6 +283,57 @@ type Route struct {
 	Target      string
 	NextHopType string
 	NextHopIP   string
+}
+
+// CloudGateway represents a generic cloud gateway with various attributes.
+type Gateway struct {
+	ID                   string            `json:"id"`
+	AccountId            string            `json:"account_id,omitempty"`
+	Name                 string            `json:"name"`
+	Provider             string            `json:"provider"`
+	Region               string            `json:"region"`
+	State                string            `json:"state"`
+	ASN                  uint32            `json:"asn"`
+	CIDRBlock            string            `json:"cidr_block"`
+	StaticRoutes         []string          `json:"static_routes"` // Could be a list of CIDR blocks
+	VPNType              string            `json:"vpn_type"`
+	SecurityGroupIDs     []string          `json:"security_group_ids"` // Security groups or ACLs IDs
+	Bandwidth            uint32            `json:"bandwidth"`          // In Mbps
+	Labels               map[string]string `json:"labels"`
+	CreatedAt            time.Time         `json:"created_at"`
+	UpdatedAt            time.Time         `json:"updated_at"`
+	AdditionalProperties map[string]string `json:"additional_properties"`
+	LastSyncTime         string            `json:"last_sync_time"`
+}
+
+type NATGateway struct {
+	ID                   string
+	Name                 string            `json:"name,omitempty"`
+	Provider             string            `json:"provider,omitempty"`
+	AccountId            string            `json:"account_id,omitempty"`
+	VpcId                string            `json:"vpc_id,omitempty"`
+	Region               string            `json:"region,omitempty"`
+	State                string            `json:"state,omitempty"`
+	PublicIp             string            `json:"public_ip,omitempty"`
+	PrivateIp            string            `json:"private_ip,omitempty"`
+	SubnetId             string            `json:"subnet_id,omitempty"`
+	Labels               map[string]string `json:"labels,omitempty"`
+	CreatedAt            time.Time         `json:"created_at,omitempty"`
+	UpdatedAt            time.Time         `json:"updated_at,omitempty"`
+	LastSyncTime         string            `json:"last_sync_time,omitempty"`
+	AdditionalProperties map[string]string `json:"additional_properties,omitempty"`
+}
+
+func (v *NATGateway) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *NATGateway) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *NATGateway) GetProvider() string {
+	return v.Provider
 }
 
 type SecurityGroup struct {

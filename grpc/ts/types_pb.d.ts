@@ -1,5 +1,6 @@
 import * as jspb from 'google-protobuf'
 
+import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
 
 
 export class Instance extends jspb.Message {
@@ -702,5 +703,173 @@ export namespace RouteTable {
     }
   }
 
+}
+
+export class Gateway extends jspb.Message {
+  getId(): string;
+  setId(value: string): Gateway;
+
+  getName(): string;
+  setName(value: string): Gateway;
+
+  getProvider(): string;
+  setProvider(value: string): Gateway;
+
+  getRegion(): string;
+  setRegion(value: string): Gateway;
+
+  getState(): string;
+  setState(value: string): Gateway;
+
+  getAsn(): number;
+  setAsn(value: number): Gateway;
+
+  getCidrBlock(): string;
+  setCidrBlock(value: string): Gateway;
+
+  getStaticRoutesList(): Array<string>;
+  setStaticRoutesList(value: Array<string>): Gateway;
+  clearStaticRoutesList(): Gateway;
+  addStaticRoutes(value: string, index?: number): Gateway;
+
+  getVpnType(): string;
+  setVpnType(value: string): Gateway;
+
+  getSecurityGroupIdsList(): Array<string>;
+  setSecurityGroupIdsList(value: Array<string>): Gateway;
+  clearSecurityGroupIdsList(): Gateway;
+  addSecurityGroupIds(value: string, index?: number): Gateway;
+
+  getBandwidth(): number;
+  setBandwidth(value: number): Gateway;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): Gateway;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Gateway;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): Gateway;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Gateway;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): Gateway;
+
+  getAccountId(): string;
+  setAccountId(value: string): Gateway;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Gateway;
+
+  getAdditionalPropertiesMap(): jspb.Map<string, string>;
+  clearAdditionalPropertiesMap(): Gateway;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Gateway.AsObject;
+  static toObject(includeInstance: boolean, msg: Gateway): Gateway.AsObject;
+  static serializeBinaryToWriter(message: Gateway, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Gateway;
+  static deserializeBinaryFromReader(message: Gateway, reader: jspb.BinaryReader): Gateway;
+}
+
+export namespace Gateway {
+  export type AsObject = {
+    id: string,
+    name: string,
+    provider: string,
+    region: string,
+    state: string,
+    asn: number,
+    cidrBlock: string,
+    staticRoutesList: Array<string>,
+    vpnType: string,
+    securityGroupIdsList: Array<string>,
+    bandwidth: number,
+    labelsMap: Array<[string, string]>,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    accountId: string,
+    lastSyncTime: string,
+    additionalPropertiesMap: Array<[string, string]>,
+  }
+}
+
+export class NATGateway extends jspb.Message {
+  getId(): string;
+  setId(value: string): NATGateway;
+
+  getName(): string;
+  setName(value: string): NATGateway;
+
+  getProvider(): string;
+  setProvider(value: string): NATGateway;
+
+  getAccountId(): string;
+  setAccountId(value: string): NATGateway;
+
+  getVpcId(): string;
+  setVpcId(value: string): NATGateway;
+
+  getRegion(): string;
+  setRegion(value: string): NATGateway;
+
+  getState(): string;
+  setState(value: string): NATGateway;
+
+  getPublicIp(): string;
+  setPublicIp(value: string): NATGateway;
+
+  getPrivateIp(): string;
+  setPrivateIp(value: string): NATGateway;
+
+  getSubnetId(): string;
+  setSubnetId(value: string): NATGateway;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): NATGateway;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): NATGateway;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): NATGateway;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): NATGateway;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): NATGateway;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): NATGateway;
+
+  getAdditionalPropertiesMap(): jspb.Map<string, string>;
+  clearAdditionalPropertiesMap(): NATGateway;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): NATGateway.AsObject;
+  static toObject(includeInstance: boolean, msg: NATGateway): NATGateway.AsObject;
+  static serializeBinaryToWriter(message: NATGateway, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): NATGateway;
+  static deserializeBinaryFromReader(message: NATGateway, reader: jspb.BinaryReader): NATGateway;
+}
+
+export namespace NATGateway {
+  export type AsObject = {
+    id: string,
+    name: string,
+    provider: string,
+    accountId: string,
+    vpcId: string,
+    region: string,
+    state: string,
+    publicIp: string,
+    privateIp: string,
+    subnetId: string,
+    labelsMap: Array<[string, string]>,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    lastSyncTime: string,
+    additionalPropertiesMap: Array<[string, string]>,
+  }
 }
 

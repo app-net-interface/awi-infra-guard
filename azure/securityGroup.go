@@ -21,7 +21,7 @@ func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecu
 			vNetName = parts[len(parts)-1]
 		}
 	}
-	//c.logger.Infof("Retrieving security groups for account %s and VPC %s", input.AccountId, vNetName)
+	c.logger.Debugf("Retrieving security groups for account %s and VPC %s", input.AccountId, vNetName)
 	vmClient, err := armcompute.NewVirtualMachinesClient(input.AccountId, c.cred, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create VM client: %w", err)
@@ -62,15 +62,21 @@ func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecu
 					// Extract VNet ID from the subnet ID
 					subnetID := *ipConf.Properties.Subnet.ID
 					vNetID := extractVNetIDFromSubnetID(subnetID)
+
+					var region string
+					if nic.Interface.Properties.NetworkSecurityGroup.Location != nil {
+						region = *nic.Interface.Properties.NetworkSecurityGroup.Location
+					}
+
 					//c.logger.Debugf("Azure security group %+v", nic.Interface.Properties.NetworkSecurityGroup)
 					secGroup := types.SecurityGroup{
 
 						ID: *nic.Interface.Properties.NetworkSecurityGroup.ID,
 						// Azure bug: NSG has a name in JSON but , not in the structure.
-						Name:      parseResourceName(*nic.Interface.Properties.NetworkSecurityGroup.ID),
-						VpcID:     vNetID,
+						Name:  parseResourceName(*nic.Interface.Properties.NetworkSecurityGroup.ID),
+						VpcID: vNetID,
 						//Labels:    convertToStringMap(nic.Interface.Properties.NetworkSecurityGroup.Tags),
-						//Region:    *nic.Interface.Properties.NetworkSecurityGroup.Location,
+						Region:    region,
 						Provider:  c.GetName(),
 						AccountID: input.AccountId,
 					}

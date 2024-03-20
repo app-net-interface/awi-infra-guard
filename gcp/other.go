@@ -27,3 +27,4 @@ import (
 func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecurityGroupsRequest) ([]types.SecurityGroup, error) {
 	return nil, nil
 }
+

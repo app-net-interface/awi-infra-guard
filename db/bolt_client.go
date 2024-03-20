@@ -199,6 +199,23 @@ func (client *boltClient) DeleteRouteTable(id string) error {
 	return delete_(client, id, routeTableTable)
 }
 
+// NAT Gateway
+func (client *boltClient) PutNATGateway(ng *types.NATGateway) error {
+	return update(client, ng, ng.DbId(), ngTable)
+}
+
+func (client *boltClient) GetNATGateway(id string) (*types.NATGateway, error) {
+	return get[types.NATGateway](client, id, ngTable)
+}
+
+func (client *boltClient) ListNATGateways() ([]*types.NATGateway, error) {
+	return list[types.NATGateway](client, ngTable)
+}
+
+func (client *boltClient) DeleteNATGateway(id string) error {
+	return delete_(client, id, ngTable)
+}
+
 // SecurityGroup
 func (client *boltClient) PutSecurityGroup(securityGroup *types.SecurityGroup) error {
 	return update(client, securityGroup, securityGroup.DbId(), securityGroupTable)

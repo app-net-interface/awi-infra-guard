@@ -32,6 +32,7 @@ const (
 	routeTableTable        = "route_tables"
 	aclTable               = "acls"
 	securityGroupTable     = "security_groups"
+	ngTable                = "nat_gateways"
 	syncTimeTable          = "sync_time"
 )
 
@@ -46,6 +47,7 @@ var tableNames = []string{
 	namespaceTable,
 	accountTable,
 	routeTableTable,
+	ngTable,
 	aclTable,
 	securityGroupTable,
 	syncTimeTable,
@@ -61,26 +63,38 @@ type Client interface {
 	Open(filename string) error
 	Close() error
 	DropDB() error
+	// VPC
 	PutVPC(vpc *types.VPC) error
 	GetVPC(id string) (*types.VPC, error)
 	ListVPCs() ([]*types.VPC, error)
 	DeleteVPC(id string) error
+	// Instance
 	PutInstance(instance *types.Instance) error
 	GetInstance(id string) (*types.Instance, error)
 	ListInstances() ([]*types.Instance, error)
 	DeleteInstance(id string) error
+	//Subnet
 	PutSubnet(subnet *types.Subnet) error
 	GetSubnet(id string) (*types.Subnet, error)
 	ListSubnets() ([]*types.Subnet, error)
 	DeleteSubnet(id string) error
+	//ACL
 	PutACL(acl *types.ACL) error
 	GetACL(id string) (*types.ACL, error)
 	ListACLs() ([]*types.ACL, error)
 	DeleteACL(id string) error
+	// RouteTable
 	PutRouteTable(routeTable *types.RouteTable) error
 	GetRouteTable(id string) (*types.RouteTable, error)
 	ListRouteTables() ([]*types.RouteTable, error)
 	DeleteRouteTable(id string) error
+
+	// NAT Gatweay
+	ListNATGateways() ([]*types.NATGateway, error)
+	PutNATGateway(ng *types.NATGateway) error
+	GetNATGateway(id string) (*types.NATGateway, error)
+	DeleteNATGateway(id string) error
+
 	PutSecurityGroup(securityGroup *types.SecurityGroup) error
 	GetSecurityGroup(id string) (*types.SecurityGroup, error)
 	ListSecurityGroups() ([]*types.SecurityGroup, error)
