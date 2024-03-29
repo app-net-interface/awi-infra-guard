@@ -1,3 +1,22 @@
+/**
+ * Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http:www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import * as jspb from 'google-protobuf'
 
 import * as types_pb from './types_pb';
@@ -373,28 +392,28 @@ export namespace ListNATGatewaysResponse {
   }
 }
 
-export class ListGatewaysRequest extends jspb.Message {
+export class ListRoutersRequest extends jspb.Message {
   getProvider(): string;
-  setProvider(value: string): ListGatewaysRequest;
+  setProvider(value: string): ListRoutersRequest;
 
   getVpcId(): string;
-  setVpcId(value: string): ListGatewaysRequest;
+  setVpcId(value: string): ListRoutersRequest;
 
   getRegion(): string;
-  setRegion(value: string): ListGatewaysRequest;
+  setRegion(value: string): ListRoutersRequest;
 
   getAccountId(): string;
-  setAccountId(value: string): ListGatewaysRequest;
+  setAccountId(value: string): ListRoutersRequest;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ListGatewaysRequest.AsObject;
-  static toObject(includeInstance: boolean, msg: ListGatewaysRequest): ListGatewaysRequest.AsObject;
-  static serializeBinaryToWriter(message: ListGatewaysRequest, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ListGatewaysRequest;
-  static deserializeBinaryFromReader(message: ListGatewaysRequest, reader: jspb.BinaryReader): ListGatewaysRequest;
+  toObject(includeInstance?: boolean): ListRoutersRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListRoutersRequest): ListRoutersRequest.AsObject;
+  static serializeBinaryToWriter(message: ListRoutersRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListRoutersRequest;
+  static deserializeBinaryFromReader(message: ListRoutersRequest, reader: jspb.BinaryReader): ListRoutersRequest;
 }
 
-export namespace ListGatewaysRequest {
+export namespace ListRoutersRequest {
   export type AsObject = {
     provider: string,
     vpcId: string,
@@ -403,26 +422,26 @@ export namespace ListGatewaysRequest {
   }
 }
 
-export class ListGatewaysResponse extends jspb.Message {
-  getGatewayList(): Array<types_pb.Gateway>;
-  setGatewayList(value: Array<types_pb.Gateway>): ListGatewaysResponse;
-  clearGatewayList(): ListGatewaysResponse;
-  addGateway(value?: types_pb.Gateway, index?: number): types_pb.Gateway;
+export class ListRoutersResponse extends jspb.Message {
+  getRoutersList(): Array<types_pb.Router>;
+  setRoutersList(value: Array<types_pb.Router>): ListRoutersResponse;
+  clearRoutersList(): ListRoutersResponse;
+  addRouters(value?: types_pb.Router, index?: number): types_pb.Router;
 
   getLastSyncTime(): string;
-  setLastSyncTime(value: string): ListGatewaysResponse;
+  setLastSyncTime(value: string): ListRoutersResponse;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ListGatewaysResponse.AsObject;
-  static toObject(includeInstance: boolean, msg: ListGatewaysResponse): ListGatewaysResponse.AsObject;
-  static serializeBinaryToWriter(message: ListGatewaysResponse, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ListGatewaysResponse;
-  static deserializeBinaryFromReader(message: ListGatewaysResponse, reader: jspb.BinaryReader): ListGatewaysResponse;
+  toObject(includeInstance?: boolean): ListRoutersResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListRoutersResponse): ListRoutersResponse.AsObject;
+  static serializeBinaryToWriter(message: ListRoutersResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListRoutersResponse;
+  static deserializeBinaryFromReader(message: ListRoutersResponse, reader: jspb.BinaryReader): ListRoutersResponse;
 }
 
-export namespace ListGatewaysResponse {
+export namespace ListRoutersResponse {
   export type AsObject = {
-    gatewayList: Array<types_pb.Gateway.AsObject>,
+    routersList: Array<types_pb.Router.AsObject>,
     lastSyncTime: string,
   }
 }

@@ -628,6 +628,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listNATGateways =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListRoutersRequest,
+ *   !proto.infra.ListRoutersResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListRouters = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListRouters',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListRoutersRequest,
+  proto.infra.ListRoutersResponse,
+  /**
+   * @param {!proto.infra.ListRoutersRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListRoutersResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListRoutersRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListRoutersResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListRoutersResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listRouters =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListRouters',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListRouters,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListRoutersRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListRoutersResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listRouters =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListRouters',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListRouters);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.GetVPCIDForCIDRRequest,
  *   !proto.infra.GetVPCIDForCIDRResponse>}
  */

@@ -47,23 +47,22 @@ type Syncer struct {
 }
 
 func (s *Syncer) Sync() {
+		//Cloud Infrastructure
+		s.syncVPC()
+		s.syncInstances()
+		s.syncSubnets()
+		s.syncRouteTables()
+		s.syncACLs()
+		s.syncSecurityGroups()
+		s.syncNATGateways()
+		s.syncRouters()
 
-	// Cloud Infrastructure
-	s.syncVPC()
-	s.syncInstances()
-	s.syncSubnets()
-	s.syncRouteTables()
-	s.syncACLs()
-	s.syncSecurityGroups()
-	s.syncNATGateways()
-
-	// Kubernetes
-	s.syncClusters()
-	s.syncPods()
-	s.syncNamespaces()
-	s.syncK8SSsNodes()
-	s.syncK8SServices()
-
+		// Kubernetes
+		s.syncClusters()
+		s.syncPods()
+		s.syncNamespaces()
+		s.syncK8SSsNodes()
+		s.syncK8SServices()
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
@@ -122,6 +121,13 @@ func (s *Syncer) syncNATGateways() {
 	}, s.logger, s.dbClient.ListNATGateways, s.dbClient.PutNATGateway, s.dbClient.DeleteNATGateway)
 }
 
+func (s *Syncer) syncRouters() {
+	genericCloudSync[*types.Router](s, types.RouterType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Router, error) {
+		
+		return cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListRouters, s.dbClient.PutRouter, s.dbClient.DeleteRouter)
+}
+
 func (s *Syncer) syncClusters() {
 	genericCloudSync[*types.Cluster](s, types.ClusterType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Cluster, error) {
 		return cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{AccountId: accountID})
@@ -172,7 +178,7 @@ func genericCloudSync[P interface {
 		t := time.Now().UTC().Format(time.RFC3339)
 		ok := false
 		for _, account := range cloudProvider.ListAccounts() {
-			//s.logger.Infof("Syncing instances in account %s and provider %s", account.ID, cloudProvider.GetName())
+			s.logger.Infof("Found account %s and provider %s", account.ID, cloudProvider.GetName())
 			remoteObjs, err := listF(ctx, cloudProvider, account.ID)
 			if err != nil {
 				s.logger.Errorf("Sync error: failed to List %s in provider %s: %v",

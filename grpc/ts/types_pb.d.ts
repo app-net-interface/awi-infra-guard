@@ -1,3 +1,22 @@
+/**
+ * Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http:www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import * as jspb from 'google-protobuf'
 
 import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
@@ -705,87 +724,83 @@ export namespace RouteTable {
 
 }
 
-export class Gateway extends jspb.Message {
+export class Router extends jspb.Message {
   getId(): string;
-  setId(value: string): Gateway;
+  setId(value: string): Router;
 
   getName(): string;
-  setName(value: string): Gateway;
+  setName(value: string): Router;
 
   getProvider(): string;
-  setProvider(value: string): Gateway;
+  setProvider(value: string): Router;
 
   getRegion(): string;
-  setRegion(value: string): Gateway;
+  setRegion(value: string): Router;
+
+  getVpcId(): string;
+  setVpcId(value: string): Router;
 
   getState(): string;
-  setState(value: string): Gateway;
+  setState(value: string): Router;
 
   getAsn(): number;
-  setAsn(value: number): Gateway;
+  setAsn(value: number): Router;
 
-  getCidrBlock(): string;
-  setCidrBlock(value: string): Gateway;
+  getAdvertisedRange(): string;
+  setAdvertisedRange(value: string): Router;
 
-  getStaticRoutesList(): Array<string>;
-  setStaticRoutesList(value: Array<string>): Gateway;
-  clearStaticRoutesList(): Gateway;
-  addStaticRoutes(value: string, index?: number): Gateway;
+  getAdvertisedGroup(): string;
+  setAdvertisedGroup(value: string): Router;
 
   getVpnType(): string;
-  setVpnType(value: string): Gateway;
+  setVpnType(value: string): Router;
 
-  getSecurityGroupIdsList(): Array<string>;
-  setSecurityGroupIdsList(value: Array<string>): Gateway;
-  clearSecurityGroupIdsList(): Gateway;
-  addSecurityGroupIds(value: string, index?: number): Gateway;
-
-  getBandwidth(): number;
-  setBandwidth(value: number): Gateway;
+  getSubnetId(): string;
+  setSubnetId(value: string): Router;
 
   getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): Gateway;
+  clearLabelsMap(): Router;
 
   getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
-  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Gateway;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Router;
   hasCreatedAt(): boolean;
-  clearCreatedAt(): Gateway;
+  clearCreatedAt(): Router;
 
   getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
-  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Gateway;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Router;
   hasUpdatedAt(): boolean;
-  clearUpdatedAt(): Gateway;
+  clearUpdatedAt(): Router;
 
   getAccountId(): string;
-  setAccountId(value: string): Gateway;
+  setAccountId(value: string): Router;
 
   getLastSyncTime(): string;
-  setLastSyncTime(value: string): Gateway;
+  setLastSyncTime(value: string): Router;
 
   getAdditionalPropertiesMap(): jspb.Map<string, string>;
-  clearAdditionalPropertiesMap(): Gateway;
+  clearAdditionalPropertiesMap(): Router;
 
   serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Gateway.AsObject;
-  static toObject(includeInstance: boolean, msg: Gateway): Gateway.AsObject;
-  static serializeBinaryToWriter(message: Gateway, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Gateway;
-  static deserializeBinaryFromReader(message: Gateway, reader: jspb.BinaryReader): Gateway;
+  toObject(includeInstance?: boolean): Router.AsObject;
+  static toObject(includeInstance: boolean, msg: Router): Router.AsObject;
+  static serializeBinaryToWriter(message: Router, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Router;
+  static deserializeBinaryFromReader(message: Router, reader: jspb.BinaryReader): Router;
 }
 
-export namespace Gateway {
+export namespace Router {
   export type AsObject = {
     id: string,
     name: string,
     provider: string,
     region: string,
+    vpcId: string,
     state: string,
     asn: number,
-    cidrBlock: string,
-    staticRoutesList: Array<string>,
+    advertisedRange: string,
+    advertisedGroup: string,
     vpnType: string,
-    securityGroupIdsList: Array<string>,
-    bandwidth: number,
+    subnetId: string,
     labelsMap: Array<[string, string]>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,

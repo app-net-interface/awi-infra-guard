@@ -34,6 +34,7 @@ import (
 // We should use the one that has AWI tag, and if there are multiple transit gateway with AWI tag,
 // let's use the first one in the list
 func (c *Client) createTransitGateway(ctx context.Context, account, region string) (*string, error) {
+	c.logger.Infof("Creating a new TGW in account %s and for region %s", account, region)
 	tgwID, err := c.findTransitGatewayByName(ctx, transitGatewayName, account, region)
 	if err != nil && err != NotFoundError {
 		return nil, err

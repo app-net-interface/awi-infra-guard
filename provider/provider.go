@@ -57,6 +57,8 @@ type CloudProvider interface {
 	ListSecurityGroups(ctx context.Context, input *infrapb.ListSecurityGroupsRequest) ([]types.SecurityGroup, error)
 	ListRouteTables(ctx context.Context, input *infrapb.ListRouteTablesRequest) ([]types.RouteTable, error)
 	ListNATGateways(ctx context.Context, input *infrapb.ListNATGatewaysRequest) ([]types.NATGateway, error)
+	ListRouters(ctx context.Context, input *infrapb.ListRoutersRequest) ([]types.Router, error)
+
 
 	// GetSubnet returns single subnet based on it's ID
 	GetSubnet(ctx context.Context, input *infrapb.GetSubnetRequest) (types.Subnet, error)

@@ -426,6 +426,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListNATGateways);
   }
 
+  methodDescriptorListRouters = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListRouters',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListRoutersRequest,
+    cloud_pb.ListRoutersResponse,
+    (request: cloud_pb.ListRoutersRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListRoutersResponse.deserializeBinary
+  );
+
+  listRouters(
+    request: cloud_pb.ListRoutersRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListRoutersResponse>;
+
+  listRouters(
+    request: cloud_pb.ListRoutersRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListRoutersResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListRoutersResponse>;
+
+  listRouters(
+    request: cloud_pb.ListRoutersRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListRoutersResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListRouters',
+        request,
+        metadata || {},
+        this.methodDescriptorListRouters,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListRouters',
+    request,
+    metadata || {},
+    this.methodDescriptorListRouters);
+  }
+
   methodDescriptorGetVPCIDForCIDR = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/GetVPCIDForCIDR',
     grpcWeb.MethodType.UNARY,

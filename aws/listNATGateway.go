@@ -36,6 +36,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 	})
 	if err != nil {
 		c.logger.Errorf("Unable to describe regions, %v", err)
+		return natGateways, err
 	}
 	for _, region := range regionResult.Regions {
 		c.logger.Debugf("Listing NAT Gateways for AWS account %s and region %s ", params.AccountId, *region.RegionName)
@@ -48,7 +49,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 		}
 
 		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
-		ngs, err := c.listNATGateways(ec2RegionalClient, *region.RegionName)
+		ngs, err := c.ListNATGatewaysInRegion(ec2RegionalClient, *region.RegionName)
 		if err != nil {
 			c.logger.Errorf("Error listing NAT Gateways in region %s: %v", *region.RegionName, err)
 			continue
@@ -67,7 +68,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 	return natGateways, err
 }
 
-func (c *Client) listNATGateways(client *ec2.Client, region string) ([]types.NATGateway, error) {
+func (c *Client) ListNATGatewaysInRegion(client *ec2.Client, region string) ([]types.NATGateway, error) {
 	var natGateways []types.NATGateway
 	paginator := ec2.NewDescribeNatGatewaysPaginator(client, &ec2.DescribeNatGatewaysInput{})
 

@@ -323,6 +323,32 @@ func (p *providerWithDB) ListNATGateways(ctx context.Context, params *infrapb.Li
 	return providerNATGateways, nil
 }
 
+func (p *providerWithDB) ListRouters(ctx context.Context, params *infrapb.ListRoutersRequest) ([]types.Router, error) {
+	dbRouters, err := p.dbClient.ListRouters()
+	if err != nil {
+		return nil, err
+	}
+	var providerRouters []types.Router
+	for _, router := range dbRouters {
+		if strings.ToLower(router.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != router.AccountId {
+			continue
+		}
+		//if params.GetRegion() != "global" {
+		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
+		//		continue
+		//	}
+		//}
+		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
+		//	continue
+		//}
+		providerRouters = append(providerRouters, *router)
+	}
+	return providerRouters, nil
+}
+
 func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {
 	dbSubnet, err := p.dbClient.GetSubnet(types.CloudID(p.realProvider.GetName(), params.GetId()))
 	if err != nil {

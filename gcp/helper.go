@@ -15,11 +15,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package aws
+package gcp
 
-func convertString(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
+import "strings"
+
+// Helper function to extract the last segment of a resource URL, typically the ID or name.
+func extractResourceID(url string) string {
+	parts := strings.Split(url, "/")
+	return parts[len(parts)-1]
 }

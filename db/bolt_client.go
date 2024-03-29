@@ -18,7 +18,6 @@
 package db
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -69,67 +68,6 @@ func (client *boltClient) DropDB() error {
 		}
 		return nil
 	})
-}
-
-func delete_(client *boltClient, id, tableName string) error {
-	return client.db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(tableName))
-		return bucket.Delete([]byte(id))
-	})
-}
-
-func update[T any](client *boltClient, t T, id, tableName string) error {
-	data, err := json.Marshal(t)
-	if err != nil {
-		return err
-	}
-	return client.db.Update(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(tableName))
-
-		if err := bucket.Put([]byte(id), data); err != nil {
-			return err
-		}
-		return nil
-	})
-}
-
-func get[T any](client *boltClient, id, tableName string) (*T, error) {
-	var data []byte
-	if err := client.db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(tableName))
-		data = bucket.Get([]byte(id))
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	if data == nil {
-		return nil, nil
-	}
-	var t T
-	if err := json.Unmarshal(data, &t); err != nil {
-		return nil, err
-	}
-
-	return &t, nil
-}
-
-func list[T any](client *boltClient, tableName string) ([]*T, error) {
-	var ts []*T
-	if err := client.db.View(func(tx *bolt.Tx) error {
-		bucket := tx.Bucket([]byte(tableName))
-		return bucket.ForEach(func(k, v []byte) error {
-			var t T
-			if err := json.Unmarshal(v, &t); err != nil {
-				return err
-			}
-			ts = append(ts, &t)
-			return nil
-		})
-	}); err != nil {
-		return nil, err
-	}
-
-	return ts, nil
 }
 
 func (client *boltClient) PutVPC(vpc *types.VPC) error {
@@ -214,6 +152,23 @@ func (client *boltClient) ListNATGateways() ([]*types.NATGateway, error) {
 
 func (client *boltClient) DeleteNATGateway(id string) error {
 	return delete_(client, id, ngTable)
+}
+
+// Router
+func (client *boltClient) PutRouter(router *types.Router) error {
+	return update(client, router, router.DbId(), routerTable)
+}
+
+func (client *boltClient) GetRouter(id string) (*types.Router, error) {
+	return get[types.Router](client, id, routerTable)
+}
+
+func (client *boltClient) ListRouters() ([]*types.Router, error) {
+	return list[types.Router](client, routerTable)
+}
+
+func (client *boltClient) DeleteRouter(id string) error {
+	return delete_(client, id, routerTable)
 }
 
 // SecurityGroup

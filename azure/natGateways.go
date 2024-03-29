@@ -108,8 +108,3 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 	return natGateways, err
 }
 
-// Helper function to extract the last segment of a resource ID (commonly used to get the name or ID of the resource)
-func extractLastSegment(resourceID string) string {
-	segments := strings.Split(resourceID, "/")
-	return segments[len(segments)-1]
-}

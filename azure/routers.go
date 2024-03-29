@@ -15,11 +15,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package aws
+package azure
 
-func convertString(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
+import (
+	"context"
+
+	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
+	"github.com/app-net-interface/awi-infra-guard/types"
+)
+
+func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersRequest) ([]types.Router, error) {
+
+	return nil, nil
 }

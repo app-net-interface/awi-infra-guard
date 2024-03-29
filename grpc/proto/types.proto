@@ -63,59 +63,7 @@ message VPC {
     string last_sync_time = 12;
 }
 
-message Cluster {
-    string name = 1;
-    string full_name = 2;
-    string arn = 3;
-    string vpc_id = 4;
-    string region = 5;
-    string project = 6;
-    map<string, string> labels = 7;
-    string provider = 10;
-    string account_id = 11;
-    string id = 12;
-    string last_sync_time = 13;
-}
 
-message Node {
-    string cluster = 1;
-    string name = 2;
-    string namespace = 3;
-    repeated string addresses = 4;
-    string last_sync_time = 5;
-}
-
-message Namespace {
-    string cluster = 1;
-    string name = 2;
-    map<string, string> labels = 3;
-    string last_sync_time = 4;
-}
-
-message Pod {
-    string cluster = 1;
-    string namespace = 2;
-    string name = 3;
-    string ip = 4;
-    map<string, string> labels = 5;
-    string state = 6;
-    string last_sync_time = 7;
-}
-
-message K8sService {
-    string cluster = 1;
-    string namespace = 2;
-    string name = 3;
-    message Ingress {
-        string hostname = 1;
-        string IP = 2;
-        repeated string ports = 3;
-    }
-    repeated Ingress ingresses = 4;
-    map<string, string> labels = 8;
-    string type = 9;
-    string last_sync_time = 10;
-}
 
 message Account {
     string provider = 1;
@@ -182,19 +130,18 @@ message RouteTable {
     string last_sync_time = 9;
 }
 
-message Gateway {
+message Router {
     string id = 1;
-   
     string name = 2;
     string provider = 3;
     string region = 4;
-    string state = 5;
-    uint32 asn = 6;
-    string cidr_block = 7;
-    repeated string static_routes = 8; // Could be a list of CIDR blocks
-    string vpn_type = 9;
-    repeated string security_group_ids = 10; // Security groups or ACLs IDs
-    uint32 bandwidth = 11; // In Mbps
+    string vpc_id = 5;
+    string state = 6;
+    uint32 asn = 7;
+    string advertised_range = 8;
+    string advertised_group = 9;
+    string vpn_type = 10;
+    string subnet_id = 11;
     map<string, string> labels = 12;
     google.protobuf.Timestamp created_at = 13;
     google.protobuf.Timestamp updated_at = 14;
@@ -220,3 +167,57 @@ message Gateway {
     string last_sync_time = 14;
     map<string, string> additional_properties = 15;
   }
+
+  message Cluster {
+    string name = 1;
+    string full_name = 2;
+    string arn = 3;
+    string vpc_id = 4;
+    string region = 5;
+    string project = 6;
+    map<string, string> labels = 7;
+    string provider = 10;
+    string account_id = 11;
+    string id = 12;
+    string last_sync_time = 13;
+}
+
+message Node {
+    string cluster = 1;
+    string name = 2;
+    string namespace = 3;
+    repeated string addresses = 4;
+    string last_sync_time = 5;
+}
+
+message Namespace {
+    string cluster = 1;
+    string name = 2;
+    map<string, string> labels = 3;
+    string last_sync_time = 4;
+}
+
+message Pod {
+    string cluster = 1;
+    string namespace = 2;
+    string name = 3;
+    string ip = 4;
+    map<string, string> labels = 5;
+    string state = 6;
+    string last_sync_time = 7;
+}
+
+message K8sService {
+    string cluster = 1;
+    string namespace = 2;
+    string name = 3;
+    message Ingress {
+        string hostname = 1;
+        string IP = 2;
+        repeated string ports = 3;
+    }
+    repeated Ingress ingresses = 4;
+    map<string, string> labels = 8;
+    string type = 9;
+    string last_sync_time = 10;
+}

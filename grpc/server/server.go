@@ -337,7 +337,6 @@ func (s *Server) ListRouteTables(ctx context.Context, in *infrapb.ListRouteTable
 
 func (s *Server) ListNATGateways(ctx context.Context, in *infrapb.ListNATGatewaysRequest) (*infrapb.ListNATGatewaysResponse, error) {
 
-	
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
 	if err != nil {
 		return nil, err
@@ -357,6 +356,31 @@ func (s *Server) ListNATGateways(ctx context.Context, in *infrapb.ListNATGateway
 	return &infrapb.ListNATGatewaysResponse{
 		LastSyncTime: t,
 		NatGateways:  typesNATGatewaysToGrpc(l),
+	}, nil
+}
+
+func (s *Server) ListRouters(ctx context.Context, in *infrapb.ListRoutersRequest) (*infrapb.ListRoutersResponse, error) {
+
+	s.logger.Infof("Listing routers from user query")
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	l, err := cloudProvider.ListRouters(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failure to retreive Router %s", err.Error())
+		return nil, err
+	}
+	var t string
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.RouterType))
+	if err != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.RouterType, cloudProvider.GetName())
+	} else {
+		t = syncTime.Time
+	}
+	return &infrapb.ListRoutersResponse{
+		LastSyncTime: t,
+		Routers:  typesRoutersToGrpc(l),
 	}, nil
 }
 
@@ -604,10 +628,17 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		return nil, err
 	}
 
-	/* natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{})
-	if err != nil {
-		return nil, err
-	} */
+	/*
+		natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{})
+		if err != nil {
+			return nil, err
+		}
+
+		routers, err := cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{})
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	clusters, err := cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{})
 	if err != nil {

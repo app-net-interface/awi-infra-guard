@@ -40,6 +40,7 @@ const (
 	SecurityGroupType = "SecurityGroup"
 	RouteTableType    = "RouteTable"
 	NATGatewayType    = "NATGateway"
+	RouterType        = "Router"
 	ClusterType       = "Cluster"
 	PodsType          = "Pod"
 	K8sServiceType    = "K8sService"
@@ -286,24 +287,39 @@ type Route struct {
 }
 
 // CloudGateway represents a generic cloud gateway with various attributes.
-type Gateway struct {
+type Router struct {
 	ID                   string            `json:"id"`
 	AccountId            string            `json:"account_id,omitempty"`
 	Name                 string            `json:"name"`
 	Provider             string            `json:"provider"`
 	Region               string            `json:"region"`
+	VPCId                string            `json:"vpc_id"`
 	State                string            `json:"state"`
+	AdvertisedRange      string            `json:"advertised_range"`
+	AdvertisedGroup      string            `json:"advertised_group"`
+	SubnetId             string            `json:"subnet_id"`
 	ASN                  uint32            `json:"asn"`
 	CIDRBlock            string            `json:"cidr_block"`
 	StaticRoutes         []string          `json:"static_routes"` // Could be a list of CIDR blocks
 	VPNType              string            `json:"vpn_type"`
 	SecurityGroupIDs     []string          `json:"security_group_ids"` // Security groups or ACLs IDs
-	Bandwidth            uint32            `json:"bandwidth"`          // In Mbps
 	Labels               map[string]string `json:"labels"`
 	CreatedAt            time.Time         `json:"created_at"`
 	UpdatedAt            time.Time         `json:"updated_at"`
 	AdditionalProperties map[string]string `json:"additional_properties"`
 	LastSyncTime         string            `json:"last_sync_time"`
+}
+
+func (v *Router) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *Router) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *Router) GetProvider() string {
+	return v.Provider
 }
 
 type NATGateway struct {

@@ -41,6 +41,8 @@ service CloudProviderService {
     
     rpc ListNATGateways (ListNATGatewaysRequest) returns (ListNATGatewaysResponse) {}
 
+    rpc ListRouters (ListRoutersRequest) returns (ListRoutersResponse) {}
+
     rpc GetVPCIDForCIDR (GetVPCIDForCIDRRequest) returns (GetVPCIDForCIDRResponse) {}
 
     rpc GetCIDRsForLabels (GetCIDRsForLabelsRequest) returns (GetCIDRsForLabelsResponse) {}
@@ -141,15 +143,15 @@ message ListNATGatewaysResponse {
     string last_sync_time = 2;
 }
 
-message ListGatewaysRequest {
+message ListRoutersRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
     string account_id = 4;
 }
 
-message ListGatewaysResponse {
-    repeated Gateway gateway = 1;
+message ListRoutersResponse {
+    repeated Router routers = 1;
     string last_sync_time = 2;
 }
 
