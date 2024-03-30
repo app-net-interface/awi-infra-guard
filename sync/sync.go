@@ -47,22 +47,23 @@ type Syncer struct {
 }
 
 func (s *Syncer) Sync() {
-		//Cloud Infrastructure
-		s.syncVPC()
-		s.syncInstances()
-		s.syncSubnets()
-		s.syncRouteTables()
-		s.syncACLs()
-		s.syncSecurityGroups()
-		s.syncNATGateways()
-		s.syncRouters()
 
-		// Kubernetes
-		s.syncClusters()
-		s.syncPods()
-		s.syncNamespaces()
-		s.syncK8SSsNodes()
-		s.syncK8SServices()
+	//Cloud Infrastructure
+	s.syncVPC()
+	s.syncInstances()
+	s.syncSubnets()
+	s.syncRouteTables()
+	s.syncACLs()
+	s.syncSecurityGroups()
+	s.syncNATGateways()
+	s.syncRouters()
+
+	// Kubernetes
+	s.syncClusters()
+	s.syncPods()
+	s.syncNamespaces()
+	s.syncK8SSsNodes()
+	s.syncK8SServices()
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
@@ -123,7 +124,7 @@ func (s *Syncer) syncNATGateways() {
 
 func (s *Syncer) syncRouters() {
 	genericCloudSync[*types.Router](s, types.RouterType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Router, error) {
-		
+
 		return cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListRouters, s.dbClient.PutRouter, s.dbClient.DeleteRouter)
 }

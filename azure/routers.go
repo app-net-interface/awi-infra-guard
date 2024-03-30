@@ -20,11 +20,87 @@ package azure
 import (
 	"context"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 )
 
 func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersRequest) ([]types.Router, error) {
 
-	return nil, nil
+	var routers []types.Router
+	c.logger.Infof("Listing routers for %s ", c.GetName())
+	vhubClient, err := armnetwork.NewVirtualHubsClient(params.AccountId, c.cred, nil)
+	if err != nil {
+		c.logger.Errorf("Failed to create vhubClient: %v", err)
+		return nil, err
+	}
+	pager := vhubClient.NewListPager(nil)
+
+	for pager.More() {
+		result, err := pager.NextPage(ctx)
+		if err != nil {
+			c.logger.Errorf("Failed to get next page of Virtual Hubs: %v", err)
+			return nil, err
+		}
+
+		for _, vhub := range result.Value {
+			router := buildRouter(vhub, params)
+			routers = append(routers, router)
+		}
+	}
+	return routers, err
+}
+
+func buildRouter(vhub *armnetwork.VirtualHub, params *infrapb.ListRoutersRequest) types.Router {
+	var name, ps, location, ap string
+	var secId []string
+	var asn uint32
+
+	var labels map[string]string = make(map[string]string)
+
+	// Extracting Tags
+	if vhub.Tags != nil {
+		for k, v := range vhub.Tags {
+			labels[k] = *v
+		}
+	}
+
+	if vhub.Name != nil {
+		name = *vhub.Name
+	}
+
+	if vhub.Properties.ProvisioningState != nil {
+		ps = string(*vhub.Properties.ProvisioningState)
+	}
+
+	if vhub.Properties.AzureFirewall != nil && vhub.Properties.AzureFirewall.ID != nil {
+		secId = []string{*vhub.Properties.AzureFirewall.ID}
+	}
+
+	if vhub.Properties.VirtualRouterAsn != nil {
+		asn = uint32(*vhub.Properties.VirtualRouterAsn)
+	}
+
+	if vhub.Location != nil {
+		location = *vhub.Location
+	}
+
+	if vhub.Properties.AddressPrefix != nil {
+		ap = *vhub.Properties.AddressPrefix
+	}
+
+	router := types.Router{
+		ID:               *vhub.ID,
+		Name:             name,
+		AccountId:        params.AccountId,
+		Provider:         "Azure",
+		VPCId:            "N/A",
+		Region:           location,
+		State:            ps,
+		Labels:           labels,
+		CIDRBlock:        ap,
+		ASN:              asn,
+		SecurityGroupIDs: secId,
+	}
+	return router
 }

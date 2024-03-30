@@ -44,7 +44,7 @@ func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersReq
 		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
 		regionalRouters, err := c.ListRoutersForRegion(ec2RegionalClient, *region.RegionName)
 		if err != nil {
-			c.logger.Errorf("Error listing Transit Gateways in region %s: %v", *region.RegionName, err)
+			c.logger.Warnf("Error listing Transit Gateways in region %s: %v", *region.RegionName, err)
 			continue
 		}
 		routers = append(routers, regionalRouters...)
@@ -88,7 +88,5 @@ func (c *Client) ListRoutersForRegion(client *ec2.Client, region string) ([]type
 			})
 		}
 	}
-
 	return routers, nil
-
 }
