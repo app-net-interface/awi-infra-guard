@@ -15,7 +15,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
     echo "This script creates GCP Virtual Machine which can be used"
     echo "for testing ping connectivity."
     echo ""
@@ -26,15 +26,20 @@ if [ "$#" -ne 3 ]; then
     echo "SUBREGION - zone where VM will be hosted"
     echo "SERVICE_ACCOUNT - The service account used for setting access"
     echo "  permissions for users to that VM"
+    echo "OWNER - a name of the owner creating virtual"
+    echo "  machines. Each Virtual-Machine needs to be"
+    echo "  tagged with the name of a person creating"
+    echo "  machines."
     echo ""
     echo "Example:"
-    echo "$0 test1-1 us-east4-c something@something.gserviceaccount.com"
+    echo "$0 test1-1 us-east4-c something@something.gserviceaccount.com iosetek"
     exit 1
 fi
 
 SCRIPT_RES_ID=$1
 SCRIPT_SUBREGION=$2
 SCRIPT_SERVICE_ACCOUNT=$3
+SCRIPT_VM_OWNER=$4
 
 GCLOUD_PROJECT="$(gcloud config get-value project 2>/dev/null)"
 
@@ -57,9 +62,17 @@ gcloud compute instances create $SCRIPT_RES_ID-vm \
     --labels=goog-ec-src=vm_add-gcloud \
     --reservation-affinity=any
 
-# Add tag to VM
+# Add tags to VM
 gcloud compute instances add-labels $SCRIPT_RES_ID-vm \
     --labels=app_type=ml-training \
+    --zone=$SCRIPT_SUBREGION
+
+gcloud compute instances add-labels $SCRIPT_RES_ID-vm \
+    --labels=owner=$SCRIPT_VM_OWNER \
+    --zone=$SCRIPT_SUBREGION
+
+gcloud compute instances add-labels $SCRIPT_RES_ID-vm \
+    --labels=project=awi \
     --zone=$SCRIPT_SUBREGION
 
 gcloud compute firewall-rules create demo-csp-allow-ssh-$SCRIPT_RES_ID \

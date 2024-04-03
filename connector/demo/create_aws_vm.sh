@@ -15,24 +15,29 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
     echo "This script creates AWS Virtual Machine for testing"
     echo "ping connectivity along with Internet Gateway/Security Rules"
     echo "etc. needed for reaching the machine with SSH."
     echo ""
-    echo "Usage: $0 RESOURCE_ID REGION"
+    echo "Usage: $0 RESOURCE_ID REGION OWNER"
     echo ""
     echo "RESOURE_ID - unique identifier that was used for"
     echo "  creating AWS resources"
     echo "REGION - region where resources were be created"
+    echo "OWNER - a name of the owner creating virtual"
+    echo "  machines. Each Virtual-Machine needs to be"
+    echo "  tagged with the name of a person creating"
+    echo "  machines."
     echo ""
     echo "Example:"
-    echo "$0 test1-1 us-west-2"
+    echo "$0 test1-1 us-west-2 iosetek"
     exit 1
 fi
 
 SCRIPT_RES_ID=$1
 SCRIPT_REGION=$2
+SCRIPT_VM_OWNER=$3
 
 SCRIPT_PATH="$(dirname $0)"
 
@@ -172,7 +177,7 @@ aws ec2 run-instances \
     --metadata-options "HttpTokens=required,HttpEndpoint=enabled,HttpPutResponseHopLimit=2" \
     --private-dns-name-options "HostnameType=ip-name,EnableResourceNameDnsARecord=false,EnableResourceNameDnsAAAARecord=false"
 
-# Add tag to VM
+# Add tags to VM
 
 SCRIPT_VM_ID="$(aws ec2 describe-instances \
     --filters \
@@ -185,5 +190,15 @@ aws ec2 create-tags \
     --resources $SCRIPT_VM_ID \
     --region $SCRIPT_REGION \
     --tags Key=app_type,Value=ml-data
+
+aws ec2 create-tags \
+    --resources $SCRIPT_VM_ID \
+    --region $SCRIPT_REGION \
+    --tags Key=owner,Value=$SCRIPT_VM_OWNER
+
+aws ec2 create-tags \
+    --resources $SCRIPT_VM_ID \
+    --region $SCRIPT_REGION \
+    --tags Key=project,Value=awi
 
 exit 0

@@ -15,13 +15,17 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
     echo "This script combines all other scripts to create"
     echo "quickly an environment with VMs on AWS and GCP."
     echo "It uses us-west-1 on AWS and us-east4 on GCP"
     echo ""
-    echo "Usage: $0 GCP_RES_NAME AWS_RES_NAME AZURE_RES_NAME"
+    echo "Usage: $0 OWNER GCP_RES_NAME AWS_RES_NAME AZURE_RES_NAME"
     echo ""
+    echo "OWNER - a name of the owner creating virtual"
+    echo "  machines. Each Virtual-Machine needs to be"
+    echo "  tagged with the name of a person creating"
+    echo "  machines."
     echo "GCP_RES_NAME - unique identifier that will be added"
     echo "  to each GCP resource created by this script"
     echo "AWS_RES_NAME - unique identifier that will be added"
@@ -34,9 +38,10 @@ if [ "$#" -ne 3 ]; then
     exit 1
 fi
 
-SCRIPT_GCP_RES_ID=$1
-SCRIPT_AWS_RES_ID=$2
-SCRIPT_AZURE_RES_ID=$3
+SCRIPT_VM_OWNER=$1
+SCRIPT_GCP_RES_ID=$2
+SCRIPT_AWS_RES_ID=$3
+SCRIPT_AZURE_RES_ID=$4
 SCRIPT_PATH="$(dirname $0)"
 
 SCRIPT_GCP_REGION="us-east4"
@@ -95,7 +100,8 @@ echo "Creating VM for AWS"
 set -x
 $SCRIPT_PATH/create_aws_vm.sh \
     $SCRIPT_AWS_RES_ID \
-    $SCRIPT_AWS_REGION || \
+    $SCRIPT_AWS_REGION \
+    $SCRIPT_VM_OWNER || \
         { echo "failed to create AWS VM"; exit 1; }
 set +x
 
@@ -104,7 +110,8 @@ set -x
 $SCRIPT_PATH/create_gcp_vm.sh \
     $SCRIPT_GCP_RES_ID \
     $SCRIPT_GCP_ZONE \
-    $GCP_SVC_ACC || \
+    $GCP_SVC_ACC \
+    $SCRIPT_VM_OWNER || \
         { echo "failed to create GCP VM"; exit 1; }
 set +x
 
@@ -113,7 +120,8 @@ set -x
 $SCRIPT_PATH/create_azure_vm.sh \
     $SCRIPT_AZURE_RES_ID \
     $SCRIPT_AZURE_VM_SUBNET_CIDR \
-    $SCRIPT_AZURE_LOCATION || \
+    $SCRIPT_AZURE_LOCATION \
+    $SCRIPT_VM_OWNER || \
         { echo "failed to create Azure VM"; exit 1; }
 set +x
 

@@ -15,10 +15,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
     echo "This script waits for the VM to be removed with a timeout set."
     echo ""
-    echo "Usage: $0 RESOURCE_ID SUBREGION"
+    echo "Usage: $0 RESOURCE_ID SUBREGION TIMEOUT"
     echo ""
     echo "RESOURE_ID - unique identifier that was used for"
     echo "  creating previous resources"
