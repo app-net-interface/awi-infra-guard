@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,8 @@
 package gcp
 
 const (
-	REQUESTED_CIDR_SIZE = 30
+	REQUESTED_CIDR_SIZE          uint8 = 30
+	NUMBER_OF_GATEWAY_INTERFACES uint8 = 2
 )
 
 type Config struct {

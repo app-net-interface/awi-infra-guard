@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -333,8 +333,14 @@ func externalVPNGatewayToGCP(gateway *ExternalVPNGateway) *computepb.ExternalVpn
 	if gateway == nil {
 		return nil
 	}
+
+	redundancyType := "TWO_IPS_REDUNDANCY"
+	if len(gateway.Interfaces) == 4 {
+		redundancyType = "FOUR_IPS_REDUNDANCY"
+	}
+
 	gcpGateway := &computepb.ExternalVpnGateway{
-		RedundancyType: helper.StringToStringPointer("FOUR_IPS_REDUNDANCY"),
+		RedundancyType: helper.StringToStringPointer(redundancyType),
 		Name:           &gateway.Name,
 		SelfLink:       helper.StringToStringPointer(gateway.URL),
 	}

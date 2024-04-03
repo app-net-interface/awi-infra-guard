@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+# Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
 # All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,12 +72,14 @@ TGW_ID="$(aws ec2 describe-transit-gateways \
     --region $SCRIPT_REGION \
     --output text)"
 
+# Missing route propagation!!!!!!
 [[ "$TGW_ID" == "" ]] && aws ec2 create-transit-gateway \
     --description "My Transit Gateway" \
     --tag-specifications 'ResourceType=transit-gateway,Tags=[{Key=Name,Value=AWI-DEV-TGW}]' \
     --region $SCRIPT_REGION
-
 # Add tag transit_route to RT
+
+
 ROUTE_TABLE_ID=$( \
     aws ec2 describe-route-tables \
         --filters "Name=vpc-id,Values=$VPC_ID" \

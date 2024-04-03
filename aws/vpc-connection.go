@@ -19,7 +19,6 @@ package aws
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -200,7 +199,9 @@ func (c *Client) connectionMatches(connection db.Connection, input t.SingleVPCCo
 	return true
 }
 
-func (c *Client) getCIDRsFromVPCOfTheSecondProvider(ctx context.Context, input t.SingleVPCConnectionParams) ([]string, error) {
+// getRoutesFromConnection returns a list of CIDRs that can
+// be reached through CSP Connection.
+func (c *Client) getRoutesFromConnection(input t.SingleVPCConnectionParams) ([]string, error) {
 	client, err := db.NewClient(db.DefaultDBFile, c.logger.WithField("logger", "cloud-connection-db"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to obtain the Client for DB storing CSP Connections: %w", err)
@@ -249,22 +250,20 @@ func (c *Client) connectOneSideVPCOp(ctx context.Context, input t.SingleVPCConne
 	if err != nil {
 		return err
 	}
-	cidrs, err := c.getCIDRsFromVPCOfTheSecondProvider(ctx, input)
+
+	cidrs, err := c.getRoutesFromConnection(input)
 	if err != nil {
 		return fmt.Errorf("failed to obtain CIDR for the AWS Transit Gateway: %w", err)
 	}
-	if len(cidrs) == 0 {
-		return errors.New("Got empty CIDR list from the second provider. Cannot create proper Route in Transit Gateway")
+	for _, cidr := range cidrs {
+		err = c.attachRoutesToVPC(ctx, account, input.Region, input.VpcID, tgwID, &cidr)
+		if err != nil {
+			return err
+		}
 	}
-	// TODO: Handle creating routes and adding proper tags when there are multiple CIDRs
-	if len(cidrs) > 1 {
-		return errors.New("NOT IMPLEMENTED - Gotta handle more CIDRs than 1")
-	}
-	err = c.attachRoutesToVPC(ctx, account, input.Region, input.VpcID, tgwID, &cidrs[0])
-	if err != nil {
-		return err
-	}
-	err = c.addCIDRsTagToVPCRouteTable(ctx, input.ConnID, account, input.Region, input.VpcID, &cidrs[0])
+
+	cidrTagValue := strings.Join(cidrs, ",")
+	err = c.addCIDRsTagToVPCRouteTable(ctx, input.ConnID, account, input.Region, input.VpcID, &cidrTagValue)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// TODO: Add multi-region support to AWS Client.
 type Client struct {
 	region           string
 	defaultAccountID string
@@ -57,6 +58,9 @@ func NewClient(ctx context.Context, logger *logrus.Entry, region string) (*Clien
 	}
 
 	client := ec2.NewFromConfig(cfg)
+	if client == nil {
+		return nil, fmt.Errorf("got nil AWS client")
+	}
 
 	logger.Debug("AWS Client created successfully")
 	return &Client{
@@ -68,7 +72,7 @@ func NewClient(ctx context.Context, logger *logrus.Entry, region string) (*Clien
 }
 
 func (c *Client) GetTransitGateway(ctx context.Context, name string) (*TransitGateway, error) {
-	gateways, err := c.GetTransitGateways(ctx)
+	gateways, err := c.ListTransitGateways(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +92,23 @@ func (c *Client) GetTransitGateway(ctx context.Context, name string) (*TransitGa
 	)
 }
 
-func (c *Client) GetTransitGateways(ctx context.Context) ([]*TransitGateway, error) {
+// TODO: Verify if modification doesn't require recreating existing Transit
+// Gateway attachments.
+func (c *Client) UpdateTransitGateway(ctx context.Context, tgw TransitGateway) error {
+	_, err := c.awsClient.ModifyTransitGateway(
+		ctx,
+		&ec2.ModifyTransitGatewayInput{
+			TransitGatewayId: &tgw.ID,
+			Options:          transitGatewayToModifyOptionsAWS(&tgw),
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to update Transit Gateway %s: %w", tgw.ID, err)
+	}
+	return nil
+}
+
+func (c *Client) ListTransitGateways(ctx context.Context) ([]*TransitGateway, error) {
 	gateways := map[string]*TransitGateway{}
 
 	output, err := c.awsClient.DescribeTransitGateways(ctx, &ec2.DescribeTransitGatewaysInput{})
@@ -97,15 +117,11 @@ func (c *Client) GetTransitGateways(ctx context.Context) ([]*TransitGateway, err
 	}
 	if output == nil {
 		return nil, errors.New(
-			"Unexpected empty Transit Gateways after attempting to Describe Transit Gateways")
+			"unexpected empty Transit Gateways after attempting to Describe Transit Gateways")
 	}
 
-	for _, gw := range output.TransitGateways {
-		gateways[helper.StringPointerToString(gw.TransitGatewayId)] = &TransitGateway{
-			ID:     helper.StringPointerToString(gw.TransitGatewayId),
-			ASN:    strconv.FormatInt(*gw.Options.AmazonSideAsn, 10),
-			Region: c.region,
-		}
+	for i, gw := range output.TransitGateways {
+		gateways[helper.StringPointerToString(gw.TransitGatewayId)] = transitGatewayFromAWS(&output.TransitGateways[i])
 	}
 
 	vpcAttachments, err := c.awsClient.DescribeTransitGatewayVpcAttachments(ctx, &ec2.DescribeTransitGatewayVpcAttachmentsInput{})
@@ -114,7 +130,7 @@ func (c *Client) GetTransitGateways(ctx context.Context) ([]*TransitGateway, err
 	}
 	if vpcAttachments == nil {
 		return nil, errors.New(
-			"Unexpected empty VPC Attachments after attempting to Describe " +
+			"unexpected empty VPC Attachments after attempting to Describe " +
 				"Transit Gateway Vpc Attachments")
 	}
 
@@ -131,7 +147,7 @@ func (c *Client) GetTransitGateways(ctx context.Context) ([]*TransitGateway, err
 		tgw, ok := gateways[*attachment.TransitGatewayId]
 		if !ok {
 			return nil, fmt.Errorf(
-				"Found Transit Gateway Attachment '%s' to non existing Transit Gateway '%s'",
+				"found Transit Gateway Attachment '%s' to non existing Transit Gateway '%s'",
 				helper.StringPointerToString(attachment.TransitGatewayAttachmentId),
 				*attachment.TransitGatewayId,
 			)
@@ -159,7 +175,7 @@ func (c *Client) GetVPC(ctx context.Context, name string) (*VPC, error) {
 	}
 	if vpcs == nil {
 		return nil, errors.New(
-			"Unexpected empty VPC after attempting to Describe VPCs")
+			"unexpected empty VPC after attempting to Describe VPCs")
 	}
 	if len(vpcs.Vpcs) == 0 {
 		return nil, fmt.Errorf(
@@ -168,22 +184,30 @@ func (c *Client) GetVPC(ctx context.Context, name string) (*VPC, error) {
 	}
 	if len(vpcs.Vpcs) > 1 {
 		return nil, fmt.Errorf(
-			"Unexpectedly there is more than 1 VPC with name %s", name,
+			"unexpectedly there is more than 1 VPC with name %s", name,
 		)
 	}
 	return vpcFromAWS(&vpcs.Vpcs[0]), nil
 }
 
-func (c *Client) GetCustomerGateways(ctx context.Context) ([]CustomerGateway, error) {
-	gateways := []CustomerGateway{}
-	output, err := c.awsClient.DescribeCustomerGateways(ctx, &ec2.DescribeCustomerGatewaysInput{})
+func (c *Client) ListCustomerGateways(ctx context.Context, filters ...ListCustomerGatewayFilter) ([]CustomerGateway, error) {
+	var awsFilters []types.Filter
+	for _, f := range filters {
+		awsFilters = append(awsFilters, f.GetCustomerGatewayListFilter())
+	}
+
+	output, err := c.awsClient.DescribeCustomerGateways(ctx, &ec2.DescribeCustomerGatewaysInput{
+		Filters: awsFilters,
+	})
 	if err != nil {
 		return nil, err
 	}
 	if output == nil {
 		return nil, errors.New(
-			"Unexpected empty Customer Gateways after attempting to Describe Customer Gateways")
+			"unexpected empty Customer Gateways after attempting to Describe Customer Gateways")
 	}
+
+	gateways := []CustomerGateway{}
 	for _, cgw := range output.CustomerGateways {
 		customerGateway := customerGatewayFromAWS(&cgw)
 		if customerGateway != nil {
@@ -192,6 +216,7 @@ func (c *Client) GetCustomerGateways(ctx context.Context) ([]CustomerGateway, er
 			c.logger.Warn("Got empty Customer Gateway object")
 		}
 	}
+
 	return gateways, nil
 }
 
@@ -214,7 +239,7 @@ func (c *Client) CreateCustomerGateway(ctx context.Context, ip, asn, tag string)
 	}
 	if output == nil {
 		return nil, fmt.Errorf(
-			"Unexpected empty Customer Gateway object from creating Customer Gateway with "+
+			"unexpected empty Customer Gateway object from creating Customer Gateway with "+
 				"Public IP '%s' and ASN '%s'", ip, asn,
 		)
 	}
@@ -242,16 +267,23 @@ type TunnelOption struct {
 	PreSharedKey string
 }
 
-func (c *Client) GetVPNConnections(ctx context.Context) ([]*VPNConnection, error) {
-	connections := []*VPNConnection{}
-	output, err := c.awsClient.DescribeVpnConnections(ctx, &ec2.DescribeVpnConnectionsInput{})
+func (c *Client) ListVPNConnections(ctx context.Context, filters ...ListVPNConnectionFilter) ([]*VPNConnection, error) {
+	var awsFilters []types.Filter
+	for _, f := range filters {
+		awsFilters = append(awsFilters, f.GetVPNConnectionListFilter())
+	}
+
+	output, err := c.awsClient.DescribeVpnConnections(ctx, &ec2.DescribeVpnConnectionsInput{
+		Filters: awsFilters,
+	})
 	if err != nil {
 		return nil, err
 	}
 	if output == nil {
 		return nil, errors.New(
-			"Unexpected empty VPN Connections after attempting to Describe VPN Connections")
+			"unexpected empty VPN Connections after attempting to Describe VPN Connections")
 	}
+	connections := []*VPNConnection{}
 	for _, conn := range output.VpnConnections {
 		connections = append(connections, vpnConnectionFromAWS(&conn))
 	}
@@ -262,7 +294,7 @@ func (c *Client) CreateVPNConnection(
 	ctx context.Context,
 	customerGatewayID,
 	transitGatewayID string,
-	tunnelOptions []TunnelOption,
+	tunnelOptions [2]TunnelOption,
 	tag string,
 ) (*VPNConnection, error) {
 	c.logger.Debugf(
@@ -273,6 +305,7 @@ func (c *Client) CreateVPNConnection(
 	for i := range tunnelOptions {
 		vpnTunnelOptions = append(vpnTunnelOptions, types.VpnTunnelOptionsSpecification{
 			TunnelInsideCidr: &tunnelOptions[i].CIDR,
+			PreSharedKey:     &tunnelOptions[i].PreSharedKey,
 		})
 	}
 	output, err := c.awsClient.CreateVpnConnection(ctx, &ec2.CreateVpnConnectionInput{
@@ -282,6 +315,7 @@ func (c *Client) CreateVPNConnection(
 		Options: &types.VpnConnectionOptionsSpecification{
 			TunnelOptions: vpnTunnelOptions,
 		},
+
 		TagSpecifications: addTag(types.ResourceTypeVpnConnection, tag),
 	})
 	if err != nil {
@@ -289,7 +323,7 @@ func (c *Client) CreateVPNConnection(
 	}
 	if output == nil {
 		return nil, fmt.Errorf(
-			"Unexpected empty VPN Connection object after attempting to create VPN Connection "+
+			"unexpected empty VPN Connection object after attempting to create VPN Connection "+
 				"for Customer Gateway '%s' and VPN Gateway '%s'", customerGatewayID, transitGatewayID,
 		)
 	}

@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,19 +27,33 @@ type Gateway struct {
 	// may be a TransitGateway.
 	Kind string
 	// The CSP owner of that particular Gateway.
-	// AWS or GCP.
+	// aws, gcp or azure.
 	CloudProvider string
 	// The name of VPC/Network the Gateway is attached to.
+	//
+	// TODO: Handling VPC needs to be reinvestigated. Different
+	// providers handle VPCs differently. GCP and Azure require
+	// VPC associated with Gateway resources such as Cloud Router
+	// or VNet Gateway. AWS Transit Gateway is not associated with
+	// any VPC from the start. Additionally, Transit Gateway can
+	// have multiple VPC attachments so it would be potentially a
+	// slice rather than a string - not to mention peered VPCs.
 	VPC string
 	// The ASN Number for the Gateway.
 	ASN string
 	// The Region where resources were created.
 	Region string
 	// Number of Connections using that particular Gateway.
+	//
+	// NOT IMPLEMENTED
 	ConnectionsCount uint64
 	// The limit of Connections that can use this particular Gateway.
 	// 0 indicates no limit.
+	//
+	// NOT IMPLEMENTED
 	ConnectionsLimit uint64
 	// Additional information available per provider.
+	//
+	// NOT IMPLEMENTED
 	Data map[string]string
 }

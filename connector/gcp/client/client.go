@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
-	"golang.org/x/exp/slices"
+	"slices"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"cloud.google.com/go/compute/apiv1/computepb"
@@ -141,7 +140,7 @@ func chooseProject(ctx context.Context, logger *logrus.Entry, project string) (s
 	if project == "" {
 		return availableProjects[0], nil
 	}
-	if !slices.Contains[string](availableProjects, project) {
+	if !slices.Contains(availableProjects, project) {
 		return "", fmt.Errorf(
 			"the requested project ID '%s' was not found among available projects: %v.",
 			project, availableProjects,
