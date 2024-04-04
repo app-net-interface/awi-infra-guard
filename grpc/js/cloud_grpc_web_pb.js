@@ -689,6 +689,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listRouters =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListInternetGatewaysRequest,
+ *   !proto.infra.ListInternetGatewaysResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListInternetGateways = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListInternetGateways',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListInternetGatewaysRequest,
+  proto.infra.ListInternetGatewaysResponse,
+  /**
+   * @param {!proto.infra.ListInternetGatewaysRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListInternetGatewaysResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListInternetGatewaysRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListInternetGatewaysResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListInternetGatewaysResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listInternetGateways =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListInternetGateways',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListInternetGateways,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListInternetGatewaysRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListInternetGatewaysResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listInternetGateways =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListInternetGateways',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListInternetGateways);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.GetVPCIDForCIDRRequest,
  *   !proto.infra.GetVPCIDForCIDRResponse>}
  */

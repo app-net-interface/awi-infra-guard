@@ -469,6 +469,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListRouters);
   }
 
+  methodDescriptorListInternetGateways = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListInternetGateways',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListInternetGatewaysRequest,
+    cloud_pb.ListInternetGatewaysResponse,
+    (request: cloud_pb.ListInternetGatewaysRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListInternetGatewaysResponse.deserializeBinary
+  );
+
+  listInternetGateways(
+    request: cloud_pb.ListInternetGatewaysRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListInternetGatewaysResponse>;
+
+  listInternetGateways(
+    request: cloud_pb.ListInternetGatewaysRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListInternetGatewaysResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListInternetGatewaysResponse>;
+
+  listInternetGateways(
+    request: cloud_pb.ListInternetGatewaysRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListInternetGatewaysResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListInternetGateways',
+        request,
+        metadata || {},
+        this.methodDescriptorListInternetGateways,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListInternetGateways',
+    request,
+    metadata || {},
+    this.methodDescriptorListInternetGateways);
+  }
+
   methodDescriptorGetVPCIDForCIDR = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/GetVPCIDForCIDR',
     grpcWeb.MethodType.UNARY,

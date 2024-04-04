@@ -1,22 +1,3 @@
-/**
- * Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http:www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import * as jspb from 'google-protobuf'
 
 import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
@@ -190,245 +171,6 @@ export namespace VPC {
     accountId: string,
     lastSyncTime: string,
   }
-}
-
-export class Cluster extends jspb.Message {
-  getName(): string;
-  setName(value: string): Cluster;
-
-  getFullName(): string;
-  setFullName(value: string): Cluster;
-
-  getArn(): string;
-  setArn(value: string): Cluster;
-
-  getVpcId(): string;
-  setVpcId(value: string): Cluster;
-
-  getRegion(): string;
-  setRegion(value: string): Cluster;
-
-  getProject(): string;
-  setProject(value: string): Cluster;
-
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): Cluster;
-
-  getProvider(): string;
-  setProvider(value: string): Cluster;
-
-  getAccountId(): string;
-  setAccountId(value: string): Cluster;
-
-  getId(): string;
-  setId(value: string): Cluster;
-
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): Cluster;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Cluster.AsObject;
-  static toObject(includeInstance: boolean, msg: Cluster): Cluster.AsObject;
-  static serializeBinaryToWriter(message: Cluster, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Cluster;
-  static deserializeBinaryFromReader(message: Cluster, reader: jspb.BinaryReader): Cluster;
-}
-
-export namespace Cluster {
-  export type AsObject = {
-    name: string,
-    fullName: string,
-    arn: string,
-    vpcId: string,
-    region: string,
-    project: string,
-    labelsMap: Array<[string, string]>,
-    provider: string,
-    accountId: string,
-    id: string,
-    lastSyncTime: string,
-  }
-}
-
-export class Node extends jspb.Message {
-  getCluster(): string;
-  setCluster(value: string): Node;
-
-  getName(): string;
-  setName(value: string): Node;
-
-  getNamespace(): string;
-  setNamespace(value: string): Node;
-
-  getAddressesList(): Array<string>;
-  setAddressesList(value: Array<string>): Node;
-  clearAddressesList(): Node;
-  addAddresses(value: string, index?: number): Node;
-
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): Node;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Node.AsObject;
-  static toObject(includeInstance: boolean, msg: Node): Node.AsObject;
-  static serializeBinaryToWriter(message: Node, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Node;
-  static deserializeBinaryFromReader(message: Node, reader: jspb.BinaryReader): Node;
-}
-
-export namespace Node {
-  export type AsObject = {
-    cluster: string,
-    name: string,
-    namespace: string,
-    addressesList: Array<string>,
-    lastSyncTime: string,
-  }
-}
-
-export class Namespace extends jspb.Message {
-  getCluster(): string;
-  setCluster(value: string): Namespace;
-
-  getName(): string;
-  setName(value: string): Namespace;
-
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): Namespace;
-
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): Namespace;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Namespace.AsObject;
-  static toObject(includeInstance: boolean, msg: Namespace): Namespace.AsObject;
-  static serializeBinaryToWriter(message: Namespace, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Namespace;
-  static deserializeBinaryFromReader(message: Namespace, reader: jspb.BinaryReader): Namespace;
-}
-
-export namespace Namespace {
-  export type AsObject = {
-    cluster: string,
-    name: string,
-    labelsMap: Array<[string, string]>,
-    lastSyncTime: string,
-  }
-}
-
-export class Pod extends jspb.Message {
-  getCluster(): string;
-  setCluster(value: string): Pod;
-
-  getNamespace(): string;
-  setNamespace(value: string): Pod;
-
-  getName(): string;
-  setName(value: string): Pod;
-
-  getIp(): string;
-  setIp(value: string): Pod;
-
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): Pod;
-
-  getState(): string;
-  setState(value: string): Pod;
-
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): Pod;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Pod.AsObject;
-  static toObject(includeInstance: boolean, msg: Pod): Pod.AsObject;
-  static serializeBinaryToWriter(message: Pod, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Pod;
-  static deserializeBinaryFromReader(message: Pod, reader: jspb.BinaryReader): Pod;
-}
-
-export namespace Pod {
-  export type AsObject = {
-    cluster: string,
-    namespace: string,
-    name: string,
-    ip: string,
-    labelsMap: Array<[string, string]>,
-    state: string,
-    lastSyncTime: string,
-  }
-}
-
-export class K8sService extends jspb.Message {
-  getCluster(): string;
-  setCluster(value: string): K8sService;
-
-  getNamespace(): string;
-  setNamespace(value: string): K8sService;
-
-  getName(): string;
-  setName(value: string): K8sService;
-
-  getIngressesList(): Array<K8sService.Ingress>;
-  setIngressesList(value: Array<K8sService.Ingress>): K8sService;
-  clearIngressesList(): K8sService;
-  addIngresses(value?: K8sService.Ingress, index?: number): K8sService.Ingress;
-
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): K8sService;
-
-  getType(): string;
-  setType(value: string): K8sService;
-
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): K8sService;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): K8sService.AsObject;
-  static toObject(includeInstance: boolean, msg: K8sService): K8sService.AsObject;
-  static serializeBinaryToWriter(message: K8sService, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): K8sService;
-  static deserializeBinaryFromReader(message: K8sService, reader: jspb.BinaryReader): K8sService;
-}
-
-export namespace K8sService {
-  export type AsObject = {
-    cluster: string,
-    namespace: string,
-    name: string,
-    ingressesList: Array<K8sService.Ingress.AsObject>,
-    labelsMap: Array<[string, string]>,
-    type: string,
-    lastSyncTime: string,
-  }
-
-  export class Ingress extends jspb.Message {
-    getHostname(): string;
-    setHostname(value: string): Ingress;
-
-    getIp(): string;
-    setIp(value: string): Ingress;
-
-    getPortsList(): Array<string>;
-    setPortsList(value: Array<string>): Ingress;
-    clearPortsList(): Ingress;
-    addPorts(value: string, index?: number): Ingress;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): Ingress.AsObject;
-    static toObject(includeInstance: boolean, msg: Ingress): Ingress.AsObject;
-    static serializeBinaryToWriter(message: Ingress, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): Ingress;
-    static deserializeBinaryFromReader(message: Ingress, reader: jspb.BinaryReader): Ingress;
-  }
-
-  export namespace Ingress {
-    export type AsObject = {
-      hostname: string,
-      ip: string,
-      portsList: Array<string>,
-    }
-  }
-
 }
 
 export class Account extends jspb.Message {
@@ -886,5 +628,306 @@ export namespace NATGateway {
     lastSyncTime: string,
     additionalPropertiesMap: Array<[string, string]>,
   }
+}
+
+export class IGW extends jspb.Message {
+  getId(): string;
+  setId(value: string): IGW;
+
+  getName(): string;
+  setName(value: string): IGW;
+
+  getProvider(): string;
+  setProvider(value: string): IGW;
+
+  getAccountId(): string;
+  setAccountId(value: string): IGW;
+
+  getAttachedVpcId(): string;
+  setAttachedVpcId(value: string): IGW;
+
+  getRegion(): string;
+  setRegion(value: string): IGW;
+
+  getState(): string;
+  setState(value: string): IGW;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): IGW;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): IGW;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): IGW;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): IGW;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): IGW;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): IGW;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): IGW.AsObject;
+  static toObject(includeInstance: boolean, msg: IGW): IGW.AsObject;
+  static serializeBinaryToWriter(message: IGW, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): IGW;
+  static deserializeBinaryFromReader(message: IGW, reader: jspb.BinaryReader): IGW;
+}
+
+export namespace IGW {
+  export type AsObject = {
+    id: string,
+    name: string,
+    provider: string,
+    accountId: string,
+    attachedVpcId: string,
+    region: string,
+    state: string,
+    labelsMap: Array<[string, string]>,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    lastSyncTime: string,
+  }
+}
+
+export class Cluster extends jspb.Message {
+  getName(): string;
+  setName(value: string): Cluster;
+
+  getFullName(): string;
+  setFullName(value: string): Cluster;
+
+  getArn(): string;
+  setArn(value: string): Cluster;
+
+  getVpcId(): string;
+  setVpcId(value: string): Cluster;
+
+  getRegion(): string;
+  setRegion(value: string): Cluster;
+
+  getProject(): string;
+  setProject(value: string): Cluster;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): Cluster;
+
+  getProvider(): string;
+  setProvider(value: string): Cluster;
+
+  getAccountId(): string;
+  setAccountId(value: string): Cluster;
+
+  getId(): string;
+  setId(value: string): Cluster;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Cluster;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Cluster.AsObject;
+  static toObject(includeInstance: boolean, msg: Cluster): Cluster.AsObject;
+  static serializeBinaryToWriter(message: Cluster, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Cluster;
+  static deserializeBinaryFromReader(message: Cluster, reader: jspb.BinaryReader): Cluster;
+}
+
+export namespace Cluster {
+  export type AsObject = {
+    name: string,
+    fullName: string,
+    arn: string,
+    vpcId: string,
+    region: string,
+    project: string,
+    labelsMap: Array<[string, string]>,
+    provider: string,
+    accountId: string,
+    id: string,
+    lastSyncTime: string,
+  }
+}
+
+export class Node extends jspb.Message {
+  getCluster(): string;
+  setCluster(value: string): Node;
+
+  getName(): string;
+  setName(value: string): Node;
+
+  getNamespace(): string;
+  setNamespace(value: string): Node;
+
+  getAddressesList(): Array<string>;
+  setAddressesList(value: Array<string>): Node;
+  clearAddressesList(): Node;
+  addAddresses(value: string, index?: number): Node;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Node;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Node.AsObject;
+  static toObject(includeInstance: boolean, msg: Node): Node.AsObject;
+  static serializeBinaryToWriter(message: Node, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Node;
+  static deserializeBinaryFromReader(message: Node, reader: jspb.BinaryReader): Node;
+}
+
+export namespace Node {
+  export type AsObject = {
+    cluster: string,
+    name: string,
+    namespace: string,
+    addressesList: Array<string>,
+    lastSyncTime: string,
+  }
+}
+
+export class Namespace extends jspb.Message {
+  getCluster(): string;
+  setCluster(value: string): Namespace;
+
+  getName(): string;
+  setName(value: string): Namespace;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): Namespace;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Namespace;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Namespace.AsObject;
+  static toObject(includeInstance: boolean, msg: Namespace): Namespace.AsObject;
+  static serializeBinaryToWriter(message: Namespace, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Namespace;
+  static deserializeBinaryFromReader(message: Namespace, reader: jspb.BinaryReader): Namespace;
+}
+
+export namespace Namespace {
+  export type AsObject = {
+    cluster: string,
+    name: string,
+    labelsMap: Array<[string, string]>,
+    lastSyncTime: string,
+  }
+}
+
+export class Pod extends jspb.Message {
+  getCluster(): string;
+  setCluster(value: string): Pod;
+
+  getNamespace(): string;
+  setNamespace(value: string): Pod;
+
+  getName(): string;
+  setName(value: string): Pod;
+
+  getIp(): string;
+  setIp(value: string): Pod;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): Pod;
+
+  getState(): string;
+  setState(value: string): Pod;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Pod;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Pod.AsObject;
+  static toObject(includeInstance: boolean, msg: Pod): Pod.AsObject;
+  static serializeBinaryToWriter(message: Pod, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Pod;
+  static deserializeBinaryFromReader(message: Pod, reader: jspb.BinaryReader): Pod;
+}
+
+export namespace Pod {
+  export type AsObject = {
+    cluster: string,
+    namespace: string,
+    name: string,
+    ip: string,
+    labelsMap: Array<[string, string]>,
+    state: string,
+    lastSyncTime: string,
+  }
+}
+
+export class K8sService extends jspb.Message {
+  getCluster(): string;
+  setCluster(value: string): K8sService;
+
+  getNamespace(): string;
+  setNamespace(value: string): K8sService;
+
+  getName(): string;
+  setName(value: string): K8sService;
+
+  getIngressesList(): Array<K8sService.Ingress>;
+  setIngressesList(value: Array<K8sService.Ingress>): K8sService;
+  clearIngressesList(): K8sService;
+  addIngresses(value?: K8sService.Ingress, index?: number): K8sService.Ingress;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): K8sService;
+
+  getType(): string;
+  setType(value: string): K8sService;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): K8sService;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): K8sService.AsObject;
+  static toObject(includeInstance: boolean, msg: K8sService): K8sService.AsObject;
+  static serializeBinaryToWriter(message: K8sService, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): K8sService;
+  static deserializeBinaryFromReader(message: K8sService, reader: jspb.BinaryReader): K8sService;
+}
+
+export namespace K8sService {
+  export type AsObject = {
+    cluster: string,
+    namespace: string,
+    name: string,
+    ingressesList: Array<K8sService.Ingress.AsObject>,
+    labelsMap: Array<[string, string]>,
+    type: string,
+    lastSyncTime: string,
+  }
+
+  export class Ingress extends jspb.Message {
+    getHostname(): string;
+    setHostname(value: string): Ingress;
+
+    getIp(): string;
+    setIp(value: string): Ingress;
+
+    getPortsList(): Array<string>;
+    setPortsList(value: Array<string>): Ingress;
+    clearPortsList(): Ingress;
+    addPorts(value: string, index?: number): Ingress;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): Ingress.AsObject;
+    static toObject(includeInstance: boolean, msg: Ingress): Ingress.AsObject;
+    static serializeBinaryToWriter(message: Ingress, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): Ingress;
+    static deserializeBinaryFromReader(message: Ingress, reader: jspb.BinaryReader): Ingress;
+  }
+
+  export namespace Ingress {
+    export type AsObject = {
+      hostname: string,
+      ip: string,
+      portsList: Array<string>,
+    }
+  }
+
 }
 

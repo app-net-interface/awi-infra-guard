@@ -349,6 +349,32 @@ func (p *providerWithDB) ListRouters(ctx context.Context, params *infrapb.ListRo
 	return providerRouters, nil
 }
 
+func (p *providerWithDB) ListInternetGateways(ctx context.Context, params *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error) {
+	dbRouters, err := p.dbClient.ListInternetGateways()
+	if err != nil {
+		return nil, err
+	}
+	var providerRouters []types.IGW
+	for _, igw := range dbRouters {
+		if strings.ToLower(igw.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != igw.AccountId {
+			continue
+		}
+		//if params.GetRegion() != "global" {
+		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
+		//		continue
+		//	}
+		//}
+		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
+		//	continue
+		//}
+		providerRouters = append(providerRouters, *igw)
+	}
+	return providerRouters, nil
+}
+
 func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {
 	dbSubnet, err := p.dbClient.GetSubnet(types.CloudID(p.realProvider.GetName(), params.GetId()))
 	if err != nil {

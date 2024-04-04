@@ -171,6 +171,23 @@ func (client *boltClient) DeleteRouter(id string) error {
 	return delete_(client, id, routerTable)
 }
 
+// IGW
+func (client *boltClient) PutIGW(igw *types.IGW) error {
+	return update(client, igw, igw.DbId(), igwTable)
+}
+
+func (client *boltClient) GetIGW(id string) (*types.IGW, error) {
+	return get[types.IGW](client, id, igwTable)
+}
+
+func (client *boltClient) ListInternetGateways() ([]*types.IGW, error) {
+	return list[types.IGW](client, igwTable)
+}
+
+func (client *boltClient) DeleteIGW(id string) error {
+	return delete_(client, id, igwTable)
+}
+
 // SecurityGroup
 func (client *boltClient) PutSecurityGroup(securityGroup *types.SecurityGroup) error {
 	return update(client, securityGroup, securityGroup.DbId(), securityGroupTable)

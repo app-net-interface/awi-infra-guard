@@ -34,6 +34,7 @@ const (
 	securityGroupTable     = "security_groups"
 	ngTable                = "nat_gateways"
 	routerTable            = "routers"
+	igwTable               = "igws"
 	syncTimeTable          = "sync_time"
 )
 
@@ -51,6 +52,7 @@ var tableNames = []string{
 	routeTableTable,
 	ngTable,
 	routerTable,
+	igwTable,
 	aclTable,
 	securityGroupTable,
 	syncTimeTable,
@@ -108,6 +110,12 @@ type Client interface {
 	PutRouter(ng *types.Router) error
 	GetRouter(id string) (*types.Router, error)
 	DeleteRouter(id string) error
+
+	// IGW
+	ListInternetGateways() ([]*types.IGW, error)
+	PutIGW(ng *types.IGW) error
+	GetIGW(id string) (*types.IGW, error)
+	DeleteIGW(id string) error
 
 	//Security Group
 	PutSecurityGroup(securityGroup *types.SecurityGroup) error

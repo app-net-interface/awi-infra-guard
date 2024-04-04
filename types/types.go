@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -41,6 +42,7 @@ const (
 	RouteTableType    = "RouteTable"
 	NATGatewayType    = "NATGateway"
 	RouterType        = "Router"
+	IGWType           = "IGW"
 	ClusterType       = "Cluster"
 	PodsType          = "Pod"
 	K8sServiceType    = "K8sService"
@@ -349,6 +351,32 @@ func (v *NATGateway) SetSyncTime(time string) {
 }
 
 func (v *NATGateway) GetProvider() string {
+	return v.Provider
+}
+
+type IGW struct {
+	ID            string                 `json:"id,omitempty"`
+	Name          string                 `json:"name,omitempty"`
+	Provider      string                 `json:"provider,omitempty"`
+	AccountId     string                 `json:"account_id,omitempty"`
+	AttachedVpcId string                 `json:"attached_vpc_id,omitempty"` //
+	Region        string                 `json:"region,omitempty"`          // VPC Region
+	State         string                 `json:"state,omitempty"`
+	Labels        map[string]string      `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt     *timestamppb.Timestamp `json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `json:"updated_at,omitempty"`
+	LastSyncTime  string                 `json:"last_sync_time,omitempty"`
+}
+
+func (v *IGW) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *IGW) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *IGW) GetProvider() string {
 	return v.Provider
 }
 

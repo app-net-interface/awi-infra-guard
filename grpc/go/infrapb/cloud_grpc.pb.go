@@ -28,6 +28,7 @@ type CloudProviderServiceClient interface {
 	ListRouteTables(ctx context.Context, in *ListRouteTablesRequest, opts ...grpc.CallOption) (*ListRouteTablesResponse, error)
 	ListNATGateways(ctx context.Context, in *ListNATGatewaysRequest, opts ...grpc.CallOption) (*ListNATGatewaysResponse, error)
 	ListRouters(ctx context.Context, in *ListRoutersRequest, opts ...grpc.CallOption) (*ListRoutersResponse, error)
+	ListInternetGateways(ctx context.Context, in *ListInternetGatewaysRequest, opts ...grpc.CallOption) (*ListInternetGatewaysResponse, error)
 	GetVPCIDForCIDR(ctx context.Context, in *GetVPCIDForCIDRRequest, opts ...grpc.CallOption) (*GetVPCIDForCIDRResponse, error)
 	GetCIDRsForLabels(ctx context.Context, in *GetCIDRsForLabelsRequest, opts ...grpc.CallOption) (*GetCIDRsForLabelsResponse, error)
 	GetIPsForLabels(ctx context.Context, in *GetIPsForLabelsRequest, opts ...grpc.CallOption) (*GetIPsForLabelsResponse, error)
@@ -135,6 +136,15 @@ func (c *cloudProviderServiceClient) ListRouters(ctx context.Context, in *ListRo
 	return out, nil
 }
 
+func (c *cloudProviderServiceClient) ListInternetGateways(ctx context.Context, in *ListInternetGatewaysRequest, opts ...grpc.CallOption) (*ListInternetGatewaysResponse, error) {
+	out := new(ListInternetGatewaysResponse)
+	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/ListInternetGateways", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cloudProviderServiceClient) GetVPCIDForCIDR(ctx context.Context, in *GetVPCIDForCIDRRequest, opts ...grpc.CallOption) (*GetVPCIDForCIDRResponse, error) {
 	out := new(GetVPCIDForCIDRResponse)
 	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/GetVPCIDForCIDR", in, out, opts...)
@@ -212,6 +222,7 @@ type CloudProviderServiceServer interface {
 	ListRouteTables(context.Context, *ListRouteTablesRequest) (*ListRouteTablesResponse, error)
 	ListNATGateways(context.Context, *ListNATGatewaysRequest) (*ListNATGatewaysResponse, error)
 	ListRouters(context.Context, *ListRoutersRequest) (*ListRoutersResponse, error)
+	ListInternetGateways(context.Context, *ListInternetGatewaysRequest) (*ListInternetGatewaysResponse, error)
 	GetVPCIDForCIDR(context.Context, *GetVPCIDForCIDRRequest) (*GetVPCIDForCIDRResponse, error)
 	GetCIDRsForLabels(context.Context, *GetCIDRsForLabelsRequest) (*GetCIDRsForLabelsResponse, error)
 	GetIPsForLabels(context.Context, *GetIPsForLabelsRequest) (*GetIPsForLabelsResponse, error)
@@ -255,6 +266,9 @@ func (UnimplementedCloudProviderServiceServer) ListNATGateways(context.Context, 
 }
 func (UnimplementedCloudProviderServiceServer) ListRouters(context.Context, *ListRoutersRequest) (*ListRoutersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListRouters not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) ListInternetGateways(context.Context, *ListInternetGatewaysRequest) (*ListInternetGatewaysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListInternetGateways not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) GetVPCIDForCIDR(context.Context, *GetVPCIDForCIDRRequest) (*GetVPCIDForCIDRResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVPCIDForCIDR not implemented")
@@ -470,6 +484,24 @@ func _CloudProviderService_ListRouters_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudProviderService_ListInternetGateways_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListInternetGatewaysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).ListInternetGateways(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infra.CloudProviderService/ListInternetGateways",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).ListInternetGateways(ctx, req.(*ListInternetGatewaysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CloudProviderService_GetVPCIDForCIDR_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetVPCIDForCIDRRequest)
 	if err := dec(in); err != nil {
@@ -642,6 +674,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListRouters",
 			Handler:    _CloudProviderService_ListRouters_Handler,
+		},
+		{
+			MethodName: "ListInternetGateways",
+			Handler:    _CloudProviderService_ListInternetGateways_Handler,
 		},
 		{
 			MethodName: "GetVPCIDForCIDR",

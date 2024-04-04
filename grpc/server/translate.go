@@ -119,6 +119,25 @@ func typesRoutersToGrpc(in []types.Router) []*infrapb.Router {
 	return out
 }
 
+func typesIGWsToGrpc(in []types.IGW) []*infrapb.IGW {
+	out := make([]*infrapb.IGW, 0, len(in))
+	for _, igw := range in {
+		out = append(out, &infrapb.IGW{
+			Id:              igw.ID,
+			Name:            igw.Name,
+			AttachedVpcId:   igw.AttachedVpcId,
+			Provider:        igw.Provider,
+			Region:          igw.Region,
+			State:           igw.State,
+			Labels:          igw.Labels,
+			AccountId:       igw.AccountId,
+			CreatedAt:       igw.CreatedAt,
+			LastSyncTime:    igw.LastSyncTime,
+		})
+	}
+	return out
+}
+
 /*
 type Router struct {
 	state         protoimpl.MessageState

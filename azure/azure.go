@@ -52,8 +52,6 @@ func NewClient(ctx context.Context, logger *logrus.Logger) (*Client, error) {
 	return client, nil
 }
 
-
-
 func (c *Client) GetName() string {
 	return providerName
 }
@@ -90,6 +88,11 @@ func (c *Client) GetInstancesForLabels(ctx context.Context, input *infrapb.GetIn
 func (c *Client) GetVPCIDWithTag(ctx context.Context, input *infrapb.GetVPCIDWithTagRequest) (string, error) {
 	// TBD
 	return "", nil
+}
+
+func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error) {
+
+	return nil, nil
 }
 
 /*

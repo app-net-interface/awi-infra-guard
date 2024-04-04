@@ -380,7 +380,32 @@ func (s *Server) ListRouters(ctx context.Context, in *infrapb.ListRoutersRequest
 	}
 	return &infrapb.ListRoutersResponse{
 		LastSyncTime: t,
-		Routers:  typesRoutersToGrpc(l),
+		Routers:      typesRoutersToGrpc(l),
+	}, nil
+}
+
+func (s *Server) ListInternetGateways(ctx context.Context, in *infrapb.ListInternetGatewaysRequest) (*infrapb.ListInternetGatewaysResponse, error) {
+
+	s.logger.Infof("Listing routers from user query")
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	l, err := cloudProvider.ListInternetGateways(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failure to retreive Router %s", err.Error())
+		return nil, err
+	}
+	var t string
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.RouterType))
+	if err != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.RouterType, cloudProvider.GetName())
+	} else {
+		t = syncTime.Time
+	}
+	return &infrapb.ListInternetGatewaysResponse{
+		LastSyncTime: t,
+		Igws:         typesIGWsToGrpc(l),
 	}, nil
 }
 
@@ -845,7 +870,7 @@ func (s *Server) unaryServerInterceptor(ctx context.Context, req interface{}, in
 	resp, err := handler(ctx, req)
 
 	// Log response
-	s.logger.Infof("Request = %+v \n Unary Response - Method:%s, Response:%v, Error:%v\n", req, info.FullMethod, resp, err)
+	s.logger.Debugf("Request = %+v \n Unary Response - Method:%s, Response:%v, Error:%v\n", req, info.FullMethod, resp, err)
 
 	return resp, err
 }
