@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,8 @@ import (
 // will give the following abilities:
 //   - List all resources that can be considered Gateway from the CSP
 //     Connector point of view,
+//   - Gather information required for establishing a connection (for
+//     example VPC CIDRs to prepare Route Tables)
 //   - Create resources needed for establishing the Connection with other
 //     provider
 //   - Remove resources, that were previously created, if the connection
@@ -58,21 +60,10 @@ type Provider interface {
 	// The name is case-insensitive. Each part of the code, that uses this method,
 	// will run strings.ToLower() on the result of this method to make sure that
 	// the casing won't make any troubles.
+	//
+	// TODO: Confirm case-insensitivity.
 	Name() string
 
-	// Looks for Gateway matching the provided identifier.
-	//
-	// Returns the pointer to the Gateway structure if it found one or returns nil if
-	// there was no such Gateway. If there is an error such as Connection Problem,
-	// lack of authorization etc. it should be reported as an error.
-	//
-	// This method should be deterministic. A single Identifier should allow the Provider
-	// to match either zero or one Gateway. If some details are missing some valid information
-	// and causes a possibility for multiple matches, the Provider should not look for such
-	// Gateways but immediately report an error that the provided information makes it impossible
-	// to determine a single matching gateway. For example, if the AWS Provider receives GetGateway
-	// with no region provided, it should report an error - even if there was only one Transit Gateway
-	// in the entire AWS, the provider should report an error due to the POSSIBILITY that in certain
 	// Looks for Gateway matching the provided identifier.
 	//
 	// Returns the pointer to the Gateway structure if it found one or returns nil if
@@ -105,6 +96,13 @@ type Provider interface {
 	GetGatewayConnectionSettings(
 		ctx context.Context, gateway types.Gateway,
 	) (types.GatewayConnectionSettings, error)
+
+	// InitializeCreation is a method for each provider to learn about the
+	// planned Create operation so the provider can initialize potential
+	// transaction objects, caches etc.
+	InitializeCreation(
+		ctx context.Context, gateway types.Gateway, peerGateway types.Gateway,
+	) error
 
 	// InitializeGatewayInterfaces creates or looks up resources to obtain
 	// Public IP Addresses that should be used as Interfaces for creating
@@ -152,6 +150,8 @@ type Provider interface {
 		peerGateway types.Gateway,
 	) error
 
+	// Returns a slice of CIDRs that can be reached using a connection with
+	// that particular Gateway.
 	GetCIDRs(ctx context.Context, gateway types.Gateway) ([]string, error)
 
 	// Returns the ID of a VPC where associated with Gateway resource.

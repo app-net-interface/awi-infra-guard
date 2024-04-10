@@ -1,6 +1,11 @@
 infra.db
 
+cspConnector
+
 # CSP Connector specific files
 connections.db
 
 bin/*
+connector/bin/*
+
+connector/demo/*.pem
