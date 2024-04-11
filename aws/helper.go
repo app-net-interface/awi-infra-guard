@@ -15,16 +15,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package gcp
+package aws
 
-import (
-	"context"
-
-	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
-	"github.com/app-net-interface/awi-infra-guard/types"
-)
-
-func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecurityGroupsRequest) ([]types.SecurityGroup, error) {
-	return nil, nil
+func convertString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
 }
-

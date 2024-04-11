@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+ * Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,13 +32,7 @@
 
 var jspb = require('google-protobuf');
 var goog = jspb;
-var global =
-    (typeof globalThis !== 'undefined' && globalThis) ||
-    (typeof window !== 'undefined' && window) ||
-    (typeof global !== 'undefined' && global) ||
-    (typeof self !== 'undefined' && self) ||
-    (function () { return this; }).call(null) ||
-    Function('return this')();
+var global = (function() { return this || window || global || self || Function('return this')(); }).call(null);
 
 var types_pb = require('./types_pb.js');
 goog.object.extend(proto, types_pb);
@@ -510,8 +504,7 @@ proto.infra.ListNamespacesRequest.prototype.getLabelsMap = function(opt_noLazyCr
  */
 proto.infra.ListNamespacesRequest.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 
@@ -864,8 +857,7 @@ proto.infra.ListNodesRequest.prototype.getLabelsMap = function(opt_noLazyCreate)
  */
 proto.infra.ListNodesRequest.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 
@@ -1218,8 +1210,7 @@ proto.infra.ListPodsRequest.prototype.getLabelsMap = function(opt_noLazyCreate) 
  */
 proto.infra.ListPodsRequest.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 
@@ -1572,8 +1563,7 @@ proto.infra.ListServicesRequest.prototype.getLabelsMap = function(opt_noLazyCrea
  */
 proto.infra.ListServicesRequest.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
-  return this;
-};
+  return this;};
 
 
 

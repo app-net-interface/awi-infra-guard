@@ -23,9 +23,64 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 	"google.golang.org/api/compute/v1"
 )
+
+func (c *Client) ListACLs(ctx context.Context, params *infrapb.ListACLsRequest) ([]types.ACL, error) {
+	if params == nil {
+		params = &infrapb.ListACLsRequest{}
+	}
+	var net network
+	var err error
+	if params.GetVpcId() != "" {
+		net, err = c.vpcIdToSingleNetwork(ctx, params.GetAccountId(), params.GetVpcId())
+		if err != nil {
+			return nil, err
+		}
+	}
+	networks, err := c.ListVPC(ctx, &infrapb.ListVPCRequest{AccountId: net.project})
+	if err != nil {
+		return nil, err
+	}
+	acls := make([]types.ACL, 0)
+	f := func(projectID string) error {
+		iter, err := c.computeService.Firewalls.List(projectID).Context(ctx).Do()
+		if err != nil {
+			return err
+		}
+
+		for _, item := range iter.Items {
+			acl := convertFirewall(projectID, networks, item)
+			if !(params.GetVpcId() == "" || net.id == acl.VpcID || net.name == acl.VpcID) {
+				continue
+			}
+
+			acls = append(acls, acl)
+		}
+		return nil
+	}
+	if params.GetAccountId() == "" {
+		for projectID := range c.projectIDs {
+			err := f(projectID)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		err := c.checkProject(params.GetAccountId())
+		if err != nil {
+			return nil, err
+		}
+		err = f(params.GetAccountId())
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return acls, nil
+}
 
 // AddInboundAllowRuleInVPC allows specified CIDRs in VPC (network)
 // supported VPC IDs format:
@@ -143,6 +198,55 @@ func (c *Client) AddInboundAllowRuleByInstanceIPMatch(ctx context.Context,
 	}
 
 	return ruleId, instances, nil
+}
+
+func convertFirewall(projectID string, networks []types.VPC, firewall *compute.Firewall) types.ACL {
+	if firewall == nil {
+		return types.ACL{}
+	}
+
+	rules := make([]types.ACLRule, 0, len(firewall.Allowed))
+	for _, rule := range firewall.Allowed {
+		rules = append(rules, types.ACLRule{
+			Number:            int(firewall.Priority),
+			Protocol:          rule.IPProtocol,
+			PortRange:         strings.Join(rule.Ports, ","),
+			SourceRanges:      firewall.SourceRanges,
+			DestinationRanges: firewall.DestinationRanges,
+			Action:            "Allow",
+			Direction:         firewall.Direction,
+		})
+	}
+	for _, rule := range firewall.Denied {
+		rules = append(rules, types.ACLRule{
+			Number:            int(firewall.Priority),
+			Protocol:          rule.IPProtocol,
+			PortRange:         strings.Join(rule.Ports, ","),
+			SourceRanges:      firewall.SourceRanges,
+			DestinationRanges: firewall.DestinationRanges,
+			Action:            "Deny",
+			Direction:         firewall.Direction,
+		})
+	}
+	acl := types.ACL{
+		ID:        strconv.FormatUint(firewall.Id, 10),
+		Name:      firewall.Name,
+		AccountID: projectID,
+		Provider:  providerName,
+		Rules:     rules,
+	}
+	network := strings.Split(firewall.Network, "/")
+	if len(network) != 0 {
+		name := network[len(network)-1]
+		for _, v := range networks {
+			if v.Name == name || v.ID == name {
+				acl.VpcID = v.ID
+				break
+			}
+		}
+	}
+
+	return acl
 }
 
 func (c *Client) addFirewallRule(ctx context.Context, net network, firewallRuleName string, cidrsToAllow []string, protocolsAndPorts types.ProtocolsAndPorts,

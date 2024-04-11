@@ -20,7 +20,9 @@ package types
 import (
 	"fmt"
 	"strings"
+	"time"
 
+	"google.golang.org/protobuf/types/known/timestamppb"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -38,6 +40,9 @@ const (
 	ACLType           = "ACL"
 	SecurityGroupType = "SecurityGroup"
 	RouteTableType    = "RouteTable"
+	NATGatewayType    = "NATGateway"
+	RouterType        = "Router"
+	IGWType           = "IGW"
 	ClusterType       = "Cluster"
 	PodsType          = "Pod"
 	K8sServiceType    = "K8sService"
@@ -50,6 +55,8 @@ type VPC struct {
 	Name         string
 	Region       string
 	Labels       map[string]string
+	IPv4CIDR     string
+	IPv6CIDR     string
 	Provider     string
 	AccountID    string
 	LastSyncTime string
@@ -273,9 +280,104 @@ func (v *RouteTable) GetProvider() string {
 }
 
 type Route struct {
+	Name        string
 	Destination string
 	Status      string
 	Target      string
+	NextHopType string
+	NextHopIP   string
+}
+
+// CloudGateway represents a generic cloud gateway with various attributes.
+type Router struct {
+	ID                   string            `json:"id"`
+	AccountId            string            `json:"account_id,omitempty"`
+	Name                 string            `json:"name"`
+	Provider             string            `json:"provider"`
+	Region               string            `json:"region"`
+	VPCId                string            `json:"vpc_id"`
+	State                string            `json:"state"`
+	AdvertisedRange      string            `json:"advertised_range"`
+	AdvertisedGroup      string            `json:"advertised_group"`
+	SubnetId             string            `json:"subnet_id"`
+	ASN                  uint32            `json:"asn"`
+	CIDRBlock            string            `json:"cidr_block"`
+	StaticRoutes         []string          `json:"static_routes"` // Could be a list of CIDR blocks
+	VPNType              string            `json:"vpn_type"`
+	SecurityGroupIDs     []string          `json:"security_group_ids"` // Security groups or ACLs IDs
+	Labels               map[string]string `json:"labels"`
+	CreatedAt            time.Time         `json:"created_at"`
+	UpdatedAt            time.Time         `json:"updated_at"`
+	AdditionalProperties map[string]string `json:"additional_properties"`
+	LastSyncTime         string            `json:"last_sync_time"`
+}
+
+func (v *Router) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *Router) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *Router) GetProvider() string {
+	return v.Provider
+}
+
+type NATGateway struct {
+	ID                   string
+	Name                 string            `json:"name,omitempty"`
+	Provider             string            `json:"provider,omitempty"`
+	AccountId            string            `json:"account_id,omitempty"`
+	VpcId                string            `json:"vpc_id,omitempty"`
+	Region               string            `json:"region,omitempty"`
+	State                string            `json:"state,omitempty"`
+	PublicIp             string            `json:"public_ip,omitempty"`
+	PrivateIp            string            `json:"private_ip,omitempty"`
+	SubnetId             string            `json:"subnet_id,omitempty"`
+	Labels               map[string]string `json:"labels,omitempty"`
+	CreatedAt            time.Time         `json:"created_at,omitempty"`
+	UpdatedAt            time.Time         `json:"updated_at,omitempty"`
+	LastSyncTime         string            `json:"last_sync_time,omitempty"`
+	AdditionalProperties map[string]string `json:"additional_properties,omitempty"`
+}
+
+func (v *NATGateway) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *NATGateway) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *NATGateway) GetProvider() string {
+	return v.Provider
+}
+
+type IGW struct {
+	ID            string                 `json:"id,omitempty"`
+	Name          string                 `json:"name,omitempty"`
+	Provider      string                 `json:"provider,omitempty"`
+	AccountId     string                 `json:"account_id,omitempty"`
+	AttachedVpcId string                 `json:"attached_vpc_id,omitempty"` //
+	Region        string                 `json:"region,omitempty"`          // VPC Region
+	State         string                 `json:"state,omitempty"`
+	Labels        map[string]string      `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt     *timestamppb.Timestamp `json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `json:"updated_at,omitempty"`
+	LastSyncTime  string                 `json:"last_sync_time,omitempty"`
+}
+
+func (v *IGW) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *IGW) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *IGW) GetProvider() string {
+	return v.Provider
 }
 
 type SecurityGroup struct {

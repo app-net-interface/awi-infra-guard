@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Cisco Systems, Inc. and its affiliates
+ * Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
  * All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -334,6 +334,168 @@ export class ListRouteTablesResponse extends jspb.Message {
 export namespace ListRouteTablesResponse {
   export type AsObject = {
     routeTablesList: Array<types_pb.RouteTable.AsObject>,
+    lastSyncTime: string,
+  }
+}
+
+export class ListNATGatewaysRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListNATGatewaysRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListNATGatewaysRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListNATGatewaysRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListNATGatewaysRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListNATGatewaysRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListNATGatewaysRequest): ListNATGatewaysRequest.AsObject;
+  static serializeBinaryToWriter(message: ListNATGatewaysRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListNATGatewaysRequest;
+  static deserializeBinaryFromReader(message: ListNATGatewaysRequest, reader: jspb.BinaryReader): ListNATGatewaysRequest;
+}
+
+export namespace ListNATGatewaysRequest {
+  export type AsObject = {
+    provider: string,
+    vpcId: string,
+    region: string,
+    accountId: string,
+  }
+}
+
+export class ListNATGatewaysResponse extends jspb.Message {
+  getNatGatewaysList(): Array<types_pb.NATGateway>;
+  setNatGatewaysList(value: Array<types_pb.NATGateway>): ListNATGatewaysResponse;
+  clearNatGatewaysList(): ListNATGatewaysResponse;
+  addNatGateways(value?: types_pb.NATGateway, index?: number): types_pb.NATGateway;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListNATGatewaysResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListNATGatewaysResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListNATGatewaysResponse): ListNATGatewaysResponse.AsObject;
+  static serializeBinaryToWriter(message: ListNATGatewaysResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListNATGatewaysResponse;
+  static deserializeBinaryFromReader(message: ListNATGatewaysResponse, reader: jspb.BinaryReader): ListNATGatewaysResponse;
+}
+
+export namespace ListNATGatewaysResponse {
+  export type AsObject = {
+    natGatewaysList: Array<types_pb.NATGateway.AsObject>,
+    lastSyncTime: string,
+  }
+}
+
+export class ListRoutersRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListRoutersRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListRoutersRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListRoutersRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListRoutersRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListRoutersRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListRoutersRequest): ListRoutersRequest.AsObject;
+  static serializeBinaryToWriter(message: ListRoutersRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListRoutersRequest;
+  static deserializeBinaryFromReader(message: ListRoutersRequest, reader: jspb.BinaryReader): ListRoutersRequest;
+}
+
+export namespace ListRoutersRequest {
+  export type AsObject = {
+    provider: string,
+    vpcId: string,
+    region: string,
+    accountId: string,
+  }
+}
+
+export class ListRoutersResponse extends jspb.Message {
+  getRoutersList(): Array<types_pb.Router>;
+  setRoutersList(value: Array<types_pb.Router>): ListRoutersResponse;
+  clearRoutersList(): ListRoutersResponse;
+  addRouters(value?: types_pb.Router, index?: number): types_pb.Router;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListRoutersResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListRoutersResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListRoutersResponse): ListRoutersResponse.AsObject;
+  static serializeBinaryToWriter(message: ListRoutersResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListRoutersResponse;
+  static deserializeBinaryFromReader(message: ListRoutersResponse, reader: jspb.BinaryReader): ListRoutersResponse;
+}
+
+export namespace ListRoutersResponse {
+  export type AsObject = {
+    routersList: Array<types_pb.Router.AsObject>,
+    lastSyncTime: string,
+  }
+}
+
+export class ListInternetGatewaysRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListInternetGatewaysRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListInternetGatewaysRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListInternetGatewaysRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListInternetGatewaysRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListInternetGatewaysRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListInternetGatewaysRequest): ListInternetGatewaysRequest.AsObject;
+  static serializeBinaryToWriter(message: ListInternetGatewaysRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListInternetGatewaysRequest;
+  static deserializeBinaryFromReader(message: ListInternetGatewaysRequest, reader: jspb.BinaryReader): ListInternetGatewaysRequest;
+}
+
+export namespace ListInternetGatewaysRequest {
+  export type AsObject = {
+    provider: string,
+    vpcId: string,
+    region: string,
+    accountId: string,
+  }
+}
+
+export class ListInternetGatewaysResponse extends jspb.Message {
+  getIgwsList(): Array<types_pb.IGW>;
+  setIgwsList(value: Array<types_pb.IGW>): ListInternetGatewaysResponse;
+  clearIgwsList(): ListInternetGatewaysResponse;
+  addIgws(value?: types_pb.IGW, index?: number): types_pb.IGW;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListInternetGatewaysResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListInternetGatewaysResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListInternetGatewaysResponse): ListInternetGatewaysResponse.AsObject;
+  static serializeBinaryToWriter(message: ListInternetGatewaysResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListInternetGatewaysResponse;
+  static deserializeBinaryFromReader(message: ListInternetGatewaysResponse, reader: jspb.BinaryReader): ListInternetGatewaysResponse;
+}
+
+export namespace ListInternetGatewaysResponse {
+  export type AsObject = {
+    igwsList: Array<types_pb.IGW.AsObject>,
     lastSyncTime: string,
   }
 }
@@ -822,6 +984,15 @@ export class Counters extends jspb.Message {
   getSecurityGroups(): number;
   setSecurityGroups(value: number): Counters;
 
+  getNatGateways(): number;
+  setNatGateways(value: number): Counters;
+
+  getRouters(): number;
+  setRouters(value: number): Counters;
+
+  getIgws(): number;
+  setIgws(value: number): Counters;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Counters.AsObject;
   static toObject(includeInstance: boolean, msg: Counters): Counters.AsObject;
@@ -843,6 +1014,9 @@ export namespace Counters {
     namespaces: number,
     acls: number,
     securityGroups: number,
+    natGateways: number,
+    routers: number,
+    igws: number,
   }
 }
 

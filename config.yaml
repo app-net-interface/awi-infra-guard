@@ -24,6 +24,6 @@ dbFileName: "infra.db"
 # use local database, if true periodically sync resources from the cloud and serve resources to the client based on local database
 useLocalDB: true
 # how often sync resources from the cloud, if useLocalDB is true
-syncWaitTime: "60s"
+syncWaitTime: "180s"
 # Logging Level: Possible options are PANIC, FATAL, ERROR, INFO, WARN, DEBUG, TRACE
 logLevel: DEBUG

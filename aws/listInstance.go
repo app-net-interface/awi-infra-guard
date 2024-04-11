@@ -125,12 +125,7 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 	return instances
 }
 
-func convertString(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
-}
+
 
 func convertTags(tags []awstypes.Tag) map[string]string {
 	labels := make(map[string]string, len(tags))

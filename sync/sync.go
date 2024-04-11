@@ -47,12 +47,18 @@ type Syncer struct {
 }
 
 func (s *Syncer) Sync() {
+
 	s.syncVPC()
 	s.syncInstances()
 	s.syncSubnets()
-	s.syncACLs()
 	s.syncRouteTables()
+	s.syncACLs()
 	s.syncSecurityGroups()
+	s.syncNATGateways()
+	s.syncRouters()
+	s.syncIGWs()
+
+	// Kubernetes
 	s.syncClusters()
 	s.syncPods()
 	s.syncNamespaces()
@@ -110,6 +116,26 @@ func (s *Syncer) syncRouteTables() {
 	}, s.logger, s.dbClient.ListRouteTables, s.dbClient.PutRouteTable, s.dbClient.DeleteRouteTable)
 }
 
+func (s *Syncer) syncNATGateways() {
+	genericCloudSync[*types.NATGateway](s, types.NATGatewayType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.NATGateway, error) {
+		return cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListNATGateways, s.dbClient.PutNATGateway, s.dbClient.DeleteNATGateway)
+}
+
+func (s *Syncer) syncRouters() {
+	genericCloudSync[*types.Router](s, types.RouterType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Router, error) {
+
+		return cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListRouters, s.dbClient.PutRouter, s.dbClient.DeleteRouter)
+}
+
+func (s *Syncer) syncIGWs() {
+	genericCloudSync[*types.IGW](s, types.IGWType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.IGW, error) {
+
+		return cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListInternetGateways, s.dbClient.PutIGW, s.dbClient.DeleteIGW)
+}
+
 func (s *Syncer) syncClusters() {
 	genericCloudSync[*types.Cluster](s, types.ClusterType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Cluster, error) {
 		return cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{AccountId: accountID})
@@ -157,10 +183,10 @@ func genericCloudSync[P interface {
 	var allRemoteObj []P
 	syncTime := make(map[string]types.SyncTime)
 	for _, cloudProvider := range s.strategy.GetAllProviders() {
-		s.logger.Infof("Syncing %s in provider %s", typeName, cloudProvider.GetName())
 		t := time.Now().UTC().Format(time.RFC3339)
 		ok := false
 		for _, account := range cloudProvider.ListAccounts() {
+			s.logger.Infof("Found account %s and provider %s", account.ID, cloudProvider.GetName())
 			remoteObjs, err := listF(ctx, cloudProvider, account.ID)
 			if err != nil {
 				s.logger.Errorf("Sync error: failed to List %s in provider %s: %v",
@@ -259,7 +285,7 @@ func genericK8sSync[P interface {
 	}
 	syncTime := make(map[string]types.SyncTime)
 	for _, cluster := range clusters {
-		s.logger.Infof("Syncing pods in cluster %s", cluster.Name)
+		//s.logger.Infof("Syncing pods in cluster %s", cluster.Name)
 		t := time.Now().UTC().Format(time.RFC3339)
 		remoteObjs, err := listF(ctx, k8sProvider, cluster.Name)
 		if err != nil {

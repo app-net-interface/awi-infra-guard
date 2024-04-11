@@ -17,14 +17,10 @@
 
 package gcp
 
-import (
-	"context"
+import "strings"
 
-	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
-	"github.com/app-net-interface/awi-infra-guard/types"
-)
-
-func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecurityGroupsRequest) ([]types.SecurityGroup, error) {
-	return nil, nil
+// Helper function to extract the last segment of a resource URL, typically the ID or name.
+func extractResourceID(url string) string {
+	parts := strings.Split(url, "/")
+	return parts[len(parts)-1]
 }
-

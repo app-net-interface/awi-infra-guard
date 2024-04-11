@@ -25,6 +25,7 @@ import (
 	"cloud.google.com/go/compute/apiv1/computepb"
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
+	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 	"github.com/sirupsen/logrus"
 	computeServ "google.golang.org/api/compute/v1"
@@ -148,4 +149,9 @@ func (c *Client) checkProject(project string) error {
 		return fmt.Errorf("provided project: %s not configured", project)
 	}
 	return nil
+}
+
+func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error) {
+
+	return nil, nil
 }

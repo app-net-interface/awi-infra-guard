@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/app-net-interface/awi-infra-guard/azure"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 
 	"github.com/app-net-interface/kubernetes-discovery/cluster"
@@ -55,6 +56,10 @@ type CloudProvider interface {
 	ListACLs(ctx context.Context, input *infrapb.ListACLsRequest) ([]types.ACL, error)
 	ListSecurityGroups(ctx context.Context, input *infrapb.ListSecurityGroupsRequest) ([]types.SecurityGroup, error)
 	ListRouteTables(ctx context.Context, input *infrapb.ListRouteTablesRequest) ([]types.RouteTable, error)
+	ListNATGateways(ctx context.Context, input *infrapb.ListNATGatewaysRequest) ([]types.NATGateway, error)
+	ListRouters(ctx context.Context, input *infrapb.ListRoutersRequest) ([]types.Router, error)
+	ListInternetGateways(ctx context.Context, input *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error)
+
 	// GetSubnet returns single subnet based on it's ID
 	GetSubnet(ctx context.Context, input *infrapb.GetSubnetRequest) (types.Subnet, error)
 	// GetVPCIDForCIDR returns ID of VPC which have subnet with given CIDR.
@@ -129,10 +134,11 @@ type VPCConnector interface {
 }
 
 type RealProviderStrategy struct {
-	awsClient *aws.Client
-	gcpClient *gcp.Client
-	k8sClient *infra_kubernetes.KubernetesClient
-	logger    *logrus.Logger
+	awsClient   *aws.Client
+	gcpClient   *gcp.Client
+	azureClient *azure.Client
+	k8sClient   *infra_kubernetes.KubernetesClient
+	logger      *logrus.Logger
 }
 
 func (s *RealProviderStrategy) GetProvider(ctx context.Context, cloud string) (CloudProvider, error) {
@@ -148,6 +154,11 @@ func (s *RealProviderStrategy) GetProvider(ctx context.Context, cloud string) (C
 			return nil, fmt.Errorf("GCP client is not initizalized")
 		}
 		return s.gcpClient, nil
+	case "azure":
+		if s.azureClient == nil {
+			return nil, fmt.Errorf("Azure client is not initizalized")
+		}
+		return s.azureClient, nil
 	}
 	return nil, fmt.Errorf("unsupported provider")
 }
@@ -160,6 +171,9 @@ func (s *RealProviderStrategy) GetAllProviders() []CloudProvider {
 	if s.awsClient != nil {
 		providers = append(providers, s.awsClient)
 	}
+	if s.azureClient != nil {
+		providers = append(providers, s.azureClient)
+	}
 	return providers
 }
 
@@ -171,7 +185,7 @@ func (s *RealProviderStrategy) GetKubernetesProvider() (Kubernetes, error) {
 }
 
 func (s *RealProviderStrategy) RefreshState(ctx context.Context) error {
-	s.logger.Infof("Refreshing clusters state...")
+	s.logger.Debugf("Refreshing clusters state...")
 	s.RetrieveClusters(ctx)
 	return nil
 }
@@ -189,6 +203,11 @@ func NewRealProviderStrategy(ctx context.Context, logger *logrus.Logger, kubeCon
 	if err != nil {
 		logger.Warnf("Failed to init GCP client: %v", err)
 	}
+	s.azureClient, err = azure.NewClient(ctx, s.logger)
+	if err != nil {
+		logger.Warnf("Failed to init Azure client: %v", err)
+	}
+
 	s.k8sClient, err = infra_kubernetes.NewKubernetesClient(logger, kubeConfigFileName)
 	if err != nil {
 		logger.Warnf("Failed to init kubernetes clients: %v", err)

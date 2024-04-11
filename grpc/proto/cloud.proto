@@ -38,6 +38,13 @@ service CloudProviderService {
     rpc ListSecurityGroups (ListSecurityGroupsRequest) returns (ListSecurityGroupsResponse) {}
 
     rpc ListRouteTables (ListRouteTablesRequest) returns (ListRouteTablesResponse) {}
+    
+    rpc ListNATGateways (ListNATGatewaysRequest) returns (ListNATGatewaysResponse) {}
+
+    rpc ListRouters (ListRoutersRequest) returns (ListRoutersResponse) {}
+   
+    rpc ListInternetGateways (ListInternetGatewaysRequest) returns (ListInternetGatewaysResponse) {}
+
 
     rpc GetVPCIDForCIDR (GetVPCIDForCIDRRequest) returns (GetVPCIDForCIDRResponse) {}
 
@@ -93,8 +100,8 @@ message ListInstancesResponse {
 message ListACLsRequest {
     string provider = 1;
     string vpc_id = 2;
-    string region = 4;
-    string account_id = 5;
+    string region = 3;
+    string account_id = 4;
 }
 
 message ListACLsResponse {
@@ -105,8 +112,8 @@ message ListACLsResponse {
 message ListSecurityGroupsRequest {
     string provider = 1;
     string vpc_id = 2;
-    string region = 4;
-    string account_id = 5;
+    string region = 3;
+    string account_id = 4;
 }
 
 message ListSecurityGroupsResponse {
@@ -117,14 +124,53 @@ message ListSecurityGroupsResponse {
 message ListRouteTablesRequest {
     string provider = 1;
     string vpc_id = 2;
-    string region = 4;
-    string account_id = 5;
+    string region = 3;
+    string account_id = 4;
 }
+
 
 message ListRouteTablesResponse {
     repeated RouteTable route_tables = 1;
     string last_sync_time = 2;
 }
+
+message ListNATGatewaysRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 3;
+    string account_id = 4;
+}
+
+message ListNATGatewaysResponse {
+    repeated NATGateway nat_gateways = 1;
+    string last_sync_time = 2;
+}
+
+message ListRoutersRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 3;
+    string account_id = 4;
+}
+
+message ListRoutersResponse {
+    repeated Router routers = 1;
+    string last_sync_time = 2;
+}
+
+message ListInternetGatewaysRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 3;
+    string account_id = 4;
+}
+
+message ListInternetGatewaysResponse {
+    repeated IGW igws = 1;
+    string last_sync_time = 2;
+}
+
+
 
 // GetSubnet
 message GetSubnetRequest {
@@ -246,6 +292,9 @@ message Counters {
     int32 namespaces = 9;
     int32 acls = 10;
     int32 security_groups = 11;
+    int32 nat_gateways = 12;
+    int32 routers = 13;
+    int32 igws = 14;
 }
 
 message StatusSummary {
