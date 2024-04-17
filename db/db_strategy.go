@@ -350,12 +350,12 @@ func (p *providerWithDB) ListRouters(ctx context.Context, params *infrapb.ListRo
 }
 
 func (p *providerWithDB) ListInternetGateways(ctx context.Context, params *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error) {
-	dbRouters, err := p.dbClient.ListInternetGateways()
+	dbIGWs, err := p.dbClient.ListInternetGateways()
 	if err != nil {
 		return nil, err
 	}
-	var providerRouters []types.IGW
-	for _, igw := range dbRouters {
+	var providerIGWs []types.IGW
+	for _, igw := range dbIGWs {
 		if strings.ToLower(igw.Provider) != strings.ToLower(p.realProvider.GetName()) {
 			continue
 		}
@@ -370,9 +370,35 @@ func (p *providerWithDB) ListInternetGateways(ctx context.Context, params *infra
 		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
 		//	continue
 		//}
-		providerRouters = append(providerRouters, *igw)
+		providerIGWs = append(providerIGWs, *igw)
 	}
-	return providerRouters, nil
+	return providerIGWs, nil
+}
+
+func (p *providerWithDB) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error) {
+	dbvpce, err := p.dbClient.ListVPCEndpoints()
+	if err != nil {
+		return nil, err
+	}
+	var providerVpces []types.VPCEndpoint
+	for _, vpce := range dbvpce {
+		if strings.ToLower(vpce.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != vpce.AccountId {
+			continue
+		}
+		//if params.GetRegion() != "global" {
+		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
+		//		continue
+		//	}
+		//}
+		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
+		//	continue
+		//}
+		providerVpces = append(providerVpces, *vpce)
+	}
+	return providerVpces, nil
 }
 
 func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {

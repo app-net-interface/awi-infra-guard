@@ -42,10 +42,8 @@ service CloudProviderService {
     rpc ListNATGateways (ListNATGatewaysRequest) returns (ListNATGatewaysResponse) {}
 
     rpc ListRouters (ListRoutersRequest) returns (ListRoutersResponse) {}
-   
     rpc ListInternetGateways (ListInternetGatewaysRequest) returns (ListInternetGatewaysResponse) {}
-
-
+    rpc ListVPCEndpoints (ListVPCEndpointsRequest) returns (ListVPCEndpointsResponse) {}
     rpc GetVPCIDForCIDR (GetVPCIDForCIDRRequest) returns (GetVPCIDForCIDRResponse) {}
 
     rpc GetCIDRsForLabels (GetCIDRsForLabelsRequest) returns (GetCIDRsForLabelsResponse) {}
@@ -170,6 +168,17 @@ message ListInternetGatewaysResponse {
     string last_sync_time = 2;
 }
 
+message ListVPCEndpointsResponse {
+    repeated VPCEndpoint veps = 1;
+    string last_sync_time = 2;
+}
+
+message ListVPCEndpointsRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 3;
+    string account_id = 4;
+}
 
 
 // GetSubnet

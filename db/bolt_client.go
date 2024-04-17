@@ -188,6 +188,23 @@ func (client *boltClient) DeleteIGW(id string) error {
 	return delete_(client, id, igwTable)
 }
 
+// VPCEndpoint
+func (client *boltClient) PutVPCEndpoint(vpce *types.VPCEndpoint) error {
+	return update(client, vpce, vpce.DbId(), vpcEndpointTable)
+}
+
+func (client *boltClient) GetVPCEndpoint(id string) (*types.VPCEndpoint, error) {
+	return get[types.VPCEndpoint](client, id, vpcEndpointTable)
+}
+
+func (client *boltClient) ListVPCEndpoints() ([]*types.VPCEndpoint, error) {
+	return list[types.VPCEndpoint](client, vpcEndpointTable)
+}
+
+func (client *boltClient) DeleteVPCEndpoint(id string) error {
+	return delete_(client, id, vpcEndpointTable)
+}
+
 // SecurityGroup
 func (client *boltClient) PutSecurityGroup(securityGroup *types.SecurityGroup) error {
 	return update(client, securityGroup, securityGroup.DbId(), securityGroupTable)

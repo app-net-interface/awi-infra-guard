@@ -35,6 +35,7 @@ const (
 	ngTable                = "nat_gateways"
 	routerTable            = "routers"
 	igwTable               = "igws"
+	vpcEndpointTable       = "vpcEndpoints"
 	syncTimeTable          = "sync_time"
 )
 
@@ -53,6 +54,7 @@ var tableNames = []string{
 	ngTable,
 	routerTable,
 	igwTable,
+	vpcEndpointTable,
 	aclTable,
 	securityGroupTable,
 	syncTimeTable,
@@ -116,6 +118,12 @@ type Client interface {
 	PutIGW(ng *types.IGW) error
 	GetIGW(id string) (*types.IGW, error)
 	DeleteIGW(id string) error
+
+	// VPCEndpoint
+	ListVPCEndpoints() ([]*types.VPCEndpoint, error)
+	PutVPCEndpoint(ng *types.VPCEndpoint) error
+	GetVPCEndpoint(id string) (*types.VPCEndpoint, error)
+	DeleteVPCEndpoint(id string) error
 
 	//Security Group
 	PutSecurityGroup(securityGroup *types.SecurityGroup) error

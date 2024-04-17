@@ -1157,6 +1157,132 @@ func (x *ListInternetGatewaysResponse) GetLastSyncTime() string {
 	return ""
 }
 
+type ListVPCEndpointsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Veps         []*VPCEndpoint `protobuf:"bytes,1,rep,name=veps,proto3" json:"veps,omitempty"`
+	LastSyncTime string         `protobuf:"bytes,2,opt,name=last_sync_time,json=lastSyncTime,proto3" json:"last_sync_time,omitempty"`
+}
+
+func (x *ListVPCEndpointsResponse) Reset() {
+	*x = ListVPCEndpointsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_cloud_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListVPCEndpointsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListVPCEndpointsResponse) ProtoMessage() {}
+
+func (x *ListVPCEndpointsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_cloud_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListVPCEndpointsResponse.ProtoReflect.Descriptor instead.
+func (*ListVPCEndpointsResponse) Descriptor() ([]byte, []int) {
+	return file_cloud_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ListVPCEndpointsResponse) GetVeps() []*VPCEndpoint {
+	if x != nil {
+		return x.Veps
+	}
+	return nil
+}
+
+func (x *ListVPCEndpointsResponse) GetLastSyncTime() string {
+	if x != nil {
+		return x.LastSyncTime
+	}
+	return ""
+}
+
+type ListVPCEndpointsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Provider  string `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	VpcId     string `protobuf:"bytes,2,opt,name=vpc_id,json=vpcId,proto3" json:"vpc_id,omitempty"`
+	Region    string `protobuf:"bytes,3,opt,name=region,proto3" json:"region,omitempty"`
+	AccountId string `protobuf:"bytes,4,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+}
+
+func (x *ListVPCEndpointsRequest) Reset() {
+	*x = ListVPCEndpointsRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_cloud_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ListVPCEndpointsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListVPCEndpointsRequest) ProtoMessage() {}
+
+func (x *ListVPCEndpointsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_cloud_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListVPCEndpointsRequest.ProtoReflect.Descriptor instead.
+func (*ListVPCEndpointsRequest) Descriptor() ([]byte, []int) {
+	return file_cloud_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ListVPCEndpointsRequest) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *ListVPCEndpointsRequest) GetVpcId() string {
+	if x != nil {
+		return x.VpcId
+	}
+	return ""
+}
+
+func (x *ListVPCEndpointsRequest) GetRegion() string {
+	if x != nil {
+		return x.Region
+	}
+	return ""
+}
+
+func (x *ListVPCEndpointsRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
 // GetSubnet
 type GetSubnetRequest struct {
 	state         protoimpl.MessageState
@@ -1173,7 +1299,7 @@ type GetSubnetRequest struct {
 func (x *GetSubnetRequest) Reset() {
 	*x = GetSubnetRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[18]
+		mi := &file_cloud_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1186,7 +1312,7 @@ func (x *GetSubnetRequest) String() string {
 func (*GetSubnetRequest) ProtoMessage() {}
 
 func (x *GetSubnetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[18]
+	mi := &file_cloud_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1199,7 +1325,7 @@ func (x *GetSubnetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubnetRequest.ProtoReflect.Descriptor instead.
 func (*GetSubnetRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{18}
+	return file_cloud_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GetSubnetRequest) GetProvider() string {
@@ -1248,7 +1374,7 @@ type GetSubnetResponse struct {
 func (x *GetSubnetResponse) Reset() {
 	*x = GetSubnetResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[19]
+		mi := &file_cloud_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1261,7 +1387,7 @@ func (x *GetSubnetResponse) String() string {
 func (*GetSubnetResponse) ProtoMessage() {}
 
 func (x *GetSubnetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[19]
+	mi := &file_cloud_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1274,7 +1400,7 @@ func (x *GetSubnetResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubnetResponse.ProtoReflect.Descriptor instead.
 func (*GetSubnetResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{19}
+	return file_cloud_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetSubnetResponse) GetSubnet() *Subnet {
@@ -1302,7 +1428,7 @@ type ListSubnetsRequest struct {
 func (x *ListSubnetsRequest) Reset() {
 	*x = ListSubnetsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[20]
+		mi := &file_cloud_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1315,7 +1441,7 @@ func (x *ListSubnetsRequest) String() string {
 func (*ListSubnetsRequest) ProtoMessage() {}
 
 func (x *ListSubnetsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[20]
+	mi := &file_cloud_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1328,7 +1454,7 @@ func (x *ListSubnetsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSubnetsRequest.ProtoReflect.Descriptor instead.
 func (*ListSubnetsRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{20}
+	return file_cloud_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ListSubnetsRequest) GetProvider() string {
@@ -1392,7 +1518,7 @@ type ListSubnetsResponse struct {
 func (x *ListSubnetsResponse) Reset() {
 	*x = ListSubnetsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[21]
+		mi := &file_cloud_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1405,7 +1531,7 @@ func (x *ListSubnetsResponse) String() string {
 func (*ListSubnetsResponse) ProtoMessage() {}
 
 func (x *ListSubnetsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[21]
+	mi := &file_cloud_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1418,7 +1544,7 @@ func (x *ListSubnetsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSubnetsResponse.ProtoReflect.Descriptor instead.
 func (*ListSubnetsResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{21}
+	return file_cloud_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ListSubnetsResponse) GetSubnets() []*Subnet {
@@ -1450,7 +1576,7 @@ type GetVPCIDForCIDRRequest struct {
 func (x *GetVPCIDForCIDRRequest) Reset() {
 	*x = GetVPCIDForCIDRRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[22]
+		mi := &file_cloud_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1463,7 +1589,7 @@ func (x *GetVPCIDForCIDRRequest) String() string {
 func (*GetVPCIDForCIDRRequest) ProtoMessage() {}
 
 func (x *GetVPCIDForCIDRRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[22]
+	mi := &file_cloud_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1476,7 +1602,7 @@ func (x *GetVPCIDForCIDRRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVPCIDForCIDRRequest.ProtoReflect.Descriptor instead.
 func (*GetVPCIDForCIDRRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{22}
+	return file_cloud_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetVPCIDForCIDRRequest) GetProvider() string {
@@ -1518,7 +1644,7 @@ type GetVPCIDForCIDRResponse struct {
 func (x *GetVPCIDForCIDRResponse) Reset() {
 	*x = GetVPCIDForCIDRResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[23]
+		mi := &file_cloud_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1531,7 +1657,7 @@ func (x *GetVPCIDForCIDRResponse) String() string {
 func (*GetVPCIDForCIDRResponse) ProtoMessage() {}
 
 func (x *GetVPCIDForCIDRResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[23]
+	mi := &file_cloud_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1544,7 +1670,7 @@ func (x *GetVPCIDForCIDRResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVPCIDForCIDRResponse.ProtoReflect.Descriptor instead.
 func (*GetVPCIDForCIDRResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{23}
+	return file_cloud_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetVPCIDForCIDRResponse) GetVpcId() string {
@@ -1569,7 +1695,7 @@ type GetCIDRsForLabelsRequest struct {
 func (x *GetCIDRsForLabelsRequest) Reset() {
 	*x = GetCIDRsForLabelsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[24]
+		mi := &file_cloud_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1582,7 +1708,7 @@ func (x *GetCIDRsForLabelsRequest) String() string {
 func (*GetCIDRsForLabelsRequest) ProtoMessage() {}
 
 func (x *GetCIDRsForLabelsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[24]
+	mi := &file_cloud_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1595,7 +1721,7 @@ func (x *GetCIDRsForLabelsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCIDRsForLabelsRequest.ProtoReflect.Descriptor instead.
 func (*GetCIDRsForLabelsRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{24}
+	return file_cloud_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *GetCIDRsForLabelsRequest) GetProvider() string {
@@ -1637,7 +1763,7 @@ type GetCIDRsForLabelsResponse struct {
 func (x *GetCIDRsForLabelsResponse) Reset() {
 	*x = GetCIDRsForLabelsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[25]
+		mi := &file_cloud_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1650,7 +1776,7 @@ func (x *GetCIDRsForLabelsResponse) String() string {
 func (*GetCIDRsForLabelsResponse) ProtoMessage() {}
 
 func (x *GetCIDRsForLabelsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[25]
+	mi := &file_cloud_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1663,7 +1789,7 @@ func (x *GetCIDRsForLabelsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCIDRsForLabelsResponse.ProtoReflect.Descriptor instead.
 func (*GetCIDRsForLabelsResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{25}
+	return file_cloud_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *GetCIDRsForLabelsResponse) GetCidrs() []string {
@@ -1688,7 +1814,7 @@ type GetIPsForLabelsRequest struct {
 func (x *GetIPsForLabelsRequest) Reset() {
 	*x = GetIPsForLabelsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[26]
+		mi := &file_cloud_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1701,7 +1827,7 @@ func (x *GetIPsForLabelsRequest) String() string {
 func (*GetIPsForLabelsRequest) ProtoMessage() {}
 
 func (x *GetIPsForLabelsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[26]
+	mi := &file_cloud_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1714,7 +1840,7 @@ func (x *GetIPsForLabelsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIPsForLabelsRequest.ProtoReflect.Descriptor instead.
 func (*GetIPsForLabelsRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{26}
+	return file_cloud_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GetIPsForLabelsRequest) GetProvider() string {
@@ -1756,7 +1882,7 @@ type GetIPsForLabelsResponse struct {
 func (x *GetIPsForLabelsResponse) Reset() {
 	*x = GetIPsForLabelsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[27]
+		mi := &file_cloud_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1769,7 +1895,7 @@ func (x *GetIPsForLabelsResponse) String() string {
 func (*GetIPsForLabelsResponse) ProtoMessage() {}
 
 func (x *GetIPsForLabelsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[27]
+	mi := &file_cloud_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1782,7 +1908,7 @@ func (x *GetIPsForLabelsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIPsForLabelsResponse.ProtoReflect.Descriptor instead.
 func (*GetIPsForLabelsResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{27}
+	return file_cloud_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *GetIPsForLabelsResponse) GetIps() []string {
@@ -1808,7 +1934,7 @@ type GetInstancesForLabelsRequest struct {
 func (x *GetInstancesForLabelsRequest) Reset() {
 	*x = GetInstancesForLabelsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[28]
+		mi := &file_cloud_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1821,7 +1947,7 @@ func (x *GetInstancesForLabelsRequest) String() string {
 func (*GetInstancesForLabelsRequest) ProtoMessage() {}
 
 func (x *GetInstancesForLabelsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[28]
+	mi := &file_cloud_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1834,7 +1960,7 @@ func (x *GetInstancesForLabelsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetInstancesForLabelsRequest.ProtoReflect.Descriptor instead.
 func (*GetInstancesForLabelsRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{28}
+	return file_cloud_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *GetInstancesForLabelsRequest) GetProvider() string {
@@ -1883,7 +2009,7 @@ type GetInstancesForLabelsResponse struct {
 func (x *GetInstancesForLabelsResponse) Reset() {
 	*x = GetInstancesForLabelsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[29]
+		mi := &file_cloud_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1896,7 +2022,7 @@ func (x *GetInstancesForLabelsResponse) String() string {
 func (*GetInstancesForLabelsResponse) ProtoMessage() {}
 
 func (x *GetInstancesForLabelsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[29]
+	mi := &file_cloud_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1909,7 +2035,7 @@ func (x *GetInstancesForLabelsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetInstancesForLabelsResponse.ProtoReflect.Descriptor instead.
 func (*GetInstancesForLabelsResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{29}
+	return file_cloud_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *GetInstancesForLabelsResponse) GetInstances() []*Instance {
@@ -1935,7 +2061,7 @@ type GetVPCIDWithTagRequest struct {
 func (x *GetVPCIDWithTagRequest) Reset() {
 	*x = GetVPCIDWithTagRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[30]
+		mi := &file_cloud_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1948,7 +2074,7 @@ func (x *GetVPCIDWithTagRequest) String() string {
 func (*GetVPCIDWithTagRequest) ProtoMessage() {}
 
 func (x *GetVPCIDWithTagRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[30]
+	mi := &file_cloud_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1961,7 +2087,7 @@ func (x *GetVPCIDWithTagRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVPCIDWithTagRequest.ProtoReflect.Descriptor instead.
 func (*GetVPCIDWithTagRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{30}
+	return file_cloud_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *GetVPCIDWithTagRequest) GetProvider() string {
@@ -2010,7 +2136,7 @@ type GetVPCIDWithTagResponse struct {
 func (x *GetVPCIDWithTagResponse) Reset() {
 	*x = GetVPCIDWithTagResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[31]
+		mi := &file_cloud_proto_msgTypes[33]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2023,7 +2149,7 @@ func (x *GetVPCIDWithTagResponse) String() string {
 func (*GetVPCIDWithTagResponse) ProtoMessage() {}
 
 func (x *GetVPCIDWithTagResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[31]
+	mi := &file_cloud_proto_msgTypes[33]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2036,7 +2162,7 @@ func (x *GetVPCIDWithTagResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetVPCIDWithTagResponse.ProtoReflect.Descriptor instead.
 func (*GetVPCIDWithTagResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{31}
+	return file_cloud_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *GetVPCIDWithTagResponse) GetVpcId() string {
@@ -2061,7 +2187,7 @@ type ListCloudClustersRequest struct {
 func (x *ListCloudClustersRequest) Reset() {
 	*x = ListCloudClustersRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[32]
+		mi := &file_cloud_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2074,7 +2200,7 @@ func (x *ListCloudClustersRequest) String() string {
 func (*ListCloudClustersRequest) ProtoMessage() {}
 
 func (x *ListCloudClustersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[32]
+	mi := &file_cloud_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2087,7 +2213,7 @@ func (x *ListCloudClustersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCloudClustersRequest.ProtoReflect.Descriptor instead.
 func (*ListCloudClustersRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{32}
+	return file_cloud_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ListCloudClustersRequest) GetProvider() string {
@@ -2137,7 +2263,7 @@ type ListCloudClustersResponse struct {
 func (x *ListCloudClustersResponse) Reset() {
 	*x = ListCloudClustersResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[33]
+		mi := &file_cloud_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2150,7 +2276,7 @@ func (x *ListCloudClustersResponse) String() string {
 func (*ListCloudClustersResponse) ProtoMessage() {}
 
 func (x *ListCloudClustersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[33]
+	mi := &file_cloud_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2163,7 +2289,7 @@ func (x *ListCloudClustersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCloudClustersResponse.ProtoReflect.Descriptor instead.
 func (*ListCloudClustersResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{33}
+	return file_cloud_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ListCloudClustersResponse) GetClusters() []*Cluster {
@@ -2191,7 +2317,7 @@ type SummaryRequest struct {
 func (x *SummaryRequest) Reset() {
 	*x = SummaryRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[34]
+		mi := &file_cloud_proto_msgTypes[36]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2204,7 +2330,7 @@ func (x *SummaryRequest) String() string {
 func (*SummaryRequest) ProtoMessage() {}
 
 func (x *SummaryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[34]
+	mi := &file_cloud_proto_msgTypes[36]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2217,7 +2343,7 @@ func (x *SummaryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SummaryRequest.ProtoReflect.Descriptor instead.
 func (*SummaryRequest) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{34}
+	return file_cloud_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *SummaryRequest) GetProvider() string {
@@ -2251,7 +2377,7 @@ type Counters struct {
 func (x *Counters) Reset() {
 	*x = Counters{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[35]
+		mi := &file_cloud_proto_msgTypes[37]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2264,7 +2390,7 @@ func (x *Counters) String() string {
 func (*Counters) ProtoMessage() {}
 
 func (x *Counters) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[35]
+	mi := &file_cloud_proto_msgTypes[37]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2277,7 +2403,7 @@ func (x *Counters) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Counters.ProtoReflect.Descriptor instead.
 func (*Counters) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{35}
+	return file_cloud_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *Counters) GetAccounts() int32 {
@@ -2390,7 +2516,7 @@ type StatusSummary struct {
 func (x *StatusSummary) Reset() {
 	*x = StatusSummary{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[36]
+		mi := &file_cloud_proto_msgTypes[38]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2403,7 +2529,7 @@ func (x *StatusSummary) String() string {
 func (*StatusSummary) ProtoMessage() {}
 
 func (x *StatusSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[36]
+	mi := &file_cloud_proto_msgTypes[38]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2416,7 +2542,7 @@ func (x *StatusSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StatusSummary.ProtoReflect.Descriptor instead.
 func (*StatusSummary) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{36}
+	return file_cloud_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *StatusSummary) GetVmStatus() map[string]int32 {
@@ -2445,7 +2571,7 @@ type SummaryResponse struct {
 func (x *SummaryResponse) Reset() {
 	*x = SummaryResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_cloud_proto_msgTypes[37]
+		mi := &file_cloud_proto_msgTypes[39]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2458,7 +2584,7 @@ func (x *SummaryResponse) String() string {
 func (*SummaryResponse) ProtoMessage() {}
 
 func (x *SummaryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cloud_proto_msgTypes[37]
+	mi := &file_cloud_proto_msgTypes[39]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2471,7 +2597,7 @@ func (x *SummaryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SummaryResponse.ProtoReflect.Descriptor instead.
 func (*SummaryResponse) Descriptor() ([]byte, []int) {
-	return file_cloud_proto_rawDescGZIP(), []int{37}
+	return file_cloud_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *SummaryResponse) GetCount() *Counters {
@@ -2635,6 +2761,21 @@ var file_cloud_proto_rawDesc = []byte{
 	0x49, 0x47, 0x57, 0x52, 0x04, 0x69, 0x67, 0x77, 0x73, 0x12, 0x24, 0x0a, 0x0e, 0x6c, 0x61, 0x73,
 	0x74, 0x5f, 0x73, 0x79, 0x6e, 0x63, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x0c, 0x6c, 0x61, 0x73, 0x74, 0x53, 0x79, 0x6e, 0x63, 0x54, 0x69, 0x6d, 0x65, 0x22,
+	0x68, 0x0a, 0x18, 0x4c, 0x69, 0x73, 0x74, 0x56, 0x50, 0x43, 0x45, 0x6e, 0x64, 0x70, 0x6f, 0x69,
+	0x6e, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x26, 0x0a, 0x04, 0x76,
+	0x65, 0x70, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x69, 0x6e, 0x66, 0x72,
+	0x61, 0x2e, 0x56, 0x50, 0x43, 0x45, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x52, 0x04, 0x76,
+	0x65, 0x70, 0x73, 0x12, 0x24, 0x0a, 0x0e, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x73, 0x79, 0x6e, 0x63,
+	0x5f, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6c, 0x61, 0x73,
+	0x74, 0x53, 0x79, 0x6e, 0x63, 0x54, 0x69, 0x6d, 0x65, 0x22, 0x83, 0x01, 0x0a, 0x17, 0x4c, 0x69,
+	0x73, 0x74, 0x56, 0x50, 0x43, 0x45, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65,
+	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65,
+	0x72, 0x12, 0x15, 0x0a, 0x06, 0x76, 0x70, 0x63, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x05, 0x76, 0x70, 0x63, 0x49, 0x64, 0x12, 0x16, 0x0a, 0x06, 0x72, 0x65, 0x67, 0x69,
+	0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x65, 0x67, 0x69, 0x6f, 0x6e,
+	0x12, 0x1d, 0x0a, 0x0a, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x04,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x49, 0x64, 0x22,
 	0x8c, 0x01, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x53, 0x75, 0x62, 0x6e, 0x65, 0x74, 0x52, 0x65, 0x71,
 	0x75, 0x65, 0x73, 0x74, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72,
@@ -2828,7 +2969,7 @@ var file_cloud_proto_rawDesc = []byte{
 	0x72, 0x73, 0x52, 0x05, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x30, 0x0a, 0x08, 0x73, 0x74, 0x61,
 	0x74, 0x75, 0x73, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x69, 0x6e,
 	0x66, 0x72, 0x61, 0x2e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72,
-	0x79, 0x52, 0x08, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x65, 0x73, 0x32, 0xb4, 0x0b, 0x0a, 0x14,
+	0x79, 0x52, 0x08, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x65, 0x73, 0x32, 0x8b, 0x0c, 0x0a, 0x14,
 	0x43, 0x6c, 0x6f, 0x75, 0x64, 0x50, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x53, 0x65, 0x72,
 	0x76, 0x69, 0x63, 0x65, 0x12, 0x49, 0x0a, 0x0c, 0x4c, 0x69, 0x73, 0x74, 0x41, 0x63, 0x63, 0x6f,
 	0x75, 0x6e, 0x74, 0x73, 0x12, 0x1a, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x4c, 0x69, 0x73,
@@ -2883,45 +3024,50 @@ var file_cloud_proto_rawDesc = []byte{
 	0x77, 0x61, 0x79, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x23, 0x2e, 0x69, 0x6e,
 	0x66, 0x72, 0x61, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x65, 0x74,
 	0x47, 0x61, 0x74, 0x65, 0x77, 0x61, 0x79, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x22, 0x00, 0x12, 0x52, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x56, 0x50, 0x43, 0x49, 0x44, 0x46, 0x6f,
-	0x72, 0x43, 0x49, 0x44, 0x52, 0x12, 0x1d, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65,
-	0x74, 0x56, 0x50, 0x43, 0x49, 0x44, 0x46, 0x6f, 0x72, 0x43, 0x49, 0x44, 0x52, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74,
-	0x56, 0x50, 0x43, 0x49, 0x44, 0x46, 0x6f, 0x72, 0x43, 0x49, 0x44, 0x52, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x58, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x43, 0x49, 0x44,
-	0x52, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x12, 0x1f, 0x2e, 0x69, 0x6e,
-	0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x49, 0x44, 0x52, 0x73, 0x46, 0x6f, 0x72, 0x4c,
-	0x61, 0x62, 0x65, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x69,
-	0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x49, 0x44, 0x52, 0x73, 0x46, 0x6f, 0x72,
-	0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00,
-	0x12, 0x52, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x49, 0x50, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62,
-	0x65, 0x6c, 0x73, 0x12, 0x1d, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x49,
-	0x50, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x50,
-	0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x00, 0x12, 0x64, 0x0a, 0x15, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x73, 0x74, 0x61,
-	0x6e, 0x63, 0x65, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x12, 0x23, 0x2e,
-	0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x73, 0x74, 0x61, 0x6e, 0x63,
-	0x65, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x24, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x6e,
-	0x73, 0x74, 0x61, 0x6e, 0x63, 0x65, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x0f, 0x47, 0x65,
-	0x74, 0x56, 0x50, 0x43, 0x49, 0x44, 0x57, 0x69, 0x74, 0x68, 0x54, 0x61, 0x67, 0x12, 0x1d, 0x2e,
-	0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x50, 0x43, 0x49, 0x44, 0x57, 0x69,
-	0x74, 0x68, 0x54, 0x61, 0x67, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x69,
-	0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x50, 0x43, 0x49, 0x44, 0x57, 0x69, 0x74,
-	0x68, 0x54, 0x61, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x58,
-	0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x43, 0x6c, 0x75, 0x73, 0x74,
-	0x65, 0x72, 0x73, 0x12, 0x1f, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x4c, 0x69, 0x73, 0x74,
-	0x43, 0x6c, 0x6f, 0x75, 0x64, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x4c, 0x69, 0x73,
-	0x74, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x73, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x38, 0x0a, 0x07, 0x53, 0x75, 0x6d, 0x6d,
-	0x61, 0x72, 0x79, 0x12, 0x15, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x53, 0x75, 0x6d, 0x6d,
-	0x61, 0x72, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x69, 0x6e, 0x66,
-	0x72, 0x61, 0x2e, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2f, 0x3b, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x70, 0x62,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x22, 0x00, 0x12, 0x55, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x56, 0x50, 0x43, 0x45, 0x6e, 0x64,
+	0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x12, 0x1e, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x4c,
+	0x69, 0x73, 0x74, 0x56, 0x50, 0x43, 0x45, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1f, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x4c,
+	0x69, 0x73, 0x74, 0x56, 0x50, 0x43, 0x45, 0x6e, 0x64, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x0f, 0x47, 0x65, 0x74,
+	0x56, 0x50, 0x43, 0x49, 0x44, 0x46, 0x6f, 0x72, 0x43, 0x49, 0x44, 0x52, 0x12, 0x1d, 0x2e, 0x69,
+	0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x50, 0x43, 0x49, 0x44, 0x46, 0x6f, 0x72,
+	0x43, 0x49, 0x44, 0x52, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x69, 0x6e,
+	0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x56, 0x50, 0x43, 0x49, 0x44, 0x46, 0x6f, 0x72, 0x43,
+	0x49, 0x44, 0x52, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x58, 0x0a,
+	0x11, 0x47, 0x65, 0x74, 0x43, 0x49, 0x44, 0x52, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65,
+	0x6c, 0x73, 0x12, 0x1f, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x43, 0x49,
+	0x44, 0x52, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x43,
+	0x49, 0x44, 0x52, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x49, 0x50,
+	0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x12, 0x1d, 0x2e, 0x69, 0x6e, 0x66,
+	0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x50, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65,
+	0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x69, 0x6e, 0x66, 0x72,
+	0x61, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x50, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c,
+	0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x64, 0x0a, 0x15, 0x47,
+	0x65, 0x74, 0x49, 0x6e, 0x73, 0x74, 0x61, 0x6e, 0x63, 0x65, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61,
+	0x62, 0x65, 0x6c, 0x73, 0x12, 0x23, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74,
+	0x49, 0x6e, 0x73, 0x74, 0x61, 0x6e, 0x63, 0x65, 0x73, 0x46, 0x6f, 0x72, 0x4c, 0x61, 0x62, 0x65,
+	0x6c, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x24, 0x2e, 0x69, 0x6e, 0x66, 0x72,
+	0x61, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x73, 0x74, 0x61, 0x6e, 0x63, 0x65, 0x73, 0x46, 0x6f,
+	0x72, 0x4c, 0x61, 0x62, 0x65, 0x6c, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
+	0x00, 0x12, 0x52, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x56, 0x50, 0x43, 0x49, 0x44, 0x57, 0x69, 0x74,
+	0x68, 0x54, 0x61, 0x67, 0x12, 0x1d, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74,
+	0x56, 0x50, 0x43, 0x49, 0x44, 0x57, 0x69, 0x74, 0x68, 0x54, 0x61, 0x67, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x1e, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x47, 0x65, 0x74, 0x56,
+	0x50, 0x43, 0x49, 0x44, 0x57, 0x69, 0x74, 0x68, 0x54, 0x61, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x58, 0x0a, 0x11, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6c, 0x6f,
+	0x75, 0x64, 0x43, 0x6c, 0x75, 0x73, 0x74, 0x65, 0x72, 0x73, 0x12, 0x1f, 0x2e, 0x69, 0x6e, 0x66,
+	0x72, 0x61, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x43, 0x6c, 0x75, 0x73,
+	0x74, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x20, 0x2e, 0x69, 0x6e,
+	0x66, 0x72, 0x61, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6c, 0x6f, 0x75, 0x64, 0x43, 0x6c, 0x75,
+	0x73, 0x74, 0x65, 0x72, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
+	0x38, 0x0a, 0x07, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x12, 0x15, 0x2e, 0x69, 0x6e, 0x66,
+	0x72, 0x61, 0x2e, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x16, 0x2e, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x2e, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72,
+	0x79, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x2f, 0x3b,
+	0x69, 0x6e, 0x66, 0x72, 0x61, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -2936,7 +3082,7 @@ func file_cloud_proto_rawDescGZIP() []byte {
 	return file_cloud_proto_rawDescData
 }
 
-var file_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 47)
+var file_cloud_proto_msgTypes = make([]protoimpl.MessageInfo, 49)
 var file_cloud_proto_goTypes = []interface{}{
 	(*ListAccountsRequest)(nil),           // 0: infra.ListAccountsRequest
 	(*ListAccountsResponse)(nil),          // 1: infra.ListAccountsResponse
@@ -2956,113 +3102,119 @@ var file_cloud_proto_goTypes = []interface{}{
 	(*ListRoutersResponse)(nil),           // 15: infra.ListRoutersResponse
 	(*ListInternetGatewaysRequest)(nil),   // 16: infra.ListInternetGatewaysRequest
 	(*ListInternetGatewaysResponse)(nil),  // 17: infra.ListInternetGatewaysResponse
-	(*GetSubnetRequest)(nil),              // 18: infra.GetSubnetRequest
-	(*GetSubnetResponse)(nil),             // 19: infra.GetSubnetResponse
-	(*ListSubnetsRequest)(nil),            // 20: infra.ListSubnetsRequest
-	(*ListSubnetsResponse)(nil),           // 21: infra.ListSubnetsResponse
-	(*GetVPCIDForCIDRRequest)(nil),        // 22: infra.GetVPCIDForCIDRRequest
-	(*GetVPCIDForCIDRResponse)(nil),       // 23: infra.GetVPCIDForCIDRResponse
-	(*GetCIDRsForLabelsRequest)(nil),      // 24: infra.GetCIDRsForLabelsRequest
-	(*GetCIDRsForLabelsResponse)(nil),     // 25: infra.GetCIDRsForLabelsResponse
-	(*GetIPsForLabelsRequest)(nil),        // 26: infra.GetIPsForLabelsRequest
-	(*GetIPsForLabelsResponse)(nil),       // 27: infra.GetIPsForLabelsResponse
-	(*GetInstancesForLabelsRequest)(nil),  // 28: infra.GetInstancesForLabelsRequest
-	(*GetInstancesForLabelsResponse)(nil), // 29: infra.GetInstancesForLabelsResponse
-	(*GetVPCIDWithTagRequest)(nil),        // 30: infra.GetVPCIDWithTagRequest
-	(*GetVPCIDWithTagResponse)(nil),       // 31: infra.GetVPCIDWithTagResponse
-	(*ListCloudClustersRequest)(nil),      // 32: infra.ListCloudClustersRequest
-	(*ListCloudClustersResponse)(nil),     // 33: infra.ListCloudClustersResponse
-	(*SummaryRequest)(nil),                // 34: infra.SummaryRequest
-	(*Counters)(nil),                      // 35: infra.Counters
-	(*StatusSummary)(nil),                 // 36: infra.StatusSummary
-	(*SummaryResponse)(nil),               // 37: infra.SummaryResponse
-	nil,                                   // 38: infra.ListVPCRequest.LabelsEntry
-	nil,                                   // 39: infra.ListInstancesRequest.LabelsEntry
-	nil,                                   // 40: infra.ListSubnetsRequest.LabelsEntry
-	nil,                                   // 41: infra.GetCIDRsForLabelsRequest.LabelsEntry
-	nil,                                   // 42: infra.GetIPsForLabelsRequest.LabelsEntry
-	nil,                                   // 43: infra.GetInstancesForLabelsRequest.LabelsEntry
-	nil,                                   // 44: infra.ListCloudClustersRequest.LabelsEntry
-	nil,                                   // 45: infra.StatusSummary.VmStatusEntry
-	nil,                                   // 46: infra.StatusSummary.PodStatusEntry
-	(*Account)(nil),                       // 47: infra.Account
-	(*VPC)(nil),                           // 48: infra.VPC
-	(*Instance)(nil),                      // 49: infra.Instance
-	(*ACL)(nil),                           // 50: infra.ACL
-	(*SecurityGroup)(nil),                 // 51: infra.SecurityGroup
-	(*RouteTable)(nil),                    // 52: infra.RouteTable
-	(*NATGateway)(nil),                    // 53: infra.NATGateway
-	(*Router)(nil),                        // 54: infra.Router
-	(*IGW)(nil),                           // 55: infra.IGW
-	(*Subnet)(nil),                        // 56: infra.Subnet
-	(*Cluster)(nil),                       // 57: infra.Cluster
+	(*ListVPCEndpointsResponse)(nil),      // 18: infra.ListVPCEndpointsResponse
+	(*ListVPCEndpointsRequest)(nil),       // 19: infra.ListVPCEndpointsRequest
+	(*GetSubnetRequest)(nil),              // 20: infra.GetSubnetRequest
+	(*GetSubnetResponse)(nil),             // 21: infra.GetSubnetResponse
+	(*ListSubnetsRequest)(nil),            // 22: infra.ListSubnetsRequest
+	(*ListSubnetsResponse)(nil),           // 23: infra.ListSubnetsResponse
+	(*GetVPCIDForCIDRRequest)(nil),        // 24: infra.GetVPCIDForCIDRRequest
+	(*GetVPCIDForCIDRResponse)(nil),       // 25: infra.GetVPCIDForCIDRResponse
+	(*GetCIDRsForLabelsRequest)(nil),      // 26: infra.GetCIDRsForLabelsRequest
+	(*GetCIDRsForLabelsResponse)(nil),     // 27: infra.GetCIDRsForLabelsResponse
+	(*GetIPsForLabelsRequest)(nil),        // 28: infra.GetIPsForLabelsRequest
+	(*GetIPsForLabelsResponse)(nil),       // 29: infra.GetIPsForLabelsResponse
+	(*GetInstancesForLabelsRequest)(nil),  // 30: infra.GetInstancesForLabelsRequest
+	(*GetInstancesForLabelsResponse)(nil), // 31: infra.GetInstancesForLabelsResponse
+	(*GetVPCIDWithTagRequest)(nil),        // 32: infra.GetVPCIDWithTagRequest
+	(*GetVPCIDWithTagResponse)(nil),       // 33: infra.GetVPCIDWithTagResponse
+	(*ListCloudClustersRequest)(nil),      // 34: infra.ListCloudClustersRequest
+	(*ListCloudClustersResponse)(nil),     // 35: infra.ListCloudClustersResponse
+	(*SummaryRequest)(nil),                // 36: infra.SummaryRequest
+	(*Counters)(nil),                      // 37: infra.Counters
+	(*StatusSummary)(nil),                 // 38: infra.StatusSummary
+	(*SummaryResponse)(nil),               // 39: infra.SummaryResponse
+	nil,                                   // 40: infra.ListVPCRequest.LabelsEntry
+	nil,                                   // 41: infra.ListInstancesRequest.LabelsEntry
+	nil,                                   // 42: infra.ListSubnetsRequest.LabelsEntry
+	nil,                                   // 43: infra.GetCIDRsForLabelsRequest.LabelsEntry
+	nil,                                   // 44: infra.GetIPsForLabelsRequest.LabelsEntry
+	nil,                                   // 45: infra.GetInstancesForLabelsRequest.LabelsEntry
+	nil,                                   // 46: infra.ListCloudClustersRequest.LabelsEntry
+	nil,                                   // 47: infra.StatusSummary.VmStatusEntry
+	nil,                                   // 48: infra.StatusSummary.PodStatusEntry
+	(*Account)(nil),                       // 49: infra.Account
+	(*VPC)(nil),                           // 50: infra.VPC
+	(*Instance)(nil),                      // 51: infra.Instance
+	(*ACL)(nil),                           // 52: infra.ACL
+	(*SecurityGroup)(nil),                 // 53: infra.SecurityGroup
+	(*RouteTable)(nil),                    // 54: infra.RouteTable
+	(*NATGateway)(nil),                    // 55: infra.NATGateway
+	(*Router)(nil),                        // 56: infra.Router
+	(*IGW)(nil),                           // 57: infra.IGW
+	(*VPCEndpoint)(nil),                   // 58: infra.VPCEndpoint
+	(*Subnet)(nil),                        // 59: infra.Subnet
+	(*Cluster)(nil),                       // 60: infra.Cluster
 }
 var file_cloud_proto_depIdxs = []int32{
-	47, // 0: infra.ListAccountsResponse.accounts:type_name -> infra.Account
-	38, // 1: infra.ListVPCRequest.labels:type_name -> infra.ListVPCRequest.LabelsEntry
-	48, // 2: infra.ListVPCResponse.vpcs:type_name -> infra.VPC
-	39, // 3: infra.ListInstancesRequest.labels:type_name -> infra.ListInstancesRequest.LabelsEntry
-	49, // 4: infra.ListInstancesResponse.instances:type_name -> infra.Instance
-	50, // 5: infra.ListACLsResponse.acls:type_name -> infra.ACL
-	51, // 6: infra.ListSecurityGroupsResponse.security_groups:type_name -> infra.SecurityGroup
-	52, // 7: infra.ListRouteTablesResponse.route_tables:type_name -> infra.RouteTable
-	53, // 8: infra.ListNATGatewaysResponse.nat_gateways:type_name -> infra.NATGateway
-	54, // 9: infra.ListRoutersResponse.routers:type_name -> infra.Router
-	55, // 10: infra.ListInternetGatewaysResponse.igws:type_name -> infra.IGW
-	56, // 11: infra.GetSubnetResponse.subnet:type_name -> infra.Subnet
-	40, // 12: infra.ListSubnetsRequest.labels:type_name -> infra.ListSubnetsRequest.LabelsEntry
-	56, // 13: infra.ListSubnetsResponse.subnets:type_name -> infra.Subnet
-	41, // 14: infra.GetCIDRsForLabelsRequest.labels:type_name -> infra.GetCIDRsForLabelsRequest.LabelsEntry
-	42, // 15: infra.GetIPsForLabelsRequest.labels:type_name -> infra.GetIPsForLabelsRequest.LabelsEntry
-	43, // 16: infra.GetInstancesForLabelsRequest.labels:type_name -> infra.GetInstancesForLabelsRequest.LabelsEntry
-	49, // 17: infra.GetInstancesForLabelsResponse.instances:type_name -> infra.Instance
-	44, // 18: infra.ListCloudClustersRequest.labels:type_name -> infra.ListCloudClustersRequest.LabelsEntry
-	57, // 19: infra.ListCloudClustersResponse.clusters:type_name -> infra.Cluster
-	45, // 20: infra.StatusSummary.vm_status:type_name -> infra.StatusSummary.VmStatusEntry
-	46, // 21: infra.StatusSummary.pod_status:type_name -> infra.StatusSummary.PodStatusEntry
-	35, // 22: infra.SummaryResponse.count:type_name -> infra.Counters
-	36, // 23: infra.SummaryResponse.statuses:type_name -> infra.StatusSummary
-	0,  // 24: infra.CloudProviderService.ListAccounts:input_type -> infra.ListAccountsRequest
-	2,  // 25: infra.CloudProviderService.ListVPC:input_type -> infra.ListVPCRequest
-	4,  // 26: infra.CloudProviderService.ListInstances:input_type -> infra.ListInstancesRequest
-	18, // 27: infra.CloudProviderService.GetSubnet:input_type -> infra.GetSubnetRequest
-	20, // 28: infra.CloudProviderService.ListSubnets:input_type -> infra.ListSubnetsRequest
-	6,  // 29: infra.CloudProviderService.ListACLs:input_type -> infra.ListACLsRequest
-	8,  // 30: infra.CloudProviderService.ListSecurityGroups:input_type -> infra.ListSecurityGroupsRequest
-	10, // 31: infra.CloudProviderService.ListRouteTables:input_type -> infra.ListRouteTablesRequest
-	12, // 32: infra.CloudProviderService.ListNATGateways:input_type -> infra.ListNATGatewaysRequest
-	14, // 33: infra.CloudProviderService.ListRouters:input_type -> infra.ListRoutersRequest
-	16, // 34: infra.CloudProviderService.ListInternetGateways:input_type -> infra.ListInternetGatewaysRequest
-	22, // 35: infra.CloudProviderService.GetVPCIDForCIDR:input_type -> infra.GetVPCIDForCIDRRequest
-	24, // 36: infra.CloudProviderService.GetCIDRsForLabels:input_type -> infra.GetCIDRsForLabelsRequest
-	26, // 37: infra.CloudProviderService.GetIPsForLabels:input_type -> infra.GetIPsForLabelsRequest
-	28, // 38: infra.CloudProviderService.GetInstancesForLabels:input_type -> infra.GetInstancesForLabelsRequest
-	30, // 39: infra.CloudProviderService.GetVPCIDWithTag:input_type -> infra.GetVPCIDWithTagRequest
-	32, // 40: infra.CloudProviderService.ListCloudClusters:input_type -> infra.ListCloudClustersRequest
-	34, // 41: infra.CloudProviderService.Summary:input_type -> infra.SummaryRequest
-	1,  // 42: infra.CloudProviderService.ListAccounts:output_type -> infra.ListAccountsResponse
-	3,  // 43: infra.CloudProviderService.ListVPC:output_type -> infra.ListVPCResponse
-	5,  // 44: infra.CloudProviderService.ListInstances:output_type -> infra.ListInstancesResponse
-	19, // 45: infra.CloudProviderService.GetSubnet:output_type -> infra.GetSubnetResponse
-	21, // 46: infra.CloudProviderService.ListSubnets:output_type -> infra.ListSubnetsResponse
-	7,  // 47: infra.CloudProviderService.ListACLs:output_type -> infra.ListACLsResponse
-	9,  // 48: infra.CloudProviderService.ListSecurityGroups:output_type -> infra.ListSecurityGroupsResponse
-	11, // 49: infra.CloudProviderService.ListRouteTables:output_type -> infra.ListRouteTablesResponse
-	13, // 50: infra.CloudProviderService.ListNATGateways:output_type -> infra.ListNATGatewaysResponse
-	15, // 51: infra.CloudProviderService.ListRouters:output_type -> infra.ListRoutersResponse
-	17, // 52: infra.CloudProviderService.ListInternetGateways:output_type -> infra.ListInternetGatewaysResponse
-	23, // 53: infra.CloudProviderService.GetVPCIDForCIDR:output_type -> infra.GetVPCIDForCIDRResponse
-	25, // 54: infra.CloudProviderService.GetCIDRsForLabels:output_type -> infra.GetCIDRsForLabelsResponse
-	27, // 55: infra.CloudProviderService.GetIPsForLabels:output_type -> infra.GetIPsForLabelsResponse
-	29, // 56: infra.CloudProviderService.GetInstancesForLabels:output_type -> infra.GetInstancesForLabelsResponse
-	31, // 57: infra.CloudProviderService.GetVPCIDWithTag:output_type -> infra.GetVPCIDWithTagResponse
-	33, // 58: infra.CloudProviderService.ListCloudClusters:output_type -> infra.ListCloudClustersResponse
-	37, // 59: infra.CloudProviderService.Summary:output_type -> infra.SummaryResponse
-	42, // [42:60] is the sub-list for method output_type
-	24, // [24:42] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	49, // 0: infra.ListAccountsResponse.accounts:type_name -> infra.Account
+	40, // 1: infra.ListVPCRequest.labels:type_name -> infra.ListVPCRequest.LabelsEntry
+	50, // 2: infra.ListVPCResponse.vpcs:type_name -> infra.VPC
+	41, // 3: infra.ListInstancesRequest.labels:type_name -> infra.ListInstancesRequest.LabelsEntry
+	51, // 4: infra.ListInstancesResponse.instances:type_name -> infra.Instance
+	52, // 5: infra.ListACLsResponse.acls:type_name -> infra.ACL
+	53, // 6: infra.ListSecurityGroupsResponse.security_groups:type_name -> infra.SecurityGroup
+	54, // 7: infra.ListRouteTablesResponse.route_tables:type_name -> infra.RouteTable
+	55, // 8: infra.ListNATGatewaysResponse.nat_gateways:type_name -> infra.NATGateway
+	56, // 9: infra.ListRoutersResponse.routers:type_name -> infra.Router
+	57, // 10: infra.ListInternetGatewaysResponse.igws:type_name -> infra.IGW
+	58, // 11: infra.ListVPCEndpointsResponse.veps:type_name -> infra.VPCEndpoint
+	59, // 12: infra.GetSubnetResponse.subnet:type_name -> infra.Subnet
+	42, // 13: infra.ListSubnetsRequest.labels:type_name -> infra.ListSubnetsRequest.LabelsEntry
+	59, // 14: infra.ListSubnetsResponse.subnets:type_name -> infra.Subnet
+	43, // 15: infra.GetCIDRsForLabelsRequest.labels:type_name -> infra.GetCIDRsForLabelsRequest.LabelsEntry
+	44, // 16: infra.GetIPsForLabelsRequest.labels:type_name -> infra.GetIPsForLabelsRequest.LabelsEntry
+	45, // 17: infra.GetInstancesForLabelsRequest.labels:type_name -> infra.GetInstancesForLabelsRequest.LabelsEntry
+	51, // 18: infra.GetInstancesForLabelsResponse.instances:type_name -> infra.Instance
+	46, // 19: infra.ListCloudClustersRequest.labels:type_name -> infra.ListCloudClustersRequest.LabelsEntry
+	60, // 20: infra.ListCloudClustersResponse.clusters:type_name -> infra.Cluster
+	47, // 21: infra.StatusSummary.vm_status:type_name -> infra.StatusSummary.VmStatusEntry
+	48, // 22: infra.StatusSummary.pod_status:type_name -> infra.StatusSummary.PodStatusEntry
+	37, // 23: infra.SummaryResponse.count:type_name -> infra.Counters
+	38, // 24: infra.SummaryResponse.statuses:type_name -> infra.StatusSummary
+	0,  // 25: infra.CloudProviderService.ListAccounts:input_type -> infra.ListAccountsRequest
+	2,  // 26: infra.CloudProviderService.ListVPC:input_type -> infra.ListVPCRequest
+	4,  // 27: infra.CloudProviderService.ListInstances:input_type -> infra.ListInstancesRequest
+	20, // 28: infra.CloudProviderService.GetSubnet:input_type -> infra.GetSubnetRequest
+	22, // 29: infra.CloudProviderService.ListSubnets:input_type -> infra.ListSubnetsRequest
+	6,  // 30: infra.CloudProviderService.ListACLs:input_type -> infra.ListACLsRequest
+	8,  // 31: infra.CloudProviderService.ListSecurityGroups:input_type -> infra.ListSecurityGroupsRequest
+	10, // 32: infra.CloudProviderService.ListRouteTables:input_type -> infra.ListRouteTablesRequest
+	12, // 33: infra.CloudProviderService.ListNATGateways:input_type -> infra.ListNATGatewaysRequest
+	14, // 34: infra.CloudProviderService.ListRouters:input_type -> infra.ListRoutersRequest
+	16, // 35: infra.CloudProviderService.ListInternetGateways:input_type -> infra.ListInternetGatewaysRequest
+	19, // 36: infra.CloudProviderService.ListVPCEndpoints:input_type -> infra.ListVPCEndpointsRequest
+	24, // 37: infra.CloudProviderService.GetVPCIDForCIDR:input_type -> infra.GetVPCIDForCIDRRequest
+	26, // 38: infra.CloudProviderService.GetCIDRsForLabels:input_type -> infra.GetCIDRsForLabelsRequest
+	28, // 39: infra.CloudProviderService.GetIPsForLabels:input_type -> infra.GetIPsForLabelsRequest
+	30, // 40: infra.CloudProviderService.GetInstancesForLabels:input_type -> infra.GetInstancesForLabelsRequest
+	32, // 41: infra.CloudProviderService.GetVPCIDWithTag:input_type -> infra.GetVPCIDWithTagRequest
+	34, // 42: infra.CloudProviderService.ListCloudClusters:input_type -> infra.ListCloudClustersRequest
+	36, // 43: infra.CloudProviderService.Summary:input_type -> infra.SummaryRequest
+	1,  // 44: infra.CloudProviderService.ListAccounts:output_type -> infra.ListAccountsResponse
+	3,  // 45: infra.CloudProviderService.ListVPC:output_type -> infra.ListVPCResponse
+	5,  // 46: infra.CloudProviderService.ListInstances:output_type -> infra.ListInstancesResponse
+	21, // 47: infra.CloudProviderService.GetSubnet:output_type -> infra.GetSubnetResponse
+	23, // 48: infra.CloudProviderService.ListSubnets:output_type -> infra.ListSubnetsResponse
+	7,  // 49: infra.CloudProviderService.ListACLs:output_type -> infra.ListACLsResponse
+	9,  // 50: infra.CloudProviderService.ListSecurityGroups:output_type -> infra.ListSecurityGroupsResponse
+	11, // 51: infra.CloudProviderService.ListRouteTables:output_type -> infra.ListRouteTablesResponse
+	13, // 52: infra.CloudProviderService.ListNATGateways:output_type -> infra.ListNATGatewaysResponse
+	15, // 53: infra.CloudProviderService.ListRouters:output_type -> infra.ListRoutersResponse
+	17, // 54: infra.CloudProviderService.ListInternetGateways:output_type -> infra.ListInternetGatewaysResponse
+	18, // 55: infra.CloudProviderService.ListVPCEndpoints:output_type -> infra.ListVPCEndpointsResponse
+	25, // 56: infra.CloudProviderService.GetVPCIDForCIDR:output_type -> infra.GetVPCIDForCIDRResponse
+	27, // 57: infra.CloudProviderService.GetCIDRsForLabels:output_type -> infra.GetCIDRsForLabelsResponse
+	29, // 58: infra.CloudProviderService.GetIPsForLabels:output_type -> infra.GetIPsForLabelsResponse
+	31, // 59: infra.CloudProviderService.GetInstancesForLabels:output_type -> infra.GetInstancesForLabelsResponse
+	33, // 60: infra.CloudProviderService.GetVPCIDWithTag:output_type -> infra.GetVPCIDWithTagResponse
+	35, // 61: infra.CloudProviderService.ListCloudClusters:output_type -> infra.ListCloudClustersResponse
+	39, // 62: infra.CloudProviderService.Summary:output_type -> infra.SummaryResponse
+	44, // [44:63] is the sub-list for method output_type
+	25, // [25:44] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_cloud_proto_init() }
@@ -3289,7 +3441,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetSubnetRequest); i {
+			switch v := v.(*ListVPCEndpointsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3301,7 +3453,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetSubnetResponse); i {
+			switch v := v.(*ListVPCEndpointsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3313,7 +3465,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListSubnetsRequest); i {
+			switch v := v.(*GetSubnetRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3325,7 +3477,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListSubnetsResponse); i {
+			switch v := v.(*GetSubnetResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3337,7 +3489,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetVPCIDForCIDRRequest); i {
+			switch v := v.(*ListSubnetsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3349,7 +3501,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetVPCIDForCIDRResponse); i {
+			switch v := v.(*ListSubnetsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3361,7 +3513,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetCIDRsForLabelsRequest); i {
+			switch v := v.(*GetVPCIDForCIDRRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3373,7 +3525,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetCIDRsForLabelsResponse); i {
+			switch v := v.(*GetVPCIDForCIDRResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3385,7 +3537,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetIPsForLabelsRequest); i {
+			switch v := v.(*GetCIDRsForLabelsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3397,7 +3549,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetIPsForLabelsResponse); i {
+			switch v := v.(*GetCIDRsForLabelsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3409,7 +3561,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetInstancesForLabelsRequest); i {
+			switch v := v.(*GetIPsForLabelsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3421,7 +3573,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetInstancesForLabelsResponse); i {
+			switch v := v.(*GetIPsForLabelsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3433,7 +3585,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetVPCIDWithTagRequest); i {
+			switch v := v.(*GetInstancesForLabelsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3445,7 +3597,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetVPCIDWithTagResponse); i {
+			switch v := v.(*GetInstancesForLabelsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3457,7 +3609,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListCloudClustersRequest); i {
+			switch v := v.(*GetVPCIDWithTagRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3469,7 +3621,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ListCloudClustersResponse); i {
+			switch v := v.(*GetVPCIDWithTagResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3481,7 +3633,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SummaryRequest); i {
+			switch v := v.(*ListCloudClustersRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3493,7 +3645,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Counters); i {
+			switch v := v.(*ListCloudClustersResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3505,7 +3657,7 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*StatusSummary); i {
+			switch v := v.(*SummaryRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -3517,6 +3669,30 @@ func file_cloud_proto_init() {
 			}
 		}
 		file_cloud_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Counters); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_cloud_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*StatusSummary); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_cloud_proto_msgTypes[39].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SummaryResponse); i {
 			case 0:
 				return &v.state
@@ -3535,7 +3711,7 @@ func file_cloud_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_cloud_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   47,
+			NumMessages:   49,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

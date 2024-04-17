@@ -512,6 +512,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListInternetGateways);
   }
 
+  methodDescriptorListVPCEndpoints = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListVPCEndpoints',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListVPCEndpointsRequest,
+    cloud_pb.ListVPCEndpointsResponse,
+    (request: cloud_pb.ListVPCEndpointsRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListVPCEndpointsResponse.deserializeBinary
+  );
+
+  listVPCEndpoints(
+    request: cloud_pb.ListVPCEndpointsRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListVPCEndpointsResponse>;
+
+  listVPCEndpoints(
+    request: cloud_pb.ListVPCEndpointsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVPCEndpointsResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListVPCEndpointsResponse>;
+
+  listVPCEndpoints(
+    request: cloud_pb.ListVPCEndpointsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVPCEndpointsResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListVPCEndpoints',
+        request,
+        metadata || {},
+        this.methodDescriptorListVPCEndpoints,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListVPCEndpoints',
+    request,
+    metadata || {},
+    this.methodDescriptorListVPCEndpoints);
+  }
+
   methodDescriptorGetVPCIDForCIDR = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/GetVPCIDForCIDR',
     grpcWeb.MethodType.UNARY,

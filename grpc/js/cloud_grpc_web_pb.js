@@ -750,6 +750,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listInternetGateways =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListVPCEndpointsRequest,
+ *   !proto.infra.ListVPCEndpointsResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListVPCEndpoints = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListVPCEndpoints',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListVPCEndpointsRequest,
+  proto.infra.ListVPCEndpointsResponse,
+  /**
+   * @param {!proto.infra.ListVPCEndpointsRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListVPCEndpointsResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListVPCEndpointsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListVPCEndpointsResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListVPCEndpointsResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listVPCEndpoints =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListVPCEndpoints',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListVPCEndpoints,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListVPCEndpointsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListVPCEndpointsResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listVPCEndpoints =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListVPCEndpoints',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListVPCEndpoints);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.GetVPCIDForCIDRRequest,
  *   !proto.infra.GetVPCIDForCIDRResponse>}
  */

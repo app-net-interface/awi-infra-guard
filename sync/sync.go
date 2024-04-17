@@ -48,22 +48,27 @@ type Syncer struct {
 
 func (s *Syncer) Sync() {
 
-	s.syncVPC()
-	s.syncInstances()
-	s.syncSubnets()
-	s.syncRouteTables()
-	s.syncACLs()
-	s.syncSecurityGroups()
-	s.syncNATGateways()
-	s.syncRouters()
-	s.syncIGWs()
+	s.syncVPCEndpoints()
 
-	// Kubernetes
-	s.syncClusters()
-	s.syncPods()
-	s.syncNamespaces()
-	s.syncK8SSsNodes()
-	s.syncK8SServices()
+	/*
+		s.syncVPC()
+		s.syncInstances()
+		s.syncSubnets()
+		s.syncRouteTables()
+		s.syncACLs()
+		s.syncSecurityGroups()
+		s.syncNATGateways()
+		s.syncRouters()
+		s.syncIGWs()
+
+
+		// Kubernetes
+		s.syncClusters()
+		s.syncPods()
+		s.syncNamespaces()
+		s.syncK8SSsNodes()
+		s.syncK8SServices()
+	*/
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
@@ -134,6 +139,13 @@ func (s *Syncer) syncIGWs() {
 
 		return cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListInternetGateways, s.dbClient.PutIGW, s.dbClient.DeleteIGW)
+}
+
+func (s *Syncer) syncVPCEndpoints() {
+	genericCloudSync[*types.VPCEndpoint](s, types.VPCEndpointType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPCEndpoint, error) {
+
+		return cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListVPCEndpoints, s.dbClient.PutVPCEndpoint, s.dbClient.DeleteVPCEndpoint)
 }
 
 func (s *Syncer) syncClusters() {

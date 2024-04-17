@@ -445,6 +445,31 @@ func (s *Server) ListInternetGateways(ctx context.Context, in *infrapb.ListInter
 	}, nil
 }
 
+func (s *Server) ListVPCEndpoints(ctx context.Context, in *infrapb.ListVPCEndpointsRequest) (*infrapb.ListVPCEndpointsResponse, error) {
+
+	s.logger.Infof("Listing routers from user query")
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	l, err := cloudProvider.ListVPCEndpoints(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failure to retreive Router %s", err.Error())
+		return nil, err
+	}
+	var t string
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.RouterType))
+	if err != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.RouterType, cloudProvider.GetName())
+	} else {
+		t = syncTime.Time
+	}
+	return &infrapb.ListVPCEndpointsResponse{
+		LastSyncTime: t,
+		Veps:         typesVPCEndpointsToGrpc(l),
+	}, nil
+}
+
 func (s *Server) GetVPCIDForCIDR(ctx context.Context, in *infrapb.GetVPCIDForCIDRRequest) (*infrapb.GetVPCIDForCIDRResponse, error) {
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
 	if err != nil {

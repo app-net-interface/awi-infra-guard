@@ -95,6 +95,11 @@ func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListI
 	return nil, nil
 }
 
+func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error) {
+
+	return nil, nil
+}
+
 /*
 func getSubscriptionToken(ctx context.Context, subscriptionID string, credential *auth.DefaultAzureCredential) (string, error) {
     // Create a subscription-specific credential using azidentity

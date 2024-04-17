@@ -1,22 +1,3 @@
-/**
- * Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http:www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import * as jspb from 'google-protobuf'
 
 import * as types_pb from './types_pb';
@@ -497,6 +478,60 @@ export namespace ListInternetGatewaysResponse {
   export type AsObject = {
     igwsList: Array<types_pb.IGW.AsObject>,
     lastSyncTime: string,
+  }
+}
+
+export class ListVPCEndpointsResponse extends jspb.Message {
+  getVepsList(): Array<types_pb.VPCEndpoint>;
+  setVepsList(value: Array<types_pb.VPCEndpoint>): ListVPCEndpointsResponse;
+  clearVepsList(): ListVPCEndpointsResponse;
+  addVeps(value?: types_pb.VPCEndpoint, index?: number): types_pb.VPCEndpoint;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListVPCEndpointsResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVPCEndpointsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVPCEndpointsResponse): ListVPCEndpointsResponse.AsObject;
+  static serializeBinaryToWriter(message: ListVPCEndpointsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVPCEndpointsResponse;
+  static deserializeBinaryFromReader(message: ListVPCEndpointsResponse, reader: jspb.BinaryReader): ListVPCEndpointsResponse;
+}
+
+export namespace ListVPCEndpointsResponse {
+  export type AsObject = {
+    vepsList: Array<types_pb.VPCEndpoint.AsObject>,
+    lastSyncTime: string,
+  }
+}
+
+export class ListVPCEndpointsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListVPCEndpointsRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListVPCEndpointsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListVPCEndpointsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListVPCEndpointsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVPCEndpointsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVPCEndpointsRequest): ListVPCEndpointsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListVPCEndpointsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVPCEndpointsRequest;
+  static deserializeBinaryFromReader(message: ListVPCEndpointsRequest, reader: jspb.BinaryReader): ListVPCEndpointsRequest;
+}
+
+export namespace ListVPCEndpointsRequest {
+  export type AsObject = {
+    provider: string,
+    vpcId: string,
+    region: string,
+    accountId: string,
   }
 }
 
