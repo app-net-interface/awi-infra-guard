@@ -148,9 +148,9 @@ func typesVPCEndpointsToGrpc(in []types.VPCEndpoint) []*infrapb.VPCEndpoint {
 			Labels:        vpce.Labels,
 			AccountId:     vpce.AccountId,
 			RouteTableIds: vpce.RouteTableIds,
-			SubnetIds: vpce.SubnetIds,
-			ServiceName: vpce.ServiceName,
-			CreatedAt:     vpce.CreatedAt,
+			SubnetIds:     vpce.SubnetIds,
+			ServiceName:   vpce.ServiceName,
+			CreatedAt:     timestamppb.New(*vpce.CreatedAt),
 			LastSyncTime:  vpce.LastSyncTime,
 		})
 	}

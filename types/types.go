@@ -265,20 +265,20 @@ func (v *IGW) GetProvider() string {
 }
 
 type VPCEndpoint struct {
-	ID            string                 `json:"id,omitempty"`
-	Name          string                 `json:"name,omitempty"`
-	Provider      string                 `json:"provider,omitempty"`
-	AccountId     string                 `json:"account_id,omitempty"`
-	VPCId         string                 `json:"vpc_id,omitempty"` //
-	Region        string                 `json:"region,omitempty"` // VPC Region
-	State         string                 `json:"state,omitempty"`
-	RouteTableIds []int32                `json:"route_table_ids,omitempty"`
-	SubnetIds     []int32                `json:"subnet_ids,omitempty"`
-	ServiceName   string                 `json:"service_name,omitempty"`
-	Labels        map[string]string      `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	CreatedAt     *timestamppb.Timestamp `json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `json:"updated_at,omitempty"`
-	LastSyncTime  string                 `json:"last_sync_time,omitempty"`
+	ID            string            `json:"id,omitempty"`
+	Name          string            `json:"name,omitempty"`
+	Provider      string            `json:"provider,omitempty"`
+	AccountId     string            `json:"account_id,omitempty"`
+	VPCId         string            `json:"vpc_id,omitempty"` //
+	Region        string            `json:"region,omitempty"` // VPC Region
+	State         string            `json:"state,omitempty"`
+	RouteTableIds string            `json:"route_table_ids,omitempty"`
+	SubnetIds     string            `json:"subnet_ids,omitempty"`
+	ServiceName   string            `json:"service_name,omitempty"`
+	Labels        map[string]string `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt     *time.Time        `json:"created_at,omitempty"`
+	UpdatedAt     *time.Time        `json:"updated_at,omitempty"`
+	LastSyncTime  string            `json:"last_sync_time,omitempty"`
 }
 
 func (v *VPCEndpoint) DbId() string {

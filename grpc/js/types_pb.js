@@ -321,7 +321,7 @@ if (goog.DEBUG && !COMPILED) {
  * @constructor
  */
 proto.infra.VPCEndpoint = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.infra.VPCEndpoint.repeatedFields_, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.infra.VPCEndpoint, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -5678,13 +5678,6 @@ proto.infra.IGW.prototype.setLastSyncTime = function(value) {
 
 
 
-/**
- * List of repeated fields within this message type.
- * @private {!Array<number>}
- * @const
- */
-proto.infra.VPCEndpoint.repeatedFields_ = [10,11];
-
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -5725,8 +5718,8 @@ proto.infra.VPCEndpoint.toObject = function(includeInstance, msg) {
     state: jspb.Message.getFieldWithDefault(msg, 7, ""),
     type: jspb.Message.getFieldWithDefault(msg, 8, ""),
     serviceName: jspb.Message.getFieldWithDefault(msg, 9, ""),
-    routeTableIdsList: (f = jspb.Message.getRepeatedField(msg, 10)) == null ? undefined : f,
-    subnetIdsList: (f = jspb.Message.getRepeatedField(msg, 11)) == null ? undefined : f,
+    routeTableIds: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    subnetIds: jspb.Message.getFieldWithDefault(msg, 11, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     createdAt: (f = msg.getCreatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     updatedAt: (f = msg.getUpdatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
@@ -5804,16 +5797,12 @@ proto.infra.VPCEndpoint.deserializeBinaryFromReader = function(msg, reader) {
       msg.setServiceName(value);
       break;
     case 10:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedInt32() : [reader.readInt32()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addRouteTableIds(values[i]);
-      }
+      var value = /** @type {string} */ (reader.readString());
+      msg.setRouteTableIds(value);
       break;
     case 11:
-      var values = /** @type {!Array<number>} */ (reader.isDelimited() ? reader.readPackedInt32() : [reader.readInt32()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addSubnetIds(values[i]);
-      }
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSubnetIds(value);
       break;
     case 12:
       var value = msg.getLabelsMap();
@@ -5927,16 +5916,16 @@ proto.infra.VPCEndpoint.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getRouteTableIdsList();
+  f = message.getRouteTableIds();
   if (f.length > 0) {
-    writer.writePackedInt32(
+    writer.writeString(
       10,
       f
     );
   }
-  f = message.getSubnetIdsList();
+  f = message.getSubnetIds();
   if (f.length > 0) {
-    writer.writePackedInt32(
+    writer.writeString(
       11,
       f
     );
@@ -6134,76 +6123,38 @@ proto.infra.VPCEndpoint.prototype.setServiceName = function(value) {
 
 
 /**
- * repeated int32 route_table_ids = 10;
- * @return {!Array<number>}
+ * optional string route_table_ids = 10;
+ * @return {string}
  */
-proto.infra.VPCEndpoint.prototype.getRouteTableIdsList = function() {
-  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedField(this, 10));
+proto.infra.VPCEndpoint.prototype.getRouteTableIds = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
 };
 
 
 /**
- * @param {!Array<number>} value
+ * @param {string} value
  * @return {!proto.infra.VPCEndpoint} returns this
  */
-proto.infra.VPCEndpoint.prototype.setRouteTableIdsList = function(value) {
-  return jspb.Message.setField(this, 10, value || []);
+proto.infra.VPCEndpoint.prototype.setRouteTableIds = function(value) {
+  return jspb.Message.setProto3StringField(this, 10, value);
 };
 
 
 /**
- * @param {number} value
- * @param {number=} opt_index
+ * optional string subnet_ids = 11;
+ * @return {string}
+ */
+proto.infra.VPCEndpoint.prototype.getSubnetIds = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
  * @return {!proto.infra.VPCEndpoint} returns this
  */
-proto.infra.VPCEndpoint.prototype.addRouteTableIds = function(value, opt_index) {
-  return jspb.Message.addToRepeatedField(this, 10, value, opt_index);
-};
-
-
-/**
- * Clears the list making it empty but non-null.
- * @return {!proto.infra.VPCEndpoint} returns this
- */
-proto.infra.VPCEndpoint.prototype.clearRouteTableIdsList = function() {
-  return this.setRouteTableIdsList([]);
-};
-
-
-/**
- * repeated int32 subnet_ids = 11;
- * @return {!Array<number>}
- */
-proto.infra.VPCEndpoint.prototype.getSubnetIdsList = function() {
-  return /** @type {!Array<number>} */ (jspb.Message.getRepeatedField(this, 11));
-};
-
-
-/**
- * @param {!Array<number>} value
- * @return {!proto.infra.VPCEndpoint} returns this
- */
-proto.infra.VPCEndpoint.prototype.setSubnetIdsList = function(value) {
-  return jspb.Message.setField(this, 11, value || []);
-};
-
-
-/**
- * @param {number} value
- * @param {number=} opt_index
- * @return {!proto.infra.VPCEndpoint} returns this
- */
-proto.infra.VPCEndpoint.prototype.addSubnetIds = function(value, opt_index) {
-  return jspb.Message.addToRepeatedField(this, 11, value, opt_index);
-};
-
-
-/**
- * Clears the list making it empty but non-null.
- * @return {!proto.infra.VPCEndpoint} returns this
- */
-proto.infra.VPCEndpoint.prototype.clearSubnetIdsList = function() {
-  return this.setSubnetIdsList([]);
+proto.infra.VPCEndpoint.prototype.setSubnetIds = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
 };
 
 

@@ -19,6 +19,7 @@ package aws
 
 import (
 	"context"
+	"strings"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -51,7 +52,7 @@ func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEn
 		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
 		regVpces, err := c.ListVPCEndpointsInRegion(ec2RegionalClient, *region.RegionName)
 		if err != nil {
-			c.logger.Errorf("Error listing VPC Endpoints in region %s: %v", *region.RegionName, err)
+			c.logger.Warnf("Error listing VPC Endpoints in region %s: %v", *region.RegionName, err)
 			continue
 		}
 		vpces = append(vpces, regVpces...)
@@ -69,8 +70,7 @@ func (c *Client) ListVPCEndpointsInRegion(client *ec2.Client, region string) ([]
 			return nil, err
 		}
 		for _, vep := range page.VpcEndpoints {
-			var name string
-			var state string = ""
+			var name, state, serviceName, subnetIds, routeTableIds string
 			labels := make(map[string]string)
 
 			// Extracting Name from Tags
@@ -80,17 +80,32 @@ func (c *Client) ListVPCEndpointsInRegion(client *ec2.Client, region string) ([]
 				}
 				labels[*tag.Key] = *tag.Value
 			}
+			if vep.ServiceName != nil {
+				serviceName = *vep.ServiceName
+			}
+
+			//var subnetIds, routeTableIds []string
+			subnetIds = strings.Join(vep.SubnetIds, ",")
+			routeTableIds = strings.Join(vep.RouteTableIds, ",")
+
 			veps = append(veps, types.VPCEndpoint{
-				ID:        *vep.VpcEndpointId,
-				Provider:  c.GetName(),
-				AccountId: *vep.OwnerId,
-				Name:      name,
-				VPCId:     *vep.VpcId,
-				Region:    region,
-				State:     state,
-				Labels:    labels,
+				ID:            *vep.VpcEndpointId,
+				Provider:      c.GetName(),
+				AccountId:     *vep.OwnerId,
+				Name:          name,
+				VPCId:         *vep.VpcId,
+				Region:        region,
+				State:         state,
+				Labels:        labels,
+				ServiceName:   serviceName,
+				SubnetIds:     subnetIds,
+				RouteTableIds: routeTableIds,
+				CreatedAt:     vep.CreationTimestamp,
 			})
+
 		}
+
 	}
+
 	return veps, nil
 }

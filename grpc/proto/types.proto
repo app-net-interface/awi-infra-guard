@@ -192,8 +192,8 @@ message Router {
     string state = 7;
     string type = 8;
     string service_name = 9;
-    repeated int32 route_table_ids = 10;
-    repeated int32 subnet_ids = 11;
+    string route_table_ids = 10; //comma separated subnet ids
+    string subnet_ids = 11; //comma separated route table ids
     map<string, string> labels = 12;
     google.protobuf.Timestamp created_at = 13;
     google.protobuf.Timestamp updated_at = 14;

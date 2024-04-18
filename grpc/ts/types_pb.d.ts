@@ -720,15 +720,11 @@ export class VPCEndpoint extends jspb.Message {
   getServiceName(): string;
   setServiceName(value: string): VPCEndpoint;
 
-  getRouteTableIdsList(): Array<number>;
-  setRouteTableIdsList(value: Array<number>): VPCEndpoint;
-  clearRouteTableIdsList(): VPCEndpoint;
-  addRouteTableIds(value: number, index?: number): VPCEndpoint;
+  getRouteTableIds(): string;
+  setRouteTableIds(value: string): VPCEndpoint;
 
-  getSubnetIdsList(): Array<number>;
-  setSubnetIdsList(value: Array<number>): VPCEndpoint;
-  clearSubnetIdsList(): VPCEndpoint;
-  addSubnetIds(value: number, index?: number): VPCEndpoint;
+  getSubnetIds(): string;
+  setSubnetIds(value: string): VPCEndpoint;
 
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): VPCEndpoint;
@@ -765,8 +761,8 @@ export namespace VPCEndpoint {
     state: string,
     type: string,
     serviceName: string,
-    routeTableIdsList: Array<number>,
-    subnetIdsList: Array<number>,
+    routeTableIds: string,
+    subnetIds: string,
     labelsMap: Array<[string, string]>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
