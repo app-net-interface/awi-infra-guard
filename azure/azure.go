@@ -19,6 +19,7 @@ package azure
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -30,10 +31,46 @@ import (
 
 const providerName = "Azure"
 
+type ResourceClient struct {
+	VNET        armnetwork.VirtualNetworksClient
+	VNETPeering armnetwork.VirtualNetworkPeeringsClient
+}
+
+func NewResourceClient(
+	accountID string, credentials *azidentity.DefaultAzureCredential,
+) (*ResourceClient, error) {
+	vnetClient, err := armnetwork.NewVirtualNetworksClient(accountID, credentials, nil)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to create VNet Client: %v", err,
+		)
+	}
+	if vnetClient == nil {
+		return nil, errors.New(
+			"failed to create VNet Client. Got empty client",
+		)
+	}
+	vnetPeeringClient, err := armnetwork.NewVirtualNetworkPeeringsClient(accountID, credentials, nil)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to create VNet Peering Client: %v", err,
+		)
+	}
+	if vnetPeeringClient == nil {
+		return nil, errors.New(
+			"failed to create VNet Peering Client. Got empty client",
+		)
+	}
+	return &ResourceClient{
+		VNET:        *vnetClient,
+		VNETPeering: *vnetPeeringClient,
+	}, nil
+}
+
 type Client struct {
-	cred       *azidentity.DefaultAzureCredential
-	logger     *logrus.Logger
-	vnetClient **armnetwork.VirtualNetworksClient
+	cred           *azidentity.DefaultAzureCredential
+	logger         *logrus.Logger
+	accountClients map[string]*ResourceClient
 }
 
 // NewClient initializes a new Azure client with all necessary clients for compute, network, and subscriptions.
@@ -41,15 +78,46 @@ func NewClient(ctx context.Context, logger *logrus.Logger) (*Client, error) {
 	// Subscription ID from environment variable
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
-		fmt.Println("Failed to obtain a credential:", err)
-		return nil, err
+		return nil, fmt.Errorf(
+			"failed to obtain a credential: %w", err,
+		)
 	}
 	client := &Client{
-		cred:   cred,
-		logger: logger,
+		cred:           cred,
+		logger:         logger,
+		accountClients: make(map[string]*ResourceClient),
+	}
+
+	if err = client.initializeClientsPerAccount(); err != nil {
+		return nil, fmt.Errorf(
+			"failed to initialize resource clients: %w", err,
+		)
 	}
 
 	return client, nil
+}
+
+func (c *Client) initializeClientsPerAccount() error {
+	accounts := c.ListAccounts()
+
+	for _, account := range accounts {
+		resClient, err := NewResourceClient(account.ID, c.cred)
+		if err != nil {
+			return fmt.Errorf(
+				"failed to initialize Client for account ID '%s': %w",
+				account.ID, err,
+			)
+		}
+		if resClient == nil {
+			return fmt.Errorf(
+				"failed to initialize Client for account ID '%s'. Got nil object",
+				account.ID,
+			)
+		}
+		c.accountClients[account.ID] = resClient
+	}
+
+	return nil
 }
 
 func (c *Client) GetName() string {
