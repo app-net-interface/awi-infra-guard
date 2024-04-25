@@ -24,6 +24,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 	"github.com/sirupsen/logrus"
@@ -34,6 +35,8 @@ const providerName = "Azure"
 type ResourceClient struct {
 	VNET        armnetwork.VirtualNetworksClient
 	VNETPeering armnetwork.VirtualNetworkPeeringsClient
+	NSG         armnetwork.SecurityGroupsClient
+	Tag         armresources.TagsClient
 }
 
 func NewResourceClient(
@@ -61,9 +64,33 @@ func NewResourceClient(
 			"failed to create VNet Peering Client. Got empty client",
 		)
 	}
+	nsgClient, err := armnetwork.NewSecurityGroupsClient(accountID, credentials, nil)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to create Security Group Client: %v", err,
+		)
+	}
+	if nsgClient == nil {
+		return nil, errors.New(
+			"failed to create Security Group Client. Got empty client",
+		)
+	}
+	tagClient, err := armresources.NewTagsClient(accountID, credentials, nil)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to create Tag Client: %v", err,
+		)
+	}
+	if tagClient == nil {
+		return nil, errors.New(
+			"failed to create Tag Client. Got empty client",
+		)
+	}
 	return &ResourceClient{
 		VNET:        *vnetClient,
 		VNETPeering: *vnetPeeringClient,
+		NSG:         *nsgClient,
+		Tag:         *tagClient,
 	}, nil
 }
 

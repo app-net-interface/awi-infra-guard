@@ -29,6 +29,10 @@ func SetFromSlice[T comparable](s []T) Set[T] {
 	return Set[T]{values: v}
 }
 
+func (s *Set[T]) Set(v T) {
+	s.values[v] = struct{}{}
+}
+
 func (s *Set[T]) Has(v T) bool {
 	_, ok := s.values[v]
 	return ok

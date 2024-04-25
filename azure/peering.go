@@ -125,7 +125,7 @@ func (c *Client) createVnetPeering(
 	future, err := client.VNETPeering.BeginCreateOrUpdate(
 		ctx,
 		resGroup,
-		sourceVnetID,
+		parseResourceName(sourceVnetID),
 		peeringName,
 		peering,
 		nil,

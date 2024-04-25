@@ -20,6 +20,7 @@ package azure
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
@@ -38,7 +39,7 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 		//fmt.Printf("Subscription ID : %s\n", subscriptionID)
 		vnetClient, err := armnetwork.NewVirtualNetworksClient(account.ID, c.cred, nil)
 		if err != nil {
-			fmt.Printf("failed to create VNet client: %w", err)
+			fmt.Printf("failed to create VNet client: %v", err)
 			return nil, err
 		}
 		pager := vnetClient.NewListAllPager(nil)
@@ -122,6 +123,10 @@ func (c *Client) ConnectVPC(ctx context.Context, input types.SingleVPCConnection
 	return types.SingleVPCConnectionOutput{}, nil
 }
 
+func getVPCSGName(connectionName string) string {
+	return fmt.Sprintf("awi-%s-sg", strings.Replace(connectionName, " ", "-", -1))
+}
+
 func (c *Client) ConnectVPCs(ctx context.Context, input types.VPCConnectionParams) (types.VPCConnectionOutput, error) {
 	vnet1, accountID1, err := c.getVPC(ctx, input.Vpc1ID, input.Region1)
 	if err != nil {
@@ -160,6 +165,10 @@ func (c *Client) DisconnectVPC(ctx context.Context, input types.SingleVPCDisconn
 	// TBD
 	return types.VPCDisconnectionOutput{}, nil
 }
+
+// func getNSGNameForPeeredVPCs(sourceVNET, destinationVNET string) string {
+
+// }
 
 func (c *Client) DisconnectVPCs(ctx context.Context, input types.VPCDisconnectionParams) (types.VPCDisconnectionOutput, error) {
 	vnet1, accountID1, err := c.getVPC(ctx, input.Vpc1ID, input.Region1)
