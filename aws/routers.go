@@ -30,6 +30,7 @@ import (
 func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersRequest) ([]types.Router, error) {
 
 	var routers []types.Router
+	c.accountID = params.AccountId
 	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
 		AllRegions: aws.Bool(true),
 	})
@@ -84,6 +85,7 @@ func (c *Client) ListRoutersForRegion(client *ec2.Client, region string) ([]type
 				Region:    region,
 				State:     string(tgw.State),
 				Labels:    labels,
+				AccountId: c.accountID,
 				CreatedAt: *tgw.CreationTime,
 			})
 		}

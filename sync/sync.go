@@ -48,27 +48,24 @@ type Syncer struct {
 
 func (s *Syncer) Sync() {
 
+	s.syncVPC()
+	s.syncInstances()
+	s.syncSubnets()
+	s.syncRouteTables()
+	s.syncACLs()
+	s.syncSecurityGroups()
+	s.syncNATGateways()
+	s.syncRouters()
+	s.syncIGWs()
 	s.syncVPCEndpoints()
 
-	/*
-		s.syncVPC()
-		s.syncInstances()
-		s.syncSubnets()
-		s.syncRouteTables()
-		s.syncACLs()
-		s.syncSecurityGroups()
-		s.syncNATGateways()
-		s.syncRouters()
-		s.syncIGWs()
+	// Kubernetes
+	s.syncClusters()
+	s.syncPods()
 
-
-		// Kubernetes
-		s.syncClusters()
-		s.syncPods()
-		s.syncNamespaces()
-		s.syncK8SSsNodes()
-		s.syncK8SServices()
-	*/
+	s.syncNamespaces()
+	s.syncK8SSsNodes()
+	s.syncK8SServices()
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {

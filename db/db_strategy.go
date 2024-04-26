@@ -315,9 +315,9 @@ func (p *providerWithDB) ListNATGateways(ctx context.Context, params *infrapb.Li
 		//		continue
 		//	}
 		//}
-		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
-		//	continue
-		//}
+		if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
+			continue
+		}
 		providerNATGateways = append(providerNATGateways, *natGateway)
 	}
 	return providerNATGateways, nil
