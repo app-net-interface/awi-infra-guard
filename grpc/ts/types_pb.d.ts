@@ -40,6 +40,9 @@ export class Instance extends jspb.Message {
   getState(): string;
   setState(value: string): Instance;
 
+  getType(): string;
+  setType(value: string): Instance;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Instance;
 
@@ -65,19 +68,20 @@ export namespace Instance {
     provider: string,
     accountId: string,
     state: string,
+    type: string,
     lastSyncTime: string,
   }
 }
 
 export class Subnet extends jspb.Message {
-  getSubnetid(): string;
-  setSubnetid(value: string): Subnet;
+  getId(): string;
+  setId(value: string): Subnet;
 
-  getCidrblock(): string;
-  setCidrblock(value: string): Subnet;
+  getCidrBlock(): string;
+  setCidrBlock(value: string): Subnet;
 
-  getVpcid(): string;
-  setVpcid(value: string): Subnet;
+  getVpcId(): string;
+  setVpcId(value: string): Subnet;
 
   getZone(): string;
   setZone(value: string): Subnet;
@@ -110,9 +114,9 @@ export class Subnet extends jspb.Message {
 
 export namespace Subnet {
   export type AsObject = {
-    subnetid: string,
-    cidrblock: string,
-    vpcid: string,
+    id: string,
+    cidrBlock: string,
+    vpcId: string,
     zone: string,
     region: string,
     labelsMap: Array<[string, string]>,

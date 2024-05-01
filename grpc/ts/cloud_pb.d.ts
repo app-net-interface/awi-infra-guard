@@ -1028,6 +1028,9 @@ export class Counters extends jspb.Message {
   getIgws(): number;
   setIgws(value: number): Counters;
 
+  getVpcEndpoints(): number;
+  setVpcEndpoints(value: number): Counters;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Counters.AsObject;
   static toObject(includeInstance: boolean, msg: Counters): Counters.AsObject;
@@ -1052,6 +1055,7 @@ export namespace Counters {
     natGateways: number,
     routers: number,
     igws: number,
+    vpcEndpoints: number,
   }
 }
 
@@ -1061,6 +1065,9 @@ export class StatusSummary extends jspb.Message {
 
   getPodStatusMap(): jspb.Map<string, number>;
   clearPodStatusMap(): StatusSummary;
+
+  getVmTypesMap(): jspb.Map<string, number>;
+  clearVmTypesMap(): StatusSummary;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): StatusSummary.AsObject;
@@ -1074,6 +1081,7 @@ export namespace StatusSummary {
   export type AsObject = {
     vmStatusMap: Array<[string, number]>,
     podStatusMap: Array<[string, number]>,
+    vmTypesMap: Array<[string, number]>,
   }
 }
 

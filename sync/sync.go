@@ -48,7 +48,10 @@ type Syncer struct {
 
 func (s *Syncer) Sync() {
 
+	//Sync VPC
 	s.syncVPC()
+
+	//Sync other cloud resources
 	s.syncInstances()
 	s.syncSubnets()
 	s.syncRouteTables()
@@ -66,6 +69,7 @@ func (s *Syncer) Sync() {
 	s.syncNamespaces()
 	s.syncK8SSsNodes()
 	s.syncK8SServices()
+
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
@@ -289,7 +293,7 @@ func genericK8sSync[P interface {
 	}
 	clusters, err := k8sProvider.ListClusters(ctx)
 	if err != nil {
-		s.logger.Errorf("Error in sync: failed to list clusters: %v", err)
+		s.logger.Warnf("Error in sync: failed to list clusters: %v", err)
 		return
 	}
 	syncTime := make(map[string]types.SyncTime)
@@ -298,7 +302,7 @@ func genericK8sSync[P interface {
 		t := time.Now().UTC().Format(time.RFC3339)
 		remoteObjs, err := listF(ctx, k8sProvider, cluster.Name)
 		if err != nil {
-			s.logger.Errorf("Sync error: failed to %s in cluster %s: %v",
+			s.logger.Warnf("Sync error: failed to access %s in cluster %s: %v",
 				typeName, cluster.Name, err)
 			continue
 		}

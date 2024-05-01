@@ -88,6 +88,7 @@ type Instance struct {
 	Zone         string
 	Provider     string
 	AccountID    string
+	Type         string
 	LastSyncTime string
 }
 

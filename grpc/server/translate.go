@@ -51,6 +51,7 @@ func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 			Provider:     instance.Provider,
 			AccountId:    instance.AccountID,
 			State:        instance.State,
+			Type:         instance.Type,
 			LastSyncTime: instance.LastSyncTime,
 		})
 	}
@@ -61,7 +62,7 @@ func typesSubnetsToGrpc(in []types.Subnet) []*infrapb.Subnet {
 	out := make([]*infrapb.Subnet, 0, len(in))
 	for _, subnet := range in {
 		out = append(out, &infrapb.Subnet{
-			SubnetId:     subnet.SubnetId,
+			Id:           subnet.SubnetId,
 			Name:         subnet.Name,
 			CidrBlock:    subnet.CidrBlock,
 			VpcId:        subnet.VpcId,

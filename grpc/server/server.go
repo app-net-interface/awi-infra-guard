@@ -701,6 +701,10 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 	for _, vm := range instances {
 		vmStateSummary[strings.ToLower(vm.State)] += 1
 	}
+	vmTypeSummary := make(map[string]int32)
+	for _, vm := range instances {
+		vmTypeSummary[strings.ToLower(vm.Type)] += 1
+	}
 	acls, err := cloudProvider.ListACLs(ctx, &infrapb.ListACLsRequest{})
 	if err != nil {
 		return nil, err
@@ -714,17 +718,27 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		return nil, err
 	}
 
-	/*
-		natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{})
-		if err != nil {
-			return nil, err
-		}
+	natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{})
+	if err != nil {
+		return nil, err
+	}
 
-		routers, err := cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{})
-		if err != nil {
-			return nil, err
-		}
-	*/
+	routers, err := cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	igws, err := cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	vpcEndpoints, err := cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	// Kubernetes Resources
 
 	clusters, err := cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{})
 	if err != nil {
@@ -782,7 +796,12 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 			Instances:      int32(len(instances)),
 			Acls:           int32(len(acls)),
 			SecurityGroups: int32(len(sgs)),
-			//NATGateways:    int32(len(natGateways)),
+			NatGateways:    int32(len(natGateways)),
+			Routers:        int32(len(routers)),
+			Igws:           int32(len(igws)),
+			VpcEndpoints:   int32(len(vpcEndpoints)),
+
+			//Kubernetes
 			Clusters:   int32(len(clusters)),
 			Pods:       int32(podsCount),
 			Services:   int32(servicesCount),
@@ -791,6 +810,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		Statuses: &infrapb.StatusSummary{
 			VmStatus:  vmStateSummary,
 			PodStatus: podsStateSummary,
+			VmTypes:   vmTypeSummary,
 		},
 	}, nil
 }
