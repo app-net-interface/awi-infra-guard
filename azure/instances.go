@@ -93,7 +93,7 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 							publicIP = *pip.Properties.IPAddress
 						}
 					}
-					var vmStatus string = "unknown"
+					var vmStatus string = "Unknown"
 					if vm.Properties.InstanceView != nil {
 						for _, status := range vm.Properties.InstanceView.Statuses {
 							if status.Code != nil && *status.Code == "PowerState/running" {
@@ -109,17 +109,18 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 							}
 						}
 					}
-
+					c.logger.Debug("Azure vmstatus = ", vmStatus)
 					// Construct and append the instance
 					instance := types.Instance{
 						ID:        *vm.ID,
 						Name:      *vm.Name,
+						Type:      string(*vm.Properties.HardwareProfile.VMSize),
 						PublicIP:  publicIP,
 						PrivateIP: privateIP,
 						SubnetID:  *ipConf.Properties.Subnet.ID,
 						VPCID:     vNetID,
 						Labels:    convertToStringMap(vm.Tags),
-						State:     vmStatus,
+						State:     string(*vm.Properties.ProvisioningState),
 						Region:    *vm.Location,
 						Provider:  "Azure",
 						AccountID: input.AccountId,

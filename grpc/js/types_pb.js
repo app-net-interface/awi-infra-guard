@@ -501,7 +501,8 @@ proto.infra.Instance.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 10, ""),
     accountId: jspb.Message.getFieldWithDefault(msg, 11, ""),
     state: jspb.Message.getFieldWithDefault(msg, 12, ""),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 13, "")
+    type: jspb.Message.getFieldWithDefault(msg, 13, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 14, "")
   };
 
   if (includeInstance) {
@@ -589,6 +590,10 @@ proto.infra.Instance.deserializeBinaryFromReader = function(msg, reader) {
       msg.setState(value);
       break;
     case 13:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setType(value);
+      break;
+    case 14:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
@@ -702,10 +707,17 @@ proto.infra.Instance.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getLastSyncTime();
+  f = message.getType();
   if (f.length > 0) {
     writer.writeString(
       13,
+      f
+    );
+  }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      14,
       f
     );
   }
@@ -933,10 +945,10 @@ proto.infra.Instance.prototype.setState = function(value) {
 
 
 /**
- * optional string last_sync_time = 13;
+ * optional string type = 13;
  * @return {string}
  */
-proto.infra.Instance.prototype.getLastSyncTime = function() {
+proto.infra.Instance.prototype.getType = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 13, ""));
 };
 
@@ -945,8 +957,26 @@ proto.infra.Instance.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setLastSyncTime = function(value) {
+proto.infra.Instance.prototype.setType = function(value) {
   return jspb.Message.setProto3StringField(this, 13, value);
+};
+
+
+/**
+ * optional string last_sync_time = 14;
+ * @return {string}
+ */
+proto.infra.Instance.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 14, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Instance} returns this
+ */
+proto.infra.Instance.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 14, value);
 };
 
 
@@ -982,9 +1012,9 @@ proto.infra.Subnet.prototype.toObject = function(opt_includeInstance) {
  */
 proto.infra.Subnet.toObject = function(includeInstance, msg) {
   var f, obj = {
-    subnetid: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    cidrblock: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    vpcid: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    id: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    cidrBlock: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    vpcId: jspb.Message.getFieldWithDefault(msg, 3, ""),
     zone: jspb.Message.getFieldWithDefault(msg, 4, ""),
     region: jspb.Message.getFieldWithDefault(msg, 5, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
@@ -1030,15 +1060,15 @@ proto.infra.Subnet.deserializeBinaryFromReader = function(msg, reader) {
     switch (field) {
     case 1:
       var value = /** @type {string} */ (reader.readString());
-      msg.setSubnetid(value);
+      msg.setId(value);
       break;
     case 2:
       var value = /** @type {string} */ (reader.readString());
-      msg.setCidrblock(value);
+      msg.setCidrBlock(value);
       break;
     case 3:
       var value = /** @type {string} */ (reader.readString());
-      msg.setVpcid(value);
+      msg.setVpcId(value);
       break;
     case 4:
       var value = /** @type {string} */ (reader.readString());
@@ -1099,21 +1129,21 @@ proto.infra.Subnet.prototype.serializeBinary = function() {
  */
 proto.infra.Subnet.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getSubnetid();
+  f = message.getId();
   if (f.length > 0) {
     writer.writeString(
       1,
       f
     );
   }
-  f = message.getCidrblock();
+  f = message.getCidrBlock();
   if (f.length > 0) {
     writer.writeString(
       2,
       f
     );
   }
-  f = message.getVpcid();
+  f = message.getVpcId();
   if (f.length > 0) {
     writer.writeString(
       3,
@@ -1170,10 +1200,10 @@ proto.infra.Subnet.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional string subnetId = 1;
+ * optional string id = 1;
  * @return {string}
  */
-proto.infra.Subnet.prototype.getSubnetid = function() {
+proto.infra.Subnet.prototype.getId = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
@@ -1182,16 +1212,16 @@ proto.infra.Subnet.prototype.getSubnetid = function() {
  * @param {string} value
  * @return {!proto.infra.Subnet} returns this
  */
-proto.infra.Subnet.prototype.setSubnetid = function(value) {
+proto.infra.Subnet.prototype.setId = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
 };
 
 
 /**
- * optional string cidrBlock = 2;
+ * optional string cidr_block = 2;
  * @return {string}
  */
-proto.infra.Subnet.prototype.getCidrblock = function() {
+proto.infra.Subnet.prototype.getCidrBlock = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
@@ -1200,16 +1230,16 @@ proto.infra.Subnet.prototype.getCidrblock = function() {
  * @param {string} value
  * @return {!proto.infra.Subnet} returns this
  */
-proto.infra.Subnet.prototype.setCidrblock = function(value) {
+proto.infra.Subnet.prototype.setCidrBlock = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
 /**
- * optional string vpcId = 3;
+ * optional string vpc_id = 3;
  * @return {string}
  */
-proto.infra.Subnet.prototype.getVpcid = function() {
+proto.infra.Subnet.prototype.getVpcId = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
@@ -1218,7 +1248,7 @@ proto.infra.Subnet.prototype.getVpcid = function() {
  * @param {string} value
  * @return {!proto.infra.Subnet} returns this
  */
-proto.infra.Subnet.prototype.setVpcid = function(value) {
+proto.infra.Subnet.prototype.setVpcId = function(value) {
   return jspb.Message.setProto3StringField(this, 3, value);
 };
 

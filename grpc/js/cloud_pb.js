@@ -8366,7 +8366,8 @@ proto.infra.Counters.toObject = function(includeInstance, msg) {
     securityGroups: jspb.Message.getFieldWithDefault(msg, 11, 0),
     natGateways: jspb.Message.getFieldWithDefault(msg, 12, 0),
     routers: jspb.Message.getFieldWithDefault(msg, 13, 0),
-    igws: jspb.Message.getFieldWithDefault(msg, 14, 0)
+    igws: jspb.Message.getFieldWithDefault(msg, 14, 0),
+    vpcEndpoints: jspb.Message.getFieldWithDefault(msg, 15, 0)
   };
 
   if (includeInstance) {
@@ -8458,6 +8459,10 @@ proto.infra.Counters.deserializeBinaryFromReader = function(msg, reader) {
     case 14:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setIgws(value);
+      break;
+    case 15:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setVpcEndpoints(value);
       break;
     default:
       reader.skipField();
@@ -8583,6 +8588,13 @@ proto.infra.Counters.serializeBinaryToWriter = function(message, writer) {
   if (f !== 0) {
     writer.writeInt32(
       14,
+      f
+    );
+  }
+  f = message.getVpcEndpoints();
+  if (f !== 0) {
+    writer.writeInt32(
+      15,
       f
     );
   }
@@ -8841,6 +8853,24 @@ proto.infra.Counters.prototype.setIgws = function(value) {
 };
 
 
+/**
+ * optional int32 vpc_endpoints = 15;
+ * @return {number}
+ */
+proto.infra.Counters.prototype.getVpcEndpoints = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 15, 0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.infra.Counters} returns this
+ */
+proto.infra.Counters.prototype.setVpcEndpoints = function(value) {
+  return jspb.Message.setProto3IntField(this, 15, value);
+};
+
+
 
 
 
@@ -8874,7 +8904,8 @@ proto.infra.StatusSummary.prototype.toObject = function(opt_includeInstance) {
 proto.infra.StatusSummary.toObject = function(includeInstance, msg) {
   var f, obj = {
     vmStatusMap: (f = msg.getVmStatusMap()) ? f.toObject(includeInstance, undefined) : [],
-    podStatusMap: (f = msg.getPodStatusMap()) ? f.toObject(includeInstance, undefined) : []
+    podStatusMap: (f = msg.getPodStatusMap()) ? f.toObject(includeInstance, undefined) : [],
+    vmTypesMap: (f = msg.getVmTypesMap()) ? f.toObject(includeInstance, undefined) : []
   };
 
   if (includeInstance) {
@@ -8923,6 +8954,12 @@ proto.infra.StatusSummary.deserializeBinaryFromReader = function(msg, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readInt32, null, "", 0);
          });
       break;
+    case 3:
+      var value = msg.getVmTypesMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readInt32, null, "", 0);
+         });
+      break;
     default:
       reader.skipField();
       break;
@@ -8959,6 +8996,10 @@ proto.infra.StatusSummary.serializeBinaryToWriter = function(message, writer) {
   f = message.getPodStatusMap(true);
   if (f && f.getLength() > 0) {
     f.serializeBinary(2, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeInt32);
+  }
+  f = message.getVmTypesMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(3, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeInt32);
   }
 };
 
@@ -9004,6 +9045,28 @@ proto.infra.StatusSummary.prototype.getPodStatusMap = function(opt_noLazyCreate)
  */
 proto.infra.StatusSummary.prototype.clearPodStatusMap = function() {
   this.getPodStatusMap().clear();
+  return this;};
+
+
+/**
+ * map<string, int32> vm_types = 3;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,number>}
+ */
+proto.infra.StatusSummary.prototype.getVmTypesMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,number>} */ (
+      jspb.Message.getMapField(this, 3, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.StatusSummary} returns this
+ */
+proto.infra.StatusSummary.prototype.clearVmTypesMap = function() {
+  this.getVmTypesMap().clear();
   return this;};
 
 

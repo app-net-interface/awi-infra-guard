@@ -367,7 +367,7 @@ func (p *providerWithDB) ListInternetGateways(ctx context.Context, params *infra
 		//		continue
 		//	}
 		//}
-		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
+		//if params.GetVpcId() != "" && params.GetVpcId() != igw.AttachedVpcId {
 		//	continue
 		//}
 		providerIGWs = append(providerIGWs, *igw)

@@ -537,11 +537,14 @@ func (c *Client) removeNetworkTagFromInstancesByIDs(ctx context.Context, project
 }
 
 func convertInstance(projectID string, networks []types.VPC, subnets []types.Subnet, gcpInstance *computepb.Instance) types.Instance {
+	machineParts := strings.Split(gcpInstance.GetMachineType(), "/")
+
 	newInstance := types.Instance{
 		ID:        strconv.FormatUint(gcpInstance.GetId(), 10),
 		Name:      gcpInstance.GetName(),
 		Labels:    gcpInstance.GetLabels(),
 		Zone:      gcpInstance.GetZone(),
+		Type:      machineParts[len(machineParts)-1],
 		AccountID: projectID,
 		Provider:  providerName,
 		State:     gcpInstance.GetStatus(),
