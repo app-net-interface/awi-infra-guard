@@ -127,6 +127,61 @@ func getVPCSGName(connectionName string) string {
 	return fmt.Sprintf("awi-%s-sg", strings.Replace(connectionName, " ", "-", -1))
 }
 
+func (c *Client) getVNetCIDRs(vnet armnetwork.VirtualNetwork) []string {
+	if vnet.Properties == nil {
+		c.logger.Infof(
+			"cannot get CIDRs from VNet as it lacks properties: %v", vnet,
+		)
+		return nil
+	}
+	if vnet.Properties.AddressSpace == nil {
+		c.logger.Infof(
+			"cannot get CIDRs from VNet as it lacks Address Space: %v", vnet,
+		)
+		return nil
+	}
+	prefixes := make([]string, 0, len(vnet.Properties.AddressSpace.AddressPrefixes))
+	for i := range vnet.Properties.AddressSpace.AddressPrefixes {
+		if vnet.Properties.AddressSpace.AddressPrefixes[i] == nil {
+			c.logger.Infof(
+				"The VNet %v has nil address prefix", vnet,
+			)
+			continue
+		}
+		prefixes = append(prefixes, *vnet.Properties.AddressSpace.AddressPrefixes[i])
+	}
+	return prefixes
+}
+
+func (c *Client) createDenyingVPCPolicy(
+	ctx context.Context,
+	account string,
+	region string,
+	sourceVNET armnetwork.VirtualNetwork,
+	destinationVNET armnetwork.VirtualNetwork,
+	trafficFromSourceAllowed bool,
+	connectionName string,
+) error {
+	destinationPrefixes := c.getVNetCIDRs(destinationVNET)
+
+	err = c.refreshSubnetSecurityGroupWithVPCInbound(
+		ctx,
+		account,
+		region,
+		destinationPrefixes,
+		vpcPolicyAllow,
+		vnet,
+		sourceID,
+		ruleName,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to refresh Security Groups for subnets from VNet %s: %w",
+			destinationVpcID, err,
+		)
+	}
+}
+
 func (c *Client) ConnectVPCs(ctx context.Context, input types.VPCConnectionParams) (types.VPCConnectionOutput, error) {
 	vnet1, accountID1, err := c.getVPC(ctx, input.Vpc1ID, input.Region1)
 	if err != nil {
@@ -139,6 +194,16 @@ func (c *Client) ConnectVPCs(ctx context.Context, input types.VPCConnectionParam
 		return types.VPCConnectionOutput{}, fmt.Errorf(
 			"failed to get VPC '%s' in region '%s'", input.Vpc2ID, input.Region2,
 		)
+	}
+
+	if !input.AllowAllTraffic {
+		err = c.createDenyingVPCPolicy(ctx, input.ConnName)
+		if err != nil {
+			return types.VPCConnectionOutput{}, fmt.Errorf(
+				"failed to create blocking policy across VPCs %s:%s due to %w",
+				input.Region1, *vnet1.ID, input.Region2, *vnet2.ID, err,
+			)
+		}
 	}
 
 	if err = c.createVnetPeering(ctx, *vnet1.ID, *vnet2.ID, accountID1); err != nil {

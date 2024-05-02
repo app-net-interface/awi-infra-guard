@@ -393,24 +393,6 @@ func getAwiNSGRuleName(inboundVPC string) string {
 	return awiNSGRulesNamePrefix + parseResourceName(inboundVPC)
 }
 
-func extractAwiNSGRuleName(nameWithSuffix string) (string, error) {
-	if len(nameWithSuffix) < 5 {
-		return "", fmt.Errorf(
-			"cannot extract AwiNSGRuleName from '%s' as its too short. "+
-				"It is expected to have identifier suffix such as ':0003'",
-			nameWithSuffix,
-		)
-	}
-	if nameWithSuffix[len(nameWithSuffix)-5] != ':' {
-		return "", fmt.Errorf(
-			"invalid AwiNSGRuleNameWithSuffix'%s'. "+
-				"It is expected to have identifier suffix such as ':0003'",
-			nameWithSuffix,
-		)
-	}
-	return nameWithSuffix[:len(nameWithSuffix)-5], nil
-}
-
 func getAwiNSGRuleNameWithIDSuffix(inboundVPC string, ruleID int) (string, error) {
 	if ruleID >= 10000 {
 		return "", fmt.Errorf(
@@ -448,19 +430,12 @@ func (c *Client) deletePreviousVPCPolicyRules(
 	}
 
 	securityRulesWithoutVPCRules := make([]*armnetwork.SecurityRule, 0, len(nsg.Properties.SecurityRules))
-	vpcRuleName := getAwiNSGRuleName(sourceVnetID)
 
 	for i := range nsg.Properties.SecurityRules {
 		if nsg.Properties.SecurityRules[i] == nil {
 			continue
 		}
-		ruleName, err := extractAwiNSGRuleName(
-			helper.StringPointerToString(nsg.Properties.SecurityRules[i].Name),
-		)
-		if err != nil || ruleName != vpcRuleName {
-			// Regular rules will not match our expected form so an error simply
-			// indicates it is a different rule.
-			//
+		if strings.HasPrefix(helper.StringPointerToString(nsg.Properties.SecurityRules[i].Name)) {
 			// We want to preserve only rules that are not matching our expected name.
 			securityRulesWithoutVPCRules = append(securityRulesWithoutVPCRules, nsg.Properties.SecurityRules[i])
 		}
@@ -541,7 +516,7 @@ func (c *Client) addVPCPolicyRulesToNSG(
 	return nil
 }
 
-func (c *Client) updateNetworkSecurityGroup(
+func (c *Client) updateSomethingNetworkSecurityGroup(
 	ctx context.Context,
 	region string,
 	nsgID string,
@@ -637,6 +612,27 @@ func (c *Client) createNewNetworkSecurityGroup(
 	)
 }
 
+func (c *Client) updateNetworkSecurityGroup(
+	ctx context.Context,
+	account string,
+	nsg armnetwork.SecurityGroup,
+) error {
+	err := c.createNetworkSecurityGroup(
+		ctx,
+		helper.StringPointerToString(nsg.Name),
+		helper.StringPointerToString(nsg.Location),
+		account,
+		parseResourceGroupName(helper.StringPointerToString(nsg.ID)),
+		nsg,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to update Network Security Group %v: %w", nsg, err,
+		)
+	}
+	return nil
+}
+
 func (c *Client) createNetworkSecurityGroup(
 	ctx context.Context,
 	name string,
@@ -671,4 +667,131 @@ func (c *Client) createNetworkSecurityGroup(
 	}
 
 	return nil
+}
+
+func peeringBlockNSGTag(peeredVNetID string) string {
+	return "awi-vpc-block-" + peeredVNetID
+}
+
+// addPeeringBlockRulesToNSG creates rules to prevent
+// the traffic from VNet to the subnet associated with
+// this NSG which is presumably in other VNet peered
+// with that VNet.
+func (c *Client) setPeeringBlockRulesToNSG(
+	ctx context.Context,
+	nsg *armnetwork.SecurityGroup,
+	peeredVNet armnetwork.VirtualNetwork,
+) {
+	if nsg == nil || nsg.Properties == nil {
+		c.logger.Warnf(
+			"cannot set peering block rules for a Network Security Group. " +
+				"The NSG is nil or its properties are nil",
+		)
+		return
+	}
+	peeredVNetID := helper.StringPointerToString(peeredVNet.ID)
+	if _, ok := nsg.Tags[peeredVNetID]; ok {
+		c.logger.Infof(
+			"Rules for blocking the traffic from VNet %s to Subnet with NSG %s "+
+				"already exist. Nothing to do",
+			peeredVNetID, helper.StringPointerToString(nsg.ID),
+		)
+		return
+	}
+
+	vnetCIDRs := c.getVNetCIDRs(peeredVNet)
+
+}
+
+func (c *Client) addRulesWithNamePrefixToNSG(
+	nsg *armnetwork.SecurityGroup,
+	namePrefix string,
+	addresses []string,
+	allow bool,
+	priorityRangeStart int32,
+	priorityRangeEnd int32,
+) error {
+	prioritiesInUse := takenPriorities(*nsg)
+
+	securityRules := make([]*armnetwork.SecurityRule, 0, len(addresses))
+
+	currentPriority := priorityRangeStart
+
+	access := armnetwork.SecurityRuleAccessDeny
+	if allow {
+		access = armnetwork.SecurityRuleAccessAllow
+	}
+
+	ruleID := 1
+
+	for _, cidr := range addresses {
+		// Priorities cannot overlap with already existing
+		// rules so find first non used priority value.
+		for prioritiesInUse.Has(currentPriority) {
+			currentPriority++
+			if currentPriority > priorityRangeEnd {
+				return fmt.Errorf(
+					"cannot attach VNet Policy rules to NSG '%s' as there are no more "+
+						"available rule slots in the range %d:%d",
+					helper.StringPointerToString(nsg.ID),
+					priorityRangeStart,
+					priorityRangeEnd,
+				)
+			}
+		}
+
+		ruleName, err := getAwiNSGRuleNameWithIDSuffix(namePrefix, ruleID)
+		if err != nil {
+			return fmt.Errorf(
+				"failed to prepare a rule name for NSG '%s': %v",
+				helper.StringPointerToString(nsg.ID),
+				err,
+			)
+		}
+
+		securityRules = append(
+			securityRules,
+			&armnetwork.SecurityRule{
+				Name: to.Ptr(ruleName),
+				Properties: &armnetwork.SecurityRulePropertiesFormat{
+					Priority:                 to.Ptr(currentPriority),
+					Protocol:                 to.Ptr(armnetwork.SecurityRuleProtocolAsterisk),
+					SourceAddressPrefix:      to.Ptr(cidr),
+					DestinationAddressPrefix: to.Ptr("*"),
+					Access:                   to.Ptr(access),
+					Direction:                to.Ptr(armnetwork.SecurityRuleDirectionInbound),
+					SourcePortRange:          to.Ptr("*"),
+					DestinationPortRange:     to.Ptr("*"),
+				},
+			},
+		)
+		currentPriority++
+		ruleID++
+	}
+
+	nsg.Properties.SecurityRules = append(nsg.Properties.SecurityRules, securityRules...)
+	return nil
+}
+
+func (c *Client) deleteRulesWithNamePrefixFromNSG(
+	nsg *armnetwork.SecurityGroup,
+	namePrefix string,
+) {
+	if nsg == nil || nsg.Properties == nil {
+		return
+	}
+
+	securityRulesWithoutVPCRules := make([]*armnetwork.SecurityRule, 0, len(nsg.Properties.SecurityRules))
+
+	for i := range nsg.Properties.SecurityRules {
+		if nsg.Properties.SecurityRules[i] == nil {
+			continue
+		}
+		if strings.HasPrefix(helper.StringPointerToString(nsg.Properties.SecurityRules[i].Name)) {
+			// We want to preserve only rules that are not matching our expected name.
+			securityRulesWithoutVPCRules = append(securityRulesWithoutVPCRules, nsg.Properties.SecurityRules[i])
+		}
+	}
+
+	nsg.Properties.SecurityRules = securityRulesWithoutVPCRules
 }
