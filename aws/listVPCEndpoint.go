@@ -52,7 +52,7 @@ func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEn
 		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
 		regVpces, err := c.ListVPCEndpointsInRegion(ec2RegionalClient, *region.RegionName)
 		if err != nil {
-			c.logger.Warnf("Error listing VPC Endpoints in region %s: %v", *region.RegionName, err)
+			//c.logger.Warnf("Error listing VPC Endpoints in region %s: %v", *region.RegionName, err)
 			continue
 		}
 		vpces = append(vpces, regVpces...)

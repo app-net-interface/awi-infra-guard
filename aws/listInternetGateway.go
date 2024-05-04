@@ -51,7 +51,7 @@ func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListI
 		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
 		regIgws, err := c.ListInternetGatewaysInRegion(ec2RegionalClient, *region.RegionName)
 		if err != nil {
-			c.logger.Errorf("Error listing Internet Gateways in region %s: %v", *region.RegionName, err)
+			//c.logger.Warnf("Failed to list Internet Gateways in region %s: %v", *region.RegionName, err)
 			continue
 		}
 

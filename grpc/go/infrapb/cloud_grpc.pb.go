@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CloudProviderServiceClient interface {
 	ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error)
+	ListRegions(ctx context.Context, in *ListRegionsRequest, opts ...grpc.CallOption) (*ListRegionsResponse, error)
 	ListVPC(ctx context.Context, in *ListVPCRequest, opts ...grpc.CallOption) (*ListVPCResponse, error)
 	ListInstances(ctx context.Context, in *ListInstancesRequest, opts ...grpc.CallOption) (*ListInstancesResponse, error)
 	GetSubnet(ctx context.Context, in *GetSubnetRequest, opts ...grpc.CallOption) (*GetSubnetResponse, error)
@@ -50,6 +51,15 @@ func NewCloudProviderServiceClient(cc grpc.ClientConnInterface) CloudProviderSer
 func (c *cloudProviderServiceClient) ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error) {
 	out := new(ListAccountsResponse)
 	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/ListAccounts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cloudProviderServiceClient) ListRegions(ctx context.Context, in *ListRegionsRequest, opts ...grpc.CallOption) (*ListRegionsResponse, error) {
+	out := new(ListRegionsResponse)
+	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/ListRegions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -223,6 +233,7 @@ func (c *cloudProviderServiceClient) Summary(ctx context.Context, in *SummaryReq
 // for forward compatibility
 type CloudProviderServiceServer interface {
 	ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error)
+	ListRegions(context.Context, *ListRegionsRequest) (*ListRegionsResponse, error)
 	ListVPC(context.Context, *ListVPCRequest) (*ListVPCResponse, error)
 	ListInstances(context.Context, *ListInstancesRequest) (*ListInstancesResponse, error)
 	GetSubnet(context.Context, *GetSubnetRequest) (*GetSubnetResponse, error)
@@ -250,6 +261,9 @@ type UnimplementedCloudProviderServiceServer struct {
 
 func (UnimplementedCloudProviderServiceServer) ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAccounts not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) ListRegions(context.Context, *ListRegionsRequest) (*ListRegionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRegions not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) ListVPC(context.Context, *ListVPCRequest) (*ListVPCResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVPC not implemented")
@@ -332,6 +346,24 @@ func _CloudProviderService_ListAccounts_Handler(srv interface{}, ctx context.Con
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CloudProviderServiceServer).ListAccounts(ctx, req.(*ListAccountsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CloudProviderService_ListRegions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRegionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).ListRegions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infra.CloudProviderService/ListRegions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).ListRegions(ctx, req.(*ListRegionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -670,6 +702,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAccounts",
 			Handler:    _CloudProviderService_ListAccounts_Handler,
+		},
+		{
+			MethodName: "ListRegions",
+			Handler:    _CloudProviderService_ListRegions_Handler,
 		},
 		{
 			MethodName: "ListVPC",

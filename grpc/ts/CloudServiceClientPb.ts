@@ -82,6 +82,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListAccounts);
   }
 
+  methodDescriptorListRegions = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListRegions',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListRegionsRequest,
+    cloud_pb.ListRegionsResponse,
+    (request: cloud_pb.ListRegionsRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListRegionsResponse.deserializeBinary
+  );
+
+  listRegions(
+    request: cloud_pb.ListRegionsRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListRegionsResponse>;
+
+  listRegions(
+    request: cloud_pb.ListRegionsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListRegionsResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListRegionsResponse>;
+
+  listRegions(
+    request: cloud_pb.ListRegionsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListRegionsResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListRegions',
+        request,
+        metadata || {},
+        this.methodDescriptorListRegions,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListRegions',
+    request,
+    metadata || {},
+    this.methodDescriptorListRegions);
+  }
+
   methodDescriptorListVPC = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/ListVPC',
     grpcWeb.MethodType.UNARY,

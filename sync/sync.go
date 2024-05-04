@@ -50,6 +50,7 @@ func (s *Syncer) Sync() {
 
 	//Sync VPC
 	s.syncVPC()
+	s.syncRegions()
 
 	//Sync other cloud resources
 	s.syncInstances()
@@ -84,6 +85,12 @@ func (s *Syncer) SyncPeriodically(ctx context.Context) {
 			return
 		}
 	}
+}
+
+func (s *Syncer) syncRegions() {
+	genericCloudSync[*types.Region](s, types.RegionType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Region, error) {
+		return cloudProvider.ListRegions(ctx, &infrapb.ListRegionsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListRegions, s.dbClient.PutRegion, s.dbClient.DeleteRegion)
 }
 
 func (s *Syncer) syncVPC() {

@@ -41,6 +41,48 @@ export namespace ListAccountsResponse {
   }
 }
 
+export class ListRegionsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListRegionsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListRegionsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListRegionsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListRegionsRequest): ListRegionsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListRegionsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListRegionsRequest;
+  static deserializeBinaryFromReader(message: ListRegionsRequest, reader: jspb.BinaryReader): ListRegionsRequest;
+}
+
+export namespace ListRegionsRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+  }
+}
+
+export class ListRegionsResponse extends jspb.Message {
+  getRegionsList(): Array<types_pb.Region>;
+  setRegionsList(value: Array<types_pb.Region>): ListRegionsResponse;
+  clearRegionsList(): ListRegionsResponse;
+  addRegions(value?: types_pb.Region, index?: number): types_pb.Region;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListRegionsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListRegionsResponse): ListRegionsResponse.AsObject;
+  static serializeBinaryToWriter(message: ListRegionsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListRegionsResponse;
+  static deserializeBinaryFromReader(message: ListRegionsResponse, reader: jspb.BinaryReader): ListRegionsResponse;
+}
+
+export namespace ListRegionsResponse {
+  export type AsObject = {
+    regionsList: Array<types_pb.Region.AsObject>,
+  }
+}
+
 export class ListVPCRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListVPCRequest;

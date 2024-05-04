@@ -158,33 +158,6 @@ func typesVPCEndpointsToGrpc(in []types.VPCEndpoint) []*infrapb.VPCEndpoint {
 	return out
 }
 
-/*
-type Router struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Id                   string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name                 string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Provider             string                 `protobuf:"bytes,3,opt,name=provider,proto3" json:"provider,omitempty"`
-	Region               string                 `protobuf:"bytes,4,opt,name=region,proto3" json:"region,omitempty"`
-	VpcId                string                 `protobuf:"bytes,5,opt,name=vpc_id,json=vpcId,proto3" json:"vpc_id,omitempty"`
-	State                string                 `protobuf:"bytes,6,opt,name=state,proto3" json:"state,omitempty"`
-	Asn                  uint32                 `protobuf:"varint,7,opt,name=asn,proto3" json:"asn,omitempty"`
-	AdvertisedRange      string                 `protobuf:"bytes,8,opt,name=advertised_range,json=advertisedRange,proto3" json:"advertised_range,omitempty"`
-	AdvertisedGroup      string                 `protobuf:"bytes,9,opt,name=advertised_group,json=advertisedGroup,proto3" json:"advertised_group,omitempty"`
-	VpnType              string                 `protobuf:"bytes,10,opt,name=vpn_type,json=vpnType,proto3" json:"vpn_type,omitempty"`
-	SubnetId             string                 `protobuf:"bytes,11,opt,name=subnet_id,json=subnetId,proto3" json:"subnet_id,omitempty"`
-	Labels               map[string]string      `protobuf:"bytes,12,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	CreatedAt            *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt            *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	AccountId            string                 `protobuf:"bytes,15,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
-	LastSyncTime         string                 `protobuf:"bytes,16,opt,name=last_sync_time,json=lastSyncTime,proto3" json:"last_sync_time,omitempty"`
-	AdditionalProperties map[string]string      `protobuf:"bytes,17,rep,name=additional_properties,json=additionalProperties,proto3" json:"additional_properties,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-}
-
-*/
-
 func typesNATGatewaysToGrpc(in []types.NATGateway) []*infrapb.NATGateway {
 	out := make([]*infrapb.NATGateway, 0, len(in))
 	for _, gateway := range in {
@@ -309,6 +282,18 @@ func typesAccountsToGrpc(in []types.Account) []*infrapb.Account {
 			Provider: account.Provider,
 			Id:       account.ID,
 			Name:     account.Name,
+		})
+	}
+	return out
+}
+
+func typesRegionsToGrpc(in []types.Region) []*infrapb.Region {
+	out := make([]*infrapb.Region, 0, len(in))
+	for _, region := range in {
+		out = append(out, &infrapb.Region{
+			Provider: region.Provider,
+			Id:       region.ID,
+			Name:     region.Name,
 		})
 	}
 	return out

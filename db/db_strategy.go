@@ -96,6 +96,24 @@ func (p *providerWithDB) ListAccounts() []types.Account {
 	return p.realProvider.ListAccounts()
 }
 
+func (p *providerWithDB) ListRegions(ctx context.Context, params *infrapb.ListRegionsRequest) ([]types.Region, error) {
+	dbRegions, err := p.dbClient.ListRegions()
+	if err != nil {
+		return nil, err
+	}
+	var providersRegions []types.Region
+	for _, region := range dbRegions {
+		if strings.ToLower(region.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		//if params.GetAccountId() != "" && params.GetAccountId() != vpc.AccountID {
+		//	continue
+		//}
+		providersRegions = append(providersRegions, *region)
+	}
+	return providersRegions, nil
+}
+
 func (p *providerWithDB) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
 	dbVPCs, err := p.dbClient.ListVPCs()
 	if err != nil {

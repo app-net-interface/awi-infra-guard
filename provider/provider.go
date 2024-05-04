@@ -45,6 +45,7 @@ type Strategy interface {
 type CloudProvider interface {
 	GetName() string
 	ListAccounts() []types.Account
+	ListRegions(ctx context.Context, input *infrapb.ListRegionsRequest) ([]types.Region, error)
 	// ListVPC returns cloud instances based on provided filters, empty filter means no filtering by this parameter.
 	ListVPC(ctx context.Context, input *infrapb.ListVPCRequest) ([]types.VPC, error)
 	// ListInstances returns cloud instances based on provided filters, empty filter means no filtering by this parameter.

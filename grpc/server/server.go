@@ -237,6 +237,20 @@ func (s *Server) ListAccounts(ctx context.Context, in *infrapb.ListAccountsReque
 	}, nil
 }
 
+func (s *Server) ListRegions(ctx context.Context, in *infrapb.ListRegionsRequest) (*infrapb.ListRegionsResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	regions, err := cloudProvider.ListRegions(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	return &infrapb.ListRegionsResponse{
+		Regions: typesRegionsToGrpc(regions),
+	}, nil
+}
+
 func (s *Server) ListVPC(ctx context.Context, in *infrapb.ListVPCRequest) (*infrapb.ListVPCResponse, error) {
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
 	if err != nil {
@@ -951,7 +965,7 @@ func (s *Server) unaryServerInterceptor(ctx context.Context, req interface{}, in
 	resp, err := handler(ctx, req)
 
 	// Log response
-	s.logger.Debugf("Request = %+v \n Unary Response - Method:%s, Response:%v, Error:%v\n", req, info.FullMethod, resp, err)
+	s.logger.Infof("Request = %+v \n Unary Response - Method:%s, Response:%v, Error:%v\n", req, info.FullMethod, resp, err)
 
 	return resp, err
 }

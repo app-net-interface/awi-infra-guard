@@ -207,6 +207,36 @@ export namespace Account {
   }
 }
 
+export class Region extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): Region;
+
+  getId(): string;
+  setId(value: string): Region;
+
+  getName(): string;
+  setName(value: string): Region;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Region;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Region.AsObject;
+  static toObject(includeInstance: boolean, msg: Region): Region.AsObject;
+  static serializeBinaryToWriter(message: Region, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Region;
+  static deserializeBinaryFromReader(message: Region, reader: jspb.BinaryReader): Region;
+}
+
+export namespace Region {
+  export type AsObject = {
+    provider: string,
+    id: string,
+    name: string,
+    lastSyncTime: string,
+  }
+}
+
 export class ACL extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ACL;

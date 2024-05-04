@@ -51,7 +51,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
 		ngs, err := c.ListNATGatewaysInRegion(ec2RegionalClient, *region.RegionName)
 		if err != nil {
-			c.logger.Errorf("Error listing NAT Gateways in region %s: %v", *region.RegionName, err)
+			//c.logger.Errorf("Error listing NAT Gateways in region %s: %v", *region.RegionName, err)
 			continue
 		}
 

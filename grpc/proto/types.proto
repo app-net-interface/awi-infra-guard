@@ -73,6 +73,13 @@ message Account {
     string last_sync_time = 4;
 }
 
+message Region {
+    string provider = 1;
+    string id = 2;
+    string name = 3;
+    string last_sync_time = 4;
+}
+
 message ACL {
     string provider = 1;
     string id = 2;

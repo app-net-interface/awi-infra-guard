@@ -21,6 +21,7 @@ import "github.com/app-net-interface/awi-infra-guard/types"
 
 const (
 	vpcTable               = "vpcs"
+	regionTable            = "regions"
 	instanceTable          = "instances"
 	subnetTable            = "subnets"
 	clusterTable           = "clusters"
@@ -42,6 +43,7 @@ const (
 // Add bolt db table to this list; or it will cause a panic
 var tableNames = []string{
 	vpcTable,
+	regionTable,
 	instanceTable,
 	subnetTable,
 	clusterTable,
@@ -70,6 +72,12 @@ type Client interface {
 	Open(filename string) error
 	Close() error
 	DropDB() error
+
+	// VPC
+	PutRegion(region *types.Region) error
+	GetRegion(id string) (*types.Region, error)
+	ListRegions() ([]*types.Region, error)
+	DeleteRegion(id string) error
 
 	// VPC
 	PutVPC(vpc *types.VPC) error

@@ -25,6 +25,8 @@ option go_package = "./;infrapb";
 service CloudProviderService {
     rpc ListAccounts (ListAccountsRequest) returns (ListAccountsResponse) {}
 
+    rpc ListRegions (ListRegionsRequest ) returns (ListRegionsResponse) {}
+
     rpc ListVPC (ListVPCRequest) returns (ListVPCResponse) {}
 
     rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse) {}
@@ -65,6 +67,15 @@ message ListAccountsRequest {
 
 message ListAccountsResponse {
     repeated Account accounts = 1;
+}
+
+message ListRegionsRequest {
+    string provider = 1;
+    string account_id = 2;
+}
+
+message ListRegionsResponse {
+    repeated Region regions = 1;
 }
 
 // ListVPC

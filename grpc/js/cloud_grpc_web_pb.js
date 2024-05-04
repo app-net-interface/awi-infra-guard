@@ -140,6 +140,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listAccounts =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListRegionsRequest,
+ *   !proto.infra.ListRegionsResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListRegions = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListRegions',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListRegionsRequest,
+  proto.infra.ListRegionsResponse,
+  /**
+   * @param {!proto.infra.ListRegionsRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListRegionsResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListRegionsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListRegionsResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListRegionsResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listRegions =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListRegions',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListRegions,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListRegionsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListRegionsResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listRegions =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListRegions',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListRegions);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.ListVPCRequest,
  *   !proto.infra.ListVPCResponse>}
  */

@@ -490,6 +490,77 @@ func (x *Account) GetLastSyncTime() string {
 	return ""
 }
 
+type Region struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Provider     string `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	Id           string `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Name         string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	LastSyncTime string `protobuf:"bytes,4,opt,name=last_sync_time,json=lastSyncTime,proto3" json:"last_sync_time,omitempty"`
+}
+
+func (x *Region) Reset() {
+	*x = Region{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_types_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Region) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Region) ProtoMessage() {}
+
+func (x *Region) ProtoReflect() protoreflect.Message {
+	mi := &file_types_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Region.ProtoReflect.Descriptor instead.
+func (*Region) Descriptor() ([]byte, []int) {
+	return file_types_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Region) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *Region) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Region) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Region) GetLastSyncTime() string {
+	if x != nil {
+		return x.LastSyncTime
+	}
+	return ""
+}
+
 type ACL struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -509,7 +580,7 @@ type ACL struct {
 func (x *ACL) Reset() {
 	*x = ACL{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[4]
+		mi := &file_types_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -522,7 +593,7 @@ func (x *ACL) String() string {
 func (*ACL) ProtoMessage() {}
 
 func (x *ACL) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[4]
+	mi := &file_types_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -535,7 +606,7 @@ func (x *ACL) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ACL.ProtoReflect.Descriptor instead.
 func (*ACL) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{4}
+	return file_types_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ACL) GetProvider() string {
@@ -620,7 +691,7 @@ type SecurityGroup struct {
 func (x *SecurityGroup) Reset() {
 	*x = SecurityGroup{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[5]
+		mi := &file_types_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -633,7 +704,7 @@ func (x *SecurityGroup) String() string {
 func (*SecurityGroup) ProtoMessage() {}
 
 func (x *SecurityGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[5]
+	mi := &file_types_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +717,7 @@ func (x *SecurityGroup) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SecurityGroup.ProtoReflect.Descriptor instead.
 func (*SecurityGroup) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{5}
+	return file_types_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *SecurityGroup) GetProvider() string {
@@ -731,7 +802,7 @@ type RouteTable struct {
 func (x *RouteTable) Reset() {
 	*x = RouteTable{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[6]
+		mi := &file_types_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -744,7 +815,7 @@ func (x *RouteTable) String() string {
 func (*RouteTable) ProtoMessage() {}
 
 func (x *RouteTable) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[6]
+	mi := &file_types_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -757,7 +828,7 @@ func (x *RouteTable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RouteTable.ProtoReflect.Descriptor instead.
 func (*RouteTable) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{6}
+	return file_types_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *RouteTable) GetProvider() string {
@@ -850,7 +921,7 @@ type Router struct {
 func (x *Router) Reset() {
 	*x = Router{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[7]
+		mi := &file_types_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -863,7 +934,7 @@ func (x *Router) String() string {
 func (*Router) ProtoMessage() {}
 
 func (x *Router) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[7]
+	mi := &file_types_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -876,7 +947,7 @@ func (x *Router) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Router.ProtoReflect.Descriptor instead.
 func (*Router) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{7}
+	return file_types_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Router) GetId() string {
@@ -1023,7 +1094,7 @@ type NATGateway struct {
 func (x *NATGateway) Reset() {
 	*x = NATGateway{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[8]
+		mi := &file_types_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1036,7 +1107,7 @@ func (x *NATGateway) String() string {
 func (*NATGateway) ProtoMessage() {}
 
 func (x *NATGateway) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[8]
+	mi := &file_types_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1049,7 +1120,7 @@ func (x *NATGateway) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NATGateway.ProtoReflect.Descriptor instead.
 func (*NATGateway) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{8}
+	return file_types_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *NATGateway) GetId() string {
@@ -1178,7 +1249,7 @@ type IGW struct {
 func (x *IGW) Reset() {
 	*x = IGW{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[9]
+		mi := &file_types_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1191,7 +1262,7 @@ func (x *IGW) String() string {
 func (*IGW) ProtoMessage() {}
 
 func (x *IGW) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[9]
+	mi := &file_types_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1204,7 +1275,7 @@ func (x *IGW) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IGW.ProtoReflect.Descriptor instead.
 func (*IGW) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{9}
+	return file_types_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *IGW) GetId() string {
@@ -1309,7 +1380,7 @@ type VPCEndpoint struct {
 func (x *VPCEndpoint) Reset() {
 	*x = VPCEndpoint{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[10]
+		mi := &file_types_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1322,7 +1393,7 @@ func (x *VPCEndpoint) String() string {
 func (*VPCEndpoint) ProtoMessage() {}
 
 func (x *VPCEndpoint) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[10]
+	mi := &file_types_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1335,7 +1406,7 @@ func (x *VPCEndpoint) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VPCEndpoint.ProtoReflect.Descriptor instead.
 func (*VPCEndpoint) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{10}
+	return file_types_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *VPCEndpoint) GetId() string {
@@ -1464,7 +1535,7 @@ type Cluster struct {
 func (x *Cluster) Reset() {
 	*x = Cluster{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[11]
+		mi := &file_types_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1477,7 +1548,7 @@ func (x *Cluster) String() string {
 func (*Cluster) ProtoMessage() {}
 
 func (x *Cluster) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[11]
+	mi := &file_types_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1490,7 +1561,7 @@ func (x *Cluster) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Cluster.ProtoReflect.Descriptor instead.
 func (*Cluster) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{11}
+	return file_types_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *Cluster) GetName() string {
@@ -1585,7 +1656,7 @@ type Node struct {
 func (x *Node) Reset() {
 	*x = Node{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[12]
+		mi := &file_types_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1598,7 +1669,7 @@ func (x *Node) String() string {
 func (*Node) ProtoMessage() {}
 
 func (x *Node) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[12]
+	mi := &file_types_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1611,7 +1682,7 @@ func (x *Node) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Node.ProtoReflect.Descriptor instead.
 func (*Node) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{12}
+	return file_types_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Node) GetCluster() string {
@@ -1663,7 +1734,7 @@ type Namespace struct {
 func (x *Namespace) Reset() {
 	*x = Namespace{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[13]
+		mi := &file_types_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1676,7 +1747,7 @@ func (x *Namespace) String() string {
 func (*Namespace) ProtoMessage() {}
 
 func (x *Namespace) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[13]
+	mi := &file_types_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1689,7 +1760,7 @@ func (x *Namespace) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Namespace.ProtoReflect.Descriptor instead.
 func (*Namespace) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{13}
+	return file_types_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *Namespace) GetCluster() string {
@@ -1737,7 +1808,7 @@ type Pod struct {
 func (x *Pod) Reset() {
 	*x = Pod{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[14]
+		mi := &file_types_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1750,7 +1821,7 @@ func (x *Pod) String() string {
 func (*Pod) ProtoMessage() {}
 
 func (x *Pod) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[14]
+	mi := &file_types_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1763,7 +1834,7 @@ func (x *Pod) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pod.ProtoReflect.Descriptor instead.
 func (*Pod) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{14}
+	return file_types_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *Pod) GetCluster() string {
@@ -1832,7 +1903,7 @@ type K8SService struct {
 func (x *K8SService) Reset() {
 	*x = K8SService{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[15]
+		mi := &file_types_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1845,7 +1916,7 @@ func (x *K8SService) String() string {
 func (*K8SService) ProtoMessage() {}
 
 func (x *K8SService) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[15]
+	mi := &file_types_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1858,7 +1929,7 @@ func (x *K8SService) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use K8SService.ProtoReflect.Descriptor instead.
 func (*K8SService) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{15}
+	return file_types_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *K8SService) GetCluster() string {
@@ -1927,7 +1998,7 @@ type ACL_ACLRule struct {
 func (x *ACL_ACLRule) Reset() {
 	*x = ACL_ACLRule{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[19]
+		mi := &file_types_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1940,7 +2011,7 @@ func (x *ACL_ACLRule) String() string {
 func (*ACL_ACLRule) ProtoMessage() {}
 
 func (x *ACL_ACLRule) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[19]
+	mi := &file_types_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1953,7 +2024,7 @@ func (x *ACL_ACLRule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ACL_ACLRule.ProtoReflect.Descriptor instead.
 func (*ACL_ACLRule) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{4, 0}
+	return file_types_proto_rawDescGZIP(), []int{5, 0}
 }
 
 func (x *ACL_ACLRule) GetNumber() int32 {
@@ -2019,7 +2090,7 @@ type SecurityGroup_SecurityGroupRule struct {
 func (x *SecurityGroup_SecurityGroupRule) Reset() {
 	*x = SecurityGroup_SecurityGroupRule{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[21]
+		mi := &file_types_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2032,7 +2103,7 @@ func (x *SecurityGroup_SecurityGroupRule) String() string {
 func (*SecurityGroup_SecurityGroupRule) ProtoMessage() {}
 
 func (x *SecurityGroup_SecurityGroupRule) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[21]
+	mi := &file_types_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2045,7 +2116,7 @@ func (x *SecurityGroup_SecurityGroupRule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SecurityGroup_SecurityGroupRule.ProtoReflect.Descriptor instead.
 func (*SecurityGroup_SecurityGroupRule) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{5, 0}
+	return file_types_proto_rawDescGZIP(), []int{6, 0}
 }
 
 func (x *SecurityGroup_SecurityGroupRule) GetProtocol() string {
@@ -2089,7 +2160,7 @@ type RouteTable_Route struct {
 func (x *RouteTable_Route) Reset() {
 	*x = RouteTable_Route{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[23]
+		mi := &file_types_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2102,7 +2173,7 @@ func (x *RouteTable_Route) String() string {
 func (*RouteTable_Route) ProtoMessage() {}
 
 func (x *RouteTable_Route) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[23]
+	mi := &file_types_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2115,7 +2186,7 @@ func (x *RouteTable_Route) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RouteTable_Route.ProtoReflect.Descriptor instead.
 func (*RouteTable_Route) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{6, 0}
+	return file_types_proto_rawDescGZIP(), []int{7, 0}
 }
 
 func (x *RouteTable_Route) GetDestination() string {
@@ -2152,7 +2223,7 @@ type K8SService_Ingress struct {
 func (x *K8SService_Ingress) Reset() {
 	*x = K8SService_Ingress{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_types_proto_msgTypes[34]
+		mi := &file_types_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2165,7 +2236,7 @@ func (x *K8SService_Ingress) String() string {
 func (*K8SService_Ingress) ProtoMessage() {}
 
 func (x *K8SService_Ingress) ProtoReflect() protoreflect.Message {
-	mi := &file_types_proto_msgTypes[34]
+	mi := &file_types_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2178,7 +2249,7 @@ func (x *K8SService_Ingress) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use K8SService_Ingress.ProtoReflect.Descriptor instead.
 func (*K8SService_Ingress) Descriptor() ([]byte, []int) {
-	return file_types_proto_rawDescGZIP(), []int{15, 0}
+	return file_types_proto_rawDescGZIP(), []int{16, 0}
 }
 
 func (x *K8SService_Ingress) GetHostname() string {
@@ -2280,6 +2351,13 @@ var file_types_proto_rawDesc = []byte{
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c,
 	0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a,
 	0x02, 0x38, 0x01, 0x22, 0x6f, 0x0a, 0x07, 0x41, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1a,
+	0x0a, 0x08, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x08, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61,
+	0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x24,
+	0x0a, 0x0e, 0x6c, 0x61, 0x73, 0x74, 0x5f, 0x73, 0x79, 0x6e, 0x63, 0x5f, 0x74, 0x69, 0x6d, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6c, 0x61, 0x73, 0x74, 0x53, 0x79, 0x6e, 0x63,
+	0x54, 0x69, 0x6d, 0x65, 0x22, 0x6e, 0x0a, 0x06, 0x52, 0x65, 0x67, 0x69, 0x6f, 0x6e, 0x12, 0x1a,
 	0x0a, 0x08, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x08, 0x70, 0x72, 0x6f, 0x76, 0x69, 0x64, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64,
 	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61,
@@ -2642,75 +2720,76 @@ func file_types_proto_rawDescGZIP() []byte {
 	return file_types_proto_rawDescData
 }
 
-var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
+var file_types_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_types_proto_goTypes = []interface{}{
 	(*Instance)(nil),                        // 0: infra.Instance
 	(*Subnet)(nil),                          // 1: infra.Subnet
 	(*VPC)(nil),                             // 2: infra.VPC
 	(*Account)(nil),                         // 3: infra.Account
-	(*ACL)(nil),                             // 4: infra.ACL
-	(*SecurityGroup)(nil),                   // 5: infra.SecurityGroup
-	(*RouteTable)(nil),                      // 6: infra.RouteTable
-	(*Router)(nil),                          // 7: infra.Router
-	(*NATGateway)(nil),                      // 8: infra.NATGateway
-	(*IGW)(nil),                             // 9: infra.IGW
-	(*VPCEndpoint)(nil),                     // 10: infra.VPCEndpoint
-	(*Cluster)(nil),                         // 11: infra.Cluster
-	(*Node)(nil),                            // 12: infra.Node
-	(*Namespace)(nil),                       // 13: infra.Namespace
-	(*Pod)(nil),                             // 14: infra.Pod
-	(*K8SService)(nil),                      // 15: infra.K8sService
-	nil,                                     // 16: infra.Instance.LabelsEntry
-	nil,                                     // 17: infra.Subnet.LabelsEntry
-	nil,                                     // 18: infra.VPC.LabelsEntry
-	(*ACL_ACLRule)(nil),                     // 19: infra.ACL.ACLRule
-	nil,                                     // 20: infra.ACL.LabelsEntry
-	(*SecurityGroup_SecurityGroupRule)(nil), // 21: infra.SecurityGroup.SecurityGroupRule
-	nil,                                     // 22: infra.SecurityGroup.LabelsEntry
-	(*RouteTable_Route)(nil),                // 23: infra.RouteTable.Route
-	nil,                                     // 24: infra.RouteTable.LabelsEntry
-	nil,                                     // 25: infra.Router.LabelsEntry
-	nil,                                     // 26: infra.Router.AdditionalPropertiesEntry
-	nil,                                     // 27: infra.NATGateway.LabelsEntry
-	nil,                                     // 28: infra.NATGateway.AdditionalPropertiesEntry
-	nil,                                     // 29: infra.IGW.LabelsEntry
-	nil,                                     // 30: infra.VPCEndpoint.LabelsEntry
-	nil,                                     // 31: infra.Cluster.LabelsEntry
-	nil,                                     // 32: infra.Namespace.LabelsEntry
-	nil,                                     // 33: infra.Pod.LabelsEntry
-	(*K8SService_Ingress)(nil),              // 34: infra.K8sService.Ingress
-	nil,                                     // 35: infra.K8sService.LabelsEntry
-	(*timestamppb.Timestamp)(nil),           // 36: google.protobuf.Timestamp
+	(*Region)(nil),                          // 4: infra.Region
+	(*ACL)(nil),                             // 5: infra.ACL
+	(*SecurityGroup)(nil),                   // 6: infra.SecurityGroup
+	(*RouteTable)(nil),                      // 7: infra.RouteTable
+	(*Router)(nil),                          // 8: infra.Router
+	(*NATGateway)(nil),                      // 9: infra.NATGateway
+	(*IGW)(nil),                             // 10: infra.IGW
+	(*VPCEndpoint)(nil),                     // 11: infra.VPCEndpoint
+	(*Cluster)(nil),                         // 12: infra.Cluster
+	(*Node)(nil),                            // 13: infra.Node
+	(*Namespace)(nil),                       // 14: infra.Namespace
+	(*Pod)(nil),                             // 15: infra.Pod
+	(*K8SService)(nil),                      // 16: infra.K8sService
+	nil,                                     // 17: infra.Instance.LabelsEntry
+	nil,                                     // 18: infra.Subnet.LabelsEntry
+	nil,                                     // 19: infra.VPC.LabelsEntry
+	(*ACL_ACLRule)(nil),                     // 20: infra.ACL.ACLRule
+	nil,                                     // 21: infra.ACL.LabelsEntry
+	(*SecurityGroup_SecurityGroupRule)(nil), // 22: infra.SecurityGroup.SecurityGroupRule
+	nil,                                     // 23: infra.SecurityGroup.LabelsEntry
+	(*RouteTable_Route)(nil),                // 24: infra.RouteTable.Route
+	nil,                                     // 25: infra.RouteTable.LabelsEntry
+	nil,                                     // 26: infra.Router.LabelsEntry
+	nil,                                     // 27: infra.Router.AdditionalPropertiesEntry
+	nil,                                     // 28: infra.NATGateway.LabelsEntry
+	nil,                                     // 29: infra.NATGateway.AdditionalPropertiesEntry
+	nil,                                     // 30: infra.IGW.LabelsEntry
+	nil,                                     // 31: infra.VPCEndpoint.LabelsEntry
+	nil,                                     // 32: infra.Cluster.LabelsEntry
+	nil,                                     // 33: infra.Namespace.LabelsEntry
+	nil,                                     // 34: infra.Pod.LabelsEntry
+	(*K8SService_Ingress)(nil),              // 35: infra.K8sService.Ingress
+	nil,                                     // 36: infra.K8sService.LabelsEntry
+	(*timestamppb.Timestamp)(nil),           // 37: google.protobuf.Timestamp
 }
 var file_types_proto_depIdxs = []int32{
-	16, // 0: infra.Instance.labels:type_name -> infra.Instance.LabelsEntry
-	17, // 1: infra.Subnet.labels:type_name -> infra.Subnet.LabelsEntry
-	18, // 2: infra.VPC.labels:type_name -> infra.VPC.LabelsEntry
-	19, // 3: infra.ACL.rules:type_name -> infra.ACL.ACLRule
-	20, // 4: infra.ACL.labels:type_name -> infra.ACL.LabelsEntry
-	21, // 5: infra.SecurityGroup.rules:type_name -> infra.SecurityGroup.SecurityGroupRule
-	22, // 6: infra.SecurityGroup.labels:type_name -> infra.SecurityGroup.LabelsEntry
-	23, // 7: infra.RouteTable.routes:type_name -> infra.RouteTable.Route
-	24, // 8: infra.RouteTable.labels:type_name -> infra.RouteTable.LabelsEntry
-	25, // 9: infra.Router.labels:type_name -> infra.Router.LabelsEntry
-	36, // 10: infra.Router.created_at:type_name -> google.protobuf.Timestamp
-	36, // 11: infra.Router.updated_at:type_name -> google.protobuf.Timestamp
-	26, // 12: infra.Router.additional_properties:type_name -> infra.Router.AdditionalPropertiesEntry
-	27, // 13: infra.NATGateway.labels:type_name -> infra.NATGateway.LabelsEntry
-	36, // 14: infra.NATGateway.created_at:type_name -> google.protobuf.Timestamp
-	36, // 15: infra.NATGateway.updated_at:type_name -> google.protobuf.Timestamp
-	28, // 16: infra.NATGateway.additional_properties:type_name -> infra.NATGateway.AdditionalPropertiesEntry
-	29, // 17: infra.IGW.labels:type_name -> infra.IGW.LabelsEntry
-	36, // 18: infra.IGW.created_at:type_name -> google.protobuf.Timestamp
-	36, // 19: infra.IGW.updated_at:type_name -> google.protobuf.Timestamp
-	30, // 20: infra.VPCEndpoint.labels:type_name -> infra.VPCEndpoint.LabelsEntry
-	36, // 21: infra.VPCEndpoint.created_at:type_name -> google.protobuf.Timestamp
-	36, // 22: infra.VPCEndpoint.updated_at:type_name -> google.protobuf.Timestamp
-	31, // 23: infra.Cluster.labels:type_name -> infra.Cluster.LabelsEntry
-	32, // 24: infra.Namespace.labels:type_name -> infra.Namespace.LabelsEntry
-	33, // 25: infra.Pod.labels:type_name -> infra.Pod.LabelsEntry
-	34, // 26: infra.K8sService.ingresses:type_name -> infra.K8sService.Ingress
-	35, // 27: infra.K8sService.labels:type_name -> infra.K8sService.LabelsEntry
+	17, // 0: infra.Instance.labels:type_name -> infra.Instance.LabelsEntry
+	18, // 1: infra.Subnet.labels:type_name -> infra.Subnet.LabelsEntry
+	19, // 2: infra.VPC.labels:type_name -> infra.VPC.LabelsEntry
+	20, // 3: infra.ACL.rules:type_name -> infra.ACL.ACLRule
+	21, // 4: infra.ACL.labels:type_name -> infra.ACL.LabelsEntry
+	22, // 5: infra.SecurityGroup.rules:type_name -> infra.SecurityGroup.SecurityGroupRule
+	23, // 6: infra.SecurityGroup.labels:type_name -> infra.SecurityGroup.LabelsEntry
+	24, // 7: infra.RouteTable.routes:type_name -> infra.RouteTable.Route
+	25, // 8: infra.RouteTable.labels:type_name -> infra.RouteTable.LabelsEntry
+	26, // 9: infra.Router.labels:type_name -> infra.Router.LabelsEntry
+	37, // 10: infra.Router.created_at:type_name -> google.protobuf.Timestamp
+	37, // 11: infra.Router.updated_at:type_name -> google.protobuf.Timestamp
+	27, // 12: infra.Router.additional_properties:type_name -> infra.Router.AdditionalPropertiesEntry
+	28, // 13: infra.NATGateway.labels:type_name -> infra.NATGateway.LabelsEntry
+	37, // 14: infra.NATGateway.created_at:type_name -> google.protobuf.Timestamp
+	37, // 15: infra.NATGateway.updated_at:type_name -> google.protobuf.Timestamp
+	29, // 16: infra.NATGateway.additional_properties:type_name -> infra.NATGateway.AdditionalPropertiesEntry
+	30, // 17: infra.IGW.labels:type_name -> infra.IGW.LabelsEntry
+	37, // 18: infra.IGW.created_at:type_name -> google.protobuf.Timestamp
+	37, // 19: infra.IGW.updated_at:type_name -> google.protobuf.Timestamp
+	31, // 20: infra.VPCEndpoint.labels:type_name -> infra.VPCEndpoint.LabelsEntry
+	37, // 21: infra.VPCEndpoint.created_at:type_name -> google.protobuf.Timestamp
+	37, // 22: infra.VPCEndpoint.updated_at:type_name -> google.protobuf.Timestamp
+	32, // 23: infra.Cluster.labels:type_name -> infra.Cluster.LabelsEntry
+	33, // 24: infra.Namespace.labels:type_name -> infra.Namespace.LabelsEntry
+	34, // 25: infra.Pod.labels:type_name -> infra.Pod.LabelsEntry
+	35, // 26: infra.K8sService.ingresses:type_name -> infra.K8sService.Ingress
+	36, // 27: infra.K8sService.labels:type_name -> infra.K8sService.LabelsEntry
 	28, // [28:28] is the sub-list for method output_type
 	28, // [28:28] is the sub-list for method input_type
 	28, // [28:28] is the sub-list for extension type_name
@@ -2773,7 +2852,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ACL); i {
+			switch v := v.(*Region); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2785,7 +2864,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SecurityGroup); i {
+			switch v := v.(*ACL); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2797,7 +2876,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RouteTable); i {
+			switch v := v.(*SecurityGroup); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2809,7 +2888,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Router); i {
+			switch v := v.(*RouteTable); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2821,7 +2900,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*NATGateway); i {
+			switch v := v.(*Router); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2833,7 +2912,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*IGW); i {
+			switch v := v.(*NATGateway); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2845,7 +2924,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*VPCEndpoint); i {
+			switch v := v.(*IGW); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2857,7 +2936,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Cluster); i {
+			switch v := v.(*VPCEndpoint); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2869,7 +2948,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Node); i {
+			switch v := v.(*Cluster); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2881,7 +2960,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Namespace); i {
+			switch v := v.(*Node); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2893,7 +2972,7 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Pod); i {
+			switch v := v.(*Namespace); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2905,6 +2984,18 @@ func file_types_proto_init() {
 			}
 		}
 		file_types_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Pod); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_types_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*K8SService); i {
 			case 0:
 				return &v.state
@@ -2916,7 +3007,7 @@ func file_types_proto_init() {
 				return nil
 			}
 		}
-		file_types_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+		file_types_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ACL_ACLRule); i {
 			case 0:
 				return &v.state
@@ -2928,7 +3019,7 @@ func file_types_proto_init() {
 				return nil
 			}
 		}
-		file_types_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+		file_types_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SecurityGroup_SecurityGroupRule); i {
 			case 0:
 				return &v.state
@@ -2940,7 +3031,7 @@ func file_types_proto_init() {
 				return nil
 			}
 		}
-		file_types_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+		file_types_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RouteTable_Route); i {
 			case 0:
 				return &v.state
@@ -2952,7 +3043,7 @@ func file_types_proto_init() {
 				return nil
 			}
 		}
-		file_types_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
+		file_types_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*K8SService_Ingress); i {
 			case 0:
 				return &v.state
@@ -2971,7 +3062,7 @@ func file_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_types_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   36,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

@@ -34,6 +34,8 @@ const (
 )
 
 const (
+	AccountType       = "Account"
+	RegionType        = "Region"
 	VPCType           = "VPC"
 	InstanceType      = "Instance"
 	SubnetType        = "Subnet"
@@ -50,6 +52,26 @@ const (
 	K8sNodeType       = "K8sNode"
 	NamespaceType     = "Namespace"
 )
+
+type Region struct {
+	ID 	         string
+	Name         string
+	Provider     string
+	AccountID    string
+	LastSyncTime string
+}
+
+func (r *Region) DbId() string {
+	return CloudID(r.Provider, r.ID)
+}
+
+func (r *Region) SetSyncTime(time string) {
+	r.LastSyncTime = time
+}
+
+func (r *Region) GetProvider() string {
+	return r.Provider
+}
 
 type VPC struct {
 	ID           string
