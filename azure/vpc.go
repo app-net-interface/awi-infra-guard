@@ -20,6 +20,7 @@ package azure
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
@@ -38,7 +39,7 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 		//fmt.Printf("Subscription ID : %s\n", subscriptionID)
 		vnetClient, err := armnetwork.NewVirtualNetworksClient(account.ID, c.cred, nil)
 		if err != nil {
-			fmt.Printf("failed to create VNet client: %w", err)
+			fmt.Printf("failed to create VNet client: %v", err)
 			return nil, err
 		}
 		pager := vnetClient.NewListAllPager(nil)
@@ -87,15 +88,142 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 	return vpclist, nil
 }
 
+func (c *Client) getVPC(ctx context.Context, id, region string) (
+	armnetwork.VirtualNetwork, string, error,
+) {
+	for account, client := range c.accountClients {
+		pager := client.VNET.NewListAllPager(nil)
+
+		for pager.More() {
+			resp, err := pager.NextPage(ctx)
+			if err != nil {
+				return armnetwork.VirtualNetwork{}, "", fmt.Errorf("failed to get the next page of VNets: %w", err)
+			}
+			for _, vnet := range resp.VirtualNetworkListResult.Value {
+				if vnet.Location == nil {
+					continue
+				}
+				if vnet.ID == nil {
+					continue
+				}
+				if *vnet.ID == id && *vnet.Location == region {
+					return *vnet, account, nil
+				}
+			}
+		}
+	}
+	return armnetwork.VirtualNetwork{}, "", fmt.Errorf(
+		"vnet '%s' not found in region '%s'", id, region,
+	)
+}
+
 // VPCConnector interface implementation
 func (c *Client) ConnectVPC(ctx context.Context, input types.SingleVPCConnectionParams) (types.SingleVPCConnectionOutput, error) {
-	// TBD
+
 	return types.SingleVPCConnectionOutput{}, nil
 }
 
+func getVPCSGName(connectionName string) string {
+	return fmt.Sprintf("awi-%s-sg", strings.Replace(connectionName, " ", "-", -1))
+}
+
+func (c *Client) getVNetCIDRs(vnet armnetwork.VirtualNetwork) []string {
+	if vnet.Properties == nil {
+		c.logger.Infof(
+			"cannot get CIDRs from VNet as it lacks properties: %v", vnet,
+		)
+		return nil
+	}
+	if vnet.Properties.AddressSpace == nil {
+		c.logger.Infof(
+			"cannot get CIDRs from VNet as it lacks Address Space: %v", vnet,
+		)
+		return nil
+	}
+	prefixes := make([]string, 0, len(vnet.Properties.AddressSpace.AddressPrefixes))
+	for i := range vnet.Properties.AddressSpace.AddressPrefixes {
+		if vnet.Properties.AddressSpace.AddressPrefixes[i] == nil {
+			c.logger.Infof(
+				"The VNet %v has nil address prefix", vnet,
+			)
+			continue
+		}
+		prefixes = append(prefixes, *vnet.Properties.AddressSpace.AddressPrefixes[i])
+	}
+	return prefixes
+}
+
+func (c *Client) createDenyingVPCPolicy(
+	ctx context.Context,
+	account string,
+	region string,
+	sourceVNET armnetwork.VirtualNetwork,
+	destinationVNET armnetwork.VirtualNetwork,
+	trafficFromSourceAllowed bool,
+	connectionName string,
+) error {
+	destinationPrefixes := c.getVNetCIDRs(destinationVNET)
+
+	err = c.refreshSubnetSecurityGroupWithVPCInbound(
+		ctx,
+		account,
+		region,
+		destinationPrefixes,
+		vpcPolicyAllow,
+		vnet,
+		sourceID,
+		ruleName,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to refresh Security Groups for subnets from VNet %s: %w",
+			destinationVpcID, err,
+		)
+	}
+}
+
 func (c *Client) ConnectVPCs(ctx context.Context, input types.VPCConnectionParams) (types.VPCConnectionOutput, error) {
-	// TBD
-	return types.VPCConnectionOutput{}, nil
+	vnet1, accountID1, err := c.getVPC(ctx, input.Vpc1ID, input.Region1)
+	if err != nil {
+		return types.VPCConnectionOutput{}, fmt.Errorf(
+			"failed to get VPC '%s' in region '%s'", input.Vpc1ID, input.Region1,
+		)
+	}
+	vnet2, accountID2, err := c.getVPC(ctx, input.Vpc2ID, input.Region2)
+	if err != nil {
+		return types.VPCConnectionOutput{}, fmt.Errorf(
+			"failed to get VPC '%s' in region '%s'", input.Vpc2ID, input.Region2,
+		)
+	}
+
+	if !input.AllowAllTraffic {
+		err = c.createDenyingVPCPolicy(ctx, input.ConnName)
+		if err != nil {
+			return types.VPCConnectionOutput{}, fmt.Errorf(
+				"failed to create blocking policy across VPCs %s:%s due to %w",
+				input.Region1, *vnet1.ID, input.Region2, *vnet2.ID, err,
+			)
+		}
+	}
+
+	if err = c.createVnetPeering(ctx, *vnet1.ID, *vnet2.ID, accountID1); err != nil {
+		return types.VPCConnectionOutput{}, fmt.Errorf(
+			"failed to create a VPC Peering from %s:%s to %s:%s due to %w",
+			input.Region1, *vnet1.ID, input.Region2, *vnet2.ID, err,
+		)
+	}
+
+	if err = c.createVnetPeering(ctx, *vnet2.ID, *vnet1.ID, accountID2); err != nil {
+		return types.VPCConnectionOutput{}, fmt.Errorf(
+			"failed to create a VPC Peering from %s:%s to %s:%s due to %w",
+			input.Region2, *vnet2.ID, input.Region1, *vnet1.ID, err,
+		)
+	}
+
+	return types.VPCConnectionOutput{
+		Region1: input.Region1,
+		Region2: input.Region2,
+	}, nil
 }
 
 func (c *Client) DisconnectVPC(ctx context.Context, input types.SingleVPCDisconnectionParams) (types.VPCDisconnectionOutput, error) {
@@ -103,7 +231,55 @@ func (c *Client) DisconnectVPC(ctx context.Context, input types.SingleVPCDisconn
 	return types.VPCDisconnectionOutput{}, nil
 }
 
+// func getNSGNameForPeeredVPCs(sourceVNET, destinationVNET string) string {
+
+// }
+
 func (c *Client) DisconnectVPCs(ctx context.Context, input types.VPCDisconnectionParams) (types.VPCDisconnectionOutput, error) {
-	// TBD
+	vnet1, accountID1, err := c.getVPC(ctx, input.Vpc1ID, input.Region1)
+	if err != nil {
+		return types.VPCDisconnectionOutput{}, fmt.Errorf(
+			"failed to get VPC '%s' in region '%s'", input.Vpc1ID, input.Region1,
+		)
+	}
+	vnet2, accountID2, err := c.getVPC(ctx, input.Vpc2ID, input.Region2)
+	if err != nil {
+		return types.VPCDisconnectionOutput{}, fmt.Errorf(
+			"failed to get VPC '%s' in region '%s'", input.Vpc2ID, input.Region2,
+		)
+	}
+
+	peering1 := c.getVnetPeeringFromVnet(vnet1, *vnet2.ID)
+	if peering1 != "" {
+		c.deleteVnetPeering(
+			ctx,
+			accountID1,
+			parseResourceGroupName(*vnet1.ID),
+			*vnet1.Name,
+			vnetPeeringName(*vnet1.ID, *vnet2.ID),
+		)
+	} else {
+		c.logger.Infof(
+			"VNet Peering %s not found. Skipping it",
+			vnetPeeringName(*vnet1.ID, *vnet2.ID),
+		)
+	}
+
+	peering2 := c.getVnetPeeringFromVnet(vnet2, *vnet1.ID)
+	if peering2 != "" {
+		c.deleteVnetPeering(
+			ctx,
+			accountID2,
+			parseResourceGroupName(*vnet2.ID),
+			*vnet2.Name,
+			vnetPeeringName(*vnet2.ID, *vnet1.ID),
+		)
+	} else {
+		c.logger.Infof(
+			"VNet Peering %s not found. Skipping it",
+			vnetPeeringName(*vnet2.ID, *vnet1.ID),
+		)
+	}
+
 	return types.VPCDisconnectionOutput{}, nil
 }

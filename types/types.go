@@ -494,18 +494,22 @@ type DestinationDetails struct {
 }
 
 type SingleVPCConnectionParams struct {
-	ConnID      string
-	VpcID       string
-	Region      string
-	Destination DestinationDetails
+	ConnID          string
+	ConnName        string
+	VpcID           string
+	Region          string
+	Destination     DestinationDetails
+	AllowAllTraffic bool
 }
 
 type VPCConnectionParams struct {
-	ConnID  string
-	Vpc1ID  string
-	Vpc2ID  string
-	Region1 string
-	Region2 string
+	ConnID          string
+	ConnName        string
+	Vpc1ID          string
+	Vpc2ID          string
+	Region1         string
+	Region2         string
+	AllowAllTraffic bool
 }
 
 type VPCConnectionOutput struct {
@@ -518,17 +522,19 @@ type SingleVPCConnectionOutput struct {
 }
 
 type VPCDisconnectionParams struct {
-	ConnID  string
-	Vpc1ID  string
-	Vpc2ID  string
-	Region1 string
-	Region2 string
+	ConnID   string
+	ConnName string
+	Vpc1ID   string
+	Vpc2ID   string
+	Region1  string
+	Region2  string
 }
 
 type SingleVPCDisconnectionParams struct {
-	ConnID string
-	VpcID  string
-	Region string
+	ConnID   string
+	ConnName string
+	VpcID    string
+	Region   string
 }
 
 type VPCDisconnectionOutput struct {
