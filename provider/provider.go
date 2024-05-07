@@ -45,6 +45,7 @@ type Strategy interface {
 type CloudProvider interface {
 	GetName() string
 	ListAccounts() []types.Account
+	ListRegions(ctx context.Context, input *infrapb.ListRegionsRequest) ([]types.Region, error)
 	// ListVPC returns cloud instances based on provided filters, empty filter means no filtering by this parameter.
 	ListVPC(ctx context.Context, input *infrapb.ListVPCRequest) ([]types.VPC, error)
 	// ListInstances returns cloud instances based on provided filters, empty filter means no filtering by this parameter.
@@ -59,6 +60,7 @@ type CloudProvider interface {
 	ListNATGateways(ctx context.Context, input *infrapb.ListNATGatewaysRequest) ([]types.NATGateway, error)
 	ListRouters(ctx context.Context, input *infrapb.ListRoutersRequest) ([]types.Router, error)
 	ListInternetGateways(ctx context.Context, input *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error)
+	ListVPCEndpoints(ctx context.Context, input *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error)
 
 	// GetSubnet returns single subnet based on it's ID
 	GetSubnet(ctx context.Context, input *infrapb.GetSubnetRequest) (types.Subnet, error)

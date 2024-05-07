@@ -35,13 +35,14 @@ message Instance {
     string provider = 10;
     string account_id = 11;
     string state = 12;
-    string last_sync_time = 13;
+    string type = 13;
+    string last_sync_time = 14;
 }
 
 message Subnet {
-    string subnetId = 1;
-    string cidrBlock = 2;
-    string vpcId = 3;
+    string id = 1;
+    string cidr_block = 2;
+    string vpc_id = 3;
     string zone = 4;
     string region = 5;
     map<string, string> labels = 6;
@@ -66,6 +67,13 @@ message VPC {
 
 
 message Account {
+    string provider = 1;
+    string id = 2;
+    string name = 3;
+    string last_sync_time = 4;
+}
+
+message Region {
     string provider = 1;
     string id = 2;
     string name = 3;
@@ -181,6 +189,27 @@ message Router {
     google.protobuf.Timestamp updated_at = 13;
     string last_sync_time = 14;
   }
+
+  message VPCEndpoint {
+    string id = 1;
+    string name = 2;
+    string provider = 3;
+    string account_id = 4;
+    string vpc_id = 5; // 
+    string region = 6; // VPC Region
+    string state = 7;
+    string type = 8;
+    string service_name = 9;
+    string route_table_ids = 10; //comma separated subnet ids
+    string subnet_ids = 11; //comma separated route table ids
+    map<string, string> labels = 12;
+    google.protobuf.Timestamp created_at = 13;
+    google.protobuf.Timestamp updated_at = 14;
+    string last_sync_time = 15;
+  }
+
+
+  // Kubernetes 
 
   message Cluster {
     string name = 1;

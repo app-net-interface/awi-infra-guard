@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CloudProviderServiceClient interface {
 	ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error)
+	ListRegions(ctx context.Context, in *ListRegionsRequest, opts ...grpc.CallOption) (*ListRegionsResponse, error)
 	ListVPC(ctx context.Context, in *ListVPCRequest, opts ...grpc.CallOption) (*ListVPCResponse, error)
 	ListInstances(ctx context.Context, in *ListInstancesRequest, opts ...grpc.CallOption) (*ListInstancesResponse, error)
 	GetSubnet(ctx context.Context, in *GetSubnetRequest, opts ...grpc.CallOption) (*GetSubnetResponse, error)
@@ -29,6 +30,7 @@ type CloudProviderServiceClient interface {
 	ListNATGateways(ctx context.Context, in *ListNATGatewaysRequest, opts ...grpc.CallOption) (*ListNATGatewaysResponse, error)
 	ListRouters(ctx context.Context, in *ListRoutersRequest, opts ...grpc.CallOption) (*ListRoutersResponse, error)
 	ListInternetGateways(ctx context.Context, in *ListInternetGatewaysRequest, opts ...grpc.CallOption) (*ListInternetGatewaysResponse, error)
+	ListVPCEndpoints(ctx context.Context, in *ListVPCEndpointsRequest, opts ...grpc.CallOption) (*ListVPCEndpointsResponse, error)
 	GetVPCIDForCIDR(ctx context.Context, in *GetVPCIDForCIDRRequest, opts ...grpc.CallOption) (*GetVPCIDForCIDRResponse, error)
 	GetCIDRsForLabels(ctx context.Context, in *GetCIDRsForLabelsRequest, opts ...grpc.CallOption) (*GetCIDRsForLabelsResponse, error)
 	GetIPsForLabels(ctx context.Context, in *GetIPsForLabelsRequest, opts ...grpc.CallOption) (*GetIPsForLabelsResponse, error)
@@ -49,6 +51,15 @@ func NewCloudProviderServiceClient(cc grpc.ClientConnInterface) CloudProviderSer
 func (c *cloudProviderServiceClient) ListAccounts(ctx context.Context, in *ListAccountsRequest, opts ...grpc.CallOption) (*ListAccountsResponse, error) {
 	out := new(ListAccountsResponse)
 	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/ListAccounts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cloudProviderServiceClient) ListRegions(ctx context.Context, in *ListRegionsRequest, opts ...grpc.CallOption) (*ListRegionsResponse, error) {
+	out := new(ListRegionsResponse)
+	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/ListRegions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -145,6 +156,15 @@ func (c *cloudProviderServiceClient) ListInternetGateways(ctx context.Context, i
 	return out, nil
 }
 
+func (c *cloudProviderServiceClient) ListVPCEndpoints(ctx context.Context, in *ListVPCEndpointsRequest, opts ...grpc.CallOption) (*ListVPCEndpointsResponse, error) {
+	out := new(ListVPCEndpointsResponse)
+	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/ListVPCEndpoints", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cloudProviderServiceClient) GetVPCIDForCIDR(ctx context.Context, in *GetVPCIDForCIDRRequest, opts ...grpc.CallOption) (*GetVPCIDForCIDRResponse, error) {
 	out := new(GetVPCIDForCIDRResponse)
 	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/GetVPCIDForCIDR", in, out, opts...)
@@ -213,6 +233,7 @@ func (c *cloudProviderServiceClient) Summary(ctx context.Context, in *SummaryReq
 // for forward compatibility
 type CloudProviderServiceServer interface {
 	ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error)
+	ListRegions(context.Context, *ListRegionsRequest) (*ListRegionsResponse, error)
 	ListVPC(context.Context, *ListVPCRequest) (*ListVPCResponse, error)
 	ListInstances(context.Context, *ListInstancesRequest) (*ListInstancesResponse, error)
 	GetSubnet(context.Context, *GetSubnetRequest) (*GetSubnetResponse, error)
@@ -223,6 +244,7 @@ type CloudProviderServiceServer interface {
 	ListNATGateways(context.Context, *ListNATGatewaysRequest) (*ListNATGatewaysResponse, error)
 	ListRouters(context.Context, *ListRoutersRequest) (*ListRoutersResponse, error)
 	ListInternetGateways(context.Context, *ListInternetGatewaysRequest) (*ListInternetGatewaysResponse, error)
+	ListVPCEndpoints(context.Context, *ListVPCEndpointsRequest) (*ListVPCEndpointsResponse, error)
 	GetVPCIDForCIDR(context.Context, *GetVPCIDForCIDRRequest) (*GetVPCIDForCIDRResponse, error)
 	GetCIDRsForLabels(context.Context, *GetCIDRsForLabelsRequest) (*GetCIDRsForLabelsResponse, error)
 	GetIPsForLabels(context.Context, *GetIPsForLabelsRequest) (*GetIPsForLabelsResponse, error)
@@ -239,6 +261,9 @@ type UnimplementedCloudProviderServiceServer struct {
 
 func (UnimplementedCloudProviderServiceServer) ListAccounts(context.Context, *ListAccountsRequest) (*ListAccountsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAccounts not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) ListRegions(context.Context, *ListRegionsRequest) (*ListRegionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRegions not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) ListVPC(context.Context, *ListVPCRequest) (*ListVPCResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVPC not implemented")
@@ -269,6 +294,9 @@ func (UnimplementedCloudProviderServiceServer) ListRouters(context.Context, *Lis
 }
 func (UnimplementedCloudProviderServiceServer) ListInternetGateways(context.Context, *ListInternetGatewaysRequest) (*ListInternetGatewaysResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListInternetGateways not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) ListVPCEndpoints(context.Context, *ListVPCEndpointsRequest) (*ListVPCEndpointsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListVPCEndpoints not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) GetVPCIDForCIDR(context.Context, *GetVPCIDForCIDRRequest) (*GetVPCIDForCIDRResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVPCIDForCIDR not implemented")
@@ -318,6 +346,24 @@ func _CloudProviderService_ListAccounts_Handler(srv interface{}, ctx context.Con
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CloudProviderServiceServer).ListAccounts(ctx, req.(*ListAccountsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CloudProviderService_ListRegions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRegionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).ListRegions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infra.CloudProviderService/ListRegions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).ListRegions(ctx, req.(*ListRegionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -502,6 +548,24 @@ func _CloudProviderService_ListInternetGateways_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudProviderService_ListVPCEndpoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListVPCEndpointsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).ListVPCEndpoints(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infra.CloudProviderService/ListVPCEndpoints",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).ListVPCEndpoints(ctx, req.(*ListVPCEndpointsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CloudProviderService_GetVPCIDForCIDR_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetVPCIDForCIDRRequest)
 	if err := dec(in); err != nil {
@@ -640,6 +704,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CloudProviderService_ListAccounts_Handler,
 		},
 		{
+			MethodName: "ListRegions",
+			Handler:    _CloudProviderService_ListRegions_Handler,
+		},
+		{
 			MethodName: "ListVPC",
 			Handler:    _CloudProviderService_ListVPC_Handler,
 		},
@@ -678,6 +746,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListInternetGateways",
 			Handler:    _CloudProviderService_ListInternetGateways_Handler,
+		},
+		{
+			MethodName: "ListVPCEndpoints",
+			Handler:    _CloudProviderService_ListVPCEndpoints_Handler,
 		},
 		{
 			MethodName: "GetVPCIDForCIDR",

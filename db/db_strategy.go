@@ -96,6 +96,24 @@ func (p *providerWithDB) ListAccounts() []types.Account {
 	return p.realProvider.ListAccounts()
 }
 
+func (p *providerWithDB) ListRegions(ctx context.Context, params *infrapb.ListRegionsRequest) ([]types.Region, error) {
+	dbRegions, err := p.dbClient.ListRegions()
+	if err != nil {
+		return nil, err
+	}
+	var providersRegions []types.Region
+	for _, region := range dbRegions {
+		if strings.ToLower(region.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		//if params.GetAccountId() != "" && params.GetAccountId() != vpc.AccountID {
+		//	continue
+		//}
+		providersRegions = append(providersRegions, *region)
+	}
+	return providersRegions, nil
+}
+
 func (p *providerWithDB) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
 	dbVPCs, err := p.dbClient.ListVPCs()
 	if err != nil {
@@ -315,9 +333,9 @@ func (p *providerWithDB) ListNATGateways(ctx context.Context, params *infrapb.Li
 		//		continue
 		//	}
 		//}
-		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
-		//	continue
-		//}
+		if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
+			continue
+		}
 		providerNATGateways = append(providerNATGateways, *natGateway)
 	}
 	return providerNATGateways, nil
@@ -350,12 +368,12 @@ func (p *providerWithDB) ListRouters(ctx context.Context, params *infrapb.ListRo
 }
 
 func (p *providerWithDB) ListInternetGateways(ctx context.Context, params *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error) {
-	dbRouters, err := p.dbClient.ListInternetGateways()
+	dbIGWs, err := p.dbClient.ListInternetGateways()
 	if err != nil {
 		return nil, err
 	}
-	var providerRouters []types.IGW
-	for _, igw := range dbRouters {
+	var providerIGWs []types.IGW
+	for _, igw := range dbIGWs {
 		if strings.ToLower(igw.Provider) != strings.ToLower(p.realProvider.GetName()) {
 			continue
 		}
@@ -367,12 +385,38 @@ func (p *providerWithDB) ListInternetGateways(ctx context.Context, params *infra
 		//		continue
 		//	}
 		//}
+		//if params.GetVpcId() != "" && params.GetVpcId() != igw.AttachedVpcId {
+		//	continue
+		//}
+		providerIGWs = append(providerIGWs, *igw)
+	}
+	return providerIGWs, nil
+}
+
+func (p *providerWithDB) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error) {
+	dbvpce, err := p.dbClient.ListVPCEndpoints()
+	if err != nil {
+		return nil, err
+	}
+	var providerVpces []types.VPCEndpoint
+	for _, vpce := range dbvpce {
+		if strings.ToLower(vpce.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != vpce.AccountId {
+			continue
+		}
+		//if params.GetRegion() != "global" {
+		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
+		//		continue
+		//	}
+		//}
 		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
 		//	continue
 		//}
-		providerRouters = append(providerRouters, *igw)
+		providerVpces = append(providerVpces, *vpce)
 	}
-	return providerRouters, nil
+	return providerVpces, nil
 }
 
 func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {

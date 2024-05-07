@@ -48,7 +48,11 @@ type Syncer struct {
 
 func (s *Syncer) Sync() {
 
+	//Sync VPC
 	s.syncVPC()
+	s.syncRegions()
+
+	//Sync other cloud resources
 	s.syncInstances()
 	s.syncSubnets()
 	s.syncRouteTables()
@@ -57,13 +61,16 @@ func (s *Syncer) Sync() {
 	s.syncNATGateways()
 	s.syncRouters()
 	s.syncIGWs()
+	s.syncVPCEndpoints()
 
 	// Kubernetes
 	s.syncClusters()
 	s.syncPods()
+
 	s.syncNamespaces()
 	s.syncK8SSsNodes()
 	s.syncK8SServices()
+
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
@@ -78,6 +85,12 @@ func (s *Syncer) SyncPeriodically(ctx context.Context) {
 			return
 		}
 	}
+}
+
+func (s *Syncer) syncRegions() {
+	genericCloudSync[*types.Region](s, types.RegionType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Region, error) {
+		return cloudProvider.ListRegions(ctx, &infrapb.ListRegionsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListRegions, s.dbClient.PutRegion, s.dbClient.DeleteRegion)
 }
 
 func (s *Syncer) syncVPC() {
@@ -134,6 +147,13 @@ func (s *Syncer) syncIGWs() {
 
 		return cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListInternetGateways, s.dbClient.PutIGW, s.dbClient.DeleteIGW)
+}
+
+func (s *Syncer) syncVPCEndpoints() {
+	genericCloudSync[*types.VPCEndpoint](s, types.VPCEndpointType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPCEndpoint, error) {
+
+		return cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListVPCEndpoints, s.dbClient.PutVPCEndpoint, s.dbClient.DeleteVPCEndpoint)
 }
 
 func (s *Syncer) syncClusters() {
@@ -280,7 +300,7 @@ func genericK8sSync[P interface {
 	}
 	clusters, err := k8sProvider.ListClusters(ctx)
 	if err != nil {
-		s.logger.Errorf("Error in sync: failed to list clusters: %v", err)
+		s.logger.Warnf("Error in sync: failed to list clusters: %v", err)
 		return
 	}
 	syncTime := make(map[string]types.SyncTime)
@@ -289,7 +309,7 @@ func genericK8sSync[P interface {
 		t := time.Now().UTC().Format(time.RFC3339)
 		remoteObjs, err := listF(ctx, k8sProvider, cluster.Name)
 		if err != nil {
-			s.logger.Errorf("Sync error: failed to %s in cluster %s: %v",
+			s.logger.Warnf("Sync error: failed to access %s in cluster %s: %v",
 				typeName, cluster.Name, err)
 			continue
 		}

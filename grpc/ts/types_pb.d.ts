@@ -1,22 +1,3 @@
-/**
- * Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
- * All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http:www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import * as jspb from 'google-protobuf'
 
 import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
@@ -59,6 +40,9 @@ export class Instance extends jspb.Message {
   getState(): string;
   setState(value: string): Instance;
 
+  getType(): string;
+  setType(value: string): Instance;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Instance;
 
@@ -84,19 +68,20 @@ export namespace Instance {
     provider: string,
     accountId: string,
     state: string,
+    type: string,
     lastSyncTime: string,
   }
 }
 
 export class Subnet extends jspb.Message {
-  getSubnetid(): string;
-  setSubnetid(value: string): Subnet;
+  getId(): string;
+  setId(value: string): Subnet;
 
-  getCidrblock(): string;
-  setCidrblock(value: string): Subnet;
+  getCidrBlock(): string;
+  setCidrBlock(value: string): Subnet;
 
-  getVpcid(): string;
-  setVpcid(value: string): Subnet;
+  getVpcId(): string;
+  setVpcId(value: string): Subnet;
 
   getZone(): string;
   setZone(value: string): Subnet;
@@ -129,9 +114,9 @@ export class Subnet extends jspb.Message {
 
 export namespace Subnet {
   export type AsObject = {
-    subnetid: string,
-    cidrblock: string,
-    vpcid: string,
+    id: string,
+    cidrBlock: string,
+    vpcId: string,
     zone: string,
     region: string,
     labelsMap: Array<[string, string]>,
@@ -214,6 +199,36 @@ export class Account extends jspb.Message {
 }
 
 export namespace Account {
+  export type AsObject = {
+    provider: string,
+    id: string,
+    name: string,
+    lastSyncTime: string,
+  }
+}
+
+export class Region extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): Region;
+
+  getId(): string;
+  setId(value: string): Region;
+
+  getName(): string;
+  setName(value: string): Region;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Region;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Region.AsObject;
+  static toObject(includeInstance: boolean, msg: Region): Region.AsObject;
+  static serializeBinaryToWriter(message: Region, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Region;
+  static deserializeBinaryFromReader(message: Region, reader: jspb.BinaryReader): Region;
+}
+
+export namespace Region {
   export type AsObject = {
     provider: string,
     id: string,
@@ -704,6 +719,84 @@ export namespace IGW {
     attachedVpcId: string,
     region: string,
     state: string,
+    labelsMap: Array<[string, string]>,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    lastSyncTime: string,
+  }
+}
+
+export class VPCEndpoint extends jspb.Message {
+  getId(): string;
+  setId(value: string): VPCEndpoint;
+
+  getName(): string;
+  setName(value: string): VPCEndpoint;
+
+  getProvider(): string;
+  setProvider(value: string): VPCEndpoint;
+
+  getAccountId(): string;
+  setAccountId(value: string): VPCEndpoint;
+
+  getVpcId(): string;
+  setVpcId(value: string): VPCEndpoint;
+
+  getRegion(): string;
+  setRegion(value: string): VPCEndpoint;
+
+  getState(): string;
+  setState(value: string): VPCEndpoint;
+
+  getType(): string;
+  setType(value: string): VPCEndpoint;
+
+  getServiceName(): string;
+  setServiceName(value: string): VPCEndpoint;
+
+  getRouteTableIds(): string;
+  setRouteTableIds(value: string): VPCEndpoint;
+
+  getSubnetIds(): string;
+  setSubnetIds(value: string): VPCEndpoint;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): VPCEndpoint;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): VPCEndpoint;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): VPCEndpoint;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): VPCEndpoint;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): VPCEndpoint;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): VPCEndpoint;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VPCEndpoint.AsObject;
+  static toObject(includeInstance: boolean, msg: VPCEndpoint): VPCEndpoint.AsObject;
+  static serializeBinaryToWriter(message: VPCEndpoint, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VPCEndpoint;
+  static deserializeBinaryFromReader(message: VPCEndpoint, reader: jspb.BinaryReader): VPCEndpoint;
+}
+
+export namespace VPCEndpoint {
+  export type AsObject = {
+    id: string,
+    name: string,
+    provider: string,
+    accountId: string,
+    vpcId: string,
+    region: string,
+    state: string,
+    type: string,
+    serviceName: string,
+    routeTableIds: string,
+    subnetIds: string,
     labelsMap: Array<[string, string]>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,

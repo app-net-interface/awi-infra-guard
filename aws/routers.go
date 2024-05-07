@@ -30,6 +30,7 @@ import (
 func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersRequest) ([]types.Router, error) {
 
 	var routers []types.Router
+	c.accountID = params.AccountId
 	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
 		AllRegions: aws.Bool(true),
 	})
@@ -44,7 +45,7 @@ func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersReq
 		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
 		regionalRouters, err := c.ListRoutersForRegion(ec2RegionalClient, *region.RegionName)
 		if err != nil {
-			c.logger.Warnf("Error listing Transit Gateways in region %s: %v", *region.RegionName, err)
+			//c.logger.Warnf("Error listing Transit Gateways in region %s: %v", *region.RegionName, err)
 			continue
 		}
 		routers = append(routers, regionalRouters...)
@@ -84,6 +85,7 @@ func (c *Client) ListRoutersForRegion(client *ec2.Client, region string) ([]type
 				Region:    region,
 				State:     string(tgw.State),
 				Labels:    labels,
+				AccountId: *tgw.OwnerId,
 				CreatedAt: *tgw.CreationTime,
 			})
 		}

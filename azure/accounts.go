@@ -19,7 +19,6 @@ package azure
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armsubscriptions"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -29,7 +28,7 @@ import (
 func (c *Client) ListAccounts() []types.Account {
 	client, err := armsubscriptions.NewClient(c.cred, nil)
 	if err != nil {
-		fmt.Printf("failed to create subscriptions client: %w", err)
+		c.logger.Errorf("failed to create subscriptions client: %w", err)
 		return nil
 	}
 
@@ -39,7 +38,7 @@ func (c *Client) ListAccounts() []types.Account {
 	for pager.More() {
 		resp, err := pager.NextPage(ctx)
 		if err != nil {
-			fmt.Printf("failed to get the next page of subscriptions: %w", err)
+			c.logger.Warnf("failed to get the next page of subscriptions: %v", err)
 			return nil
 		}
 
@@ -61,6 +60,5 @@ func (c *Client) ListAccounts() []types.Account {
 			accounts = append(accounts, account) // Append the mapped account to the slice
 		}
 	}
-
 	return accounts
 }

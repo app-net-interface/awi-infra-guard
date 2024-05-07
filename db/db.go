@@ -21,6 +21,7 @@ import "github.com/app-net-interface/awi-infra-guard/types"
 
 const (
 	vpcTable               = "vpcs"
+	regionTable            = "regions"
 	instanceTable          = "instances"
 	subnetTable            = "subnets"
 	clusterTable           = "clusters"
@@ -35,12 +36,14 @@ const (
 	ngTable                = "nat_gateways"
 	routerTable            = "routers"
 	igwTable               = "igws"
+	vpcEndpointTable       = "vpcEndpoints"
 	syncTimeTable          = "sync_time"
 )
 
 // Add bolt db table to this list; or it will cause a panic
 var tableNames = []string{
 	vpcTable,
+	regionTable,
 	instanceTable,
 	subnetTable,
 	clusterTable,
@@ -53,6 +56,7 @@ var tableNames = []string{
 	ngTable,
 	routerTable,
 	igwTable,
+	vpcEndpointTable,
 	aclTable,
 	securityGroupTable,
 	syncTimeTable,
@@ -68,6 +72,12 @@ type Client interface {
 	Open(filename string) error
 	Close() error
 	DropDB() error
+
+	// VPC
+	PutRegion(region *types.Region) error
+	GetRegion(id string) (*types.Region, error)
+	ListRegions() ([]*types.Region, error)
+	DeleteRegion(id string) error
 
 	// VPC
 	PutVPC(vpc *types.VPC) error
@@ -116,6 +126,12 @@ type Client interface {
 	PutIGW(ng *types.IGW) error
 	GetIGW(id string) (*types.IGW, error)
 	DeleteIGW(id string) error
+
+	// VPCEndpoint
+	ListVPCEndpoints() ([]*types.VPCEndpoint, error)
+	PutVPCEndpoint(ng *types.VPCEndpoint) error
+	GetVPCEndpoint(id string) (*types.VPCEndpoint, error)
+	DeleteVPCEndpoint(id string) error
 
 	//Security Group
 	PutSecurityGroup(securityGroup *types.SecurityGroup) error

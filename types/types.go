@@ -34,6 +34,8 @@ const (
 )
 
 const (
+	AccountType       = "Account"
+	RegionType        = "Region"
 	VPCType           = "VPC"
 	InstanceType      = "Instance"
 	SubnetType        = "Subnet"
@@ -43,12 +45,33 @@ const (
 	NATGatewayType    = "NATGateway"
 	RouterType        = "Router"
 	IGWType           = "IGW"
+	VPCEndpointType   = "VPCEndpoint"
 	ClusterType       = "Cluster"
 	PodsType          = "Pod"
 	K8sServiceType    = "K8sService"
 	K8sNodeType       = "K8sNode"
 	NamespaceType     = "Namespace"
 )
+
+type Region struct {
+	ID 	         string
+	Name         string
+	Provider     string
+	AccountID    string
+	LastSyncTime string
+}
+
+func (r *Region) DbId() string {
+	return CloudID(r.Provider, r.ID)
+}
+
+func (r *Region) SetSyncTime(time string) {
+	r.LastSyncTime = time
+}
+
+func (r *Region) GetProvider() string {
+	return r.Provider
+}
 
 type VPC struct {
 	ID           string
@@ -87,6 +110,7 @@ type Instance struct {
 	Zone         string
 	Provider     string
 	AccountID    string
+	Type         string
 	LastSyncTime string
 }
 
@@ -130,123 +154,6 @@ func (v *Subnet) GetProvider() string {
 type Ports []string
 
 type ProtocolsAndPorts map[string]Ports
-
-type Cluster struct {
-	Name         string
-	FullName     string
-	Arn          string
-	VpcID        string
-	Region       string
-	Project      string
-	Labels       map[string]string
-	Provider     string
-	AccountID    string
-	Id           string
-	LastSyncTime string
-}
-
-func (v *Cluster) DbId() string {
-	return CloudID(v.Provider, v.Name)
-}
-
-func (v *Cluster) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *Cluster) GetProvider() string {
-	return v.Provider
-}
-
-type Pod struct {
-	Cluster      string
-	Namespace    string
-	Name         string
-	Ip           string
-	Labels       map[string]string
-	State        string
-	LastSyncTime string
-}
-
-func (v *Pod) DbId() string {
-	return KubernetesID(v.Cluster, v.Namespace, v.Name)
-}
-
-func (v *Pod) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *Pod) GetProvider() string {
-	return v.Cluster
-}
-
-type K8SService struct {
-	Cluster           string
-	Namespace         string
-	Name              string
-	Type              string
-	ProtocolsAndPorts ProtocolsAndPorts
-	Ingresses         []K8sServiceIngress
-	Labels            map[string]string
-	LastSyncTime      string
-}
-
-func (v *K8SService) DbId() string {
-	return KubernetesID(v.Cluster, v.Namespace, v.Name)
-}
-
-func (v *K8SService) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *K8SService) GetProvider() string {
-	return v.Cluster
-}
-
-type K8sServiceIngress struct {
-	Hostname string
-	IP       string
-	Ports    []string
-}
-
-type K8sNode struct {
-	Cluster      string
-	Name         string
-	Namespace    string
-	Addresses    []v1.NodeAddress
-	Labels       map[string]string
-	LastSyncTime string
-}
-
-func (v *K8sNode) DbId() string {
-	return KubernetesID(v.Cluster, v.Namespace, v.Name)
-}
-
-func (v *K8sNode) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *K8sNode) GetProvider() string {
-	return v.Cluster
-}
-
-type Namespace struct {
-	Cluster      string
-	Name         string
-	Labels       map[string]string
-	LastSyncTime string
-}
-
-func (v *Namespace) DbId() string {
-	return KubernetesID(v.Cluster, v.Name, "")
-}
-
-func (v *Namespace) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *Namespace) GetProvider() string {
-	return v.Cluster
-}
 
 type Account struct {
 	Name         string
@@ -380,6 +287,35 @@ func (v *IGW) GetProvider() string {
 	return v.Provider
 }
 
+type VPCEndpoint struct {
+	ID            string            `json:"id,omitempty"`
+	Name          string            `json:"name,omitempty"`
+	Provider      string            `json:"provider,omitempty"`
+	AccountId     string            `json:"account_id,omitempty"`
+	VPCId         string            `json:"vpc_id,omitempty"` //
+	Region        string            `json:"region,omitempty"` // VPC Region
+	State         string            `json:"state,omitempty"`
+	RouteTableIds string            `json:"route_table_ids,omitempty"`
+	SubnetIds     string            `json:"subnet_ids,omitempty"`
+	ServiceName   string            `json:"service_name,omitempty"`
+	Labels        map[string]string `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt     *time.Time        `json:"created_at,omitempty"`
+	UpdatedAt     *time.Time        `json:"updated_at,omitempty"`
+	LastSyncTime  string            `json:"last_sync_time,omitempty"`
+}
+
+func (v *VPCEndpoint) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *VPCEndpoint) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *VPCEndpoint) GetProvider() string {
+	return v.Provider
+}
+
 type SecurityGroup struct {
 	Name         string
 	ID           string
@@ -463,14 +399,6 @@ func (v *SyncTime) GetProvider() string {
 	return v.Provider
 }
 
-func KubernetesID(cluster, namespace, name string) string {
-	n := cluster + "/" + namespace
-	if name != "" {
-		n += "/" + name
-	}
-	return n
-}
-
 func CloudID(provider, id string) string {
 	return provider + ":" + id
 }
@@ -532,4 +460,131 @@ type SingleVPCDisconnectionParams struct {
 }
 
 type VPCDisconnectionOutput struct {
+}
+
+//Kubernetes
+
+type Cluster struct {
+	Name         string
+	FullName     string
+	Arn          string
+	VpcID        string
+	Region       string
+	Project      string
+	Labels       map[string]string
+	Provider     string
+	AccountID    string
+	Id           string
+	LastSyncTime string
+}
+
+func (v *Cluster) DbId() string {
+	return CloudID(v.Provider, v.Name)
+}
+
+func (v *Cluster) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *Cluster) GetProvider() string {
+	return v.Provider
+}
+
+type Pod struct {
+	Cluster      string
+	Namespace    string
+	Name         string
+	Ip           string
+	Labels       map[string]string
+	State        string
+	LastSyncTime string
+}
+
+func (v *Pod) DbId() string {
+	return KubernetesID(v.Cluster, v.Namespace, v.Name)
+}
+
+func (v *Pod) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *Pod) GetProvider() string {
+	return v.Cluster
+}
+
+type K8SService struct {
+	Cluster           string
+	Namespace         string
+	Name              string
+	Type              string
+	ProtocolsAndPorts ProtocolsAndPorts
+	Ingresses         []K8sServiceIngress
+	Labels            map[string]string
+	LastSyncTime      string
+}
+
+func (v *K8SService) DbId() string {
+	return KubernetesID(v.Cluster, v.Namespace, v.Name)
+}
+
+func (v *K8SService) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *K8SService) GetProvider() string {
+	return v.Cluster
+}
+
+type K8sServiceIngress struct {
+	Hostname string
+	IP       string
+	Ports    []string
+}
+
+type K8sNode struct {
+	Cluster      string
+	Name         string
+	Namespace    string
+	Addresses    []v1.NodeAddress
+	Labels       map[string]string
+	LastSyncTime string
+}
+
+func (v *K8sNode) DbId() string {
+	return KubernetesID(v.Cluster, v.Namespace, v.Name)
+}
+
+func (v *K8sNode) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *K8sNode) GetProvider() string {
+	return v.Cluster
+}
+
+type Namespace struct {
+	Cluster      string
+	Name         string
+	Labels       map[string]string
+	LastSyncTime string
+}
+
+func (v *Namespace) DbId() string {
+	return KubernetesID(v.Cluster, v.Name, "")
+}
+
+func (v *Namespace) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *Namespace) GetProvider() string {
+	return v.Cluster
+}
+
+func KubernetesID(cluster, namespace, name string) string {
+	n := cluster + "/" + namespace
+	if name != "" {
+		n += "/" + name
+	}
+	return n
 }

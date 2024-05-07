@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
@@ -107,13 +108,15 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 		}
 		inst := reservation.Instances[0]
 		name := getTagName(inst.Tags)
+
 		instance := types.Instance{
-			ID:        convertString(inst.InstanceId),
-			Name:      convertString(name),
-			PrivateIP: convertString(inst.PrivateIpAddress),
-			PublicIP:  convertString(inst.PublicIpAddress),
-			SubnetID:  convertString(inst.SubnetId),
-			VPCID:     convertString(inst.VpcId),
+			ID:        aws.ToString(inst.InstanceId),
+			Name:      aws.ToString(name),
+			PrivateIP: aws.ToString(inst.PrivateIpAddress),
+			PublicIP:  aws.ToString(inst.PublicIpAddress),
+			SubnetID:  aws.ToString(inst.SubnetId),
+			VPCID:     aws.ToString(inst.VpcId),
+			Type:      aws.ToString((*string)(&inst.InstanceType)),
 			Labels:    convertTags(inst.Tags),
 			State:     convertState(inst.State),
 			Region:    region,
@@ -124,8 +127,6 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 	}
 	return instances
 }
-
-
 
 func convertTags(tags []awstypes.Tag) map[string]string {
 	labels := make(map[string]string, len(tags))

@@ -21,7 +21,8 @@ import (
 	"time"
 
 	"github.com/app-net-interface/awi-infra-guard/types"
-	"github.com/boltdb/bolt"
+	//"github.com/boltdb/bolt"
+	bolt "go.etcd.io/bbolt"
 )
 
 type boltClient struct {
@@ -84,6 +85,22 @@ func (client *boltClient) ListVPCs() ([]*types.VPC, error) {
 
 func (client *boltClient) DeleteVPC(id string) error {
 	return delete_(client, id, vpcTable)
+}
+
+func (client *boltClient) PutRegion(region *types.Region) error {
+	return update(client, region, region.DbId(), regionTable)
+}
+
+func (client *boltClient) GetRegion(id string) (*types.Region, error) {
+	return get[types.Region](client, id, regionTable)
+}
+
+func (client *boltClient) ListRegions() ([]*types.Region, error) {
+	return list[types.Region](client, regionTable)
+}
+
+func (client *boltClient) DeleteRegion(id string) error {
+	return delete_(client, id, regionTable)
 }
 
 // Instance
@@ -186,6 +203,23 @@ func (client *boltClient) ListInternetGateways() ([]*types.IGW, error) {
 
 func (client *boltClient) DeleteIGW(id string) error {
 	return delete_(client, id, igwTable)
+}
+
+// VPCEndpoint
+func (client *boltClient) PutVPCEndpoint(vpce *types.VPCEndpoint) error {
+	return update(client, vpce, vpce.DbId(), vpcEndpointTable)
+}
+
+func (client *boltClient) GetVPCEndpoint(id string) (*types.VPCEndpoint, error) {
+	return get[types.VPCEndpoint](client, id, vpcEndpointTable)
+}
+
+func (client *boltClient) ListVPCEndpoints() ([]*types.VPCEndpoint, error) {
+	return list[types.VPCEndpoint](client, vpcEndpointTable)
+}
+
+func (client *boltClient) DeleteVPCEndpoint(id string) error {
+	return delete_(client, id, vpcEndpointTable)
 }
 
 // SecurityGroup

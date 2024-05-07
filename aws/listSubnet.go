@@ -145,7 +145,7 @@ func convertSubnets(defaultAccount, defaultRegion, account, region string, subne
 			CidrBlock: convertString(subnet.CidrBlock),
 			Labels:    convertTags(subnet.Tags),
 			Region:    region,
-			AccountID: account,
+			AccountID: *subnet.OwnerId,
 			Provider:  providerName,
 		})
 	}

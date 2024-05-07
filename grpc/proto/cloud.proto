@@ -25,6 +25,8 @@ option go_package = "./;infrapb";
 service CloudProviderService {
     rpc ListAccounts (ListAccountsRequest) returns (ListAccountsResponse) {}
 
+    rpc ListRegions (ListRegionsRequest ) returns (ListRegionsResponse) {}
+
     rpc ListVPC (ListVPCRequest) returns (ListVPCResponse) {}
 
     rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse) {}
@@ -42,10 +44,8 @@ service CloudProviderService {
     rpc ListNATGateways (ListNATGatewaysRequest) returns (ListNATGatewaysResponse) {}
 
     rpc ListRouters (ListRoutersRequest) returns (ListRoutersResponse) {}
-   
     rpc ListInternetGateways (ListInternetGatewaysRequest) returns (ListInternetGatewaysResponse) {}
-
-
+    rpc ListVPCEndpoints (ListVPCEndpointsRequest) returns (ListVPCEndpointsResponse) {}
     rpc GetVPCIDForCIDR (GetVPCIDForCIDRRequest) returns (GetVPCIDForCIDRResponse) {}
 
     rpc GetCIDRsForLabels (GetCIDRsForLabelsRequest) returns (GetCIDRsForLabelsResponse) {}
@@ -67,6 +67,15 @@ message ListAccountsRequest {
 
 message ListAccountsResponse {
     repeated Account accounts = 1;
+}
+
+message ListRegionsRequest {
+    string provider = 1;
+    string account_id = 2;
+}
+
+message ListRegionsResponse {
+    repeated Region regions = 1;
 }
 
 // ListVPC
@@ -170,6 +179,17 @@ message ListInternetGatewaysResponse {
     string last_sync_time = 2;
 }
 
+message ListVPCEndpointsResponse {
+    repeated VPCEndpoint veps = 1;
+    string last_sync_time = 2;
+}
+
+message ListVPCEndpointsRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 3;
+    string account_id = 4;
+}
 
 
 // GetSubnet
@@ -295,11 +315,13 @@ message Counters {
     int32 nat_gateways = 12;
     int32 routers = 13;
     int32 igws = 14;
+    int32 vpc_endpoints = 15;
 }
 
 message StatusSummary {
     map<string, int32> vm_status = 1;
     map<string, int32> pod_status = 2;
+    map<string, int32> vm_types = 3;
 }
 
 message SummaryResponse {

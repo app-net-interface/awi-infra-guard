@@ -40,6 +40,7 @@ const providerName = "AWS"
 type Client struct {
 	defaultRegion    string
 	defaultAccountID string
+	accountID        string
 	profiles         []types.Account
 	clients          map[string]awsRegionalClientSet
 

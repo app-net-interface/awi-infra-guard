@@ -237,6 +237,20 @@ func (s *Server) ListAccounts(ctx context.Context, in *infrapb.ListAccountsReque
 	}, nil
 }
 
+func (s *Server) ListRegions(ctx context.Context, in *infrapb.ListRegionsRequest) (*infrapb.ListRegionsResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	regions, err := cloudProvider.ListRegions(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	return &infrapb.ListRegionsResponse{
+		Regions: typesRegionsToGrpc(regions),
+	}, nil
+}
+
 func (s *Server) ListVPC(ctx context.Context, in *infrapb.ListVPCRequest) (*infrapb.ListVPCResponse, error) {
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
 	if err != nil {
@@ -442,6 +456,31 @@ func (s *Server) ListInternetGateways(ctx context.Context, in *infrapb.ListInter
 	return &infrapb.ListInternetGatewaysResponse{
 		LastSyncTime: t,
 		Igws:         typesIGWsToGrpc(l),
+	}, nil
+}
+
+func (s *Server) ListVPCEndpoints(ctx context.Context, in *infrapb.ListVPCEndpointsRequest) (*infrapb.ListVPCEndpointsResponse, error) {
+
+	s.logger.Infof("Listing routers from user query")
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	l, err := cloudProvider.ListVPCEndpoints(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failure to retreive Router %s", err.Error())
+		return nil, err
+	}
+	var t string
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.RouterType))
+	if err != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.RouterType, cloudProvider.GetName())
+	} else {
+		t = syncTime.Time
+	}
+	return &infrapb.ListVPCEndpointsResponse{
+		LastSyncTime: t,
+		Veps:         typesVPCEndpointsToGrpc(l),
 	}, nil
 }
 
@@ -676,6 +715,10 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 	for _, vm := range instances {
 		vmStateSummary[strings.ToLower(vm.State)] += 1
 	}
+	vmTypeSummary := make(map[string]int32)
+	for _, vm := range instances {
+		vmTypeSummary[strings.ToLower(vm.Type)] += 1
+	}
 	acls, err := cloudProvider.ListACLs(ctx, &infrapb.ListACLsRequest{})
 	if err != nil {
 		return nil, err
@@ -689,17 +732,27 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		return nil, err
 	}
 
-	/*
-		natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{})
-		if err != nil {
-			return nil, err
-		}
+	natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{})
+	if err != nil {
+		return nil, err
+	}
 
-		routers, err := cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{})
-		if err != nil {
-			return nil, err
-		}
-	*/
+	routers, err := cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	igws, err := cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	vpcEndpoints, err := cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	// Kubernetes Resources
 
 	clusters, err := cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{})
 	if err != nil {
@@ -757,7 +810,12 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 			Instances:      int32(len(instances)),
 			Acls:           int32(len(acls)),
 			SecurityGroups: int32(len(sgs)),
-			//NATGateways:    int32(len(natGateways)),
+			NatGateways:    int32(len(natGateways)),
+			Routers:        int32(len(routers)),
+			Igws:           int32(len(igws)),
+			VpcEndpoints:   int32(len(vpcEndpoints)),
+
+			//Kubernetes
 			Clusters:   int32(len(clusters)),
 			Pods:       int32(podsCount),
 			Services:   int32(servicesCount),
@@ -766,6 +824,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		Statuses: &infrapb.StatusSummary{
 			VmStatus:  vmStateSummary,
 			PodStatus: podsStateSummary,
+			VmTypes:   vmTypeSummary,
 		},
 	}, nil
 }
@@ -906,7 +965,7 @@ func (s *Server) unaryServerInterceptor(ctx context.Context, req interface{}, in
 	resp, err := handler(ctx, req)
 
 	// Log response
-	s.logger.Debugf("Request = %+v \n Unary Response - Method:%s, Response:%v, Error:%v\n", req, info.FullMethod, resp, err)
+	s.logger.Infof("Request = %+v \n Unary Response - Method:%s, Response:%v, Error:%v\n", req, info.FullMethod, resp, err)
 
 	return resp, err
 }
