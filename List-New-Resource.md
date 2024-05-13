@@ -60,6 +60,10 @@ Add or update VPCEndpoint struct definitions in type/types.go.
 
 ```
 // type/types.go
+
+const VPCEndpointType   = "VPCEndpoint"
+
+
 type VPCEndpoint struct {
 }
 
