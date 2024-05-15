@@ -25,30 +25,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
 )
 
-func (c *Client) getVnetPeering(
-	ctx context.Context,
-	accountID string,
-	resourceGroup string,
-	vnetName string,
-	vnetPeeringName string,
-) (armnetwork.VirtualNetworkPeering, error) {
-	client, ok := c.accountClients[accountID]
-	if !ok {
-		return armnetwork.VirtualNetworkPeering{}, fmt.Errorf(
-			"account ID '%s' is not associated with any clients", accountID,
-		)
-	}
-	peering, err := client.VNETPeering.Get(
-		ctx, resourceGroup, vnetName, vnetPeeringName, nil,
-	)
-	if err != nil {
-		return armnetwork.VirtualNetworkPeering{}, fmt.Errorf(
-			"failed to get VNet Peering '%s': %w", vnetPeeringName, err,
-		)
-	}
-	return peering.VirtualNetworkPeering, nil
-}
-
 func (c *Client) getVnetPeeringFromVnet(vnet armnetwork.VirtualNetwork, destVNetID string) string {
 	if vnet.Properties == nil {
 		return ""

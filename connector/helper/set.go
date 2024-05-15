@@ -30,7 +30,18 @@ func SetFromSlice[T comparable](s []T) Set[T] {
 }
 
 func (s *Set[T]) Set(v T) {
+	if s.values == nil {
+		s.values = map[T]struct{}{}
+	}
 	s.values[v] = struct{}{}
+}
+
+func (s *Set[T]) Keys() []T {
+	keys := make([]T, 0, len(s.values))
+	for k := range s.values {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 func (s *Set[T]) Has(v T) bool {

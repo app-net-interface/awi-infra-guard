@@ -61,9 +61,13 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 			return nil, fmt.Errorf("failed to get the next page of VMs: %w", err)
 		}
 		for _, vm := range vmResult.Value {
-			if vm.Properties.NetworkProfile == nil {
+			if vm.Properties == nil || vm.Properties.NetworkProfile == nil {
 				continue
 			}
+			if !allLabelsMatch(vm.Tags, input.Labels) {
+				continue
+			}
+
 			for _, nicRef := range vm.Properties.NetworkProfile.NetworkInterfaces {
 				nic, err := nicClient.Get(ctx, parseResourceGroupName(*nicRef.ID), parseResourceName(*nicRef.ID), nil)
 				//nic.Interface.Properties.NetworkSecurityGroup.

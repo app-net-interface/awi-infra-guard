@@ -36,6 +36,7 @@ type ResourceClient struct {
 	VNET        armnetwork.VirtualNetworksClient
 	VNETPeering armnetwork.VirtualNetworkPeeringsClient
 	NSG         armnetwork.SecurityGroupsClient
+	Subnet      armnetwork.SubnetsClient
 	Tag         armresources.TagsClient
 }
 
@@ -86,11 +87,23 @@ func NewResourceClient(
 			"failed to create Tag Client. Got empty client",
 		)
 	}
+	subnetClient, err := armnetwork.NewSubnetsClient(accountID, credentials, nil)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to create Subnet Client: %v", err,
+		)
+	}
+	if subnetClient == nil {
+		return nil, errors.New(
+			"failed to create Subnet Client. Got empty client",
+		)
+	}
 	return &ResourceClient{
 		VNET:        *vnetClient,
 		VNETPeering: *vnetPeeringClient,
 		NSG:         *nsgClient,
 		Tag:         *tagClient,
+		Subnet:      *subnetClient,
 	}, nil
 }
 

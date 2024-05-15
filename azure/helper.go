@@ -174,6 +174,34 @@ func parseResourceGroupName(resourceID string) string {
 	return ""
 }
 
+// Returns true if the given string consists of '/' characters
+// indicating the form of Azure Resource ID rather than being
+// regular resource name.
+//
+// This method is to distinguish ResourceID and ResourceName
+// whenever it is important to use any of those.
+func isResourceID(id string) bool {
+	chunks := strings.SplitN(id, "/", 2)
+	return len(chunks) > 1
+}
+
+// Returns true if the given string consists of zero '/'
+// characters indicating the form of Azure Resource name
+// rather than being resource ID.
+//
+// This method is to distinguish ResourceID and ResourceName
+// whenever it is important to use any of those.
+//
+// Using negation of "isResourceID" is not valid due to the
+// possibility of empty string which should return false for
+// both of these methods.
+func isResourceName(id string) bool {
+	if id == "" {
+		return false
+	}
+	return !isResourceID(id)
+}
+
 func parseResourceName(resourceID string) string {
 	parts := strings.Split(resourceID, "/")
 	return parts[len(parts)-1]
@@ -243,4 +271,23 @@ func isIPv4CIDR(cidr string) bool {
 func extractLastSegment(resourceID string) string {
 	segments := strings.Split(resourceID, "/")
 	return segments[len(segments)-1]
+}
+
+// allLabelsMatch returns true if all required label keys are
+// present within tags and if their values correspond to
+// those from tags.
+func allLabelsMatch(tags map[string]*string, requiredTags map[string]string) bool {
+	for k, v := range requiredTags {
+		actual, ok := tags[k]
+		if !ok {
+			return false
+		}
+		if actual == nil {
+			return false
+		}
+		if v != *actual {
+			return false
+		}
+	}
+	return true
 }

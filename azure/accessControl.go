@@ -20,73 +20,13 @@ package azure
 import (
 	"context"
 	"fmt"
-	"strings"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	accesscontrol "github.com/app-net-interface/awi-infra-guard/azure/accessControl"
+	"github.com/app-net-interface/awi-infra-guard/connector/helper"
+	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 )
-
-type vpcPolicy string
-
-const (
-	vpcPolicyAllow = "allow"
-	vpcPolicyDeny  = "deny"
-)
-
-// func (c *Client) refreshVnetSubnetsWithVPCPolicy(
-// 	ctx context.Context,
-// 	vnet armnetwork.VirtualNetwork,
-// 	inboundVnet string,
-// 	policy vpcPolicy,
-// ) error {
-// 	c.logger.Trace(
-// 		"updating virtual network '%s' subnets with VPC Policy %s",
-// 		vnet,
-// 	)
-// 	if vnet.Properties == nil {
-// 		c.logger.Warnf(
-// 			"virtual network '%s' has no properties - skipping policy update",
-// 			helper.StringPointerToString(vnet.ID),
-// 		)
-// 		return nil
-// 	}
-
-// 	for i := range vnet.Properties.Subnets {
-// 		if vnet.Properties.Subnets[i] == nil {
-// 			c.logger.Warnf(
-// 				"virtual network '%s' has a nil subnet pointer - skipping subnet entry",
-// 				helper.StringPointerToString(vnet.ID),
-// 			)
-// 			continue
-// 		}
-// 		if vnet.Properties.Subnets[i].Properties == nil {
-// 			c.logger.Warnf(
-// 				"virtual network '%s' has a subnet %s with no properties - skipping subnet entry",
-// 				helper.StringPointerToString(vnet.ID),
-// 				helper.StringPointerToString(vnet.Properties.Subnets[i].ID),
-// 			)
-// 			continue
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-func getVnetSourceIDFromAWITags(tags map[string]string) (string, error) {
-	tagValue, ok := tags["awi"]
-	if !ok {
-		return "", fmt.Errorf(
-			"expected request key tag 'awi' with source ID but found none. Got tags: %v",
-			tags,
-		)
-	}
-	if !strings.HasPrefix(tagValue, "default-") {
-		return "", fmt.Errorf(
-			"the value of 'awi' tag from request has invalid prefix. Expected 'default-' but got: %s",
-			tagValue,
-		)
-	}
-	return strings.TrimPrefix(tagValue, "default-"), nil
-}
 
 // AccessControl interface implementation
 func (c *Client) AddInboundAllowRuleInVPC(
@@ -98,7 +38,6 @@ func (c *Client) AddInboundAllowRuleInVPC(
 	ruleName string,
 	tags map[string]string,
 ) error {
-
 	vnet, vnetAccount, err := c.getVPC(
 		ctx, destinationVpcID, region,
 	)
@@ -113,38 +52,150 @@ func (c *Client) AddInboundAllowRuleInVPC(
 		account = vnetAccount
 	}
 
-	sourceID, err := getVnetSourceIDFromAWITags(tags)
-	if err != nil {
-		return fmt.Errorf(
-			"failed to obtain the ID of Source VPC: %w", err,
-		)
-	}
+	ruleset := accesscontrol.AccessControlRuleSet{}
+	ruleset.NewDirectedVPCRules(
+		accesscontrol.CustomRuleName(ruleName),
+		accesscontrol.AccessAllow,
+		cidrsToAllow,
+	)
 
-	err = c.refreshSubnetSecurityGroupWithVPCInbound(
+	err = c.ApplyAccessRulesToVPC(
 		ctx,
 		account,
-		region,
-		cidrsToAllow,
-		vpcPolicyAllow,
 		vnet,
-		sourceID,
-		ruleName,
+		ruleset,
 	)
 	if err != nil {
 		return fmt.Errorf(
-			"failed to refresh Security Groups for subnets from VNet %s: %w",
-			destinationVpcID, err,
+			"failed to apply rules %v to VPC %s: %w",
+			ruleset, destinationVpcID, err,
 		)
 	}
 
 	return nil
 }
 
+func (c *Client) getSubnetsFromInstances(
+	ctx context.Context, instances []types.Instance,
+) ([]armnetwork.Subnet, error) {
+
+	type subnetInfo struct {
+		VNetID   string
+		SubnetID string
+	}
+
+	subnetInfos := helper.Set[subnetInfo]{}
+
+	for _, instance := range instances {
+		subnetInfos.Set(subnetInfo{
+			VNetID:   instance.VPCID,
+			SubnetID: instance.SubnetID,
+		})
+	}
+
+	infos := subnetInfos.Keys()
+	subnets := make([]armnetwork.Subnet, 0, len(infos))
+
+	for _, info := range infos {
+		subnet, _, err := c.getSubnet(
+			ctx,
+			parseResourceGroupName(info.SubnetID),
+			parseResourceName(info.VNetID),
+			parseResourceName(info.SubnetID),
+		)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"failed to get subnet %s: %w",
+				info.SubnetID, err,
+			)
+		}
+		subnets = append(subnets, subnet)
+	}
+
+	return subnets, nil
+}
+
+func (c *Client) prepareCustomAccessRules(
+	instances []types.Instance,
+	ruleName string,
+	cidrsToAllow []string,
+	protocolsAndPorts types.ProtocolsAndPorts,
+) (accesscontrol.AccessControlRuleSet, error) {
+	ruleset := accesscontrol.AccessControlRuleSet{}
+
+	for _, instance := range instances {
+		err := ruleset.NewCustomRules(
+			accesscontrol.CustomRuleName(ruleName),
+			accesscontrol.AccessAllow,
+			[]string{instance.SubnetID},
+			cidrsToAllow,
+			[]string{instance.PrivateIP},
+			protocolsAndPorts,
+		)
+		if err != nil {
+			return accesscontrol.AccessControlRuleSet{}, fmt.Errorf(
+				"failed to create custom rule: %w", err,
+			)
+		}
+	}
+
+	return ruleset, nil
+}
+
 func (c *Client) AddInboundAllowRuleByLabelsMatch(ctx context.Context, account, region string,
 	vpcID string, ruleName string, labels map[string]string, cidrsToAllow []string,
 	protocolsAndPorts types.ProtocolsAndPorts) (ruleId string, instances []types.Instance, err error) {
-	// TBD
-	return "", nil, nil
+
+	instances, err = c.ListInstances(ctx, &infrapb.ListInstancesRequest{
+		VpcId:     vpcID,
+		Zone:      region,
+		AccountId: account,
+		Labels:    labels,
+		Region:    region,
+	})
+	if err != nil {
+		return "", nil, fmt.Errorf(
+			"failed to list Instances: %w", err,
+		)
+	}
+
+	subnets, err := c.getSubnetsFromInstances(ctx, instances)
+	if err != nil {
+		return "", nil, fmt.Errorf(
+			"failed to extract subnets associated with matched instances: %w", err,
+		)
+	}
+
+	ruleset, err := c.prepareCustomAccessRules(
+		instances,
+		ruleName,
+		cidrsToAllow,
+		protocolsAndPorts,
+	)
+	if err != nil {
+		return "", nil, fmt.Errorf(
+			"failed to prepare custom access rules: %w", err,
+		)
+	}
+
+	for _, subnet := range subnets {
+		err = c.ApplyAccessRulesToSubnet(
+			ctx,
+			account,
+			region,
+			subnet,
+			ruleset,
+		)
+		if err != nil {
+			return "", nil, fmt.Errorf(
+				"failed to apply access rules to subnet %s: %w",
+				helper.StringPointerToString(subnet.ID),
+				err,
+			)
+		}
+	}
+
+	return ruleName, instances, nil
 }
 
 func (c *Client) AddInboundAllowRuleBySubnetMatch(ctx context.Context, account, region string,
@@ -168,7 +219,7 @@ func (c *Client) AddInboundAllowRuleForLoadBalancerByDNS(ctx context.Context, ac
 }
 
 func (c *Client) RemoveInboundAllowRuleFromVPCByName(ctx context.Context, account, region string, vpcID string, ruleName string) error {
-	vnet, vnetAccount, err := c.getVPC(
+	vnet, _, err := c.getVPC(
 		ctx, vpcID, region,
 	)
 	if err != nil {
@@ -177,16 +228,13 @@ func (c *Client) RemoveInboundAllowRuleFromVPCByName(ctx context.Context, accoun
 			vpcID, err,
 		)
 	}
-	if account == "" {
-		account = vnetAccount
-	}
 
-	err = c.deleteVPCInboundFromSubnets(
+	err = c.DeleteAccessRulesFromVPC(
 		ctx,
-		account,
-		region,
 		vnet,
-		ruleName,
+		accesscontrol.RuleNames{
+			accesscontrol.CustomRuleName(ruleName),
+		},
 	)
 	if err != nil {
 		return fmt.Errorf(

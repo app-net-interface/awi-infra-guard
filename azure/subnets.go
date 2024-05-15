@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
+	"github.com/app-net-interface/awi-infra-guard/connector/helper"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 )
@@ -90,6 +91,92 @@ func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsReq
 		}
 	}
 	return subnets, nil
+}
+
+func (c *Client) getSubnet(ctx context.Context, resGroupName, vnetName, subnetName string) (
+	armnetwork.Subnet, string, error,
+) {
+	for account, client := range c.accountClients {
+		subnet, err := client.Subnet.Get(
+			ctx, resGroupName, vnetName, subnetName, nil,
+		)
+		if err != nil {
+			return armnetwork.Subnet{}, account, fmt.Errorf(
+				"failed to get Subnet '%s:%s': %w", vnetName, subnetName, err)
+		}
+		return subnet.Subnet, account, nil
+	}
+
+	return armnetwork.Subnet{}, "", fmt.Errorf(
+		"subnet '%s:%s' not found", vnetName, subnetName,
+	)
+}
+
+func (c *Client) updateSubnet(
+	ctx context.Context,
+	account string,
+	subnet armnetwork.Subnet,
+) error {
+	_, err := c.createSubnet(
+		ctx,
+		account,
+
+		helper.StringPointerToString(nsg.Name),
+		helper.StringPointerToString(nsg.Location),
+		account,
+		parseResourceGroupName(helper.StringPointerToString(nsg.ID)),
+		nsg,
+	)
+	if err != nil {
+		return fmt.Errorf(
+			"failed to update Network Security Group %v: %w", nsg, err,
+		)
+	}
+	return nil
+}
+
+func (c *Client) createSubnet(
+	ctx context.Context,
+	accountID string,
+	resourceGroup string,
+	name string,
+	vnetName string,
+	subnet armnetwork.Subnet,
+) (string, error) {
+	client, ok := c.accountClients[accountID]
+	if !ok {
+		return "", fmt.Errorf(
+			"account ID '%s' is not associated with any clients", accountID,
+		)
+	}
+
+	future, err := client.Subnet.BeginCreateOrUpdate(
+		ctx,
+		resourceGroup,
+		vnetName,
+		name,
+		subnet,
+		nil,
+	)
+	if err != nil {
+		return "", fmt.Errorf("cannot create Subnet: %w", err)
+	}
+
+	if _, err = future.PollUntilDone(ctx, nil); err != nil {
+		return "", fmt.Errorf(
+			"cannot get the subnet create or update future response: %w",
+			err,
+		)
+	}
+
+	res, err := future.Result(ctx)
+	if err != nil {
+		return "", fmt.Errorf(
+			"failed to create/update subnet: %w", err,
+		)
+	}
+
+	return helper.StringPointerToString(res.ID), nil
 }
 
 // Helper function to extract the resource group name from a resource ID
