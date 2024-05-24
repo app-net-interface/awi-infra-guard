@@ -256,6 +256,23 @@ func (client *boltClient) DeleteACL(id string) error {
 	return delete_(client, id, aclTable)
 }
 
+// PublicIP
+func (client *boltClient) PutPublicIP(publicIP *types.PublicIP) error {
+	return update(client, publicIP, publicIP.DbId(), publicIPTable)
+}
+
+func (client *boltClient) GetPublicIP(id string) (*types.PublicIP, error) {
+	return get[types.PublicIP](client, id, publicIPTable)
+}
+
+func (client *boltClient) ListPublicIPs() ([]*types.PublicIP, error) {
+	return list[types.PublicIP](client, publicIPTable)
+}
+
+func (client *boltClient) DeletePublicIP(id string) error {
+	return delete_(client, id, publicIPTable)
+}
+
 // Cluster
 func (client *boltClient) PutCluster(cluster *types.Cluster) error {
 	return update(client, cluster, cluster.DbId(), clusterTable)

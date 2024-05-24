@@ -63,7 +63,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 	//c.logger.Infof("NAT GW to be writtend %+v ", natGateways)
 	for i, _ := range natGateways {
 		c.logger.Debugf("NAT GW [%d] %+v\n", i, natGateways[i])
-		natGateways[i].AccountId = params.AccountId
+		natGateways[i].AccountID = params.AccountId
 	}
 	return natGateways, err
 }

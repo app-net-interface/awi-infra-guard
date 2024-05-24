@@ -108,6 +108,8 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 		}
 		inst := reservation.Instances[0]
 		name := getTagName(inst.Tags)
+		instanceLink := fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#InstanceDetails:instanceId=%s", region, region, aws.ToString(inst.InstanceId))
+		// https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#InstanceDetails:instanceId=
 
 		instance := types.Instance{
 			ID:        aws.ToString(inst.InstanceId),
@@ -122,6 +124,7 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 			Region:    region,
 			AccountID: account,
 			Provider:  providerName,
+			SelfLink:  instanceLink,
 		}
 		instances = append(instances, instance)
 	}

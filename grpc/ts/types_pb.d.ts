@@ -46,6 +46,9 @@ export class Instance extends jspb.Message {
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Instance;
 
+  getSelfLink(): string;
+  setSelfLink(value: string): Instance;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Instance.AsObject;
   static toObject(includeInstance: boolean, msg: Instance): Instance.AsObject;
@@ -70,6 +73,7 @@ export namespace Instance {
     state: string,
     type: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -797,6 +801,80 @@ export namespace VPCEndpoint {
     serviceName: string,
     routeTableIds: string,
     subnetIds: string,
+    labelsMap: Array<[string, string]>,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    lastSyncTime: string,
+  }
+}
+
+export class PublicIP extends jspb.Message {
+  getId(): string;
+  setId(value: string): PublicIP;
+
+  getType(): string;
+  setType(value: string): PublicIP;
+
+  getProvider(): string;
+  setProvider(value: string): PublicIP;
+
+  getAccountId(): string;
+  setAccountId(value: string): PublicIP;
+
+  getVpcId(): string;
+  setVpcId(value: string): PublicIP;
+
+  getRegion(): string;
+  setRegion(value: string): PublicIP;
+
+  getPublicIp(): string;
+  setPublicIp(value: string): PublicIP;
+
+  getInstanceId(): string;
+  setInstanceId(value: string): PublicIP;
+
+  getPrivateIp(): string;
+  setPrivateIp(value: string): PublicIP;
+
+  getByoip(): string;
+  setByoip(value: string): PublicIP;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): PublicIP;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): PublicIP;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): PublicIP;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): PublicIP;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): PublicIP;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): PublicIP;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): PublicIP.AsObject;
+  static toObject(includeInstance: boolean, msg: PublicIP): PublicIP.AsObject;
+  static serializeBinaryToWriter(message: PublicIP, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): PublicIP;
+  static deserializeBinaryFromReader(message: PublicIP, reader: jspb.BinaryReader): PublicIP;
+}
+
+export namespace PublicIP {
+  export type AsObject = {
+    id: string,
+    type: string,
+    provider: string,
+    accountId: string,
+    vpcId: string,
+    region: string,
+    publicIp: string,
+    instanceId: string,
+    privateIp: string,
+    byoip: string,
     labelsMap: Array<[string, string]>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,

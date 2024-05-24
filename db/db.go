@@ -37,7 +37,9 @@ const (
 	routerTable            = "routers"
 	igwTable               = "igws"
 	vpcEndpointTable       = "vpcEndpoints"
-	syncTimeTable          = "sync_time"
+	publicIPTable          = "publicIPs"
+
+	syncTimeTable = "sync_time"
 )
 
 // Add bolt db table to this list; or it will cause a panic
@@ -59,6 +61,7 @@ var tableNames = []string{
 	vpcEndpointTable,
 	aclTable,
 	securityGroupTable,
+	publicIPTable,
 	syncTimeTable,
 }
 
@@ -132,6 +135,12 @@ type Client interface {
 	PutVPCEndpoint(ng *types.VPCEndpoint) error
 	GetVPCEndpoint(id string) (*types.VPCEndpoint, error)
 	DeleteVPCEndpoint(id string) error
+
+	// PublicIPs
+	ListPublicIPs() ([]*types.PublicIP, error)
+	PutPublicIP(ng *types.PublicIP) error
+	GetPublicIP(id string) (*types.PublicIP, error)
+	DeletePublicIP(id string) error
 
 	//Security Group
 	PutSecurityGroup(securityGroup *types.SecurityGroup) error

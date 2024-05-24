@@ -93,7 +93,7 @@ func (c *Client) ListInternetGatewaysInRegion(client *ec2.Client, region string)
 			igws = append(igws, types.IGW{
 				ID:            *igw.InternetGatewayId,
 				Provider:      c.GetName(),
-				AccountId:     *igw.OwnerId,
+				AccountID:     *igw.OwnerId,
 				Name:          name,
 				AttachedVpcId: vpcId,
 				Region:        region,

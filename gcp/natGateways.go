@@ -73,7 +73,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 						ID:        strconv.FormatUint(*router.Id, 10),
 						Provider:  c.GetName(),
 						Name:      routerName,
-						AccountId: params.AccountId,
+						AccountID: params.AccountId,
 						VpcId:     *router.Network,
 						Region:    *router.Region,
 						State:     "Available", // Assuming ACTIVE

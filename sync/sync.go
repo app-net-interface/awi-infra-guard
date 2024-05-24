@@ -48,12 +48,15 @@ type Syncer struct {
 
 func (s *Syncer) Sync() {
 
+	
+
 	//Sync VPC
 	s.syncVPC()
+	s.syncPublicIPs()
+	s.syncInstances()
 	s.syncRegions()
 
 	//Sync other cloud resources
-	s.syncInstances()
 	s.syncSubnets()
 	s.syncRouteTables()
 	s.syncACLs()
@@ -80,6 +83,7 @@ func (s *Syncer) SyncPeriodically(ctx context.Context) {
 	for {
 		select {
 		case <-ticker.C:
+			s.logger.Debugf("**Sync*** - Refresh cloud resources")
 			s.Sync()
 		case <-ctx.Done():
 			return
@@ -103,6 +107,12 @@ func (s *Syncer) syncInstances() {
 	genericCloudSync[*types.Instance](s, types.InstanceType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Instance, error) {
 		return cloudProvider.ListInstances(ctx, &infrapb.ListInstancesRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListInstances, s.dbClient.PutInstance, s.dbClient.DeleteInstance)
+}
+
+func (s *Syncer) syncPublicIPs() {
+	genericCloudSync[*types.PublicIP](s, types.PublicIPType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.PublicIP, error) {
+		return cloudProvider.ListPublicIPs(ctx, &infrapb.ListPublicIPsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListPublicIPs, s.dbClient.PutPublicIP, s.dbClient.DeletePublicIP)
 }
 
 func (s *Syncer) syncSubnets() {
@@ -206,7 +216,7 @@ func genericCloudSync[P interface {
 		t := time.Now().UTC().Format(time.RFC3339)
 		ok := false
 		for _, account := range cloudProvider.ListAccounts() {
-			s.logger.Infof("Found account %s and provider %s", account.ID, cloudProvider.GetName())
+			s.logger.Infof("Found account %s with name %s and provider %s", account.ID, account.Name, cloudProvider.GetName())
 			remoteObjs, err := listF(ctx, cloudProvider, account.ID)
 			if err != nil {
 				s.logger.Errorf("Sync error: failed to List %s in provider %s: %v",

@@ -21,7 +21,9 @@ import (
 	"context"
 	"fmt"
 
+	//"github.com/app-net-interface/awi-infra-guard/connector/aws"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
+	"github.com/aws/aws-sdk-go-v2/aws"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -56,24 +58,7 @@ type awsClient struct {
 	eksClient *eks.Client
 }
 
-func NewClient(ctx context.Context, logger *logrus.Logger) (*Client, error) {
-	cfg, err := config.LoadDefaultConfig(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("could not get AWS config: %v", err)
-	}
-	if cfg.Region == "" {
-		reg := "us-east-1"
-		logger.Warnf("Default AWS region is not specified, falling back to %s", reg)
-		cfg.Region = reg
-	}
-	stsclient := sts.NewFromConfig(cfg)
-	var defaultAccountID string
-	req, err := stsclient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
-	if err != nil {
-		logger.Errorf("Failed to determine Account ID for default profile: %v", err)
-	} else {
-		defaultAccountID = convertString(req.Account)
-	}
+func GetProfiles(ctx context.Context, cfg aws.Config, logger *logrus.Logger) []types.Account {
 
 	profiles := make([]types.Account, 0)
 	configFile, err := ini.Load(config.DefaultSharedCredentialsFilename())
@@ -114,6 +99,29 @@ func NewClient(ctx context.Context, logger *logrus.Logger) (*Client, error) {
 			})
 		}
 	}
+	return profiles
+}
+
+func NewClient(ctx context.Context, logger *logrus.Logger) (*Client, error) {
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("could not get AWS config: %v", err)
+	}
+	if cfg.Region == "" {
+		reg := "us-east-1"
+		logger.Warnf("Default AWS region is not specified, falling back to %s", reg)
+		cfg.Region = reg
+	}
+	stsclient := sts.NewFromConfig(cfg)
+	var defaultAccountID string
+	req, err := stsclient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	if err != nil {
+		logger.Errorf("Failed to determine Account ID for default profile: %v", err)
+	} else {
+		defaultAccountID = convertString(req.Account)
+	}
+
+	profiles := GetProfiles(ctx, cfg, logger)
 
 	client := ec2.NewFromConfig(cfg)
 	lbClient := elasticloadbalancing.NewFromConfig(cfg)
@@ -437,7 +445,7 @@ func (c *Client) getInstances(ctx context.Context, account, region string, build
 	}
 	instances, err := client.DescribeInstances(ctx, input)
 	if err != nil {
-		return nil, fmt.Errorf("could not find subnet: %v", err)
+		return nil, fmt.Errorf("could not find instance: %v", err)
 	}
 	return instances.Reservations, nil
 }

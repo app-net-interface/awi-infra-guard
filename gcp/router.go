@@ -94,7 +94,7 @@ func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersReq
 				ID:              strconv.FormatUint(*router.Id, 10),
 				Provider:        c.GetName(),
 				Name:            routerName,
-				AccountId:       params.AccountId,
+				AccountID:       params.AccountId,
 				VPCId:           extractResourceID(*router.Network),
 				ASN:             asn,
 				AdvertisedRange: advertisedRange,

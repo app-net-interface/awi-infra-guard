@@ -46,6 +46,7 @@ const (
 	RouterType        = "Router"
 	IGWType           = "IGW"
 	VPCEndpointType   = "VPCEndpoint"
+	PublicIPType      = "PublicIP"
 	ClusterType       = "Cluster"
 	PodsType          = "Pod"
 	K8sServiceType    = "K8sService"
@@ -54,7 +55,7 @@ const (
 )
 
 type Region struct {
-	ID 	         string
+	ID           string
 	Name         string
 	Provider     string
 	AccountID    string
@@ -112,6 +113,7 @@ type Instance struct {
 	AccountID    string
 	Type         string
 	LastSyncTime string
+	SelfLink     string
 }
 
 func (v Instance) DbId() string {
@@ -123,6 +125,32 @@ func (v *Instance) SetSyncTime(time string) {
 }
 
 func (v *Instance) GetProvider() string {
+	return v.Provider
+}
+
+type PublicIP struct {
+	ID           string
+	Region       string
+	VPCID        string
+	PublicIP     string
+	InstanceId   string
+	Provider     string
+	AccountID    string
+	Type         string //Elastic(Static) or Dynamic
+	PrivateIP    string
+	Labels       map[string]string
+	LastSyncTime string
+}
+
+func (v PublicIP) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *PublicIP) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *PublicIP) GetProvider() string {
 	return v.Provider
 }
 
@@ -198,7 +226,7 @@ type Route struct {
 // CloudGateway represents a generic cloud gateway with various attributes.
 type Router struct {
 	ID                   string            `json:"id"`
-	AccountId            string            `json:"account_id,omitempty"`
+	AccountID            string            `json:"account_id,omitempty"`
 	Name                 string            `json:"name"`
 	Provider             string            `json:"provider"`
 	Region               string            `json:"region"`
@@ -235,7 +263,7 @@ type NATGateway struct {
 	ID                   string
 	Name                 string            `json:"name,omitempty"`
 	Provider             string            `json:"provider,omitempty"`
-	AccountId            string            `json:"account_id,omitempty"`
+	AccountID            string            `json:"account_id,omitempty"`
 	VpcId                string            `json:"vpc_id,omitempty"`
 	Region               string            `json:"region,omitempty"`
 	State                string            `json:"state,omitempty"`
@@ -265,7 +293,7 @@ type IGW struct {
 	ID            string                 `json:"id,omitempty"`
 	Name          string                 `json:"name,omitempty"`
 	Provider      string                 `json:"provider,omitempty"`
-	AccountId     string                 `json:"account_id,omitempty"`
+	AccountID     string                 `json:"account_id,omitempty"`
 	AttachedVpcId string                 `json:"attached_vpc_id,omitempty"` //
 	Region        string                 `json:"region,omitempty"`          // VPC Region
 	State         string                 `json:"state,omitempty"`
@@ -291,7 +319,7 @@ type VPCEndpoint struct {
 	ID            string            `json:"id,omitempty"`
 	Name          string            `json:"name,omitempty"`
 	Provider      string            `json:"provider,omitempty"`
-	AccountId     string            `json:"account_id,omitempty"`
+	AccountID     string            `json:"account_id,omitempty"`
 	VPCId         string            `json:"vpc_id,omitempty"` //
 	Region        string            `json:"region,omitempty"` // VPC Region
 	State         string            `json:"state,omitempty"`

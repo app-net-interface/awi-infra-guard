@@ -85,7 +85,7 @@ func (c *Client) ListRoutersForRegion(client *ec2.Client, region string) ([]type
 				Region:    region,
 				State:     string(tgw.State),
 				Labels:    labels,
-				AccountId: *tgw.OwnerId,
+				AccountID: *tgw.OwnerId,
 				CreatedAt: *tgw.CreationTime,
 			})
 		}

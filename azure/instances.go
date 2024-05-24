@@ -38,7 +38,7 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 			vNetName = parts[len(parts)-1]
 		}
 	}
-	c.logger.Infof("Retrieving instances for account %s and VPC %s", input.AccountId, vNetName)
+	c.logger.Infof("Retrieving instances for account %s and VPC %s", input.AccountId, input.VpcId)
 
 	vmClient, err := armcompute.NewVirtualMachinesClient(input.AccountId, c.cred, nil)
 	if err != nil {
@@ -124,6 +124,7 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 						Region:    *vm.Location,
 						Provider:  "Azure",
 						AccountID: input.AccountId,
+						//SelfLink: *vm.Properties.,
 						// LastSyncTime and Zone fields require additional logic or assumptions
 					}
 					instances = append(instances, instance)

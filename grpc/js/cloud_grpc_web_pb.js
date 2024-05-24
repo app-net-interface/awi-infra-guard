@@ -872,6 +872,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listVPCEndpoints =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListPublicIPsRequest,
+ *   !proto.infra.ListPublicIPsResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListPublicIPs = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListPublicIPs',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListPublicIPsRequest,
+  proto.infra.ListPublicIPsResponse,
+  /**
+   * @param {!proto.infra.ListPublicIPsRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListPublicIPsResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListPublicIPsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListPublicIPsResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListPublicIPsResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listPublicIPs =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListPublicIPs',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListPublicIPs,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListPublicIPsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListPublicIPsResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listPublicIPs =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListPublicIPs',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListPublicIPs);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.GetVPCIDForCIDRRequest,
  *   !proto.infra.GetVPCIDForCIDRResponse>}
  */

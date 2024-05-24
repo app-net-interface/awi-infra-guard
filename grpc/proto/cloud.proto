@@ -46,6 +46,10 @@ service CloudProviderService {
     rpc ListRouters (ListRoutersRequest) returns (ListRoutersResponse) {}
     rpc ListInternetGateways (ListInternetGatewaysRequest) returns (ListInternetGatewaysResponse) {}
     rpc ListVPCEndpoints (ListVPCEndpointsRequest) returns (ListVPCEndpointsResponse) {}
+    rpc ListPublicIPs (ListPublicIPsRequest) returns (ListPublicIPsResponse) {}
+
+    
+    //Add New List Cloud Resource RPCs above this
     rpc GetVPCIDForCIDR (GetVPCIDForCIDRRequest) returns (GetVPCIDForCIDRResponse) {}
 
     rpc GetCIDRsForLabels (GetCIDRsForLabelsRequest) returns (GetCIDRsForLabelsResponse) {}
@@ -184,13 +188,24 @@ message ListVPCEndpointsResponse {
     string last_sync_time = 2;
 }
 
-message ListVPCEndpointsRequest {
+message ListPublicIPsRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
     string account_id = 4;
 }
 
+message ListPublicIPsResponse {
+    repeated PublicIP public_ips = 1;
+    string last_sync_time = 2;
+}
+
+message ListVPCEndpointsRequest {
+    string provider = 1;
+    string vpc_id = 2;
+    string region = 3;
+    string account_id = 4;
+}
 
 // GetSubnet
 message GetSubnetRequest {
@@ -316,6 +331,7 @@ message Counters {
     int32 routers = 13;
     int32 igws = 14;
     int32 vpc_endpoints = 15;
+    int32 public_ips = 16;
 }
 
 message StatusSummary {

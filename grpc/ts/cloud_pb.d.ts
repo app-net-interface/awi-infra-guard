@@ -547,6 +547,60 @@ export namespace ListVPCEndpointsResponse {
   }
 }
 
+export class ListPublicIPsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListPublicIPsRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListPublicIPsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListPublicIPsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListPublicIPsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListPublicIPsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListPublicIPsRequest): ListPublicIPsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListPublicIPsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListPublicIPsRequest;
+  static deserializeBinaryFromReader(message: ListPublicIPsRequest, reader: jspb.BinaryReader): ListPublicIPsRequest;
+}
+
+export namespace ListPublicIPsRequest {
+  export type AsObject = {
+    provider: string,
+    vpcId: string,
+    region: string,
+    accountId: string,
+  }
+}
+
+export class ListPublicIPsResponse extends jspb.Message {
+  getPublicIpsList(): Array<types_pb.PublicIP>;
+  setPublicIpsList(value: Array<types_pb.PublicIP>): ListPublicIPsResponse;
+  clearPublicIpsList(): ListPublicIPsResponse;
+  addPublicIps(value?: types_pb.PublicIP, index?: number): types_pb.PublicIP;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListPublicIPsResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListPublicIPsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListPublicIPsResponse): ListPublicIPsResponse.AsObject;
+  static serializeBinaryToWriter(message: ListPublicIPsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListPublicIPsResponse;
+  static deserializeBinaryFromReader(message: ListPublicIPsResponse, reader: jspb.BinaryReader): ListPublicIPsResponse;
+}
+
+export namespace ListPublicIPsResponse {
+  export type AsObject = {
+    publicIpsList: Array<types_pb.PublicIP.AsObject>,
+    lastSyncTime: string,
+  }
+}
+
 export class ListVPCEndpointsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListVPCEndpointsRequest;
@@ -1073,6 +1127,9 @@ export class Counters extends jspb.Message {
   getVpcEndpoints(): number;
   setVpcEndpoints(value: number): Counters;
 
+  getPublicIps(): number;
+  setPublicIps(value: number): Counters;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Counters.AsObject;
   static toObject(includeInstance: boolean, msg: Counters): Counters.AsObject;
@@ -1098,6 +1155,7 @@ export namespace Counters {
     routers: number,
     igws: number,
     vpcEndpoints: number,
+    publicIps: number,
   }
 }
 

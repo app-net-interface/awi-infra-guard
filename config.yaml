@@ -26,4 +26,4 @@ useLocalDB: true
 # how often sync resources from the cloud, if useLocalDB is true
 syncWaitTime: "180s"
 # Logging Level: Possible options are PANIC, FATAL, ERROR, INFO, WARN, DEBUG, TRACE
-logLevel: INFO
+logLevel: DEBUG

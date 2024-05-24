@@ -91,7 +91,7 @@ func (c *Client) ListVPCEndpointsInRegion(client *ec2.Client, region string) ([]
 			veps = append(veps, types.VPCEndpoint{
 				ID:            *vep.VpcEndpointId,
 				Provider:      c.GetName(),
-				AccountId:     *vep.OwnerId,
+				AccountID:     *vep.OwnerId,
 				Name:          name,
 				VPCId:         *vep.VpcId,
 				Region:        region,

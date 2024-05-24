@@ -61,6 +61,7 @@ type CloudProvider interface {
 	ListRouters(ctx context.Context, input *infrapb.ListRoutersRequest) ([]types.Router, error)
 	ListInternetGateways(ctx context.Context, input *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error)
 	ListVPCEndpoints(ctx context.Context, input *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error)
+	ListPublicIPs(ctx context.Context, input *infrapb.ListPublicIPsRequest) ([]types.PublicIP, error)
 
 	// GetSubnet returns single subnet based on it's ID
 	GetSubnet(ctx context.Context, input *infrapb.GetSubnetRequest) (types.Subnet, error)

@@ -92,7 +92,7 @@ func buildRouter(vhub *armnetwork.VirtualHub, params *infrapb.ListRoutersRequest
 	router := types.Router{
 		ID:               *vhub.ID,
 		Name:             name,
-		AccountId:        params.AccountId,
+		AccountID:        params.AccountId,
 		Provider:         "Azure",
 		VPCId:            "N/A",
 		Region:           location,

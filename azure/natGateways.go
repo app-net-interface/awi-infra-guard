@@ -92,7 +92,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 			natGateways = append(natGateways, types.NATGateway{
 				ID:        *natGateway.ID,
 				Name:      *natGateway.Name,
-				AccountId: params.AccountId,
+				AccountID: params.AccountId,
 				Provider:  c.GetName(),
 				PublicIp:  publicIp,
 				VpcId:     vnetId,

@@ -548,6 +548,7 @@ func convertInstance(projectID string, networks []types.VPC, subnets []types.Sub
 		AccountID: projectID,
 		Provider:  providerName,
 		State:     gcpInstance.GetStatus(),
+		SelfLink:  *gcpInstance.SelfLink,
 	}
 	newInstance.PrivateIP, newInstance.PublicIP, newInstance.VPCID, newInstance.SubnetID =
 		getNetwork(networks, subnets, gcpInstance.GetNetworkInterfaces())

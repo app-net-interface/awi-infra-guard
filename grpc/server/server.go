@@ -232,6 +232,9 @@ func (s *Server) ListAccounts(ctx context.Context, in *infrapb.ListAccountsReque
 		return nil, err
 	}
 	accounts := cloudProvider.ListAccounts()
+	if err != nil {
+		return nil, err
+	}
 	return &infrapb.ListAccountsResponse{
 		Accounts: typesAccountsToGrpc(accounts),
 	}, nil
@@ -447,9 +450,9 @@ func (s *Server) ListInternetGateways(ctx context.Context, in *infrapb.ListInter
 		return nil, err
 	}
 	var t string
-	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.RouterType))
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.IGWType))
 	if err != nil {
-		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.RouterType, cloudProvider.GetName())
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.IGWType, cloudProvider.GetName())
 	} else {
 		t = syncTime.Time
 	}
@@ -472,15 +475,39 @@ func (s *Server) ListVPCEndpoints(ctx context.Context, in *infrapb.ListVPCEndpoi
 		return nil, err
 	}
 	var t string
-	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.RouterType))
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.VPCEndpointType))
 	if err != nil {
-		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.RouterType, cloudProvider.GetName())
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.VPCEndpointType, cloudProvider.GetName())
 	} else {
 		t = syncTime.Time
 	}
 	return &infrapb.ListVPCEndpointsResponse{
 		LastSyncTime: t,
 		Veps:         typesVPCEndpointsToGrpc(l),
+	}, nil
+}
+
+// server/server.go
+func (s *Server) ListPublicIPs(ctx context.Context, in *infrapb.ListPublicIPsRequest) (*infrapb.ListPublicIPsResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	l, err := cloudProvider.ListPublicIPs(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failure to retreive Router %s", err.Error())
+		return nil, err
+	}
+	var t string
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.PublicIPType))
+	if err != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.PublicIPType, cloudProvider.GetName())
+	} else {
+		t = syncTime.Time
+	}
+	return &infrapb.ListPublicIPsResponse{
+		LastSyncTime: t,
+		PublicIps:    typesPublicIPsToGrpc(l),
 	}, nil
 }
 
@@ -751,6 +778,10 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 	if err != nil {
 		return nil, err
 	}
+	publicIPs, err := cloudProvider.ListPublicIPs(ctx, &infrapb.ListPublicIPsRequest{})
+	if err != nil {
+		return nil, err
+	}
 
 	// Kubernetes Resources
 
@@ -814,6 +845,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 			Routers:        int32(len(routers)),
 			Igws:           int32(len(igws)),
 			VpcEndpoints:   int32(len(vpcEndpoints)),
+			PublicIps:      int32(len(publicIPs)),
 
 			//Kubernetes
 			Clusters:   int32(len(clusters)),
@@ -965,7 +997,8 @@ func (s *Server) unaryServerInterceptor(ctx context.Context, req interface{}, in
 	resp, err := handler(ctx, req)
 
 	// Log response
-	s.logger.Infof("Request = %+v \n Unary Response - Method:%s, Response:%v, Error:%v\n", req, info.FullMethod, resp, err)
+	s.logger.Infof("Request = %v", req)
+	s.logger.Debugf("Unary Response - Method:%s, Response:%v, Error:%v\n", info.FullMethod, resp, err)
 
 	return resp, err
 }

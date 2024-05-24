@@ -598,6 +598,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListVPCEndpoints);
   }
 
+  methodDescriptorListPublicIPs = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListPublicIPs',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListPublicIPsRequest,
+    cloud_pb.ListPublicIPsResponse,
+    (request: cloud_pb.ListPublicIPsRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListPublicIPsResponse.deserializeBinary
+  );
+
+  listPublicIPs(
+    request: cloud_pb.ListPublicIPsRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListPublicIPsResponse>;
+
+  listPublicIPs(
+    request: cloud_pb.ListPublicIPsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListPublicIPsResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListPublicIPsResponse>;
+
+  listPublicIPs(
+    request: cloud_pb.ListPublicIPsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListPublicIPsResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListPublicIPs',
+        request,
+        metadata || {},
+        this.methodDescriptorListPublicIPs,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListPublicIPs',
+    request,
+    metadata || {},
+    this.methodDescriptorListPublicIPs);
+  }
+
   methodDescriptorGetVPCIDForCIDR = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/GetVPCIDForCIDR',
     grpcWeb.MethodType.UNARY,

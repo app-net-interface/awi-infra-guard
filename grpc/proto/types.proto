@@ -37,6 +37,7 @@ message Instance {
     string state = 12;
     string type = 13;
     string last_sync_time = 14;
+    string self_link = 15;
 }
 
 message Subnet {
@@ -64,15 +65,12 @@ message VPC {
     string last_sync_time = 12;
 }
 
-
-
 message Account {
     string provider = 1;
     string id = 2;
     string name = 3;
     string last_sync_time = 4;
 }
-
 message Region {
     string provider = 1;
     string id = 2;
@@ -206,6 +204,23 @@ message Router {
     google.protobuf.Timestamp created_at = 13;
     google.protobuf.Timestamp updated_at = 14;
     string last_sync_time = 15;
+  }
+
+  message PublicIP {
+    string id = 1;
+    string type = 2;
+    string provider = 3;
+    string account_id = 4;
+    string vpc_id = 5; //
+    string region = 6; 
+    string public_ip = 7;
+    string instance_id = 8; 
+    string private_ip = 9;
+    string byoip = 10;
+    map<string, string> labels = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
+    string last_sync_time = 14;
   }
 
 

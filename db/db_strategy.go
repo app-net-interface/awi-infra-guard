@@ -325,7 +325,7 @@ func (p *providerWithDB) ListNATGateways(ctx context.Context, params *infrapb.Li
 		if strings.ToLower(natGateway.Provider) != strings.ToLower(p.realProvider.GetName()) {
 			continue
 		}
-		if params.GetAccountId() != "" && params.GetAccountId() != natGateway.AccountId {
+		if params.GetAccountId() != "" && params.GetAccountId() != natGateway.AccountID {
 			continue
 		}
 		//if params.GetRegion() != "global" {
@@ -351,7 +351,7 @@ func (p *providerWithDB) ListRouters(ctx context.Context, params *infrapb.ListRo
 		if strings.ToLower(router.Provider) != strings.ToLower(p.realProvider.GetName()) {
 			continue
 		}
-		if params.GetAccountId() != "" && params.GetAccountId() != router.AccountId {
+		if params.GetAccountId() != "" && params.GetAccountId() != router.AccountID {
 			continue
 		}
 		//if params.GetRegion() != "global" {
@@ -377,7 +377,7 @@ func (p *providerWithDB) ListInternetGateways(ctx context.Context, params *infra
 		if strings.ToLower(igw.Provider) != strings.ToLower(p.realProvider.GetName()) {
 			continue
 		}
-		if params.GetAccountId() != "" && params.GetAccountId() != igw.AccountId {
+		if params.GetAccountId() != "" && params.GetAccountId() != igw.AccountID {
 			continue
 		}
 		//if params.GetRegion() != "global" {
@@ -403,7 +403,7 @@ func (p *providerWithDB) ListVPCEndpoints(ctx context.Context, params *infrapb.L
 		if strings.ToLower(vpce.Provider) != strings.ToLower(p.realProvider.GetName()) {
 			continue
 		}
-		if params.GetAccountId() != "" && params.GetAccountId() != vpce.AccountId {
+		if params.GetAccountId() != "" && params.GetAccountId() != vpce.AccountID {
 			continue
 		}
 		//if params.GetRegion() != "global" {
@@ -417,6 +417,32 @@ func (p *providerWithDB) ListVPCEndpoints(ctx context.Context, params *infrapb.L
 		providerVpces = append(providerVpces, *vpce)
 	}
 	return providerVpces, nil
+}
+
+func (p *providerWithDB) ListPublicIPs(ctx context.Context, params *infrapb.ListPublicIPsRequest) ([]types.PublicIP, error) {
+	dbPublicIP, err := p.dbClient.ListPublicIPs()
+	if err != nil {
+		return nil, err
+	}
+	var providerPublicIPs []types.PublicIP
+	for _, publicIP := range dbPublicIP {
+		if strings.ToLower(publicIP.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != publicIP.AccountID {
+			continue
+		}
+		//if params.GetRegion() != "global" {
+		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
+		//		continue
+		//	}
+		//}
+		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
+		//	continue
+		//}
+		providerPublicIPs = append(providerPublicIPs, *publicIP)
+	}
+	return providerPublicIPs, nil
 }
 
 func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {

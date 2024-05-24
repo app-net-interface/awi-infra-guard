@@ -35,6 +35,30 @@ func grpcProtocolsAndPortToTypes(in map[string]*infrapb.Ports) types.ProtocolsAn
 	return out
 }
 
+func typesAccountsToGrpc(in []types.Account) []*infrapb.Account {
+	out := make([]*infrapb.Account, 0, len(in))
+	for _, account := range in {
+		out = append(out, &infrapb.Account{
+			Provider: account.Provider,
+			Id:       account.ID,
+			Name:     account.Name,
+		})
+	}
+	return out
+}
+
+func typesRegionsToGrpc(in []types.Region) []*infrapb.Region {
+	out := make([]*infrapb.Region, 0, len(in))
+	for _, region := range in {
+		out = append(out, &infrapb.Region{
+			Provider: region.Provider,
+			Id:       region.ID,
+			Name:     region.Name,
+		})
+	}
+	return out
+}
+
 func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 	out := make([]*infrapb.Instance, 0, len(in))
 	for _, instance := range in {
@@ -53,6 +77,7 @@ func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 			State:        instance.State,
 			Type:         instance.Type,
 			LastSyncTime: instance.LastSyncTime,
+			SelfLink:     instance.SelfLink,
 		})
 	}
 	return out
@@ -110,7 +135,7 @@ func typesRoutersToGrpc(in []types.Router) []*infrapb.Router {
 			Region:          router.Region,
 			State:           router.State,
 			Labels:          router.Labels,
-			AccountId:       router.AccountId,
+			AccountId:       router.AccountID,
 			CreatedAt:       timestamppb.New(router.CreatedAt),
 			LastSyncTime:    router.LastSyncTime,
 		})
@@ -129,7 +154,7 @@ func typesIGWsToGrpc(in []types.IGW) []*infrapb.IGW {
 			Region:        igw.Region,
 			State:         igw.State,
 			Labels:        igw.Labels,
-			AccountId:     igw.AccountId,
+			AccountId:     igw.AccountID,
 			CreatedAt:     igw.CreatedAt,
 			LastSyncTime:  igw.LastSyncTime,
 		})
@@ -147,7 +172,7 @@ func typesVPCEndpointsToGrpc(in []types.VPCEndpoint) []*infrapb.VPCEndpoint {
 			Region:        vpce.Region,
 			State:         vpce.State,
 			Labels:        vpce.Labels,
-			AccountId:     vpce.AccountId,
+			AccountId:     vpce.AccountID,
 			RouteTableIds: vpce.RouteTableIds,
 			SubnetIds:     vpce.SubnetIds,
 			ServiceName:   vpce.ServiceName,
@@ -169,7 +194,7 @@ func typesNATGatewaysToGrpc(in []types.NATGateway) []*infrapb.NATGateway {
 			Region:       gateway.Region,
 			State:        gateway.State,
 			Labels:       gateway.Labels,
-			AccountId:    gateway.AccountId,
+			AccountId:    gateway.AccountID,
 			PublicIp:     gateway.PublicIp,
 			PrivateIp:    gateway.PrivateIp,
 			SubnetId:     gateway.SubnetId,
@@ -179,6 +204,111 @@ func typesNATGatewaysToGrpc(in []types.NATGateway) []*infrapb.NATGateway {
 	}
 	return out
 }
+
+func typesACLsToGrpc(in []types.ACL) []*infrapb.ACL {
+	out := make([]*infrapb.ACL, 0, len(in))
+	for _, acl := range in {
+		rules := make([]*infrapb.ACL_ACLRule, 0, len(acl.Rules))
+		for _, r := range acl.Rules {
+			rules = append(rules, &infrapb.ACL_ACLRule{
+				Number:            int32(r.Number),
+				Protocol:          r.Protocol,
+				PortRange:         r.PortRange,
+				SourceRanges:      r.SourceRanges,
+				DestinationRanges: r.DestinationRanges,
+				Action:            r.Action,
+				Direction:         r.Direction,
+			})
+		}
+		out = append(out, &infrapb.ACL{
+			Provider:     acl.Provider,
+			Id:           acl.ID,
+			Name:         acl.Name,
+			VpcId:        acl.VpcID,
+			Region:       acl.Region,
+			AccountId:    acl.AccountID,
+			Labels:       acl.Labels,
+			Rules:        rules,
+			LastSyncTime: acl.LastSyncTime,
+		})
+	}
+	return out
+}
+
+func typesSgsToGrpc(in []types.SecurityGroup) []*infrapb.SecurityGroup {
+	out := make([]*infrapb.SecurityGroup, 0, len(in))
+	for _, acl := range in {
+		rules := make([]*infrapb.SecurityGroup_SecurityGroupRule, 0, len(acl.Rules))
+		for _, r := range acl.Rules {
+			rules = append(rules, &infrapb.SecurityGroup_SecurityGroupRule{
+				Protocol:  r.Protocol,
+				PortRange: r.PortRange,
+				Source:    r.Source,
+				Direction: r.Direction,
+			})
+		}
+		out = append(out, &infrapb.SecurityGroup{
+			Provider:     acl.Provider,
+			Id:           acl.ID,
+			Name:         acl.Name,
+			VpcId:        acl.VpcID,
+			Region:       acl.Region,
+			AccountId:    acl.AccountID,
+			Labels:       acl.Labels,
+			Rules:        rules,
+			LastSyncTime: acl.LastSyncTime,
+		})
+	}
+	return out
+}
+
+func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
+	out := make([]*infrapb.RouteTable, 0, len(in))
+	for _, rt := range in {
+		routes := make([]*infrapb.RouteTable_Route, 0, len(rt.Routes))
+		for _, r := range rt.Routes {
+			routes = append(routes, &infrapb.RouteTable_Route{
+				Destination: r.Destination,
+				Target:      r.Target,
+				Status:      r.Status,
+			})
+		}
+		out = append(out, &infrapb.RouteTable{
+			Provider:     rt.Provider,
+			Id:           rt.ID,
+			Name:         rt.Name,
+			VpcId:        rt.VpcID,
+			Region:       rt.Region,
+			AccountId:    rt.AccountID,
+			Labels:       rt.Labels,
+			Routes:       routes,
+			LastSyncTime: rt.LastSyncTime,
+		})
+	}
+	return out
+}
+
+func typesPublicIPsToGrpc(in []types.PublicIP) []*infrapb.PublicIP {
+	out := make([]*infrapb.PublicIP, 0, len(in))
+	for _, publicIP := range in {
+
+		out = append(out, &infrapb.PublicIP{
+			Provider:   publicIP.Provider,
+			Id:         publicIP.ID,
+			VpcId:      publicIP.VPCID,
+			Region:     publicIP.Region,
+			PublicIp:   publicIP.PublicIP,
+			InstanceId: publicIP.InstanceId,
+			PrivateIp:  publicIP.PrivateIP,
+			AccountId:  publicIP.AccountID,
+			Type:       publicIP.Type,
+			Labels:     publicIP.Labels,
+		})
+	}
+	return out
+}
+
+// Kubernetes Types
 
 func typesPodsToGrpc(in []types.Pod) []*infrapb.Pod {
 	out := make([]*infrapb.Pod, 0, len(in))
@@ -270,113 +400,6 @@ func typesNodesToGrpc(in []types.K8sNode) []*infrapb.Node {
 			Namespace:    node.Namespace,
 			Addresses:    addresses,
 			LastSyncTime: node.LastSyncTime,
-		})
-	}
-	return out
-}
-
-func typesAccountsToGrpc(in []types.Account) []*infrapb.Account {
-	out := make([]*infrapb.Account, 0, len(in))
-	for _, account := range in {
-		out = append(out, &infrapb.Account{
-			Provider: account.Provider,
-			Id:       account.ID,
-			Name:     account.Name,
-		})
-	}
-	return out
-}
-
-func typesRegionsToGrpc(in []types.Region) []*infrapb.Region {
-	out := make([]*infrapb.Region, 0, len(in))
-	for _, region := range in {
-		out = append(out, &infrapb.Region{
-			Provider: region.Provider,
-			Id:       region.ID,
-			Name:     region.Name,
-		})
-	}
-	return out
-}
-
-func typesACLsToGrpc(in []types.ACL) []*infrapb.ACL {
-	out := make([]*infrapb.ACL, 0, len(in))
-	for _, acl := range in {
-		rules := make([]*infrapb.ACL_ACLRule, 0, len(acl.Rules))
-		for _, r := range acl.Rules {
-			rules = append(rules, &infrapb.ACL_ACLRule{
-				Number:            int32(r.Number),
-				Protocol:          r.Protocol,
-				PortRange:         r.PortRange,
-				SourceRanges:      r.SourceRanges,
-				DestinationRanges: r.DestinationRanges,
-				Action:            r.Action,
-				Direction:         r.Direction,
-			})
-		}
-		out = append(out, &infrapb.ACL{
-			Provider:     acl.Provider,
-			Id:           acl.ID,
-			Name:         acl.Name,
-			VpcId:        acl.VpcID,
-			Region:       acl.Region,
-			AccountId:    acl.AccountID,
-			Labels:       acl.Labels,
-			Rules:        rules,
-			LastSyncTime: acl.LastSyncTime,
-		})
-	}
-	return out
-}
-
-func typesSgsToGrpc(in []types.SecurityGroup) []*infrapb.SecurityGroup {
-	out := make([]*infrapb.SecurityGroup, 0, len(in))
-	for _, acl := range in {
-		rules := make([]*infrapb.SecurityGroup_SecurityGroupRule, 0, len(acl.Rules))
-		for _, r := range acl.Rules {
-			rules = append(rules, &infrapb.SecurityGroup_SecurityGroupRule{
-				Protocol:  r.Protocol,
-				PortRange: r.PortRange,
-				Source:    r.Source,
-				Direction: r.Direction,
-			})
-		}
-		out = append(out, &infrapb.SecurityGroup{
-			Provider:     acl.Provider,
-			Id:           acl.ID,
-			Name:         acl.Name,
-			VpcId:        acl.VpcID,
-			Region:       acl.Region,
-			AccountId:    acl.AccountID,
-			Labels:       acl.Labels,
-			Rules:        rules,
-			LastSyncTime: acl.LastSyncTime,
-		})
-	}
-	return out
-}
-
-func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
-	out := make([]*infrapb.RouteTable, 0, len(in))
-	for _, rt := range in {
-		routes := make([]*infrapb.RouteTable_Route, 0, len(rt.Routes))
-		for _, r := range rt.Routes {
-			routes = append(routes, &infrapb.RouteTable_Route{
-				Destination: r.Destination,
-				Target:      r.Target,
-				Status:      r.Status,
-			})
-		}
-		out = append(out, &infrapb.RouteTable{
-			Provider:     rt.Provider,
-			Id:           rt.ID,
-			Name:         rt.Name,
-			VpcId:        rt.VpcID,
-			Region:       rt.Region,
-			AccountId:    rt.AccountID,
-			Labels:       rt.Labels,
-			Routes:       routes,
-			LastSyncTime: rt.LastSyncTime,
 		})
 	}
 	return out

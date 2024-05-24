@@ -30,6 +30,8 @@ import (
 )
 
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
+	
+	c.logger.Infof("Syncing VPCs")
 	if params == nil {
 		params = &infrapb.ListVPCRequest{}
 	}
@@ -49,6 +51,7 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 
 		regionalClients, err := c.getAllClientsForProfile(params.AccountId)
 		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
 			return nil, err
 		}
 		for regionName, awsRegionClient := range regionalClients {
@@ -82,7 +85,6 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 	}
 
 	return c.getVPCsForRegion(ctx, params.AccountId, params.Region, filters)
-
 }
 
 func (c *Client) getVPCsForRegion(ctx context.Context, account, region string, filters []awstypes.Filter) ([]types.VPC, error) {

@@ -45,7 +45,7 @@ func (c *Client) ListRegions(ctx context.Context, params *infrapb.ListRegionsReq
 			//fmt.Printf("* %s - %s\n", *location.Name, *location.DisplayName)
 			regions = append(regions, types.Region{
 				ID:       *location.ID,
-				Name:     *location.DisplayName,
+				Name:     *location.Name,
 				Provider: providerName,
 			})
 		}
