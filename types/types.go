@@ -83,6 +83,8 @@ type VPC struct {
 	IPv6CIDR     string
 	Provider     string
 	AccountID    string
+	SelfLink     string
+	Project      string
 	LastSyncTime string
 }
 
@@ -107,6 +109,7 @@ type Instance struct {
 	VPCID        string
 	Labels       map[string]string
 	State        string
+	Project      string
 	Region       string
 	Zone         string
 	Provider     string
@@ -139,6 +142,7 @@ type PublicIP struct {
 	Type         string //Elastic(Static) or Dynamic
 	PrivateIP    string
 	Labels       map[string]string
+	SelfLink     string
 	LastSyncTime string
 }
 
@@ -164,6 +168,7 @@ type Subnet struct {
 	Region       string
 	Provider     string
 	AccountID    string
+	SelfLink     string
 	LastSyncTime string
 }
 
@@ -199,6 +204,7 @@ type RouteTable struct {
 	Labels       map[string]string
 	AccountID    string
 	Routes       []Route
+	SelfLink     string
 	LastSyncTime string
 }
 
@@ -244,7 +250,8 @@ type Router struct {
 	CreatedAt            time.Time         `json:"created_at"`
 	UpdatedAt            time.Time         `json:"updated_at"`
 	AdditionalProperties map[string]string `json:"additional_properties"`
-	LastSyncTime         string            `json:"last_sync_time"`
+	SelfLink             string
+	LastSyncTime         string `json:"last_sync_time"`
 }
 
 func (v *Router) DbId() string {
@@ -274,6 +281,7 @@ type NATGateway struct {
 	CreatedAt            time.Time         `json:"created_at,omitempty"`
 	UpdatedAt            time.Time         `json:"updated_at,omitempty"`
 	LastSyncTime         string            `json:"last_sync_time,omitempty"`
+	SelfLink             string
 	AdditionalProperties map[string]string `json:"additional_properties,omitempty"`
 }
 
@@ -300,7 +308,8 @@ type IGW struct {
 	Labels        map[string]string      `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	CreatedAt     *timestamppb.Timestamp `json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `json:"updated_at,omitempty"`
-	LastSyncTime  string                 `json:"last_sync_time,omitempty"`
+	SelfLink      string
+	LastSyncTime  string `json:"last_sync_time,omitempty"`
 }
 
 func (v *IGW) DbId() string {
@@ -329,7 +338,8 @@ type VPCEndpoint struct {
 	Labels        map[string]string `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	CreatedAt     *time.Time        `json:"created_at,omitempty"`
 	UpdatedAt     *time.Time        `json:"updated_at,omitempty"`
-	LastSyncTime  string            `json:"last_sync_time,omitempty"`
+	SelfLink      string
+	LastSyncTime  string `json:"last_sync_time,omitempty"`
 }
 
 func (v *VPCEndpoint) DbId() string {
@@ -353,6 +363,7 @@ type SecurityGroup struct {
 	Labels       map[string]string
 	AccountID    string
 	Rules        []SecurityGroupRule
+	SelfLink     string
 	LastSyncTime string
 }
 
@@ -384,6 +395,7 @@ type ACL struct {
 	Labels       map[string]string
 	AccountID    string
 	Rules        []ACLRule
+	SelfLink     string
 	LastSyncTime string
 }
 
@@ -503,6 +515,7 @@ type Cluster struct {
 	Provider     string
 	AccountID    string
 	Id           string
+	SelfLink     string
 	LastSyncTime string
 }
 
@@ -525,6 +538,7 @@ type Pod struct {
 	Ip           string
 	Labels       map[string]string
 	State        string
+	SelfLink     string
 	LastSyncTime string
 }
 
@@ -548,7 +562,9 @@ type K8SService struct {
 	ProtocolsAndPorts ProtocolsAndPorts
 	Ingresses         []K8sServiceIngress
 	Labels            map[string]string
-	LastSyncTime      string
+	SelfLink          string
+
+	LastSyncTime string
 }
 
 func (v *K8SService) DbId() string {
@@ -575,6 +591,7 @@ type K8sNode struct {
 	Namespace    string
 	Addresses    []v1.NodeAddress
 	Labels       map[string]string
+	SelfLink     string
 	LastSyncTime string
 }
 
@@ -594,6 +611,7 @@ type Namespace struct {
 	Cluster      string
 	Name         string
 	Labels       map[string]string
+	SelfLink     string
 	LastSyncTime string
 }
 

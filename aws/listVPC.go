@@ -20,17 +20,19 @@ package aws
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 
 	"github.com/app-net-interface/awi-infra-guard/types"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
-	
+
 	c.logger.Infof("Syncing VPCs")
 	if params == nil {
 		params = &infrapb.ListVPCRequest{}
@@ -114,15 +116,25 @@ func convertVPCs(vpcs []awstypes.Vpc, defaultAccount, defaultRegion, account, re
 				ipv6CIDR = fmt.Sprintf("%s,%s", *ipv6Association.Ipv6CidrBlock, ipv6CIDR)
 			}
 		}
+		vpcLink := fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#VpcDetails:VpcId=%s", region, region, aws.ToString(vpc.VpcId))
+		project := ""
+		for _, tag := range vpc.Tags {
+			if strings.ToLower(*tag.Key) == "project" {
+				project = *tag.Value
+				break
+			}
+		}
 		result = append(result, types.VPC{
 			Name:      convertString(getTagName(vpc.Tags)),
-			ID:        convertString(vpc.VpcId),
+			ID:        aws.ToString(vpc.VpcId),
 			Region:    region,
 			Labels:    convertTags(vpc.Tags),
 			IPv4CIDR:  *vpc.CidrBlock,
 			IPv6CIDR:  ipv6CIDR,
 			AccountID: account,
 			Provider:  providerName,
+			Project:   project,
+			SelfLink:  vpcLink,
 		})
 	}
 	return result

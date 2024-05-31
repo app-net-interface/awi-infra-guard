@@ -70,6 +70,7 @@ func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 			SubnetID:     instance.SubnetID,
 			VpcId:        instance.VPCID,
 			Zone:         instance.Zone,
+			Project:      instance.Project,
 			Region:       instance.Region,
 			Labels:       instance.Labels,
 			Provider:     instance.Provider,
@@ -97,6 +98,7 @@ func typesSubnetsToGrpc(in []types.Subnet) []*infrapb.Subnet {
 			Provider:     subnet.Provider,
 			AccountId:    subnet.AccountID,
 			LastSyncTime: subnet.LastSyncTime,
+			SelfLink:     subnet.SelfLink,
 		})
 	}
 	return out
@@ -115,6 +117,8 @@ func typesVpcsToGrpc(in []types.VPC) []*infrapb.VPC {
 			Provider:     vpc.Provider,
 			AccountId:    vpc.AccountID,
 			LastSyncTime: vpc.LastSyncTime,
+			SelfLink:     vpc.SelfLink,
+			Project:      vpc.Project,
 		})
 	}
 	return out
@@ -138,6 +142,7 @@ func typesRoutersToGrpc(in []types.Router) []*infrapb.Router {
 			AccountId:       router.AccountID,
 			CreatedAt:       timestamppb.New(router.CreatedAt),
 			LastSyncTime:    router.LastSyncTime,
+			SelfLink:        router.SelfLink,
 		})
 	}
 	return out
@@ -157,6 +162,7 @@ func typesIGWsToGrpc(in []types.IGW) []*infrapb.IGW {
 			AccountId:     igw.AccountID,
 			CreatedAt:     igw.CreatedAt,
 			LastSyncTime:  igw.LastSyncTime,
+			SelfLink:      igw.SelfLink,
 		})
 	}
 	return out
@@ -178,6 +184,7 @@ func typesVPCEndpointsToGrpc(in []types.VPCEndpoint) []*infrapb.VPCEndpoint {
 			ServiceName:   vpce.ServiceName,
 			CreatedAt:     timestamppb.New(*vpce.CreatedAt),
 			LastSyncTime:  vpce.LastSyncTime,
+			SelfLink:      vpce.SelfLink,
 		})
 	}
 	return out
@@ -200,6 +207,7 @@ func typesNATGatewaysToGrpc(in []types.NATGateway) []*infrapb.NATGateway {
 			SubnetId:     gateway.SubnetId,
 			CreatedAt:    timestamppb.New(gateway.CreatedAt),
 			LastSyncTime: gateway.LastSyncTime,
+			SelfLink:     gateway.SelfLink,
 		})
 	}
 	return out
@@ -230,6 +238,7 @@ func typesACLsToGrpc(in []types.ACL) []*infrapb.ACL {
 			Labels:       acl.Labels,
 			Rules:        rules,
 			LastSyncTime: acl.LastSyncTime,
+			SelfLink:     acl.SelfLink,
 		})
 	}
 	return out
@@ -257,6 +266,7 @@ func typesSgsToGrpc(in []types.SecurityGroup) []*infrapb.SecurityGroup {
 			Labels:       acl.Labels,
 			Rules:        rules,
 			LastSyncTime: acl.LastSyncTime,
+			SelfLink:     acl.SelfLink,
 		})
 	}
 	return out
@@ -283,6 +293,7 @@ func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
 			Labels:       rt.Labels,
 			Routes:       routes,
 			LastSyncTime: rt.LastSyncTime,
+			SelfLink:     rt.SelfLink,
 		})
 	}
 	return out
@@ -303,6 +314,7 @@ func typesPublicIPsToGrpc(in []types.PublicIP) []*infrapb.PublicIP {
 			AccountId:  publicIP.AccountID,
 			Type:       publicIP.Type,
 			Labels:     publicIP.Labels,
+			SelfLink:   publicIP.SelfLink,
 		})
 	}
 	return out
@@ -321,6 +333,7 @@ func typesPodsToGrpc(in []types.Pod) []*infrapb.Pod {
 			Labels:       pod.Labels,
 			State:        pod.State,
 			LastSyncTime: pod.LastSyncTime,
+			SelfLink:     pod.SelfLink,
 		})
 	}
 	return out
@@ -337,6 +350,7 @@ func typesServicesToGrpc(in []types.K8SService) []*infrapb.K8SService {
 			Labels:       svc.Labels,
 			Type:         svc.Type,
 			LastSyncTime: svc.LastSyncTime,
+			SelfLink:     svc.SelfLink,
 		})
 	}
 	return out
@@ -369,6 +383,7 @@ func typesClustersToGrpc(in []types.Cluster) []*infrapb.Cluster {
 			AccountId:    cluster.AccountID,
 			Id:           cluster.Id,
 			LastSyncTime: cluster.LastSyncTime,
+			SelfLink:     cluster.SelfLink,
 		})
 	}
 	return out
@@ -400,6 +415,7 @@ func typesNodesToGrpc(in []types.K8sNode) []*infrapb.Node {
 			Namespace:    node.Namespace,
 			Addresses:    addresses,
 			LastSyncTime: node.LastSyncTime,
+			SelfLink:     node.SelfLink,
 		})
 	}
 	return out

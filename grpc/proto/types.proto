@@ -28,29 +28,34 @@ message Instance {
     string publicIP = 3;
     string privateIP = 4;
     string subnetID = 5;
-    string vpcId = 6;
-    string region = 7;
-    string zone = 8;
-    map<string, string> labels = 9;
-    string provider = 10;
-    string account_id = 11;
-    string state = 12;
-    string type = 13;
-    string last_sync_time = 14;
-    string self_link = 15;
+    string project = 6;
+    string vpcId = 7;
+    string region = 8;
+    string zone = 9;
+    map<string, string> labels = 10;
+    string provider = 11;
+    string account_id = 12;
+    string state = 13;
+    string type = 14;
+    string last_sync_time = 15;
+    string self_link = 16;
 }
 
 message Subnet {
     string id = 1;
-    string cidr_block = 2;
-    string vpc_id = 3;
-    string zone = 4;
-    string region = 5;
-    map<string, string> labels = 6;
+    string name = 2;
+    string cidr_block = 3;
+    string vpc_id = 4;
+    string zone = 5;
+    string region = 6;
+    map<string, string> labels = 7;
+    string project = 8;
+
     string provider = 10;
     string account_id = 11;
     string last_sync_time = 12;
-    string name = 13;
+    string self_link = 13;
+    
 }
 
 message VPC {
@@ -60,9 +65,11 @@ message VPC {
     map<string, string> labels = 4;
     string ipv4_cidr = 5;
     string ipv6_cidr = 6;
+    string project = 7;
     string provider = 10;
     string account_id = 11;
     string last_sync_time = 12;
+    string self_link = 13;
 }
 
 message Account {
@@ -96,7 +103,10 @@ message ACL {
     }
     repeated ACLRule rules = 7;
     map<string, string> labels = 8;
-    string last_sync_time = 9;
+    string project = 9;
+
+    string last_sync_time = 10;
+    string self_link = 11;
 }
 
 
@@ -115,7 +125,10 @@ message SecurityGroup {
     }
     repeated SecurityGroupRule rules = 7;
     map<string, string> labels = 8;
-    string last_sync_time = 9;
+    string project = 9;
+
+    string last_sync_time = 10;
+    string self_link = 11;
 }
 
 
@@ -133,7 +146,10 @@ message RouteTable {
     }
     repeated Route routes = 7;
     map<string, string> labels = 8;
-    string last_sync_time = 9;
+    string project = 9;
+
+    string last_sync_time = 10;
+    string self_link = 11;
 }
 
 message Router {
@@ -152,8 +168,10 @@ message Router {
     google.protobuf.Timestamp created_at = 13;
     google.protobuf.Timestamp updated_at = 14;
     string account_id = 15;
-    string last_sync_time = 16;
-    map<string, string> additional_properties = 17;
+    string project = 16;
+    string last_sync_time = 17;
+    map<string, string> additional_properties = 18;
+    string self_link = 19;
   }
 
   message NATGateway {
@@ -167,11 +185,14 @@ message Router {
     string public_ip = 8;
     string private_ip = 9;
     string subnet_id = 10;
-    map<string, string> labels = 11;
-    google.protobuf.Timestamp created_at = 12;
-    google.protobuf.Timestamp updated_at = 13;
-    string last_sync_time = 14;
-    map<string, string> additional_properties = 15;
+    string project = 11;
+
+    map<string, string> labels = 12;
+    google.protobuf.Timestamp created_at = 13;
+    google.protobuf.Timestamp updated_at = 14;
+    string last_sync_time = 15;
+    map<string, string> additional_properties = 16;
+    string self_link = 17;
   }
 
   message IGW {
@@ -182,10 +203,13 @@ message Router {
     string attached_vpc_id = 5; // 
     string region = 6; // VPC Region
     string state = 7;
+    string project = 8;
+
     map<string, string> labels = 11;
     google.protobuf.Timestamp created_at = 12;
     google.protobuf.Timestamp updated_at = 13;
     string last_sync_time = 14;
+    string self_link = 15;
   }
 
   message VPCEndpoint {
@@ -197,13 +221,16 @@ message Router {
     string region = 6; // VPC Region
     string state = 7;
     string type = 8;
-    string service_name = 9;
-    string route_table_ids = 10; //comma separated subnet ids
-    string subnet_ids = 11; //comma separated route table ids
-    map<string, string> labels = 12;
-    google.protobuf.Timestamp created_at = 13;
-    google.protobuf.Timestamp updated_at = 14;
-    string last_sync_time = 15;
+    string project = 9;
+
+    string service_name = 10;
+    string route_table_ids = 11; //comma separated subnet ids
+    string subnet_ids = 12; //comma separated route table ids
+    map<string, string> labels = 13;
+    google.protobuf.Timestamp created_at = 14;
+    google.protobuf.Timestamp updated_at = 15;
+    string last_sync_time = 16;
+    string self_link = 17;
   }
 
   message PublicIP {
@@ -217,10 +244,13 @@ message Router {
     string instance_id = 8; 
     string private_ip = 9;
     string byoip = 10;
-    map<string, string> labels = 11;
-    google.protobuf.Timestamp created_at = 12;
-    google.protobuf.Timestamp updated_at = 13;
-    string last_sync_time = 14;
+    string project = 11;
+
+    map<string, string> labels = 12;
+    google.protobuf.Timestamp created_at = 13;
+    google.protobuf.Timestamp updated_at = 14;
+    string last_sync_time = 15;
+    string self_link = 16;
   }
 
 
@@ -238,6 +268,7 @@ message Router {
     string account_id = 11;
     string id = 12;
     string last_sync_time = 13;
+    string self_link = 14;
 }
 
 message Node {
@@ -245,14 +276,19 @@ message Node {
     string name = 2;
     string namespace = 3;
     repeated string addresses = 4;
-    string last_sync_time = 5;
+    string project = 5;
+
+    string last_sync_time = 6;
+    string self_link = 7;
 }
 
 message Namespace {
     string cluster = 1;
     string name = 2;
     map<string, string> labels = 3;
-    string last_sync_time = 4;
+    string project = 4;
+    string last_sync_time = 5;
+    string self_link = 6;
 }
 
 message Pod {
@@ -262,7 +298,9 @@ message Pod {
     string ip = 4;
     map<string, string> labels = 5;
     string state = 6;
-    string last_sync_time = 7;
+    string project = 7;
+    string last_sync_time = 8;
+    string self_link = 9;
 }
 
 message K8sService {
@@ -277,5 +315,7 @@ message K8sService {
     repeated Ingress ingresses = 4;
     map<string, string> labels = 8;
     string type = 9;
-    string last_sync_time = 10;
+    string project = 10;
+    string last_sync_time = 11;
+    string self_link = 12;
 }

@@ -19,6 +19,9 @@ export class Instance extends jspb.Message {
   getSubnetid(): string;
   setSubnetid(value: string): Instance;
 
+  getProject(): string;
+  setProject(value: string): Instance;
+
   getVpcid(): string;
   setVpcid(value: string): Instance;
 
@@ -64,6 +67,7 @@ export namespace Instance {
     publicip: string,
     privateip: string,
     subnetid: string,
+    project: string,
     vpcid: string,
     region: string,
     zone: string,
@@ -81,6 +85,9 @@ export class Subnet extends jspb.Message {
   getId(): string;
   setId(value: string): Subnet;
 
+  getName(): string;
+  setName(value: string): Subnet;
+
   getCidrBlock(): string;
   setCidrBlock(value: string): Subnet;
 
@@ -96,6 +103,9 @@ export class Subnet extends jspb.Message {
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): Subnet;
 
+  getProject(): string;
+  setProject(value: string): Subnet;
+
   getProvider(): string;
   setProvider(value: string): Subnet;
 
@@ -105,8 +115,8 @@ export class Subnet extends jspb.Message {
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Subnet;
 
-  getName(): string;
-  setName(value: string): Subnet;
+  getSelfLink(): string;
+  setSelfLink(value: string): Subnet;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Subnet.AsObject;
@@ -119,15 +129,17 @@ export class Subnet extends jspb.Message {
 export namespace Subnet {
   export type AsObject = {
     id: string,
+    name: string,
     cidrBlock: string,
     vpcId: string,
     zone: string,
     region: string,
     labelsMap: Array<[string, string]>,
+    project: string,
     provider: string,
     accountId: string,
     lastSyncTime: string,
-    name: string,
+    selfLink: string,
   }
 }
 
@@ -150,6 +162,9 @@ export class VPC extends jspb.Message {
   getIpv6Cidr(): string;
   setIpv6Cidr(value: string): VPC;
 
+  getProject(): string;
+  setProject(value: string): VPC;
+
   getProvider(): string;
   setProvider(value: string): VPC;
 
@@ -158,6 +173,9 @@ export class VPC extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): VPC;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): VPC;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): VPC.AsObject;
@@ -175,9 +193,11 @@ export namespace VPC {
     labelsMap: Array<[string, string]>,
     ipv4Cidr: string,
     ipv6Cidr: string,
+    project: string,
     provider: string,
     accountId: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -268,8 +288,14 @@ export class ACL extends jspb.Message {
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ACL;
 
+  getProject(): string;
+  setProject(value: string): ACL;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ACL;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): ACL;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ACL.AsObject;
@@ -289,7 +315,9 @@ export namespace ACL {
     accountId: string,
     rulesList: Array<ACL.ACLRule.AsObject>,
     labelsMap: Array<[string, string]>,
+    project: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 
   export class ACLRule extends jspb.Message {
@@ -367,8 +395,14 @@ export class SecurityGroup extends jspb.Message {
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): SecurityGroup;
 
+  getProject(): string;
+  setProject(value: string): SecurityGroup;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): SecurityGroup;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): SecurityGroup;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SecurityGroup.AsObject;
@@ -388,7 +422,9 @@ export namespace SecurityGroup {
     accountId: string,
     rulesList: Array<SecurityGroup.SecurityGroupRule.AsObject>,
     labelsMap: Array<[string, string]>,
+    project: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 
   export class SecurityGroupRule extends jspb.Message {
@@ -452,8 +488,14 @@ export class RouteTable extends jspb.Message {
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): RouteTable;
 
+  getProject(): string;
+  setProject(value: string): RouteTable;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): RouteTable;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): RouteTable;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): RouteTable.AsObject;
@@ -473,7 +515,9 @@ export namespace RouteTable {
     accountId: string,
     routesList: Array<RouteTable.Route.AsObject>,
     labelsMap: Array<[string, string]>,
+    project: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 
   export class Route extends jspb.Message {
@@ -554,11 +598,17 @@ export class Router extends jspb.Message {
   getAccountId(): string;
   setAccountId(value: string): Router;
 
+  getProject(): string;
+  setProject(value: string): Router;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Router;
 
   getAdditionalPropertiesMap(): jspb.Map<string, string>;
   clearAdditionalPropertiesMap(): Router;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): Router;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Router.AsObject;
@@ -585,8 +635,10 @@ export namespace Router {
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     accountId: string,
+    project: string,
     lastSyncTime: string,
     additionalPropertiesMap: Array<[string, string]>,
+    selfLink: string,
   }
 }
 
@@ -621,6 +673,9 @@ export class NATGateway extends jspb.Message {
   getSubnetId(): string;
   setSubnetId(value: string): NATGateway;
 
+  getProject(): string;
+  setProject(value: string): NATGateway;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): NATGateway;
 
@@ -639,6 +694,9 @@ export class NATGateway extends jspb.Message {
 
   getAdditionalPropertiesMap(): jspb.Map<string, string>;
   clearAdditionalPropertiesMap(): NATGateway;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): NATGateway;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): NATGateway.AsObject;
@@ -660,11 +718,13 @@ export namespace NATGateway {
     publicIp: string,
     privateIp: string,
     subnetId: string,
+    project: string,
     labelsMap: Array<[string, string]>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     lastSyncTime: string,
     additionalPropertiesMap: Array<[string, string]>,
+    selfLink: string,
   }
 }
 
@@ -690,6 +750,9 @@ export class IGW extends jspb.Message {
   getState(): string;
   setState(value: string): IGW;
 
+  getProject(): string;
+  setProject(value: string): IGW;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): IGW;
 
@@ -705,6 +768,9 @@ export class IGW extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): IGW;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): IGW;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): IGW.AsObject;
@@ -723,10 +789,12 @@ export namespace IGW {
     attachedVpcId: string,
     region: string,
     state: string,
+    project: string,
     labelsMap: Array<[string, string]>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -755,6 +823,9 @@ export class VPCEndpoint extends jspb.Message {
   getType(): string;
   setType(value: string): VPCEndpoint;
 
+  getProject(): string;
+  setProject(value: string): VPCEndpoint;
+
   getServiceName(): string;
   setServiceName(value: string): VPCEndpoint;
 
@@ -780,6 +851,9 @@ export class VPCEndpoint extends jspb.Message {
   getLastSyncTime(): string;
   setLastSyncTime(value: string): VPCEndpoint;
 
+  getSelfLink(): string;
+  setSelfLink(value: string): VPCEndpoint;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): VPCEndpoint.AsObject;
   static toObject(includeInstance: boolean, msg: VPCEndpoint): VPCEndpoint.AsObject;
@@ -798,6 +872,7 @@ export namespace VPCEndpoint {
     region: string,
     state: string,
     type: string,
+    project: string,
     serviceName: string,
     routeTableIds: string,
     subnetIds: string,
@@ -805,6 +880,7 @@ export namespace VPCEndpoint {
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -839,6 +915,9 @@ export class PublicIP extends jspb.Message {
   getByoip(): string;
   setByoip(value: string): PublicIP;
 
+  getProject(): string;
+  setProject(value: string): PublicIP;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): PublicIP;
 
@@ -854,6 +933,9 @@ export class PublicIP extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): PublicIP;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): PublicIP;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): PublicIP.AsObject;
@@ -875,10 +957,12 @@ export namespace PublicIP {
     instanceId: string,
     privateIp: string,
     byoip: string,
+    project: string,
     labelsMap: Array<[string, string]>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -916,6 +1000,9 @@ export class Cluster extends jspb.Message {
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Cluster;
 
+  getSelfLink(): string;
+  setSelfLink(value: string): Cluster;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Cluster.AsObject;
   static toObject(includeInstance: boolean, msg: Cluster): Cluster.AsObject;
@@ -937,6 +1024,7 @@ export namespace Cluster {
     accountId: string,
     id: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -955,8 +1043,14 @@ export class Node extends jspb.Message {
   clearAddressesList(): Node;
   addAddresses(value: string, index?: number): Node;
 
+  getProject(): string;
+  setProject(value: string): Node;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Node;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): Node;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Node.AsObject;
@@ -972,7 +1066,9 @@ export namespace Node {
     name: string,
     namespace: string,
     addressesList: Array<string>,
+    project: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -986,8 +1082,14 @@ export class Namespace extends jspb.Message {
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): Namespace;
 
+  getProject(): string;
+  setProject(value: string): Namespace;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Namespace;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): Namespace;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Namespace.AsObject;
@@ -1002,7 +1104,9 @@ export namespace Namespace {
     cluster: string,
     name: string,
     labelsMap: Array<[string, string]>,
+    project: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -1025,8 +1129,14 @@ export class Pod extends jspb.Message {
   getState(): string;
   setState(value: string): Pod;
 
+  getProject(): string;
+  setProject(value: string): Pod;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Pod;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): Pod;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Pod.AsObject;
@@ -1044,7 +1154,9 @@ export namespace Pod {
     ip: string,
     labelsMap: Array<[string, string]>,
     state: string,
+    project: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 }
 
@@ -1069,8 +1181,14 @@ export class K8sService extends jspb.Message {
   getType(): string;
   setType(value: string): K8sService;
 
+  getProject(): string;
+  setProject(value: string): K8sService;
+
   getLastSyncTime(): string;
   setLastSyncTime(value: string): K8sService;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): K8sService;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): K8sService.AsObject;
@@ -1088,7 +1206,9 @@ export namespace K8sService {
     ingressesList: Array<K8sService.Ingress.AsObject>,
     labelsMap: Array<[string, string]>,
     type: string,
+    project: string,
     lastSyncTime: string,
+    selfLink: string,
   }
 
   export class Ingress extends jspb.Message {

@@ -57,6 +57,7 @@ func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersReq
 func (c *Client) ListRoutersForRegion(client *ec2.Client, region string) ([]types.Router, error) {
 
 	var routers []types.Router
+	var CIDRBlock string
 
 	paginator := ec2.NewDescribeTransitGatewaysPaginator(client, &ec2.DescribeTransitGatewaysInput{})
 
@@ -78,17 +79,23 @@ func (c *Client) ListRoutersForRegion(client *ec2.Client, region string) ([]type
 				labels[*tag.Key] = *tag.Value
 			}
 
+			if tgw.Options != nil && len(tgw.Options.TransitGatewayCidrBlocks) > 0 {
+				CIDRBlock = tgw.Options.TransitGatewayCidrBlocks[0]
+			}
+		
 			routers = append(routers, types.Router{
-				ID:        *tgw.TransitGatewayId,
-				Provider:  c.GetName(),
-				Name:      name,
-				Region:    region,
-				State:     string(tgw.State),
-				Labels:    labels,
-				AccountID: *tgw.OwnerId,
-				CreatedAt: *tgw.CreationTime,
+				ID:             *tgw.TransitGatewayId,
+				Provider:       c.GetName(),
+				Name:           name,
+				Region:         region,
+				State:          string(tgw.State),
+				Labels:         labels,
+				CIDRBlock:      CIDRBlock,
+				AccountID:      *tgw.OwnerId,
+				CreatedAt:      *tgw.CreationTime,
 			})
 		}
 	}
+	
 	return routers, nil
 }

@@ -538,16 +538,17 @@ proto.infra.Instance.toObject = function(includeInstance, msg) {
     publicip: jspb.Message.getFieldWithDefault(msg, 3, ""),
     privateip: jspb.Message.getFieldWithDefault(msg, 4, ""),
     subnetid: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    vpcid: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    region: jspb.Message.getFieldWithDefault(msg, 7, ""),
-    zone: jspb.Message.getFieldWithDefault(msg, 8, ""),
+    project: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    vpcid: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    region: jspb.Message.getFieldWithDefault(msg, 8, ""),
+    zone: jspb.Message.getFieldWithDefault(msg, 9, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    provider: jspb.Message.getFieldWithDefault(msg, 10, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 11, ""),
-    state: jspb.Message.getFieldWithDefault(msg, 12, ""),
-    type: jspb.Message.getFieldWithDefault(msg, 13, ""),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 14, ""),
-    selfLink: jspb.Message.getFieldWithDefault(msg, 15, "")
+    provider: jspb.Message.getFieldWithDefault(msg, 11, ""),
+    accountId: jspb.Message.getFieldWithDefault(msg, 12, ""),
+    state: jspb.Message.getFieldWithDefault(msg, 13, ""),
+    type: jspb.Message.getFieldWithDefault(msg, 14, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 15, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 16, "")
   };
 
   if (includeInstance) {
@@ -606,43 +607,47 @@ proto.infra.Instance.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 6:
       var value = /** @type {string} */ (reader.readString());
-      msg.setVpcid(value);
+      msg.setProject(value);
       break;
     case 7:
       var value = /** @type {string} */ (reader.readString());
-      msg.setRegion(value);
+      msg.setVpcid(value);
       break;
     case 8:
       var value = /** @type {string} */ (reader.readString());
-      msg.setZone(value);
+      msg.setRegion(value);
       break;
     case 9:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setZone(value);
+      break;
+    case 10:
       var value = msg.getLabelsMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
       break;
-    case 10:
+    case 11:
       var value = /** @type {string} */ (reader.readString());
       msg.setProvider(value);
       break;
-    case 11:
+    case 12:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
       break;
-    case 12:
+    case 13:
       var value = /** @type {string} */ (reader.readString());
       msg.setState(value);
       break;
-    case 13:
+    case 14:
       var value = /** @type {string} */ (reader.readString());
       msg.setType(value);
       break;
-    case 14:
+    case 15:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
-    case 15:
+    case 16:
       var value = /** @type {string} */ (reader.readString());
       msg.setSelfLink(value);
       break;
@@ -710,70 +715,77 @@ proto.infra.Instance.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getVpcid();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       6,
       f
     );
   }
-  f = message.getRegion();
+  f = message.getVpcid();
   if (f.length > 0) {
     writer.writeString(
       7,
       f
     );
   }
-  f = message.getZone();
+  f = message.getRegion();
   if (f.length > 0) {
     writer.writeString(
       8,
       f
     );
   }
-  f = message.getLabelsMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(9, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
-  }
-  f = message.getProvider();
+  f = message.getZone();
   if (f.length > 0) {
     writer.writeString(
-      10,
+      9,
       f
     );
   }
-  f = message.getAccountId();
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(10, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getProvider();
   if (f.length > 0) {
     writer.writeString(
       11,
       f
     );
   }
-  f = message.getState();
+  f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
       12,
       f
     );
   }
-  f = message.getType();
+  f = message.getState();
   if (f.length > 0) {
     writer.writeString(
       13,
       f
     );
   }
-  f = message.getLastSyncTime();
+  f = message.getType();
   if (f.length > 0) {
     writer.writeString(
       14,
       f
     );
   }
-  f = message.getSelfLink();
+  f = message.getLastSyncTime();
   if (f.length > 0) {
     writer.writeString(
       15,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      16,
       f
     );
   }
@@ -871,10 +883,10 @@ proto.infra.Instance.prototype.setSubnetid = function(value) {
 
 
 /**
- * optional string vpcId = 6;
+ * optional string project = 6;
  * @return {string}
  */
-proto.infra.Instance.prototype.getVpcid = function() {
+proto.infra.Instance.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
@@ -883,16 +895,16 @@ proto.infra.Instance.prototype.getVpcid = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setVpcid = function(value) {
+proto.infra.Instance.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
 /**
- * optional string region = 7;
+ * optional string vpcId = 7;
  * @return {string}
  */
-proto.infra.Instance.prototype.getRegion = function() {
+proto.infra.Instance.prototype.getVpcid = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
 };
 
@@ -901,16 +913,16 @@ proto.infra.Instance.prototype.getRegion = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setRegion = function(value) {
+proto.infra.Instance.prototype.setVpcid = function(value) {
   return jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
 /**
- * optional string zone = 8;
+ * optional string region = 8;
  * @return {string}
  */
-proto.infra.Instance.prototype.getZone = function() {
+proto.infra.Instance.prototype.getRegion = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
 };
 
@@ -919,20 +931,38 @@ proto.infra.Instance.prototype.getZone = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setZone = function(value) {
+proto.infra.Instance.prototype.setRegion = function(value) {
   return jspb.Message.setProto3StringField(this, 8, value);
 };
 
 
 /**
- * map<string, string> labels = 9;
+ * optional string zone = 9;
+ * @return {string}
+ */
+proto.infra.Instance.prototype.getZone = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Instance} returns this
+ */
+proto.infra.Instance.prototype.setZone = function(value) {
+  return jspb.Message.setProto3StringField(this, 9, value);
+};
+
+
+/**
+ * map<string, string> labels = 10;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.Instance.prototype.getLabelsMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 9, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 10, opt_noLazyCreate,
       null));
 };
 
@@ -947,28 +977,10 @@ proto.infra.Instance.prototype.clearLabelsMap = function() {
 
 
 /**
- * optional string provider = 10;
+ * optional string provider = 11;
  * @return {string}
  */
 proto.infra.Instance.prototype.getProvider = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.infra.Instance} returns this
- */
-proto.infra.Instance.prototype.setProvider = function(value) {
-  return jspb.Message.setProto3StringField(this, 10, value);
-};
-
-
-/**
- * optional string account_id = 11;
- * @return {string}
- */
-proto.infra.Instance.prototype.getAccountId = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
 };
 
@@ -977,16 +989,16 @@ proto.infra.Instance.prototype.getAccountId = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setAccountId = function(value) {
+proto.infra.Instance.prototype.setProvider = function(value) {
   return jspb.Message.setProto3StringField(this, 11, value);
 };
 
 
 /**
- * optional string state = 12;
+ * optional string account_id = 12;
  * @return {string}
  */
-proto.infra.Instance.prototype.getState = function() {
+proto.infra.Instance.prototype.getAccountId = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 12, ""));
 };
 
@@ -995,16 +1007,16 @@ proto.infra.Instance.prototype.getState = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setState = function(value) {
+proto.infra.Instance.prototype.setAccountId = function(value) {
   return jspb.Message.setProto3StringField(this, 12, value);
 };
 
 
 /**
- * optional string type = 13;
+ * optional string state = 13;
  * @return {string}
  */
-proto.infra.Instance.prototype.getType = function() {
+proto.infra.Instance.prototype.getState = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 13, ""));
 };
 
@@ -1013,16 +1025,16 @@ proto.infra.Instance.prototype.getType = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setType = function(value) {
+proto.infra.Instance.prototype.setState = function(value) {
   return jspb.Message.setProto3StringField(this, 13, value);
 };
 
 
 /**
- * optional string last_sync_time = 14;
+ * optional string type = 14;
  * @return {string}
  */
-proto.infra.Instance.prototype.getLastSyncTime = function() {
+proto.infra.Instance.prototype.getType = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 14, ""));
 };
 
@@ -1031,16 +1043,16 @@ proto.infra.Instance.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setLastSyncTime = function(value) {
+proto.infra.Instance.prototype.setType = function(value) {
   return jspb.Message.setProto3StringField(this, 14, value);
 };
 
 
 /**
- * optional string self_link = 15;
+ * optional string last_sync_time = 15;
  * @return {string}
  */
-proto.infra.Instance.prototype.getSelfLink = function() {
+proto.infra.Instance.prototype.getLastSyncTime = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 15, ""));
 };
 
@@ -1049,8 +1061,26 @@ proto.infra.Instance.prototype.getSelfLink = function() {
  * @param {string} value
  * @return {!proto.infra.Instance} returns this
  */
-proto.infra.Instance.prototype.setSelfLink = function(value) {
+proto.infra.Instance.prototype.setLastSyncTime = function(value) {
   return jspb.Message.setProto3StringField(this, 15, value);
+};
+
+
+/**
+ * optional string self_link = 16;
+ * @return {string}
+ */
+proto.infra.Instance.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 16, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Instance} returns this
+ */
+proto.infra.Instance.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 16, value);
 };
 
 
@@ -1087,15 +1117,17 @@ proto.infra.Subnet.prototype.toObject = function(opt_includeInstance) {
 proto.infra.Subnet.toObject = function(includeInstance, msg) {
   var f, obj = {
     id: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    cidrBlock: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    vpcId: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    zone: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    region: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    name: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    cidrBlock: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    vpcId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    zone: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    region: jspb.Message.getFieldWithDefault(msg, 6, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    project: jspb.Message.getFieldWithDefault(msg, 8, ""),
     provider: jspb.Message.getFieldWithDefault(msg, 10, ""),
     accountId: jspb.Message.getFieldWithDefault(msg, 11, ""),
     lastSyncTime: jspb.Message.getFieldWithDefault(msg, 12, ""),
-    name: jspb.Message.getFieldWithDefault(msg, 13, "")
+    selfLink: jspb.Message.getFieldWithDefault(msg, 13, "")
   };
 
   if (includeInstance) {
@@ -1138,25 +1170,33 @@ proto.infra.Subnet.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 2:
       var value = /** @type {string} */ (reader.readString());
-      msg.setCidrBlock(value);
+      msg.setName(value);
       break;
     case 3:
       var value = /** @type {string} */ (reader.readString());
-      msg.setVpcId(value);
+      msg.setCidrBlock(value);
       break;
     case 4:
       var value = /** @type {string} */ (reader.readString());
-      msg.setZone(value);
+      msg.setVpcId(value);
       break;
     case 5:
       var value = /** @type {string} */ (reader.readString());
-      msg.setRegion(value);
+      msg.setZone(value);
       break;
     case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setRegion(value);
+      break;
+    case 7:
       var value = msg.getLabelsMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
       break;
     case 10:
       var value = /** @type {string} */ (reader.readString());
@@ -1172,7 +1212,7 @@ proto.infra.Subnet.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 13:
       var value = /** @type {string} */ (reader.readString());
-      msg.setName(value);
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -1210,37 +1250,51 @@ proto.infra.Subnet.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getCidrBlock();
+  f = message.getName();
   if (f.length > 0) {
     writer.writeString(
       2,
       f
     );
   }
-  f = message.getVpcId();
+  f = message.getCidrBlock();
   if (f.length > 0) {
     writer.writeString(
       3,
       f
     );
   }
-  f = message.getZone();
+  f = message.getVpcId();
   if (f.length > 0) {
     writer.writeString(
       4,
       f
     );
   }
-  f = message.getRegion();
+  f = message.getZone();
   if (f.length > 0) {
     writer.writeString(
       5,
       f
     );
   }
+  f = message.getRegion();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
   f = message.getLabelsMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(6, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+    f.serializeBinary(7, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getProject();
+  if (f.length > 0) {
+    writer.writeString(
+      8,
+      f
+    );
   }
   f = message.getProvider();
   if (f.length > 0) {
@@ -1263,7 +1317,7 @@ proto.infra.Subnet.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getName();
+  f = message.getSelfLink();
   if (f.length > 0) {
     writer.writeString(
       13,
@@ -1292,10 +1346,10 @@ proto.infra.Subnet.prototype.setId = function(value) {
 
 
 /**
- * optional string cidr_block = 2;
+ * optional string name = 2;
  * @return {string}
  */
-proto.infra.Subnet.prototype.getCidrBlock = function() {
+proto.infra.Subnet.prototype.getName = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
@@ -1304,16 +1358,16 @@ proto.infra.Subnet.prototype.getCidrBlock = function() {
  * @param {string} value
  * @return {!proto.infra.Subnet} returns this
  */
-proto.infra.Subnet.prototype.setCidrBlock = function(value) {
+proto.infra.Subnet.prototype.setName = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
 /**
- * optional string vpc_id = 3;
+ * optional string cidr_block = 3;
  * @return {string}
  */
-proto.infra.Subnet.prototype.getVpcId = function() {
+proto.infra.Subnet.prototype.getCidrBlock = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
@@ -1322,16 +1376,16 @@ proto.infra.Subnet.prototype.getVpcId = function() {
  * @param {string} value
  * @return {!proto.infra.Subnet} returns this
  */
-proto.infra.Subnet.prototype.setVpcId = function(value) {
+proto.infra.Subnet.prototype.setCidrBlock = function(value) {
   return jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
 /**
- * optional string zone = 4;
+ * optional string vpc_id = 4;
  * @return {string}
  */
-proto.infra.Subnet.prototype.getZone = function() {
+proto.infra.Subnet.prototype.getVpcId = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
 
@@ -1340,16 +1394,16 @@ proto.infra.Subnet.prototype.getZone = function() {
  * @param {string} value
  * @return {!proto.infra.Subnet} returns this
  */
-proto.infra.Subnet.prototype.setZone = function(value) {
+proto.infra.Subnet.prototype.setVpcId = function(value) {
   return jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
 /**
- * optional string region = 5;
+ * optional string zone = 5;
  * @return {string}
  */
-proto.infra.Subnet.prototype.getRegion = function() {
+proto.infra.Subnet.prototype.getZone = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
@@ -1358,20 +1412,38 @@ proto.infra.Subnet.prototype.getRegion = function() {
  * @param {string} value
  * @return {!proto.infra.Subnet} returns this
  */
-proto.infra.Subnet.prototype.setRegion = function(value) {
+proto.infra.Subnet.prototype.setZone = function(value) {
   return jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
 /**
- * map<string, string> labels = 6;
+ * optional string region = 6;
+ * @return {string}
+ */
+proto.infra.Subnet.prototype.getRegion = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Subnet} returns this
+ */
+proto.infra.Subnet.prototype.setRegion = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * map<string, string> labels = 7;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.Subnet.prototype.getLabelsMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 6, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 7, opt_noLazyCreate,
       null));
 };
 
@@ -1383,6 +1455,24 @@ proto.infra.Subnet.prototype.getLabelsMap = function(opt_noLazyCreate) {
 proto.infra.Subnet.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
   return this;};
+
+
+/**
+ * optional string project = 8;
+ * @return {string}
+ */
+proto.infra.Subnet.prototype.getProject = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Subnet} returns this
+ */
+proto.infra.Subnet.prototype.setProject = function(value) {
+  return jspb.Message.setProto3StringField(this, 8, value);
+};
 
 
 /**
@@ -1440,10 +1530,10 @@ proto.infra.Subnet.prototype.setLastSyncTime = function(value) {
 
 
 /**
- * optional string name = 13;
+ * optional string self_link = 13;
  * @return {string}
  */
-proto.infra.Subnet.prototype.getName = function() {
+proto.infra.Subnet.prototype.getSelfLink = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 13, ""));
 };
 
@@ -1452,7 +1542,7 @@ proto.infra.Subnet.prototype.getName = function() {
  * @param {string} value
  * @return {!proto.infra.Subnet} returns this
  */
-proto.infra.Subnet.prototype.setName = function(value) {
+proto.infra.Subnet.prototype.setSelfLink = function(value) {
   return jspb.Message.setProto3StringField(this, 13, value);
 };
 
@@ -1495,9 +1585,11 @@ proto.infra.VPC.toObject = function(includeInstance, msg) {
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     ipv4Cidr: jspb.Message.getFieldWithDefault(msg, 5, ""),
     ipv6Cidr: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    project: jspb.Message.getFieldWithDefault(msg, 7, ""),
     provider: jspb.Message.getFieldWithDefault(msg, 10, ""),
     accountId: jspb.Message.getFieldWithDefault(msg, 11, ""),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 12, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 12, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 13, "")
   };
 
   if (includeInstance) {
@@ -1560,6 +1652,10 @@ proto.infra.VPC.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setIpv6Cidr(value);
       break;
+    case 7:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
     case 10:
       var value = /** @type {string} */ (reader.readString());
       msg.setProvider(value);
@@ -1571,6 +1667,10 @@ proto.infra.VPC.deserializeBinaryFromReader = function(msg, reader) {
     case 12:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 13:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -1640,6 +1740,13 @@ proto.infra.VPC.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getProject();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
+      f
+    );
+  }
   f = message.getProvider();
   if (f.length > 0) {
     writer.writeString(
@@ -1658,6 +1765,13 @@ proto.infra.VPC.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       12,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      13,
       f
     );
   }
@@ -1777,6 +1891,24 @@ proto.infra.VPC.prototype.setIpv6Cidr = function(value) {
 
 
 /**
+ * optional string project = 7;
+ * @return {string}
+ */
+proto.infra.VPC.prototype.getProject = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.VPC} returns this
+ */
+proto.infra.VPC.prototype.setProject = function(value) {
+  return jspb.Message.setProto3StringField(this, 7, value);
+};
+
+
+/**
  * optional string provider = 10;
  * @return {string}
  */
@@ -1827,6 +1959,24 @@ proto.infra.VPC.prototype.getLastSyncTime = function() {
  */
 proto.infra.VPC.prototype.setLastSyncTime = function(value) {
   return jspb.Message.setProto3StringField(this, 12, value);
+};
+
+
+/**
+ * optional string self_link = 13;
+ * @return {string}
+ */
+proto.infra.VPC.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 13, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.VPC} returns this
+ */
+proto.infra.VPC.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 13, value);
 };
 
 
@@ -2318,7 +2468,9 @@ proto.infra.ACL.toObject = function(includeInstance, msg) {
     rulesList: jspb.Message.toObjectList(msg.getRulesList(),
     proto.infra.ACL.ACLRule.toObject, includeInstance),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 9, "")
+    project: jspb.Message.getFieldWithDefault(msg, 9, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 11, "")
   };
 
   if (includeInstance) {
@@ -2392,7 +2544,15 @@ proto.infra.ACL.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 9:
       var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 10:
+      var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 11:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -2477,10 +2637,24 @@ proto.infra.ACL.serializeBinaryToWriter = function(message, writer) {
   if (f && f.getLength() > 0) {
     f.serializeBinary(8, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
-  f = message.getLastSyncTime();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       9,
+      f
+    );
+  }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      10,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
       f
     );
   }
@@ -3011,10 +3185,10 @@ proto.infra.ACL.prototype.clearLabelsMap = function() {
 
 
 /**
- * optional string last_sync_time = 9;
+ * optional string project = 9;
  * @return {string}
  */
-proto.infra.ACL.prototype.getLastSyncTime = function() {
+proto.infra.ACL.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
 };
 
@@ -3023,8 +3197,44 @@ proto.infra.ACL.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.ACL} returns this
  */
-proto.infra.ACL.prototype.setLastSyncTime = function(value) {
+proto.infra.ACL.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 9, value);
+};
+
+
+/**
+ * optional string last_sync_time = 10;
+ * @return {string}
+ */
+proto.infra.ACL.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.ACL} returns this
+ */
+proto.infra.ACL.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 10, value);
+};
+
+
+/**
+ * optional string self_link = 11;
+ * @return {string}
+ */
+proto.infra.ACL.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.ACL} returns this
+ */
+proto.infra.ACL.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
 };
 
 
@@ -3076,7 +3286,9 @@ proto.infra.SecurityGroup.toObject = function(includeInstance, msg) {
     rulesList: jspb.Message.toObjectList(msg.getRulesList(),
     proto.infra.SecurityGroup.SecurityGroupRule.toObject, includeInstance),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 9, "")
+    project: jspb.Message.getFieldWithDefault(msg, 9, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 11, "")
   };
 
   if (includeInstance) {
@@ -3150,7 +3362,15 @@ proto.infra.SecurityGroup.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 9:
       var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 10:
+      var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 11:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -3235,10 +3455,24 @@ proto.infra.SecurityGroup.serializeBinaryToWriter = function(message, writer) {
   if (f && f.getLength() > 0) {
     f.serializeBinary(8, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
-  f = message.getLastSyncTime();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       9,
+      f
+    );
+  }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      10,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
       f
     );
   }
@@ -3660,10 +3894,10 @@ proto.infra.SecurityGroup.prototype.clearLabelsMap = function() {
 
 
 /**
- * optional string last_sync_time = 9;
+ * optional string project = 9;
  * @return {string}
  */
-proto.infra.SecurityGroup.prototype.getLastSyncTime = function() {
+proto.infra.SecurityGroup.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
 };
 
@@ -3672,8 +3906,44 @@ proto.infra.SecurityGroup.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.SecurityGroup} returns this
  */
-proto.infra.SecurityGroup.prototype.setLastSyncTime = function(value) {
+proto.infra.SecurityGroup.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 9, value);
+};
+
+
+/**
+ * optional string last_sync_time = 10;
+ * @return {string}
+ */
+proto.infra.SecurityGroup.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.SecurityGroup} returns this
+ */
+proto.infra.SecurityGroup.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 10, value);
+};
+
+
+/**
+ * optional string self_link = 11;
+ * @return {string}
+ */
+proto.infra.SecurityGroup.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.SecurityGroup} returns this
+ */
+proto.infra.SecurityGroup.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
 };
 
 
@@ -3725,7 +3995,9 @@ proto.infra.RouteTable.toObject = function(includeInstance, msg) {
     routesList: jspb.Message.toObjectList(msg.getRoutesList(),
     proto.infra.RouteTable.Route.toObject, includeInstance),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 9, "")
+    project: jspb.Message.getFieldWithDefault(msg, 9, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 11, "")
   };
 
   if (includeInstance) {
@@ -3799,7 +4071,15 @@ proto.infra.RouteTable.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 9:
       var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 10:
+      var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 11:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -3884,10 +4164,24 @@ proto.infra.RouteTable.serializeBinaryToWriter = function(message, writer) {
   if (f && f.getLength() > 0) {
     f.serializeBinary(8, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
-  f = message.getLastSyncTime();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       9,
+      f
+    );
+  }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      10,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
       f
     );
   }
@@ -4253,10 +4547,10 @@ proto.infra.RouteTable.prototype.clearLabelsMap = function() {
 
 
 /**
- * optional string last_sync_time = 9;
+ * optional string project = 9;
  * @return {string}
  */
-proto.infra.RouteTable.prototype.getLastSyncTime = function() {
+proto.infra.RouteTable.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
 };
 
@@ -4265,8 +4559,44 @@ proto.infra.RouteTable.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.RouteTable} returns this
  */
-proto.infra.RouteTable.prototype.setLastSyncTime = function(value) {
+proto.infra.RouteTable.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 9, value);
+};
+
+
+/**
+ * optional string last_sync_time = 10;
+ * @return {string}
+ */
+proto.infra.RouteTable.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.RouteTable} returns this
+ */
+proto.infra.RouteTable.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 10, value);
+};
+
+
+/**
+ * optional string self_link = 11;
+ * @return {string}
+ */
+proto.infra.RouteTable.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.RouteTable} returns this
+ */
+proto.infra.RouteTable.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
 };
 
 
@@ -4317,8 +4647,10 @@ proto.infra.Router.toObject = function(includeInstance, msg) {
     createdAt: (f = msg.getCreatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     updatedAt: (f = msg.getUpdatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     accountId: jspb.Message.getFieldWithDefault(msg, 15, ""),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 16, ""),
-    additionalPropertiesMap: (f = msg.getAdditionalPropertiesMap()) ? f.toObject(includeInstance, undefined) : []
+    project: jspb.Message.getFieldWithDefault(msg, 16, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 17, ""),
+    additionalPropertiesMap: (f = msg.getAdditionalPropertiesMap()) ? f.toObject(includeInstance, undefined) : [],
+    selfLink: jspb.Message.getFieldWithDefault(msg, 19, "")
   };
 
   if (includeInstance) {
@@ -4421,13 +4753,21 @@ proto.infra.Router.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 16:
       var value = /** @type {string} */ (reader.readString());
-      msg.setLastSyncTime(value);
+      msg.setProject(value);
       break;
     case 17:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setLastSyncTime(value);
+      break;
+    case 18:
       var value = msg.getAdditionalPropertiesMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
+      break;
+    case 19:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -4562,16 +4902,30 @@ proto.infra.Router.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getLastSyncTime();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       16,
       f
     );
   }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      17,
+      f
+    );
+  }
   f = message.getAdditionalPropertiesMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(17, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+    f.serializeBinary(18, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      19,
+      f
+    );
   }
 };
 
@@ -4889,10 +5243,10 @@ proto.infra.Router.prototype.setAccountId = function(value) {
 
 
 /**
- * optional string last_sync_time = 16;
+ * optional string project = 16;
  * @return {string}
  */
-proto.infra.Router.prototype.getLastSyncTime = function() {
+proto.infra.Router.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 16, ""));
 };
 
@@ -4901,20 +5255,38 @@ proto.infra.Router.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.Router} returns this
  */
-proto.infra.Router.prototype.setLastSyncTime = function(value) {
+proto.infra.Router.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 16, value);
 };
 
 
 /**
- * map<string, string> additional_properties = 17;
+ * optional string last_sync_time = 17;
+ * @return {string}
+ */
+proto.infra.Router.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 17, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Router} returns this
+ */
+proto.infra.Router.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 17, value);
+};
+
+
+/**
+ * map<string, string> additional_properties = 18;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.Router.prototype.getAdditionalPropertiesMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 17, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 18, opt_noLazyCreate,
       null));
 };
 
@@ -4926,6 +5298,24 @@ proto.infra.Router.prototype.getAdditionalPropertiesMap = function(opt_noLazyCre
 proto.infra.Router.prototype.clearAdditionalPropertiesMap = function() {
   this.getAdditionalPropertiesMap().clear();
   return this;};
+
+
+/**
+ * optional string self_link = 19;
+ * @return {string}
+ */
+proto.infra.Router.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 19, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Router} returns this
+ */
+proto.infra.Router.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 19, value);
+};
 
 
 
@@ -4970,11 +5360,13 @@ proto.infra.NATGateway.toObject = function(includeInstance, msg) {
     publicIp: jspb.Message.getFieldWithDefault(msg, 8, ""),
     privateIp: jspb.Message.getFieldWithDefault(msg, 9, ""),
     subnetId: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    project: jspb.Message.getFieldWithDefault(msg, 11, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     createdAt: (f = msg.getCreatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     updatedAt: (f = msg.getUpdatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 14, ""),
-    additionalPropertiesMap: (f = msg.getAdditionalPropertiesMap()) ? f.toObject(includeInstance, undefined) : []
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 15, ""),
+    additionalPropertiesMap: (f = msg.getAdditionalPropertiesMap()) ? f.toObject(includeInstance, undefined) : [],
+    selfLink: jspb.Message.getFieldWithDefault(msg, 17, "")
   };
 
   if (includeInstance) {
@@ -5052,30 +5444,38 @@ proto.infra.NATGateway.deserializeBinaryFromReader = function(msg, reader) {
       msg.setSubnetId(value);
       break;
     case 11:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 12:
       var value = msg.getLabelsMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
       break;
-    case 12:
+    case 13:
       var value = new google_protobuf_timestamp_pb.Timestamp;
       reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
       msg.setCreatedAt(value);
       break;
-    case 13:
+    case 14:
       var value = new google_protobuf_timestamp_pb.Timestamp;
       reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
       msg.setUpdatedAt(value);
       break;
-    case 14:
+    case 15:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
-    case 15:
+    case 16:
       var value = msg.getAdditionalPropertiesMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
+      break;
+    case 17:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -5176,19 +5576,18 @@ proto.infra.NATGateway.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getLabelsMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(11, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
-  }
-  f = message.getCreatedAt();
-  if (f != null) {
-    writer.writeMessage(
-      12,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+  f = message.getProject();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
+      f
     );
   }
-  f = message.getUpdatedAt();
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(12, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getCreatedAt();
   if (f != null) {
     writer.writeMessage(
       13,
@@ -5196,16 +5595,31 @@ proto.infra.NATGateway.serializeBinaryToWriter = function(message, writer) {
       google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
     );
   }
+  f = message.getUpdatedAt();
+  if (f != null) {
+    writer.writeMessage(
+      14,
+      f,
+      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+    );
+  }
   f = message.getLastSyncTime();
   if (f.length > 0) {
     writer.writeString(
-      14,
+      15,
       f
     );
   }
   f = message.getAdditionalPropertiesMap(true);
   if (f && f.getLength() > 0) {
-    f.serializeBinary(15, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+    f.serializeBinary(16, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      17,
+      f
+    );
   }
 };
 
@@ -5391,14 +5805,32 @@ proto.infra.NATGateway.prototype.setSubnetId = function(value) {
 
 
 /**
- * map<string, string> labels = 11;
+ * optional string project = 11;
+ * @return {string}
+ */
+proto.infra.NATGateway.prototype.getProject = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.NATGateway} returns this
+ */
+proto.infra.NATGateway.prototype.setProject = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
+};
+
+
+/**
+ * map<string, string> labels = 12;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.NATGateway.prototype.getLabelsMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 11, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 12, opt_noLazyCreate,
       null));
 };
 
@@ -5413,12 +5845,12 @@ proto.infra.NATGateway.prototype.clearLabelsMap = function() {
 
 
 /**
- * optional google.protobuf.Timestamp created_at = 12;
+ * optional google.protobuf.Timestamp created_at = 13;
  * @return {?proto.google.protobuf.Timestamp}
  */
 proto.infra.NATGateway.prototype.getCreatedAt = function() {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 12));
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 13));
 };
 
 
@@ -5427,7 +5859,7 @@ proto.infra.NATGateway.prototype.getCreatedAt = function() {
  * @return {!proto.infra.NATGateway} returns this
 */
 proto.infra.NATGateway.prototype.setCreatedAt = function(value) {
-  return jspb.Message.setWrapperField(this, 12, value);
+  return jspb.Message.setWrapperField(this, 13, value);
 };
 
 
@@ -5445,17 +5877,17 @@ proto.infra.NATGateway.prototype.clearCreatedAt = function() {
  * @return {boolean}
  */
 proto.infra.NATGateway.prototype.hasCreatedAt = function() {
-  return jspb.Message.getField(this, 12) != null;
+  return jspb.Message.getField(this, 13) != null;
 };
 
 
 /**
- * optional google.protobuf.Timestamp updated_at = 13;
+ * optional google.protobuf.Timestamp updated_at = 14;
  * @return {?proto.google.protobuf.Timestamp}
  */
 proto.infra.NATGateway.prototype.getUpdatedAt = function() {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 13));
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 14));
 };
 
 
@@ -5464,7 +5896,7 @@ proto.infra.NATGateway.prototype.getUpdatedAt = function() {
  * @return {!proto.infra.NATGateway} returns this
 */
 proto.infra.NATGateway.prototype.setUpdatedAt = function(value) {
-  return jspb.Message.setWrapperField(this, 13, value);
+  return jspb.Message.setWrapperField(this, 14, value);
 };
 
 
@@ -5482,16 +5914,16 @@ proto.infra.NATGateway.prototype.clearUpdatedAt = function() {
  * @return {boolean}
  */
 proto.infra.NATGateway.prototype.hasUpdatedAt = function() {
-  return jspb.Message.getField(this, 13) != null;
+  return jspb.Message.getField(this, 14) != null;
 };
 
 
 /**
- * optional string last_sync_time = 14;
+ * optional string last_sync_time = 15;
  * @return {string}
  */
 proto.infra.NATGateway.prototype.getLastSyncTime = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 14, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 15, ""));
 };
 
 
@@ -5500,19 +5932,19 @@ proto.infra.NATGateway.prototype.getLastSyncTime = function() {
  * @return {!proto.infra.NATGateway} returns this
  */
 proto.infra.NATGateway.prototype.setLastSyncTime = function(value) {
-  return jspb.Message.setProto3StringField(this, 14, value);
+  return jspb.Message.setProto3StringField(this, 15, value);
 };
 
 
 /**
- * map<string, string> additional_properties = 15;
+ * map<string, string> additional_properties = 16;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.NATGateway.prototype.getAdditionalPropertiesMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 15, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 16, opt_noLazyCreate,
       null));
 };
 
@@ -5524,6 +5956,24 @@ proto.infra.NATGateway.prototype.getAdditionalPropertiesMap = function(opt_noLaz
 proto.infra.NATGateway.prototype.clearAdditionalPropertiesMap = function() {
   this.getAdditionalPropertiesMap().clear();
   return this;};
+
+
+/**
+ * optional string self_link = 17;
+ * @return {string}
+ */
+proto.infra.NATGateway.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 17, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.NATGateway} returns this
+ */
+proto.infra.NATGateway.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 17, value);
+};
 
 
 
@@ -5565,10 +6015,12 @@ proto.infra.IGW.toObject = function(includeInstance, msg) {
     attachedVpcId: jspb.Message.getFieldWithDefault(msg, 5, ""),
     region: jspb.Message.getFieldWithDefault(msg, 6, ""),
     state: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    project: jspb.Message.getFieldWithDefault(msg, 8, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     createdAt: (f = msg.getCreatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     updatedAt: (f = msg.getUpdatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 14, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 14, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 15, "")
   };
 
   if (includeInstance) {
@@ -5633,6 +6085,10 @@ proto.infra.IGW.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setState(value);
       break;
+    case 8:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
     case 11:
       var value = msg.getLabelsMap();
       reader.readMessage(value, function(message, reader) {
@@ -5652,6 +6108,10 @@ proto.infra.IGW.deserializeBinaryFromReader = function(msg, reader) {
     case 14:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 15:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -5731,6 +6191,13 @@ proto.infra.IGW.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getProject();
+  if (f.length > 0) {
+    writer.writeString(
+      8,
+      f
+    );
+  }
   f = message.getLabelsMap(true);
   if (f && f.getLength() > 0) {
     f.serializeBinary(11, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
@@ -5755,6 +6222,13 @@ proto.infra.IGW.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       14,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      15,
       f
     );
   }
@@ -5888,6 +6362,24 @@ proto.infra.IGW.prototype.setState = function(value) {
 
 
 /**
+ * optional string project = 8;
+ * @return {string}
+ */
+proto.infra.IGW.prototype.getProject = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.IGW} returns this
+ */
+proto.infra.IGW.prototype.setProject = function(value) {
+  return jspb.Message.setProto3StringField(this, 8, value);
+};
+
+
+/**
  * map<string, string> labels = 11;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
@@ -6001,6 +6493,24 @@ proto.infra.IGW.prototype.setLastSyncTime = function(value) {
 };
 
 
+/**
+ * optional string self_link = 15;
+ * @return {string}
+ */
+proto.infra.IGW.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 15, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.IGW} returns this
+ */
+proto.infra.IGW.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 15, value);
+};
+
+
 
 
 
@@ -6041,13 +6551,15 @@ proto.infra.VPCEndpoint.toObject = function(includeInstance, msg) {
     region: jspb.Message.getFieldWithDefault(msg, 6, ""),
     state: jspb.Message.getFieldWithDefault(msg, 7, ""),
     type: jspb.Message.getFieldWithDefault(msg, 8, ""),
-    serviceName: jspb.Message.getFieldWithDefault(msg, 9, ""),
-    routeTableIds: jspb.Message.getFieldWithDefault(msg, 10, ""),
-    subnetIds: jspb.Message.getFieldWithDefault(msg, 11, ""),
+    project: jspb.Message.getFieldWithDefault(msg, 9, ""),
+    serviceName: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    routeTableIds: jspb.Message.getFieldWithDefault(msg, 11, ""),
+    subnetIds: jspb.Message.getFieldWithDefault(msg, 12, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     createdAt: (f = msg.getCreatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     updatedAt: (f = msg.getUpdatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 15, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 16, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 17, "")
   };
 
   if (includeInstance) {
@@ -6118,35 +6630,43 @@ proto.infra.VPCEndpoint.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 9:
       var value = /** @type {string} */ (reader.readString());
-      msg.setServiceName(value);
+      msg.setProject(value);
       break;
     case 10:
       var value = /** @type {string} */ (reader.readString());
-      msg.setRouteTableIds(value);
+      msg.setServiceName(value);
       break;
     case 11:
       var value = /** @type {string} */ (reader.readString());
-      msg.setSubnetIds(value);
+      msg.setRouteTableIds(value);
       break;
     case 12:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSubnetIds(value);
+      break;
+    case 13:
       var value = msg.getLabelsMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
       break;
-    case 13:
+    case 14:
       var value = new google_protobuf_timestamp_pb.Timestamp;
       reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
       msg.setCreatedAt(value);
       break;
-    case 14:
+    case 15:
       var value = new google_protobuf_timestamp_pb.Timestamp;
       reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
       msg.setUpdatedAt(value);
       break;
-    case 15:
+    case 16:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 17:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -6233,40 +6753,39 @@ proto.infra.VPCEndpoint.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getServiceName();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       9,
       f
     );
   }
-  f = message.getRouteTableIds();
+  f = message.getServiceName();
   if (f.length > 0) {
     writer.writeString(
       10,
       f
     );
   }
-  f = message.getSubnetIds();
+  f = message.getRouteTableIds();
   if (f.length > 0) {
     writer.writeString(
       11,
       f
     );
   }
-  f = message.getLabelsMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(12, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
-  }
-  f = message.getCreatedAt();
-  if (f != null) {
-    writer.writeMessage(
-      13,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+  f = message.getSubnetIds();
+  if (f.length > 0) {
+    writer.writeString(
+      12,
+      f
     );
   }
-  f = message.getUpdatedAt();
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(13, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getCreatedAt();
   if (f != null) {
     writer.writeMessage(
       14,
@@ -6274,10 +6793,25 @@ proto.infra.VPCEndpoint.serializeBinaryToWriter = function(message, writer) {
       google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
     );
   }
+  f = message.getUpdatedAt();
+  if (f != null) {
+    writer.writeMessage(
+      15,
+      f,
+      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+    );
+  }
   f = message.getLastSyncTime();
   if (f.length > 0) {
     writer.writeString(
-      15,
+      16,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      17,
       f
     );
   }
@@ -6429,10 +6963,10 @@ proto.infra.VPCEndpoint.prototype.setType = function(value) {
 
 
 /**
- * optional string service_name = 9;
+ * optional string project = 9;
  * @return {string}
  */
-proto.infra.VPCEndpoint.prototype.getServiceName = function() {
+proto.infra.VPCEndpoint.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
 };
 
@@ -6441,16 +6975,16 @@ proto.infra.VPCEndpoint.prototype.getServiceName = function() {
  * @param {string} value
  * @return {!proto.infra.VPCEndpoint} returns this
  */
-proto.infra.VPCEndpoint.prototype.setServiceName = function(value) {
+proto.infra.VPCEndpoint.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 9, value);
 };
 
 
 /**
- * optional string route_table_ids = 10;
+ * optional string service_name = 10;
  * @return {string}
  */
-proto.infra.VPCEndpoint.prototype.getRouteTableIds = function() {
+proto.infra.VPCEndpoint.prototype.getServiceName = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
 };
 
@@ -6459,16 +6993,16 @@ proto.infra.VPCEndpoint.prototype.getRouteTableIds = function() {
  * @param {string} value
  * @return {!proto.infra.VPCEndpoint} returns this
  */
-proto.infra.VPCEndpoint.prototype.setRouteTableIds = function(value) {
+proto.infra.VPCEndpoint.prototype.setServiceName = function(value) {
   return jspb.Message.setProto3StringField(this, 10, value);
 };
 
 
 /**
- * optional string subnet_ids = 11;
+ * optional string route_table_ids = 11;
  * @return {string}
  */
-proto.infra.VPCEndpoint.prototype.getSubnetIds = function() {
+proto.infra.VPCEndpoint.prototype.getRouteTableIds = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
 };
 
@@ -6477,20 +7011,38 @@ proto.infra.VPCEndpoint.prototype.getSubnetIds = function() {
  * @param {string} value
  * @return {!proto.infra.VPCEndpoint} returns this
  */
-proto.infra.VPCEndpoint.prototype.setSubnetIds = function(value) {
+proto.infra.VPCEndpoint.prototype.setRouteTableIds = function(value) {
   return jspb.Message.setProto3StringField(this, 11, value);
 };
 
 
 /**
- * map<string, string> labels = 12;
+ * optional string subnet_ids = 12;
+ * @return {string}
+ */
+proto.infra.VPCEndpoint.prototype.getSubnetIds = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 12, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.VPCEndpoint} returns this
+ */
+proto.infra.VPCEndpoint.prototype.setSubnetIds = function(value) {
+  return jspb.Message.setProto3StringField(this, 12, value);
+};
+
+
+/**
+ * map<string, string> labels = 13;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.VPCEndpoint.prototype.getLabelsMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 12, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 13, opt_noLazyCreate,
       null));
 };
 
@@ -6505,12 +7057,12 @@ proto.infra.VPCEndpoint.prototype.clearLabelsMap = function() {
 
 
 /**
- * optional google.protobuf.Timestamp created_at = 13;
+ * optional google.protobuf.Timestamp created_at = 14;
  * @return {?proto.google.protobuf.Timestamp}
  */
 proto.infra.VPCEndpoint.prototype.getCreatedAt = function() {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 13));
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 14));
 };
 
 
@@ -6519,7 +7071,7 @@ proto.infra.VPCEndpoint.prototype.getCreatedAt = function() {
  * @return {!proto.infra.VPCEndpoint} returns this
 */
 proto.infra.VPCEndpoint.prototype.setCreatedAt = function(value) {
-  return jspb.Message.setWrapperField(this, 13, value);
+  return jspb.Message.setWrapperField(this, 14, value);
 };
 
 
@@ -6537,17 +7089,17 @@ proto.infra.VPCEndpoint.prototype.clearCreatedAt = function() {
  * @return {boolean}
  */
 proto.infra.VPCEndpoint.prototype.hasCreatedAt = function() {
-  return jspb.Message.getField(this, 13) != null;
+  return jspb.Message.getField(this, 14) != null;
 };
 
 
 /**
- * optional google.protobuf.Timestamp updated_at = 14;
+ * optional google.protobuf.Timestamp updated_at = 15;
  * @return {?proto.google.protobuf.Timestamp}
  */
 proto.infra.VPCEndpoint.prototype.getUpdatedAt = function() {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 14));
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 15));
 };
 
 
@@ -6556,7 +7108,7 @@ proto.infra.VPCEndpoint.prototype.getUpdatedAt = function() {
  * @return {!proto.infra.VPCEndpoint} returns this
 */
 proto.infra.VPCEndpoint.prototype.setUpdatedAt = function(value) {
-  return jspb.Message.setWrapperField(this, 14, value);
+  return jspb.Message.setWrapperField(this, 15, value);
 };
 
 
@@ -6574,16 +7126,16 @@ proto.infra.VPCEndpoint.prototype.clearUpdatedAt = function() {
  * @return {boolean}
  */
 proto.infra.VPCEndpoint.prototype.hasUpdatedAt = function() {
-  return jspb.Message.getField(this, 14) != null;
+  return jspb.Message.getField(this, 15) != null;
 };
 
 
 /**
- * optional string last_sync_time = 15;
+ * optional string last_sync_time = 16;
  * @return {string}
  */
 proto.infra.VPCEndpoint.prototype.getLastSyncTime = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 15, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 16, ""));
 };
 
 
@@ -6592,7 +7144,25 @@ proto.infra.VPCEndpoint.prototype.getLastSyncTime = function() {
  * @return {!proto.infra.VPCEndpoint} returns this
  */
 proto.infra.VPCEndpoint.prototype.setLastSyncTime = function(value) {
-  return jspb.Message.setProto3StringField(this, 15, value);
+  return jspb.Message.setProto3StringField(this, 16, value);
+};
+
+
+/**
+ * optional string self_link = 17;
+ * @return {string}
+ */
+proto.infra.VPCEndpoint.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 17, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.VPCEndpoint} returns this
+ */
+proto.infra.VPCEndpoint.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 17, value);
 };
 
 
@@ -6638,10 +7208,12 @@ proto.infra.PublicIP.toObject = function(includeInstance, msg) {
     instanceId: jspb.Message.getFieldWithDefault(msg, 8, ""),
     privateIp: jspb.Message.getFieldWithDefault(msg, 9, ""),
     byoip: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    project: jspb.Message.getFieldWithDefault(msg, 11, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     createdAt: (f = msg.getCreatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
     updatedAt: (f = msg.getUpdatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 14, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 15, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 16, "")
   };
 
   if (includeInstance) {
@@ -6719,24 +7291,32 @@ proto.infra.PublicIP.deserializeBinaryFromReader = function(msg, reader) {
       msg.setByoip(value);
       break;
     case 11:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 12:
       var value = msg.getLabelsMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
       break;
-    case 12:
+    case 13:
       var value = new google_protobuf_timestamp_pb.Timestamp;
       reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
       msg.setCreatedAt(value);
       break;
-    case 13:
+    case 14:
       var value = new google_protobuf_timestamp_pb.Timestamp;
       reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
       msg.setUpdatedAt(value);
       break;
-    case 14:
+    case 15:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 16:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -6837,19 +7417,18 @@ proto.infra.PublicIP.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getLabelsMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(11, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
-  }
-  f = message.getCreatedAt();
-  if (f != null) {
-    writer.writeMessage(
-      12,
-      f,
-      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+  f = message.getProject();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
+      f
     );
   }
-  f = message.getUpdatedAt();
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(12, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
+  f = message.getCreatedAt();
   if (f != null) {
     writer.writeMessage(
       13,
@@ -6857,10 +7436,25 @@ proto.infra.PublicIP.serializeBinaryToWriter = function(message, writer) {
       google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
     );
   }
+  f = message.getUpdatedAt();
+  if (f != null) {
+    writer.writeMessage(
+      14,
+      f,
+      google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+    );
+  }
   f = message.getLastSyncTime();
   if (f.length > 0) {
     writer.writeString(
-      14,
+      15,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      16,
       f
     );
   }
@@ -7048,14 +7642,32 @@ proto.infra.PublicIP.prototype.setByoip = function(value) {
 
 
 /**
- * map<string, string> labels = 11;
+ * optional string project = 11;
+ * @return {string}
+ */
+proto.infra.PublicIP.prototype.getProject = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.PublicIP} returns this
+ */
+proto.infra.PublicIP.prototype.setProject = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
+};
+
+
+/**
+ * map<string, string> labels = 12;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.PublicIP.prototype.getLabelsMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 11, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 12, opt_noLazyCreate,
       null));
 };
 
@@ -7070,12 +7682,12 @@ proto.infra.PublicIP.prototype.clearLabelsMap = function() {
 
 
 /**
- * optional google.protobuf.Timestamp created_at = 12;
+ * optional google.protobuf.Timestamp created_at = 13;
  * @return {?proto.google.protobuf.Timestamp}
  */
 proto.infra.PublicIP.prototype.getCreatedAt = function() {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 12));
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 13));
 };
 
 
@@ -7084,7 +7696,7 @@ proto.infra.PublicIP.prototype.getCreatedAt = function() {
  * @return {!proto.infra.PublicIP} returns this
 */
 proto.infra.PublicIP.prototype.setCreatedAt = function(value) {
-  return jspb.Message.setWrapperField(this, 12, value);
+  return jspb.Message.setWrapperField(this, 13, value);
 };
 
 
@@ -7102,17 +7714,17 @@ proto.infra.PublicIP.prototype.clearCreatedAt = function() {
  * @return {boolean}
  */
 proto.infra.PublicIP.prototype.hasCreatedAt = function() {
-  return jspb.Message.getField(this, 12) != null;
+  return jspb.Message.getField(this, 13) != null;
 };
 
 
 /**
- * optional google.protobuf.Timestamp updated_at = 13;
+ * optional google.protobuf.Timestamp updated_at = 14;
  * @return {?proto.google.protobuf.Timestamp}
  */
 proto.infra.PublicIP.prototype.getUpdatedAt = function() {
   return /** @type{?proto.google.protobuf.Timestamp} */ (
-    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 13));
+    jspb.Message.getWrapperField(this, google_protobuf_timestamp_pb.Timestamp, 14));
 };
 
 
@@ -7121,7 +7733,7 @@ proto.infra.PublicIP.prototype.getUpdatedAt = function() {
  * @return {!proto.infra.PublicIP} returns this
 */
 proto.infra.PublicIP.prototype.setUpdatedAt = function(value) {
-  return jspb.Message.setWrapperField(this, 13, value);
+  return jspb.Message.setWrapperField(this, 14, value);
 };
 
 
@@ -7139,16 +7751,16 @@ proto.infra.PublicIP.prototype.clearUpdatedAt = function() {
  * @return {boolean}
  */
 proto.infra.PublicIP.prototype.hasUpdatedAt = function() {
-  return jspb.Message.getField(this, 13) != null;
+  return jspb.Message.getField(this, 14) != null;
 };
 
 
 /**
- * optional string last_sync_time = 14;
+ * optional string last_sync_time = 15;
  * @return {string}
  */
 proto.infra.PublicIP.prototype.getLastSyncTime = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 14, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 15, ""));
 };
 
 
@@ -7157,7 +7769,25 @@ proto.infra.PublicIP.prototype.getLastSyncTime = function() {
  * @return {!proto.infra.PublicIP} returns this
  */
 proto.infra.PublicIP.prototype.setLastSyncTime = function(value) {
-  return jspb.Message.setProto3StringField(this, 14, value);
+  return jspb.Message.setProto3StringField(this, 15, value);
+};
+
+
+/**
+ * optional string self_link = 16;
+ * @return {string}
+ */
+proto.infra.PublicIP.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 16, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.PublicIP} returns this
+ */
+proto.infra.PublicIP.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 16, value);
 };
 
 
@@ -7203,7 +7833,8 @@ proto.infra.Cluster.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 10, ""),
     accountId: jspb.Message.getFieldWithDefault(msg, 11, ""),
     id: jspb.Message.getFieldWithDefault(msg, 12, ""),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 13, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 13, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 14, "")
   };
 
   if (includeInstance) {
@@ -7285,6 +7916,10 @@ proto.infra.Cluster.deserializeBinaryFromReader = function(msg, reader) {
     case 13:
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 14:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -7386,6 +8021,13 @@ proto.infra.Cluster.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       13,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      14,
       f
     );
   }
@@ -7594,6 +8236,24 @@ proto.infra.Cluster.prototype.setLastSyncTime = function(value) {
 };
 
 
+/**
+ * optional string self_link = 14;
+ * @return {string}
+ */
+proto.infra.Cluster.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 14, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Cluster} returns this
+ */
+proto.infra.Cluster.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 14, value);
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -7637,7 +8297,9 @@ proto.infra.Node.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 2, ""),
     namespace: jspb.Message.getFieldWithDefault(msg, 3, ""),
     addressesList: (f = jspb.Message.getRepeatedField(msg, 4)) == null ? undefined : f,
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 5, "")
+    project: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 7, "")
   };
 
   if (includeInstance) {
@@ -7692,7 +8354,15 @@ proto.infra.Node.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 5:
       var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 7:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -7751,10 +8421,24 @@ proto.infra.Node.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getLastSyncTime();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       5,
+      f
+    );
+  }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
       f
     );
   }
@@ -7853,10 +8537,10 @@ proto.infra.Node.prototype.clearAddressesList = function() {
 
 
 /**
- * optional string last_sync_time = 5;
+ * optional string project = 5;
  * @return {string}
  */
-proto.infra.Node.prototype.getLastSyncTime = function() {
+proto.infra.Node.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
@@ -7865,8 +8549,44 @@ proto.infra.Node.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.Node} returns this
  */
-proto.infra.Node.prototype.setLastSyncTime = function(value) {
+proto.infra.Node.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional string last_sync_time = 6;
+ * @return {string}
+ */
+proto.infra.Node.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Node} returns this
+ */
+proto.infra.Node.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional string self_link = 7;
+ * @return {string}
+ */
+proto.infra.Node.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Node} returns this
+ */
+proto.infra.Node.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -7905,7 +8625,9 @@ proto.infra.Namespace.toObject = function(includeInstance, msg) {
     cluster: jspb.Message.getFieldWithDefault(msg, 1, ""),
     name: jspb.Message.getFieldWithDefault(msg, 2, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 4, "")
+    project: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 6, "")
   };
 
   if (includeInstance) {
@@ -7958,7 +8680,15 @@ proto.infra.Namespace.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 4:
       var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -8007,10 +8737,24 @@ proto.infra.Namespace.serializeBinaryToWriter = function(message, writer) {
   if (f && f.getLength() > 0) {
     f.serializeBinary(3, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
-  f = message.getLastSyncTime();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       4,
+      f
+    );
+  }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      5,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      6,
       f
     );
   }
@@ -8076,10 +8820,10 @@ proto.infra.Namespace.prototype.clearLabelsMap = function() {
 
 
 /**
- * optional string last_sync_time = 4;
+ * optional string project = 4;
  * @return {string}
  */
-proto.infra.Namespace.prototype.getLastSyncTime = function() {
+proto.infra.Namespace.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
 
@@ -8088,8 +8832,44 @@ proto.infra.Namespace.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.Namespace} returns this
  */
-proto.infra.Namespace.prototype.setLastSyncTime = function(value) {
+proto.infra.Namespace.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
+/**
+ * optional string last_sync_time = 5;
+ * @return {string}
+ */
+proto.infra.Namespace.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Namespace} returns this
+ */
+proto.infra.Namespace.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional string self_link = 6;
+ * @return {string}
+ */
+proto.infra.Namespace.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Namespace} returns this
+ */
+proto.infra.Namespace.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -8131,7 +8911,9 @@ proto.infra.Pod.toObject = function(includeInstance, msg) {
     ip: jspb.Message.getFieldWithDefault(msg, 4, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     state: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 7, "")
+    project: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 8, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 9, "")
   };
 
   if (includeInstance) {
@@ -8196,7 +8978,15 @@ proto.infra.Pod.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 7:
       var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 8:
+      var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 9:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -8266,10 +9056,24 @@ proto.infra.Pod.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getLastSyncTime();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       7,
+      f
+    );
+  }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      8,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      9,
       f
     );
   }
@@ -8389,10 +9193,10 @@ proto.infra.Pod.prototype.setState = function(value) {
 
 
 /**
- * optional string last_sync_time = 7;
+ * optional string project = 7;
  * @return {string}
  */
-proto.infra.Pod.prototype.getLastSyncTime = function() {
+proto.infra.Pod.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
 };
 
@@ -8401,8 +9205,44 @@ proto.infra.Pod.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.Pod} returns this
  */
-proto.infra.Pod.prototype.setLastSyncTime = function(value) {
+proto.infra.Pod.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 7, value);
+};
+
+
+/**
+ * optional string last_sync_time = 8;
+ * @return {string}
+ */
+proto.infra.Pod.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Pod} returns this
+ */
+proto.infra.Pod.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 8, value);
+};
+
+
+/**
+ * optional string self_link = 9;
+ * @return {string}
+ */
+proto.infra.Pod.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.Pod} returns this
+ */
+proto.infra.Pod.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 9, value);
 };
 
 
@@ -8452,7 +9292,9 @@ proto.infra.K8sService.toObject = function(includeInstance, msg) {
     proto.infra.K8sService.Ingress.toObject, includeInstance),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     type: jspb.Message.getFieldWithDefault(msg, 9, ""),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 10, "")
+    project: jspb.Message.getFieldWithDefault(msg, 10, ""),
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 11, ""),
+    selfLink: jspb.Message.getFieldWithDefault(msg, 12, "")
   };
 
   if (includeInstance) {
@@ -8518,7 +9360,15 @@ proto.infra.K8sService.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 10:
       var value = /** @type {string} */ (reader.readString());
+      msg.setProject(value);
+      break;
+    case 11:
+      var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
+      break;
+    case 12:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setSelfLink(value);
       break;
     default:
       reader.skipField();
@@ -8589,10 +9439,24 @@ proto.infra.K8sService.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getLastSyncTime();
+  f = message.getProject();
   if (f.length > 0) {
     writer.writeString(
       10,
+      f
+    );
+  }
+  f = message.getLastSyncTime();
+  if (f.length > 0) {
+    writer.writeString(
+      11,
+      f
+    );
+  }
+  f = message.getSelfLink();
+  if (f.length > 0) {
+    writer.writeString(
+      12,
       f
     );
   }
@@ -8948,10 +9812,10 @@ proto.infra.K8sService.prototype.setType = function(value) {
 
 
 /**
- * optional string last_sync_time = 10;
+ * optional string project = 10;
  * @return {string}
  */
-proto.infra.K8sService.prototype.getLastSyncTime = function() {
+proto.infra.K8sService.prototype.getProject = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 10, ""));
 };
 
@@ -8960,8 +9824,44 @@ proto.infra.K8sService.prototype.getLastSyncTime = function() {
  * @param {string} value
  * @return {!proto.infra.K8sService} returns this
  */
-proto.infra.K8sService.prototype.setLastSyncTime = function(value) {
+proto.infra.K8sService.prototype.setProject = function(value) {
   return jspb.Message.setProto3StringField(this, 10, value);
+};
+
+
+/**
+ * optional string last_sync_time = 11;
+ * @return {string}
+ */
+proto.infra.K8sService.prototype.getLastSyncTime = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 11, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.K8sService} returns this
+ */
+proto.infra.K8sService.prototype.setLastSyncTime = function(value) {
+  return jspb.Message.setProto3StringField(this, 11, value);
+};
+
+
+/**
+ * optional string self_link = 12;
+ * @return {string}
+ */
+proto.infra.K8sService.prototype.getSelfLink = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 12, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.K8sService} returns this
+ */
+proto.infra.K8sService.prototype.setSelfLink = function(value) {
+  return jspb.Message.setProto3StringField(this, 12, value);
 };
 
 

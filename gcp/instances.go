@@ -538,17 +538,20 @@ func (c *Client) removeNetworkTagFromInstancesByIDs(ctx context.Context, project
 
 func convertInstance(projectID string, networks []types.VPC, subnets []types.Subnet, gcpInstance *computepb.Instance) types.Instance {
 	machineParts := strings.Split(gcpInstance.GetMachineType(), "/")
+	zone := strings.Split(gcpInstance.GetZone(), "/")[len(strings.Split(gcpInstance.GetZone(), "/"))-1]
+	consoleAccessLink := fmt.Sprintf("https://console.cloud.google.com/compute/instancesDetail/zones/%s/instances/%s?project=%s", zone, gcpInstance.GetName(), projectID)
 
 	newInstance := types.Instance{
 		ID:        strconv.FormatUint(gcpInstance.GetId(), 10),
 		Name:      gcpInstance.GetName(),
 		Labels:    gcpInstance.GetLabels(),
-		Zone:      gcpInstance.GetZone(),
+		Project:   projectID,
+		Zone:      zone,
 		Type:      machineParts[len(machineParts)-1],
-		AccountID: projectID,
+		AccountID: projectID, // Remove the comma here
 		Provider:  providerName,
 		State:     gcpInstance.GetStatus(),
-		SelfLink:  *gcpInstance.SelfLink,
+		SelfLink:  consoleAccessLink,
 	}
 	newInstance.PrivateIP, newInstance.PublicIP, newInstance.VPCID, newInstance.SubnetID =
 		getNetwork(networks, subnets, gcpInstance.GetNetworkInterfaces())

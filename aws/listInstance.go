@@ -122,6 +122,7 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 			Labels:    convertTags(inst.Tags),
 			State:     convertState(inst.State),
 			Region:    region,
+			Zone:      aws.ToString(inst.Placement.AvailabilityZone),
 			AccountID: account,
 			Provider:  providerName,
 			SelfLink:  instanceLink,

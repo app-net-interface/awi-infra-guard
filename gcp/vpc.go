@@ -217,6 +217,11 @@ func (c *Client) vpcIdToSingleNetwork(ctx context.Context, project, vpcID string
 }
 
 func convertVPC(projectID string, network *computepb.Network) types.VPC {
+	var ipv6Range string
+	if network.InternalIpv6Range != nil {
+		ipv6Range = *network.InternalIpv6Range
+	}
+	consoleAccesLInk := fmt.Sprintf("https://console.cloud.google.com/networking/networks/details/%s?project=%s", network.GetName(), projectID)
 	return types.VPC{
 		ID:     strconv.FormatUint(network.GetId(), 10),
 		Name:   network.GetName(),
@@ -224,6 +229,9 @@ func convertVPC(projectID string, network *computepb.Network) types.VPC {
 
 		AccountID: projectID,
 		Provider:  providerName,
+		SelfLink:  consoleAccesLInk,
+		IPv4CIDR:  network.GetIPv4Range(),
+		IPv6CIDR:  ipv6Range,
 	}
 }
 
