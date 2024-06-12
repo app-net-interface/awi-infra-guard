@@ -33,7 +33,7 @@ import (
 
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
 
-	c.logger.Infof("Syncing VPCs")
+	c.logger.Debugf("Syncing AWS VPCs")
 	if params == nil {
 		params = &infrapb.ListVPCRequest{}
 	}

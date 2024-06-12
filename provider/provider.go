@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/app-net-interface/awi-infra-guard/azure"
+	"github.com/app-net-interface/awi-infra-guard/grpc/config"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 
 	"github.com/app-net-interface/kubernetes-discovery/cluster"
@@ -142,6 +143,7 @@ type RealProviderStrategy struct {
 	azureClient *azure.Client
 	k8sClient   *infra_kubernetes.KubernetesClient
 	logger      *logrus.Logger
+	providers   []CloudProvider
 }
 
 func (s *RealProviderStrategy) GetProvider(ctx context.Context, cloud string) (CloudProvider, error) {
@@ -151,33 +153,27 @@ func (s *RealProviderStrategy) GetProvider(ctx context.Context, cloud string) (C
 		if s.awsClient == nil {
 			return nil, fmt.Errorf("AWS client is not initialized")
 		}
+		s.providers = append(s.providers, s.awsClient)
 		return s.awsClient, nil
 	case "gcp":
 		if s.gcpClient == nil {
 			return nil, fmt.Errorf("GCP client is not initizalized")
 		}
+		s.providers = append(s.providers, s.awsClient)
+
 		return s.gcpClient, nil
 	case "azure":
 		if s.azureClient == nil {
 			return nil, fmt.Errorf("Azure client is not initizalized")
 		}
+		s.providers = append(s.providers, s.awsClient)
 		return s.azureClient, nil
 	}
 	return nil, fmt.Errorf("unsupported provider")
 }
 
 func (s *RealProviderStrategy) GetAllProviders() []CloudProvider {
-	var providers []CloudProvider
-	if s.gcpClient != nil {
-		providers = append(providers, s.gcpClient)
-	}
-	if s.awsClient != nil {
-		providers = append(providers, s.awsClient)
-	}
-	if s.azureClient != nil {
-		providers = append(providers, s.azureClient)
-	}
-	return providers
+	return s.providers
 }
 
 func (s *RealProviderStrategy) GetKubernetesProvider() (Kubernetes, error) {
@@ -193,30 +189,48 @@ func (s *RealProviderStrategy) RefreshState(ctx context.Context) error {
 	return nil
 }
 
-func NewRealProviderStrategy(ctx context.Context, logger *logrus.Logger, kubeConfigFileName string) *RealProviderStrategy {
+func NewRealProviderStrategy(ctx context.Context, logger *logrus.Logger, providers []config.Provider, k8sSupport bool) (*RealProviderStrategy, error) {
 	s := &RealProviderStrategy{
 		logger: logger,
 	}
 	var err error
-	s.awsClient, err = aws.NewClient(ctx, s.logger)
-	if err != nil {
-		logger.Warnf("Failed to init AWS client: %v", err)
+	for _, provider := range providers {
+		s.logger.Infof("Initializing provider %s", provider.Name)
+		switch strings.ToLower(provider.Name) {
+		case "aws":
+			s.awsClient, err = aws.NewClient(ctx, s.logger)
+			if err != nil {
+				logger.Warnf("Failed to init AWS client: %v", err)
+			} else {
+				s.providers = append(s.providers, s.awsClient)
+			}
+		case "gcp":
+			s.gcpClient, err = gcp.NewClient(ctx, s.logger)
+			if err != nil {
+				logger.Warnf("Failed to init GCP client: %v", err)
+			} else {
+				s.providers = append(s.providers, s.gcpClient)
+			}
+		case "azure":
+			s.azureClient, err = azure.NewClient(ctx, s.logger)
+			if err != nil {
+				logger.Warnf("Failed to init Azure client: %v", err)
+			} else {
+				s.providers = append(s.providers, s.azureClient)
+			}
+		}
 	}
-	s.gcpClient, err = gcp.NewClient(ctx, s.logger)
-	if err != nil {
-		logger.Warnf("Failed to init GCP client: %v", err)
+	for _, provider := range s.providers {
+		logger.Debugf("Provider %s initialized", provider.GetName())
 	}
-	s.azureClient, err = azure.NewClient(ctx, s.logger)
-	if err != nil {
-		logger.Warnf("Failed to init Azure client: %v", err)
+	if k8sSupport {
+		s.k8sClient, err = infra_kubernetes.NewKubernetesClient(logger, "")
+		if err != nil {
+			logger.Warnf("Failed to init kubernetes clients: %v", err)
+		}
+		s.RetrieveClusters(ctx)
 	}
-
-	s.k8sClient, err = infra_kubernetes.NewKubernetesClient(logger, kubeConfigFileName)
-	if err != nil {
-		logger.Warnf("Failed to init kubernetes clients: %v", err)
-	}
-	s.RetrieveClusters(ctx)
-	return s
+	return s, err
 }
 
 func (s *RealProviderStrategy) RetrieveClusters(ctx context.Context) {

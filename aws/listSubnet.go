@@ -24,6 +24,7 @@ import (
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 
@@ -135,8 +136,11 @@ func convertSubnets(defaultAccount, defaultRegion, account, region string, subne
 	if account == "" {
 		account = defaultAccount
 	}
+
 	result := make([]types.Subnet, 0, len(subnets))
 	for _, subnet := range subnets {
+
+		subnetLink := fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#SubnetDetails:subnetId=%s", region, region, aws.ToString(subnet.SubnetId))
 		result = append(result, types.Subnet{
 			Zone:      convertString(subnet.AvailabilityZone),
 			SubnetId:  convertString(subnet.SubnetId),
@@ -147,6 +151,7 @@ func convertSubnets(defaultAccount, defaultRegion, account, region string, subne
 			Region:    region,
 			AccountID: *subnet.OwnerId,
 			Provider:  providerName,
+			SelfLink:  subnetLink,
 		})
 	}
 

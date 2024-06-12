@@ -19,6 +19,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -111,6 +112,7 @@ func (c *Client) ListNATGatewaysInRegion(client *ec2.Client, region string) ([]t
 				SubnetId:  convertString(ngw.SubnetId),
 				Labels:    labels,
 				CreatedAt: *ngw.CreateTime,
+				SelfLink:  fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#NatGatewayDetails:natGatewayId=%s", region, region, *ngw.NatGatewayId),
 			})
 		}
 	}

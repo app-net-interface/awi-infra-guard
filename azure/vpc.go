@@ -28,6 +28,7 @@ import (
 
 // ListVPC returns a slice of VPC objects for a given subscription
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
+	c.logger.Debugf("Syncing Azure VPCs")
 
 	var vpclist []types.VPC
 	var ipv4Cidr, ipv6Cidr string

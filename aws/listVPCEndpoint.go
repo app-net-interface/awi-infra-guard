@@ -19,6 +19,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
@@ -101,10 +102,9 @@ func (c *Client) ListVPCEndpointsInRegion(client *ec2.Client, region string) ([]
 				SubnetIds:     subnetIds,
 				RouteTableIds: routeTableIds,
 				CreatedAt:     vep.CreationTimestamp,
+				SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#EndpointDetails:vpcEndpointId=%s", region, region, *vep.VpcEndpointId),
 			})
-
 		}
-
 	}
 
 	return veps, nil

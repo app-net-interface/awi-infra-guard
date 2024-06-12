@@ -19,8 +19,10 @@ package sync
 
 import (
 	"context"
+	"sync"
 	"time"
 
+	"github.com/app-net-interface/awi-infra-guard/grpc/config"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 
 	"github.com/app-net-interface/awi-infra-guard/db"
@@ -30,9 +32,9 @@ import (
 )
 
 func NewSyncer(l *logrus.Logger, dbClient db.Client, strategy provider.Strategy,
-	waitTime time.Duration) *Syncer {
+	sc *config.SyncConfig) *Syncer {
 	return &Syncer{
-		waitTime: waitTime,
+		sc:       sc,
 		logger:   l,
 		dbClient: dbClient,
 		strategy: strategy,
@@ -40,157 +42,284 @@ func NewSyncer(l *logrus.Logger, dbClient db.Client, strategy provider.Strategy,
 }
 
 type Syncer struct {
-	waitTime time.Duration
+	sc       *config.SyncConfig
 	logger   *logrus.Logger
 	dbClient db.Client
 	strategy provider.Strategy
 }
 
-func (s *Syncer) Sync() {
-
-	
-
+func (s *Syncer) Sync(done chan<- struct{}) {
 	//Sync VPC
-	s.syncVPC()
-	s.syncPublicIPs()
-	s.syncInstances()
-	s.syncRegions()
+	defer func() {
+		done <- struct{}{}
+	}()
+	s.logger.Errorf("*****************Sync Start*****************")
+	allResource := s.sc.HasCloudResource("all")
+	var wg sync.WaitGroup
 
-	//Sync other cloud resources
-	s.syncSubnets()
-	s.syncRouteTables()
-	s.syncACLs()
-	s.syncSecurityGroups()
-	s.syncNATGateways()
-	s.syncRouters()
-	s.syncIGWs()
-	s.syncVPCEndpoints()
+	if allResource || s.sc.HasCloudResource("vpc") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncVPC(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("region") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncRegions(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("instance") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncInstances(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("publicip") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncPublicIPs(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("subnet") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncSubnets(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("acl") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncACLs(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("routetable") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncRouteTables(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("securitygroup") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncSecurityGroups(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("natgateway") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncNATGateways(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("router") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncRouters(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("internetgateway") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncIGWs(ctx)
+		}()
+	}
+	if allResource || s.sc.HasCloudResource("vpcendpoint") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncVPCEndpoints(ctx)
+		}()
+	}
 
 	// Kubernetes
-	s.syncClusters()
-	s.syncPods()
 
-	s.syncNamespaces()
-	s.syncK8SSsNodes()
-	s.syncK8SServices()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx := context.Background()
+		s.syncClusters(ctx)
+	}()
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx := context.Background()
+		s.syncPods(ctx)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx := context.Background()
+		s.syncNamespaces(ctx)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx := context.Background()
+		s.syncK8SServices(ctx)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx := context.Background()
+		s.syncK8SSsNodes(ctx)
+	}()
+
+	wg.Wait()
+
+	s.logger.Errorf("*****************Cloud Sync End*****************")
+	s.logger.Errorf("*****************K8S Sync Start*****************")
+	s.logger.Errorf("*****************K8S Sync End*****************")
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
 	s.logger.Infof("Starting periodical sync of cloud resources")
-	s.Sync()
-	ticker := time.NewTicker(s.waitTime)
+	done := make(chan struct{}, 1)
+	s.Sync(done)
+	ticker := time.NewTicker(s.sc.SyncWaitTime)
 	for {
 		select {
 		case <-ticker.C:
-			s.logger.Debugf("**Sync*** - Refresh cloud resources")
-			s.Sync()
+			go func() {
+				select {
+				case <-done:
+					s.Sync(done)
+				default:
+					s.logger.Errorf("Previous sync operation is still running, skipping this sync")
+				}
+			}()
 		case <-ctx.Done():
-			return
+			s.logger.Infof("Context done - time out")
 		}
 	}
 }
-
-func (s *Syncer) syncRegions() {
-	genericCloudSync[*types.Region](s, types.RegionType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Region, error) {
+func (s *Syncer) syncRegions(ctx context.Context) (e error) {
+	e = genericCloudSync[*types.Region](s, types.RegionType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Region, error) {
 		return cloudProvider.ListRegions(ctx, &infrapb.ListRegionsRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListRegions, s.dbClient.PutRegion, s.dbClient.DeleteRegion)
+	if e != nil {
+		s.logger.Errorf("Sync error: failed to sync regions: %v", e)
+	}
+	return
 }
 
-func (s *Syncer) syncVPC() {
+func (s *Syncer) syncVPC(ctx context.Context) {
 	genericCloudSync[*types.VPC](s, types.VPCType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPC, error) {
 		return cloudProvider.ListVPC(ctx, &infrapb.ListVPCRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListVPCs, s.dbClient.PutVPC, s.dbClient.DeleteVPC)
 }
 
-func (s *Syncer) syncInstances() {
+func (s *Syncer) syncInstances(ctx context.Context) {
 	genericCloudSync[*types.Instance](s, types.InstanceType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Instance, error) {
 		return cloudProvider.ListInstances(ctx, &infrapb.ListInstancesRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListInstances, s.dbClient.PutInstance, s.dbClient.DeleteInstance)
 }
 
-func (s *Syncer) syncPublicIPs() {
+func (s *Syncer) syncPublicIPs(ctx context.Context) {
 	genericCloudSync[*types.PublicIP](s, types.PublicIPType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.PublicIP, error) {
 		return cloudProvider.ListPublicIPs(ctx, &infrapb.ListPublicIPsRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListPublicIPs, s.dbClient.PutPublicIP, s.dbClient.DeletePublicIP)
 }
 
-func (s *Syncer) syncSubnets() {
+func (s *Syncer) syncSubnets(ctx context.Context) {
 	genericCloudSync[*types.Subnet](s, types.SubnetType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Subnet, error) {
 		return cloudProvider.ListSubnets(ctx, &infrapb.ListSubnetsRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListSubnets, s.dbClient.PutSubnet, s.dbClient.DeleteSubnet)
 }
 
-func (s *Syncer) syncACLs() {
+func (s *Syncer) syncACLs(ctx context.Context) {
 	genericCloudSync[*types.ACL](s, types.ACLType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.ACL, error) {
 		return cloudProvider.ListACLs(ctx, &infrapb.ListACLsRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListACLs, s.dbClient.PutACL, s.dbClient.DeleteACL)
 }
 
-func (s *Syncer) syncSecurityGroups() {
+func (s *Syncer) syncSecurityGroups(ctx context.Context) {
 	genericCloudSync[*types.SecurityGroup](s, types.SecurityGroupType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.SecurityGroup, error) {
 		return cloudProvider.ListSecurityGroups(ctx, &infrapb.ListSecurityGroupsRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListSecurityGroups, s.dbClient.PutSecurityGroup, s.dbClient.DeleteSecurityGroup)
 }
 
-func (s *Syncer) syncRouteTables() {
+func (s *Syncer) syncRouteTables(ctx context.Context) {
 	genericCloudSync[*types.RouteTable](s, types.RouteTableType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.RouteTable, error) {
 		return cloudProvider.ListRouteTables(ctx, &infrapb.ListRouteTablesRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListRouteTables, s.dbClient.PutRouteTable, s.dbClient.DeleteRouteTable)
 }
 
-func (s *Syncer) syncNATGateways() {
+func (s *Syncer) syncNATGateways(ctx context.Context) {
 	genericCloudSync[*types.NATGateway](s, types.NATGatewayType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.NATGateway, error) {
 		return cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListNATGateways, s.dbClient.PutNATGateway, s.dbClient.DeleteNATGateway)
 }
 
-func (s *Syncer) syncRouters() {
+func (s *Syncer) syncRouters(ctx context.Context) {
 	genericCloudSync[*types.Router](s, types.RouterType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Router, error) {
-
 		return cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListRouters, s.dbClient.PutRouter, s.dbClient.DeleteRouter)
 }
 
-func (s *Syncer) syncIGWs() {
+func (s *Syncer) syncIGWs(ctx context.Context) {
 	genericCloudSync[*types.IGW](s, types.IGWType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.IGW, error) {
-
 		return cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListInternetGateways, s.dbClient.PutIGW, s.dbClient.DeleteIGW)
 }
 
-func (s *Syncer) syncVPCEndpoints() {
+func (s *Syncer) syncVPCEndpoints(ctx context.Context) {
 	genericCloudSync[*types.VPCEndpoint](s, types.VPCEndpointType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPCEndpoint, error) {
-
 		return cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListVPCEndpoints, s.dbClient.PutVPCEndpoint, s.dbClient.DeleteVPCEndpoint)
 }
 
-func (s *Syncer) syncClusters() {
+func (s *Syncer) syncClusters(ctx context.Context) {
 	genericCloudSync[*types.Cluster](s, types.ClusterType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Cluster, error) {
 		return cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListClusters, s.dbClient.PutCluster, s.dbClient.DeleteCluster)
 }
 
-func (s *Syncer) syncPods() {
+func (s *Syncer) syncPods(ctx context.Context) {
 	genericK8sSync[*types.Pod](s, types.PodsType, func(ctx context.Context, k8sProvider provider.Kubernetes, clusterName string) ([]types.Pod, error) {
 		return k8sProvider.ListPods(ctx, clusterName, nil)
 	}, s.logger, s.dbClient.ListPods, s.dbClient.PutPod, s.dbClient.DeletePod)
 }
 
-func (s *Syncer) syncNamespaces() {
+func (s *Syncer) syncNamespaces(ctx context.Context) {
 	genericK8sSync[*types.Namespace](s, types.NamespaceType, func(ctx context.Context, k8sProvider provider.Kubernetes, clusterName string) ([]types.Namespace, error) {
 		return k8sProvider.ListNamespaces(ctx, clusterName, nil)
 	}, s.logger, s.dbClient.ListNamespaces, s.dbClient.PutNamespace, s.dbClient.DeleteNamespace)
 }
 
-func (s *Syncer) syncK8SServices() {
+func (s *Syncer) syncK8SServices(ctx context.Context) {
 	genericK8sSync[*types.K8SService](s, types.K8sServiceType, func(ctx context.Context, k8sProvider provider.Kubernetes, clusterName string) ([]types.K8SService, error) {
 		return k8sProvider.ListServices(ctx, clusterName, nil)
 	}, s.logger, s.dbClient.ListKubernetesServices, s.dbClient.PutKubernetesService, s.dbClient.DeleteKubernetesService)
 }
 
-func (s *Syncer) syncK8SSsNodes() {
+func (s *Syncer) syncK8SSsNodes(ctx context.Context) {
 	genericK8sSync[*types.K8sNode](s, types.K8sNodeType, func(ctx context.Context, k8sProvider provider.Kubernetes, clusterName string) ([]types.K8sNode, error) {
 		return k8sProvider.ListNodes(ctx, clusterName, nil)
 	}, s.logger, s.dbClient.ListKubernetesNodes, s.dbClient.PutKubernetesNode, s.dbClient.DeleteKubernetesNode)
@@ -205,7 +334,7 @@ func genericCloudSync[P interface {
 	logger *logrus.Logger,
 	listFunc func() ([]P, error),
 	putFunc func(P) error,
-	deleteFunc func(string) error) {
+	deleteFunc func(string) error) error {
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Second*60)
@@ -247,7 +376,7 @@ func genericCloudSync[P interface {
 	local, err := listFunc()
 	if err != nil {
 		logger.Errorf("Sync error: failed to List %T in database: %v", new(*T), err)
-		return
+		return err
 	}
 	remoteSet := make(map[string]struct{})
 	for _, obj := range allRemoteObj {
@@ -286,6 +415,7 @@ func genericCloudSync[P interface {
 			logger.Errorf("Sync error: to put sync time of %s", v.DbId())
 		}
 	}
+	return err
 }
 
 func genericK8sSync[P interface {

@@ -18,12 +18,69 @@
 # gRPC server listen port
 port: 50052
 # gRPC server hostname, if hostname is empty listen on all available IP addresses
-#hostname: 127.0.0.1
-# Name of BoltDB database file
-dbFileName: "infra.db"
+# hostname: 127.0.0.1
+
 # use local database, if true periodically sync resources from the cloud and serve resources to the client based on local database
+#useLocalDB: false
 useLocalDB: true
-# how often sync resources from the cloud, if useLocalDB is true
-syncWaitTime: "180s"
+
 # Logging Level: Possible options are PANIC, FATAL, ERROR, INFO, WARN, DEBUG, TRACE
-logLevel: DEBUG
+logLevel: INFO
+#logLevel: ERROR
+
+providers:
+  - name: aws
+    type: cloud
+  - name: azure
+    type: cloud
+  - name: gcp
+    type: cloud
+
+#Support for K8S
+kubernetesSupported: true
+
+# Cloud resource synchronization configuration
+syncConfig:
+  # how often sync resources from the cloud, if useLocalDB is true
+  enabled: true
+  syncWaitTime: "180s" 
+  # Name of BoltDB database file
+  dbFileName: "infra.db"
+  resources: 
+    cloud:
+      - region
+      - vpc
+      - instance
+      - subnet
+      - securitygroup
+      - routeTable
+      - router
+      - natGateway
+      - internetGateway
+      - vpcEndpoint
+      - vpnConnection
+      - publicIP
+      - acl
+      - loadBalancer
+      - apiGateway
+    kubernetes:
+      - clusters
+      - nodes
+      - pods
+      - services
+      - deployments
+      - replicaSets
+      - statefulSets
+      - daemonSets
+      - jobs
+      - cronJobs
+      - namespaces
+      - configMaps
+      - secrets
+      - serviceAccounts
+      - roles
+      - roleBindings
+      - clusterRoles
+      - clusterRoleBindings
+      - networkPolicies
+      - podSecurityPolicies

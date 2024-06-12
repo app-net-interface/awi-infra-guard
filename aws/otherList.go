@@ -20,10 +20,12 @@ package aws
 import (
 	"context"
 	"fmt"
-	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"sync"
 
+	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
+
 	"github.com/app-net-interface/awi-infra-guard/types"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
@@ -97,6 +99,7 @@ func convertSecurityGroups(defaultAccount, defaultRegion, account, region string
 	}
 	out := make([]types.SecurityGroup, 0, len(awsSGs))
 	for _, sg := range awsSGs {
+		sgLink := fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#SecurityGroup:groupId=%s", region, region, aws.ToString(sg.GroupId))
 		out = append(out, types.SecurityGroup{
 			Name:      convertString(sg.GroupName),
 			ID:        convertString(sg.GroupId),
@@ -106,6 +109,7 @@ func convertSecurityGroups(defaultAccount, defaultRegion, account, region string
 			AccountID: account,
 			Labels:    convertTags(sg.Tags),
 			Rules:     convertSecurityGroupRules(sg.IpPermissions, sg.IpPermissionsEgress),
+			SelfLink:  sgLink,
 		})
 	}
 	return out
@@ -270,6 +274,7 @@ func convertACLs(defaultAccount, defaultRegion, account, region string, awsACLs 
 
 			rules = append(rules, rule)
 		}
+		aclLink := fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#NetworkAclDetails:networkAclId=%s", region, region, aws.ToString(acl.NetworkAclId))
 		out = append(out, types.ACL{
 			Name:      convertString(getTagName(acl.Tags)),
 			ID:        convertString(acl.NetworkAclId),
@@ -279,6 +284,7 @@ func convertACLs(defaultAccount, defaultRegion, account, region string, awsACLs 
 			AccountID: account,
 			Labels:    convertTags(acl.Tags),
 			Rules:     rules,
+			SelfLink:  aclLink,
 		})
 	}
 	return out
@@ -356,6 +362,8 @@ func convertRouteTables(defaultAccount, defaultRegion, account, region string, a
 	out := make([]types.RouteTable, 0, len(awsRts))
 	for _, rt := range awsRts {
 		routes := make([]types.Route, 0, len(rt.Routes))
+		rtLink := fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#RouteTableDetails:routeTableId=%s", region, region, aws.ToString(rt.RouteTableId))
+
 		for _, r := range rt.Routes {
 			var destination string
 			if r.DestinationCidrBlock != nil {
@@ -404,6 +412,7 @@ func convertRouteTables(defaultAccount, defaultRegion, account, region string, a
 			AccountID: account,
 			Labels:    convertTags(rt.Tags),
 			Routes:    routes,
+			SelfLink:  rtLink,
 		})
 	}
 	return out

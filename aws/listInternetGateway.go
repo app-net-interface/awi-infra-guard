@@ -19,6 +19,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -99,6 +100,7 @@ func (c *Client) ListInternetGatewaysInRegion(client *ec2.Client, region string)
 				Region:        region,
 				State:         state,
 				Labels:        labels,
+				SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#InternetGateway:internetGatewayId=%s", region, region, *igw.InternetGatewayId),
 			})
 		}
 	}

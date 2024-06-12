@@ -32,6 +32,8 @@ import (
 )
 
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
+	c.logger.Debugf("Syncing GCP VPCs")
+
 	if params == nil {
 		params = &infrapb.ListVPCRequest{}
 	}

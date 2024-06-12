@@ -33,6 +33,7 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	"github.com/app-net-interface/awi-infra-guard/db"
+	"github.com/app-net-interface/awi-infra-guard/grpc/config"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/provider"
 	"github.com/app-net-interface/awi-infra-guard/sync"
@@ -43,23 +44,13 @@ const configPath = "config.yaml"
 
 type Server struct {
 	logger *logrus.Logger
-
 	infrapb.UnimplementedCloudProviderServiceServer
 	infrapb.UnimplementedAccessControlServiceServer
 	infrapb.UnimplementedKubernetesServiceServer
 	strategy provider.Strategy
 }
 
-type Config struct {
-	Hostname     string
-	Port         string
-	DbFileName   string
-	SyncWaitTime string
-	UseLocalDB   bool
-	LogLevel     string
-}
-
-func setLoggingLevel(config Config, logger *logrus.Logger) error {
+func setLoggingLevel(config config.Config, logger *logrus.Logger) error {
 	switch config.LogLevel {
 	case "PANIC":
 		logger.SetLevel(logrus.PanicLevel)
@@ -87,15 +78,25 @@ func setLoggingLevel(config Config, logger *logrus.Logger) error {
 	return nil
 }
 
-func parseConfig(logger *logrus.Logger) Config {
-	config := Config{
-		Hostname:     "",
-		Port:         "50052",
-		DbFileName:   "infra.db",
-		SyncWaitTime: "60s",
-		UseLocalDB:   true,
-		LogLevel:     "INFO",
+func parseConfig(logger *logrus.Logger) config.Config {
+
+	config := config.Config{
+		Hostname:   "",
+		Port:       "50052",
+		UseLocalDB: true,
+		LogLevel:   "INFO",
+		SyncConfig: config.SyncConfig{
+			DbFileName:   "infra.db",
+			SyncWaitTime: time.Second * 300,
+			Resources: config.Resources{
+				Cloud:      []string{},
+				Kubernetes: []string{},
+			},
+		},
+		Providers:           []config.Provider{},
+		KubernetesSupported: false,
 	}
+
 	err := initConfig(configPath, &config)
 	if err != nil {
 		logger.Errorf("Failed to parse config: %v using default values...", err)
@@ -107,7 +108,7 @@ func parseConfig(logger *logrus.Logger) Config {
 	return config
 }
 
-func initConfig(configFilePath string, config *Config) error {
+func initConfig(configFilePath string, c *config.Config) error {
 	viper.AutomaticEnv()
 	viper.SetConfigFile(configFilePath)
 
@@ -118,29 +119,38 @@ func initConfig(configFilePath string, config *Config) error {
 		return err
 	}
 
+	if err := viper.Unmarshal(c); err != nil {
+		return fmt.Errorf("unable to decode into struct: %v", err)
+	}
+
 	// Get the configuration values using Viper
-	port := viper.GetString("port")
-	if port != "" {
-		config.Port = port
+	// Overriding values from environment variables if set
+	if port := viper.GetString("port"); port != "" {
+		c.Port = port
 	}
-	logLevel := viper.GetString("logLevel")
-	if logLevel != "" {
-		config.LogLevel = logLevel
+	if logLevel := viper.GetString("logLevel"); logLevel != "" {
+		c.LogLevel = logLevel
 	}
-	hostname := viper.GetString("hostname")
-	if hostname != "" {
-		config.Hostname = hostname
+	if hostname := viper.GetString("hostname"); hostname != "" {
+		c.Hostname = hostname
 	}
-	dbFileName := viper.GetString("dbFileName")
-	if dbFileName != "" {
-		config.DbFileName = dbFileName
+	if useDB := viper.GetBool("useLocalDB"); useDB {
+		c.UseLocalDB = useDB
 	}
-	syncWaitTime := viper.GetString("syncWaitTime")
-	if syncWaitTime != "" {
-		config.SyncWaitTime = syncWaitTime
+
+	if err := viper.UnmarshalKey("providers", &c.Providers); err != nil {
+		return fmt.Errorf("unable to decode providers into struct: %v", err)
 	}
-	useDB := viper.GetBool("useLocalDB")
-	config.UseLocalDB = useDB
+
+
+	if c.UseLocalDB {
+		var syncConfig config.SyncConfig
+		if err := viper.UnmarshalKey("syncConfig", &syncConfig); err != nil {
+			return fmt.Errorf("unable to decode syncConfig into struct: %v", err)
+		}
+		fmt.Printf("Config: %+v\n", syncConfig)
+		c.SyncConfig = syncConfig
+	}
 
 	return nil
 }
@@ -153,16 +163,21 @@ func Run() {
 		TimestampFormat: "2006-01-02 15:04:05",
 	}
 
-	config := parseConfig(logger)
+	c := parseConfig(logger)
+	fmt.Printf("Provider Config: %+v\n", c.Providers)
 
-	providerStrategy := provider.NewRealProviderStrategy(ctx, logger, "")
+	providerStrategy, err := provider.NewRealProviderStrategy(ctx, logger, c.Providers, c.KubernetesSupported)
+
+	if err != nil {
+		logger.Warnf("Initialized with error %v", err)
+	}
 
 	var usedStrategy provider.Strategy
 	usedStrategy = providerStrategy
-	if config.UseLocalDB {
+	if c.UseLocalDB {
 		logger.Infof("Initializing local database")
 		dbClient := db.NewBoltClient()
-		if err := dbClient.Open(config.DbFileName); err != nil {
+		if err := dbClient.Open(c.SyncConfig.DbFileName); err != nil {
 			logger.Errorf("could not opend db: %v", err)
 			return
 		}
@@ -176,12 +191,7 @@ func Run() {
 		strategyWithDB := db.NewStrategyWithDB(dbClient, providerStrategy, logger)
 		usedStrategy = strategyWithDB
 
-		syncWait, err := time.ParseDuration(config.SyncWaitTime)
-		if err != nil {
-			logger.Fatalf("Failed to parse sync wait %s time: %v", config.SyncWaitTime, err)
-		}
-
-		syncer := sync.NewSyncer(logger, dbClient, providerStrategy, syncWait)
+		syncer := sync.NewSyncer(logger, dbClient, providerStrategy, &c.SyncConfig)
 		go syncer.SyncPeriodically(ctx)
 	}
 
@@ -190,7 +200,7 @@ func Run() {
 		strategy: usedStrategy,
 	}
 
-	lis, err := net.Listen("tcp", config.Hostname+":"+config.Port)
+	lis, err := net.Listen("tcp", c.Hostname+":"+c.Port)
 	if err != nil {
 		logger.Fatalf("failed to listen: %v", err)
 	}

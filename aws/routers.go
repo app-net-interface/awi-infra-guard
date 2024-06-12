@@ -19,6 +19,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -82,20 +83,22 @@ func (c *Client) ListRoutersForRegion(client *ec2.Client, region string) ([]type
 			if tgw.Options != nil && len(tgw.Options.TransitGatewayCidrBlocks) > 0 {
 				CIDRBlock = tgw.Options.TransitGatewayCidrBlocks[0]
 			}
-		
+			//tgwLink : =
+
 			routers = append(routers, types.Router{
-				ID:             *tgw.TransitGatewayId,
-				Provider:       c.GetName(),
-				Name:           name,
-				Region:         region,
-				State:          string(tgw.State),
-				Labels:         labels,
-				CIDRBlock:      CIDRBlock,
-				AccountID:      *tgw.OwnerId,
-				CreatedAt:      *tgw.CreationTime,
+				ID:        *tgw.TransitGatewayId,
+				Provider:  c.GetName(),
+				Name:      name,
+				Region:    region,
+				State:     string(tgw.State),
+				Labels:    labels,
+				CIDRBlock: CIDRBlock,
+				AccountID: *tgw.OwnerId,
+				CreatedAt: *tgw.CreationTime,
+				SelfLink:  fmt.Sprintf("https://%s.console.aws.amazon.com/vpc/home?region=%s#TransitGateways:transitGatewayId=%s", region, region, *tgw.TransitGatewayId),
 			})
 		}
 	}
-	
+
 	return routers, nil
 }

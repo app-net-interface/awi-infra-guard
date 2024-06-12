@@ -118,6 +118,7 @@ func convertPublicIPs(account, region string, addresses []awstypes.Address, rese
 	var instancePublicIPs []types.PublicIP
 	var allPublicIPs []types.PublicIP
 	for _, address := range addresses {
+
 		staticIPs = append(staticIPs, types.PublicIP{
 			ID:         aws.ToString(address.AllocationId),
 			Region:     region,
@@ -128,6 +129,7 @@ func convertPublicIPs(account, region string, addresses []awstypes.Address, rese
 			Type:       "static",
 			Labels:     convertTags(address.Tags),
 			PrivateIP:  aws.ToString(address.PrivateIpAddress),
+			SelfLink:   fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#ElasticIpDetails:AllocationId=%s", region, region, aws.ToString(address.AllocationId)),
 		})
 	}
 
@@ -176,6 +178,7 @@ func convertPublicIPs(account, region string, addresses []awstypes.Address, rese
 	return allPublicIPs, nil
 }
 
+// Merge static(elastic) and dynamic(instance) public IPs
 func mergePublicIPs(elasticIPs []types.PublicIP, instanceIPs []types.PublicIP) []types.PublicIP {
 	// Create a map to keep track of unique items in slice1 by Name
 	itemMap := make(map[string]types.PublicIP)

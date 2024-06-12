@@ -369,6 +369,7 @@ func (c *Client) attachRoutesToVPC(ctx context.Context, account, region string, 
 			RouteTableId:         rt.RouteTableId,
 		}
 
+		// Need at least one route in all route tables to point to this transit gateway, because different subnets may be attached to different route tables.
 		_, err = client.CreateRoute(ctx, input)
 		if err != nil && !strings.Contains(err.Error(), "RouteAlreadyExists") {
 			return err
@@ -530,7 +531,7 @@ func (c *Client) createTransitGatewayRoutesTables(ctx context.Context, account, 
 		return nil, err
 	}
 
-	// Check if any Transit Gateways RT were found
+	// Check if any Transit Gateways RT were found - This is a bug here. 
 	if len(output.TransitGatewayRouteTables) > 0 {
 		c.logger.Infof("AWI Transit Gateway Route Table already exists")
 		return output.TransitGatewayRouteTables[0].TransitGatewayRouteTableId, nil
