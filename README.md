@@ -128,7 +128,7 @@ instances {
                     "value": "Cisco SD-WAN Control Plane"
                 }
             ],
-            "id": "i-007755280666fdca5",
+            "id": "i-xxxx",
             "name": "sdwan-vmanage-00",
             "publicIP": "",
             "privateIP": "10.128.0.32",
