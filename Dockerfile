@@ -34,6 +34,6 @@ COPY --from=builder /root/go/src/github.com/awi-infra-guard/awi-infra-guard .
 # within the directory with already present files, we create a symlink
 # to point to a new empty directory where actual config.yaml will be
 # mounted.
-RUN ln -s /root/config/config.yaml /root/config.yaml
+COPY --from=builder /root/go/src/github.com/awi-infra-guard/config.yaml /root/config.yaml
 
 CMD ["./awi-infra-guard"]
