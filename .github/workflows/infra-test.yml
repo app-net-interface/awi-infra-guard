@@ -1,0 +1,36 @@
+name: Run infrastructure tests
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Terraform with the latest version
+      uses: hashicorp/setup-terraform@v3
+    - name: Terraform Init
+      id: init
+      run: terraform init
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color
+      continue-on-error: true
+    
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: ^1.21
