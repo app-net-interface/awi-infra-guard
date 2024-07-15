@@ -6,35 +6,29 @@ on:
     branches: [ "main" ]
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  TF_CLOUD_ORGANIZATION: "ani-hcp"
+  TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
+  TF_WORKSPACE: "awi-infra-guard-workspace"
+  CONFIG_DIRECTORY: "./terraform"
 
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    defaults:
-     run:
-       shell: bash
-       working-directory: ./terraform
-
     steps:
     - uses: actions/checkout@v3
-    
-    - name: Setup Terraform with the latest version
-      uses: hashicorp/setup-terraform@v3
-    - name: Terraform Init
-      id: init
-      run: terraform init
-    - name: Terraform Validate
-      id: validate
-      run: terraform validate -no-color
-    - name: Terraform Plan
-      id: plan
-      run: terraform plan -no-color
-      continue-on-error: true
-    
-    - name: Set up Go
-      uses: actions/setup-go@v3
+
+    - name: Upload Configuration
+      uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
+      id: plan-upload
       with:
-        go-version: ^1.21
+        workspace: ${{ env.TF_WORKSPACE }}
+        directory: ${{ env.CONFIG_DIRECTORY }}
+        speculative: true
+    - name: Create Plan Run
+      uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
+      id: plan-run
+      with:
+        workspace: ${{ env.TF_WORKSPACE }}
+        configuration_version: ${{ steps.plan-upload.outputs.configuration_version_id }}
+        plan_only: true
