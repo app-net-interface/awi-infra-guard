@@ -1,7 +1,12 @@
 name: Test infrastructure
 on:
   push:
-    branches: [ "main", "terraform-for-infrastructure" ]
+    branches: [ "main" ]
+  # TODO: remove before merge
+  workflow_run:
+    workflows: ["Plan infrastructure with terraform"]
+    types:
+      - completed
           
 
 env:
@@ -21,11 +26,10 @@ jobs:
 
     - name: Upload Configuration
       uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
-      id: plan-upload
+      id: apply-upload
       with:
         workspace: ${{ env.TF_WORKSPACE }}
         directory: ${{ env.CONFIG_DIRECTORY }}
-        speculative: true
     - name: Create Apply Run
       uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
       id: aplly-run
