@@ -1,6 +1,8 @@
 name: Plan infrastructure with terraform
 on:
-  pull_request:
+  push:
+    branches: 
+      - main
 
 env:
   TF_CLOUD_ORGANIZATION: "ani-hcp"
@@ -9,7 +11,7 @@ env:
   CONFIG_DIRECTORY: "./terraform"
 
 jobs:
-  test:
+  plan:
     name: Plan
     runs-on: ubuntu-latest
     permissions:
@@ -72,3 +74,32 @@ jobs:
             repo: context.repo.repo,
             body: output
           });
+
+  # TODO: remove before merge
+  test:
+    name: Test
+    needs: plan
+    runs-on: ubuntu-latest
+    permissions:
+        contents: read
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Upload Configuration
+      uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
+      id: apply-upload
+      with:
+        workspace: ${{ env.TF_WORKSPACE }}
+        directory: ${{ env.CONFIG_DIRECTORY }}
+    - name: Create Apply Run
+      uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
+      id: aplly-run
+      with:
+        workspace: ${{ env.TF_WORKSPACE }}
+        configuration_version: ${{ steps.plan-upload.outputs.configuration_version_id }}
+    - name: Apply
+      uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.0.0
+      id: apply
+      with:
+        run: ${{ steps.apply-run.outputs.run_id }}
+        comment: "Apply Run from GitHub Actions CI ${{ github.sha }}"

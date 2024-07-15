@@ -1,13 +1,6 @@
 name: Test infrastructure
 on:
-  push:
-    branches: [ "main" ]
-  # TODO: remove before merge
-  workflow_run:
-    workflows: ["Plan infrastructure with terraform"]
-    types:
-      - completed
-          
+  pull_request:
 
 env:
   TF_CLOUD_ORGANIZATION: "ani-hcp"
@@ -38,7 +31,6 @@ jobs:
         configuration_version: ${{ steps.plan-upload.outputs.configuration_version_id }}
     - name: Apply
       uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.0.0
-      if: fromJSON(steps.apply-run.outputs.payload).data.attributes.actions.IsConfirmable
       id: apply
       with:
         run: ${{ steps.apply-run.outputs.run_id }}
