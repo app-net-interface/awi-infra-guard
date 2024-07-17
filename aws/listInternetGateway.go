@@ -20,6 +20,7 @@ package aws
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -29,8 +30,13 @@ import (
 )
 
 func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error) {
+	var (
+		igws []types.IGW
+		wg   sync.WaitGroup
+		mu   sync.Mutex
+		err  error
+	)
 
-	var igws []types.IGW
 	// List all regions to ensure NAT Gateways from every region are considered
 	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
 		AllRegions: aws.Bool(true),
@@ -39,28 +45,35 @@ func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListI
 		c.logger.Errorf("Unable to describe regions, %v", err)
 		return igws, err
 	}
+
 	for _, region := range regionResult.Regions {
-		c.logger.Debugf("Listing Internet Gateways for AWS account %s and region %s ", params.AccountId, *region.RegionName)
-		regionalCfg, err := config.LoadDefaultConfig(ctx,
-			config.WithRegion(*region.RegionName),
-		)
-		if err != nil {
-			c.logger.Errorf("Unable to load SDK config for region %s, %v", *region.RegionName, err)
-			continue
-		}
+		wg.Add(1)
+		go func(regionName string) {
+			defer wg.Done()
 
-		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
-		regIgws, err := c.ListInternetGatewaysInRegion(ec2RegionalClient, *region.RegionName)
-		if err != nil {
-			//c.logger.Warnf("Failed to list Internet Gateways in region %s: %v", *region.RegionName, err)
-			continue
-		}
+			c.logger.Debugf("Listing Internet Gateways for AWS account %s and region %s ", params.AccountId, regionName)
+			regionalCfg, err := config.LoadDefaultConfig(ctx,
+				config.WithRegion(regionName),
+			)
+			if err != nil {
+				c.logger.Warnf("Unable to load SDK config for region %s, %v", regionName, err)
+				return
+			}
 
-		//for i, natGateway := range natGateways {
-		//	c.logger.Infof("NAT GW [%d] %+v\n", i, natGateway)
-		//}
-		igws = append(igws, regIgws...)
+			ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
+			regIgws, err := c.ListInternetGatewaysInRegion(ec2RegionalClient, regionName)
+			if err != nil {
+				//c.logger.Warnf("Failed to list Internet Gateways in region %s: %v", regionName, err)
+				return
+			}
+
+			mu.Lock()
+			igws = append(igws, regIgws...)
+			mu.Unlock()
+		}(*region.RegionName)
 	}
+
+	wg.Wait()
 	return igws, err
 }
 

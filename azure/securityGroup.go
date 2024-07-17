@@ -60,7 +60,7 @@ func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecu
 				continue
 			}
 			for _, nicRef := range vm.Properties.NetworkProfile.NetworkInterfaces {
-				nic, err := nicClient.Get(ctx, parseResourceGroupName(*nicRef.ID), parseResourceName(*nicRef.ID), nil)
+				nic, err := nicClient.Get(ctx, getResourceGroupName(*nicRef.ID), getResourceName(*nicRef.ID), nil)
 				if err != nil {
 					fmt.Printf("Failed to get NIC: %v\n", err)
 					continue
@@ -90,7 +90,7 @@ func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecu
 
 						ID: *nic.Interface.Properties.NetworkSecurityGroup.ID,
 						// Azure bug: NSG has a name in JSON but , not in the structure.
-						Name:  parseResourceName(*nic.Interface.Properties.NetworkSecurityGroup.ID),
+						Name:  getResourceName(*nic.Interface.Properties.NetworkSecurityGroup.ID),
 						VpcID: vNetID,
 						//Labels:    convertToStringMap(nic.Interface.Properties.NetworkSecurityGroup.Tags),
 						Region:    region,

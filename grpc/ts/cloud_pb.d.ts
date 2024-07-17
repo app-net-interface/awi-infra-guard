@@ -1,6 +1,8 @@
 import * as jspb from 'google-protobuf'
 
 import * as types_pb from './types_pb';
+import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
+import * as google_protobuf_field_mask_pb from 'google-protobuf/google/protobuf/field_mask_pb';
 
 
 export class ListAccountsRequest extends jspb.Message {
@@ -1208,6 +1210,206 @@ export namespace SummaryResponse {
   export type AsObject = {
     count?: Counters.AsObject,
     statuses?: StatusSummary.AsObject,
+  }
+}
+
+export class SearchResourcesRequest extends jspb.Message {
+  getFilterProvider(): string;
+  setFilterProvider(value: string): SearchResourcesRequest;
+
+  getFilterAccountId(): string;
+  setFilterAccountId(value: string): SearchResourcesRequest;
+
+  getFilterRegion(): string;
+  setFilterRegion(value: string): SearchResourcesRequest;
+
+  getFilterVpcId(): string;
+  setFilterVpcId(value: string): SearchResourcesRequest;
+
+  getFilterZone(): string;
+  setFilterZone(value: string): SearchResourcesRequest;
+
+  getSearchLabelsMap(): jspb.Map<string, string>;
+  clearSearchLabelsMap(): SearchResourcesRequest;
+
+  getSearchName(): string;
+  setSearchName(value: string): SearchResourcesRequest;
+
+  getSearchId(): string;
+  setSearchId(value: string): SearchResourcesRequest;
+
+  getSearchStatus(): string;
+  setSearchStatus(value: string): SearchResourcesRequest;
+
+  getSearchCreationTimeStart(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setSearchCreationTimeStart(value?: google_protobuf_timestamp_pb.Timestamp): SearchResourcesRequest;
+  hasSearchCreationTimeStart(): boolean;
+  clearSearchCreationTimeStart(): SearchResourcesRequest;
+
+  getSearchCreationTimeEnd(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setSearchCreationTimeEnd(value?: google_protobuf_timestamp_pb.Timestamp): SearchResourcesRequest;
+  hasSearchCreationTimeEnd(): boolean;
+  clearSearchCreationTimeEnd(): SearchResourcesRequest;
+
+  getSearchTerminationTimeStart(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setSearchTerminationTimeStart(value?: google_protobuf_timestamp_pb.Timestamp): SearchResourcesRequest;
+  hasSearchTerminationTimeStart(): boolean;
+  clearSearchTerminationTimeStart(): SearchResourcesRequest;
+
+  getSearchTerminationTimeEnd(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setSearchTerminationTimeEnd(value?: google_protobuf_timestamp_pb.Timestamp): SearchResourcesRequest;
+  hasSearchTerminationTimeEnd(): boolean;
+  clearSearchTerminationTimeEnd(): SearchResourcesRequest;
+
+  getPageSize(): number;
+  setPageSize(value: number): SearchResourcesRequest;
+
+  getPageNumber(): number;
+  setPageNumber(value: number): SearchResourcesRequest;
+
+  getSortBy(): string;
+  setSortBy(value: string): SearchResourcesRequest;
+
+  getSortDescending(): boolean;
+  setSortDescending(value: boolean): SearchResourcesRequest;
+
+  getFieldMask(): google_protobuf_field_mask_pb.FieldMask | undefined;
+  setFieldMask(value?: google_protobuf_field_mask_pb.FieldMask): SearchResourcesRequest;
+  hasFieldMask(): boolean;
+  clearFieldMask(): SearchResourcesRequest;
+
+  getResourceTypesList(): Array<string>;
+  setResourceTypesList(value: Array<string>): SearchResourcesRequest;
+  clearResourceTypesList(): SearchResourcesRequest;
+  addResourceTypes(value: string, index?: number): SearchResourcesRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SearchResourcesRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: SearchResourcesRequest): SearchResourcesRequest.AsObject;
+  static serializeBinaryToWriter(message: SearchResourcesRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SearchResourcesRequest;
+  static deserializeBinaryFromReader(message: SearchResourcesRequest, reader: jspb.BinaryReader): SearchResourcesRequest;
+}
+
+export namespace SearchResourcesRequest {
+  export type AsObject = {
+    filterProvider: string,
+    filterAccountId: string,
+    filterRegion: string,
+    filterVpcId: string,
+    filterZone: string,
+    searchLabelsMap: Array<[string, string]>,
+    searchName: string,
+    searchId: string,
+    searchStatus: string,
+    searchCreationTimeStart?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    searchCreationTimeEnd?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    searchTerminationTimeStart?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    searchTerminationTimeEnd?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    pageSize: number,
+    pageNumber: number,
+    sortBy: string,
+    sortDescending: boolean,
+    fieldMask?: google_protobuf_field_mask_pb.FieldMask.AsObject,
+    resourceTypesList: Array<string>,
+  }
+}
+
+export class SearchResourcesResponse extends jspb.Message {
+  getInstancesList(): Array<types_pb.Instance>;
+  setInstancesList(value: Array<types_pb.Instance>): SearchResourcesResponse;
+  clearInstancesList(): SearchResourcesResponse;
+  addInstances(value?: types_pb.Instance, index?: number): types_pb.Instance;
+
+  getVpcsList(): Array<types_pb.VPC>;
+  setVpcsList(value: Array<types_pb.VPC>): SearchResourcesResponse;
+  clearVpcsList(): SearchResourcesResponse;
+  addVpcs(value?: types_pb.VPC, index?: number): types_pb.VPC;
+
+  getSubnetsList(): Array<types_pb.Subnet>;
+  setSubnetsList(value: Array<types_pb.Subnet>): SearchResourcesResponse;
+  clearSubnetsList(): SearchResourcesResponse;
+  addSubnets(value?: types_pb.Subnet, index?: number): types_pb.Subnet;
+
+  getAclsList(): Array<types_pb.ACL>;
+  setAclsList(value: Array<types_pb.ACL>): SearchResourcesResponse;
+  clearAclsList(): SearchResourcesResponse;
+  addAcls(value?: types_pb.ACL, index?: number): types_pb.ACL;
+
+  getSecurityGroupsList(): Array<types_pb.SecurityGroup>;
+  setSecurityGroupsList(value: Array<types_pb.SecurityGroup>): SearchResourcesResponse;
+  clearSecurityGroupsList(): SearchResourcesResponse;
+  addSecurityGroups(value?: types_pb.SecurityGroup, index?: number): types_pb.SecurityGroup;
+
+  getRouteTablesList(): Array<types_pb.RouteTable>;
+  setRouteTablesList(value: Array<types_pb.RouteTable>): SearchResourcesResponse;
+  clearRouteTablesList(): SearchResourcesResponse;
+  addRouteTables(value?: types_pb.RouteTable, index?: number): types_pb.RouteTable;
+
+  getNatGatewaysList(): Array<types_pb.NATGateway>;
+  setNatGatewaysList(value: Array<types_pb.NATGateway>): SearchResourcesResponse;
+  clearNatGatewaysList(): SearchResourcesResponse;
+  addNatGateways(value?: types_pb.NATGateway, index?: number): types_pb.NATGateway;
+
+  getRoutersList(): Array<types_pb.Router>;
+  setRoutersList(value: Array<types_pb.Router>): SearchResourcesResponse;
+  clearRoutersList(): SearchResourcesResponse;
+  addRouters(value?: types_pb.Router, index?: number): types_pb.Router;
+
+  getIgwsList(): Array<types_pb.IGW>;
+  setIgwsList(value: Array<types_pb.IGW>): SearchResourcesResponse;
+  clearIgwsList(): SearchResourcesResponse;
+  addIgws(value?: types_pb.IGW, index?: number): types_pb.IGW;
+
+  getVpcEndpointsList(): Array<types_pb.VPCEndpoint>;
+  setVpcEndpointsList(value: Array<types_pb.VPCEndpoint>): SearchResourcesResponse;
+  clearVpcEndpointsList(): SearchResourcesResponse;
+  addVpcEndpoints(value?: types_pb.VPCEndpoint, index?: number): types_pb.VPCEndpoint;
+
+  getPublicIpsList(): Array<types_pb.PublicIP>;
+  setPublicIpsList(value: Array<types_pb.PublicIP>): SearchResourcesResponse;
+  clearPublicIpsList(): SearchResourcesResponse;
+  addPublicIps(value?: types_pb.PublicIP, index?: number): types_pb.PublicIP;
+
+  getClustersList(): Array<types_pb.Cluster>;
+  setClustersList(value: Array<types_pb.Cluster>): SearchResourcesResponse;
+  clearClustersList(): SearchResourcesResponse;
+  addClusters(value?: types_pb.Cluster, index?: number): types_pb.Cluster;
+
+  getTotalResults(): number;
+  setTotalResults(value: number): SearchResourcesResponse;
+
+  getTotalPages(): number;
+  setTotalPages(value: number): SearchResourcesResponse;
+
+  getCurrentPage(): number;
+  setCurrentPage(value: number): SearchResourcesResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SearchResourcesResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: SearchResourcesResponse): SearchResourcesResponse.AsObject;
+  static serializeBinaryToWriter(message: SearchResourcesResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SearchResourcesResponse;
+  static deserializeBinaryFromReader(message: SearchResourcesResponse, reader: jspb.BinaryReader): SearchResourcesResponse;
+}
+
+export namespace SearchResourcesResponse {
+  export type AsObject = {
+    instancesList: Array<types_pb.Instance.AsObject>,
+    vpcsList: Array<types_pb.VPC.AsObject>,
+    subnetsList: Array<types_pb.Subnet.AsObject>,
+    aclsList: Array<types_pb.ACL.AsObject>,
+    securityGroupsList: Array<types_pb.SecurityGroup.AsObject>,
+    routeTablesList: Array<types_pb.RouteTable.AsObject>,
+    natGatewaysList: Array<types_pb.NATGateway.AsObject>,
+    routersList: Array<types_pb.Router.AsObject>,
+    igwsList: Array<types_pb.IGW.AsObject>,
+    vpcEndpointsList: Array<types_pb.VPCEndpoint.AsObject>,
+    publicIpsList: Array<types_pb.PublicIP.AsObject>,
+    clustersList: Array<types_pb.Cluster.AsObject>,
+    totalResults: number,
+    totalPages: number,
+    currentPage: number,
   }
 }
 

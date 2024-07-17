@@ -20,79 +20,16 @@ package gcp
 import (
 	"context"
 	"fmt"
-	"net"
 	"strconv"
 	"strings"
 
 	"cloud.google.com/go/compute/apiv1/computepb"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
+	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
-
 	"github.com/app-net-interface/awi-infra-guard/types"
 	"google.golang.org/api/iterator"
 )
-
-func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
-	c.logger.Debugf("Syncing GCP VPCs")
-
-	if params == nil {
-		params = &infrapb.ListVPCRequest{}
-	}
-	if params.Region != "" {
-		return nil, fmt.Errorf("VPCs in GCP have global scope")
-	}
-	if len(params.Labels) > 0 {
-		return nil, fmt.Errorf("VPCs in GCP don't have labels")
-	}
-	vpcs := make([]types.VPC, 0)
-	f := func(projectID string, vpcs []types.VPC) ([]types.VPC, error) {
-		iter := c.networksClient.List(ctx, &computepb.ListNetworksRequest{
-			Project: projectID,
-		})
-		for {
-			net, err := iter.Next()
-			if err == iterator.Done {
-				break
-			}
-			if err != nil {
-				return nil, err
-			}
-			vpcs = append(vpcs, convertVPC(projectID, net))
-		}
-		return vpcs, nil
-	}
-	if params.AccountId == "" {
-		for projectID := range c.projectIDs {
-			newVPCs, err := f(projectID, vpcs)
-			if err != nil {
-				return nil, err
-			}
-			vpcs = append(vpcs, newVPCs...)
-		}
-	} else {
-		return f(params.AccountId, vpcs)
-	}
-
-	return vpcs, nil
-}
-
-func (c *Client) GetVPCIDForCIDR(ctx context.Context, request *infrapb.GetVPCIDForCIDRRequest) (string, error) {
-	subnets, err := c.ListSubnets(ctx, &infrapb.ListSubnetsRequest{
-		Cidr:      request.GetCidr(),
-		Region:    request.GetRegion(),
-		AccountId: request.GetAccountId(),
-	})
-	if err != nil {
-		return "", err
-	}
-	if len(subnets) > 1 {
-		return "", fmt.Errorf("expected to find one subnet with cidr %s, found %v", request.GetCidr(), len(subnets))
-	}
-	return subnets[0].VpcId, nil
-}
-
-func (c *Client) GetVPCIDWithTag(_ context.Context, _ *infrapb.GetVPCIDWithTagRequest) (string, error) {
-	return "", fmt.Errorf("VPC tags or labels are not supported in GCP")
-}
 
 type network struct {
 	// project name
@@ -117,6 +54,126 @@ type network struct {
 //     In this case given network will be looked up in specified 'project' or
 //     in all projects specified in client.projectIDs if 'project' param is empty and all matching
 //     will be returned.
+
+func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
+	c.logger.Debugf("Syncing GCP VPCs")
+
+	if params == nil {
+		params = &infrapb.ListVPCRequest{}
+	}
+	if params.Region != "" {
+		return nil, fmt.Errorf("VPCs in GCP have global scope")
+	}
+	if len(params.Labels) > 0 {
+		return nil, fmt.Errorf("VPCs in GCP don't have labels")
+	}
+
+	vpcs := make([]types.VPC, 0)
+	f := func(ctx context.Context, projectID string, vpcs []types.VPC) ([]types.VPC, error) {
+		iter := c.networksClient.List(ctx, &computepb.ListNetworksRequest{
+			Project: projectID,
+		})
+		for {
+			net, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return nil, err
+			}
+			vpc := c.ConvertVPC(ctx, projectID, net)
+			vpcs = append(vpcs, vpc)
+		}
+		return vpcs, nil
+	}
+	if params.AccountId == "" {
+		for projectID := range c.projectIDs {
+			newVPCs, err := f(ctx, projectID, vpcs)
+			if err != nil {
+				return nil, err
+			}
+			vpcs = append(vpcs, newVPCs...)
+		}
+	} else {
+		return f(ctx, params.AccountId, vpcs)
+	}
+
+	return vpcs, nil
+}
+
+func (c *Client) GetVPCIDForCIDR(ctx context.Context, request *infrapb.GetVPCIDForCIDRRequest) (string, error) {
+	subnets, err := c.ListSubnets(ctx, &infrapb.ListSubnetsRequest{
+		Cidr:      request.GetCidr(),
+		Region:    request.GetRegion(),
+		AccountId: request.GetAccountId(),
+	})
+	if err != nil {
+		return "", err
+	}
+	if len(subnets) > 1 {
+		return "", fmt.Errorf("expected to find one subnet with cidr %s, found %v", request.GetCidr(), len(subnets))
+	}
+	return subnets[0].VpcId, nil
+}
+
+func (c *Client) GetVPCIDWithTag(_ context.Context, _ *infrapb.GetVPCIDWithTagRequest) (string, error) {
+	return "", fmt.Errorf("VPC tags or labels are not supported in GCP")
+}
+
+func (c *Client) ConvertVPC(ctx context.Context, projectID string, network *computepb.Network) types.VPC {
+	var ipv6Range string
+
+	if network.InternalIpv6Range != nil {
+		ipv6Range = *network.InternalIpv6Range
+	}
+	consoleAccesLInk := fmt.Sprintf("https://console.cloud.google.com/networking/networks/details/%s?project=%s", network.GetName(), projectID)
+	return types.VPC{
+		ID:        strconv.FormatUint(network.GetId(), 10),
+		Name:      network.GetName(),
+		Region:    "global",
+		AccountID: projectID,
+		Provider:  providerName,
+		SelfLink:  consoleAccesLInk,
+		IPv4CIDR:  network.GetIPv4Range(),
+		IPv6CIDR:  ipv6Range,
+		Project:   projectID,
+		//Labels:    c.GetTags(ctx, projectID, network.GetName()),
+	}
+}
+
+func (c *Client) GetTags(ctx context.Context, projectId string, networkName string) map[string]string {
+	tags := make(map[string]string)
+	client, err := resourcemanager.NewTagBindingsRESTClient(ctx)
+	if err != nil {
+		c.logger.Errorf("Error creating TagBindingsClient: %v", err)
+		return nil // TODO: Handle error.
+	}
+	defer client.Close()
+
+	parent := fmt.Sprintf("//cloudresourcemanager.googleapis.com/projects/%s", projectId)
+
+	req := &resourcemanagerpb.ListTagBindingsRequest{
+		Parent: parent,
+	}
+	c.logger.Infof("Reqest = %+v", req)
+	it := client.ListTagBindings(ctx, req)
+	for {
+		resp, err := it.Next()
+		c.logger.Errorf("%v", resp)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			c.logger.Errorf("Error getting tags: %v", err)
+			break
+		} else {
+			c.logger.Infof("getting tags: %s: %s", resp.Parent, resp.GetTagValue())
+			tags[resp.Name] = resp.GetTagValue()
+		}
+	}
+	return tags
+}
+
 func (c *Client) findNetwork(ctx context.Context, project, vpc string) ([]network, error) {
 	var networksWithProject []network
 	fullUrlStarter := "https://www.googleapis.com/compute/v1/"
@@ -136,6 +193,7 @@ func (c *Client) findNetwork(ctx context.Context, project, vpc string) ([]networ
 					Network: path[len(path)-1],
 					Project: foundProject,
 				})
+
 				if err != nil {
 					return nil, err
 				}
@@ -216,31 +274,4 @@ func (c *Client) vpcIdToSingleNetwork(ctx context.Context, project, vpcID string
 		return network{}, fmt.Errorf("couldn't find network matching to provided ID: %s", vpcID)
 	}
 	return networks[0], nil
-}
-
-func convertVPC(projectID string, network *computepb.Network) types.VPC {
-	var ipv6Range string
-	if network.InternalIpv6Range != nil {
-		ipv6Range = *network.InternalIpv6Range
-	}
-	consoleAccesLInk := fmt.Sprintf("https://console.cloud.google.com/networking/networks/details/%s?project=%s", network.GetName(), projectID)
-	return types.VPC{
-		ID:     strconv.FormatUint(network.GetId(), 10),
-		Name:   network.GetName(),
-		Region: "global",
-
-		AccountID: projectID,
-		Provider:  providerName,
-		SelfLink:  consoleAccesLInk,
-		IPv4CIDR:  network.GetIPv4Range(),
-		IPv6CIDR:  ipv6Range,
-	}
-}
-
-func isIPv4CIDR(cidr string) bool {
-	ip, _, err := net.ParseCIDR(cidr)
-	if err != nil {
-		return false // Not a valid CIDR notation
-	}
-	return ip.To4() != nil // Returns true if CIDR is IPv4
 }

@@ -77,6 +77,8 @@ func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 			AccountId:    instance.AccountID,
 			State:        instance.State,
 			Type:         instance.Type,
+			SecurityGroupIds: instance.SecurityGroupIDs,
+			InterfaceIds:   instance.InterfaceIDs,
 			LastSyncTime: instance.LastSyncTime,
 			SelfLink:     instance.SelfLink,
 		})

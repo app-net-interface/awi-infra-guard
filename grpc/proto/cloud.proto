@@ -19,7 +19,13 @@ syntax = "proto3";
 package infra;
 import "types.proto";
 
+
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+
 option go_package = "./;infrapb";
+
 
 // CloudProvider service definition
 service CloudProviderService {
@@ -63,6 +69,8 @@ service CloudProviderService {
     rpc ListCloudClusters (ListCloudClustersRequest) returns (ListCloudClustersResponse) {}
 
     rpc Summary(SummaryRequest) returns (SummaryResponse);
+
+    rpc SearchResources (SearchResourcesRequest) returns (SearchResourcesResponse) {}
 }
 
 message ListAccountsRequest {
@@ -343,4 +351,58 @@ message StatusSummary {
 message SummaryResponse {
     Counters count = 1;
     StatusSummary statuses = 2;
+}
+
+// Request message for searching resources
+message SearchResourcesRequest {
+    // Filter parameters
+    string filter_provider = 1; // Cloud provider (e.g., aws, gcp, azure)
+    string filter_account_id = 2; // Account ID within the cloud provider
+    string filter_region = 3; // Region within the cloud provider
+    string filter_vpc_id = 4; // VPC ID
+    string filter_zone = 5; // Zone within the region
+
+    // Search criteria
+    map<string, string> search_labels = 6; // Labels associated with the resources
+    string search_name = 7; // Name of the resource
+    string search_id = 8; // ID of the resource
+    string search_status = 9; // Status of the resource (e.g., running, stopped)
+    google.protobuf.Timestamp search_creation_time_start = 10; // Start of the creation time range
+    google.protobuf.Timestamp search_creation_time_end = 11; // End of the creation time range
+    google.protobuf.Timestamp search_termination_time_start = 12; // Start of the termination time range
+    google.protobuf.Timestamp search_termination_time_end = 13; // End of the termination time range
+
+    // Pagination and sorting
+    int32 page_size = 14; // Number of results to return per page
+    int32 page_number = 15; // Page number to return
+    string sort_by = 16; // Field to sort by (e.g., name, creation_time)
+    bool sort_descending = 17; // Whether to sort in descending order
+
+    // Field mask to specify which fields to include in the response
+    google.protobuf.FieldMask field_mask = 18;
+
+    // Resource types to include in the search
+    repeated string resource_types = 19; // Specify which resource types to search for (e.g., "instance", "vpc", "subnet")
+}
+
+// Response message for the search results
+message SearchResourcesResponse {
+    repeated Instance instances = 1;
+    repeated VPC vpcs = 2;
+    repeated Subnet subnets = 3;
+    repeated ACL acls = 4;
+    repeated SecurityGroup security_groups = 5;
+    repeated RouteTable route_tables = 6;
+    repeated NATGateway nat_gateways = 7;
+    repeated Router routers = 8;
+    repeated IGW igws = 9;
+    repeated VPCEndpoint vpc_endpoints = 10;
+    repeated PublicIP public_ips = 11;
+    repeated Cluster clusters = 12;
+
+    // Pagination information
+    int32 total_results = 13; // Total number of results
+    int32 total_pages = 14; // Total number of pages
+    int32 current_page = 15; // Current page number
+    // Add other resource types as needed
 }

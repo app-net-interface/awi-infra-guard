@@ -109,23 +109,34 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 		inst := reservation.Instances[0]
 		name := getTagName(inst.Tags)
 		instanceLink := fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#InstanceDetails:instanceId=%s", region, region, aws.ToString(inst.InstanceId))
-		// https://us-east-1.console.aws.amazon.com/ec2/home?region=us-east-1#InstanceDetails:instanceId=
+
+		secGroups := make([]string, len(inst.SecurityGroups))
+		for i, group := range inst.SecurityGroups {
+			secGroups[i] = *group.GroupId
+		}
+
+		networkInterfaces := make([]string, len(inst.NetworkInterfaces))
+		for j, iface := range inst.NetworkInterfaces {
+			networkInterfaces[j] = *iface.NetworkInterfaceId
+		}
 
 		instance := types.Instance{
-			ID:        aws.ToString(inst.InstanceId),
-			Name:      aws.ToString(name),
-			PrivateIP: aws.ToString(inst.PrivateIpAddress),
-			PublicIP:  aws.ToString(inst.PublicIpAddress),
-			SubnetID:  aws.ToString(inst.SubnetId),
-			VPCID:     aws.ToString(inst.VpcId),
-			Type:      aws.ToString((*string)(&inst.InstanceType)),
-			Labels:    convertTags(inst.Tags),
-			State:     convertState(inst.State),
-			Region:    region,
-			Zone:      aws.ToString(inst.Placement.AvailabilityZone),
-			AccountID: account,
-			Provider:  providerName,
-			SelfLink:  instanceLink,
+			ID:               aws.ToString(inst.InstanceId),
+			Name:             aws.ToString(name),
+			PrivateIP:        aws.ToString(inst.PrivateIpAddress),
+			PublicIP:         aws.ToString(inst.PublicIpAddress),
+			SubnetID:         aws.ToString(inst.SubnetId),
+			VPCID:            aws.ToString(inst.VpcId),
+			Type:             aws.ToString((*string)(&inst.InstanceType)),
+			Labels:           convertTags(inst.Tags),
+			State:            convertState(inst.State),
+			Region:           region,
+			Zone:             aws.ToString(inst.Placement.AvailabilityZone),
+			AccountID:        account,
+			Provider:         providerName,
+			SelfLink:         instanceLink,
+			SecurityGroupIDs: secGroups,
+			InterfaceIDs:     networkInterfaces,
 		}
 		instances = append(instances, instance)
 	}

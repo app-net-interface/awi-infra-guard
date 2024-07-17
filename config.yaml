@@ -31,8 +31,8 @@ logLevel: INFO
 providers:
   - name: aws
     type: cloud
-  - name: azure
-    type: cloud
+  #- name: azure
+  #  type: cloud
   - name: gcp
     type: cloud
 

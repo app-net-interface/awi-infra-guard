@@ -39,6 +39,9 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 		}
 	}
 	c.logger.Infof("Retrieving instances for account %s and VPC %s", input.AccountId, input.VpcId)
+	if input.AccountId == "" {
+		return nil, fmt.Errorf("account ID is required")
+	}
 
 	vmClient, err := armcompute.NewVirtualMachinesClient(input.AccountId, c.cred, nil)
 	if err != nil {
@@ -64,8 +67,14 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 			if vm.Properties.NetworkProfile == nil {
 				continue
 			}
+			var nsgId []string
+			var interfaceIds []string
 			for _, nicRef := range vm.Properties.NetworkProfile.NetworkInterfaces {
-				nic, err := nicClient.Get(ctx, parseResourceGroupName(*nicRef.ID), parseResourceName(*nicRef.ID), nil)
+				if nicRef.ID != nil {
+					interfaceIds = append(interfaceIds, *nicRef.ID)
+				}
+
+				nic, err := nicClient.Get(ctx, getResourceGroupName(*nicRef.ID), getResourceName(*nicRef.ID), nil)
 				//nic.Interface.Properties.NetworkSecurityGroup.
 				if err != nil {
 					fmt.Printf("Failed to get NIC: %v\n", err)
@@ -73,6 +82,12 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 				}
 				if nic.Properties == nil || nic.Properties.IPConfigurations == nil {
 					continue
+				}
+				if nic.Properties.NetworkSecurityGroup == nil {
+					c.logger.Debugf("No security group associated with the NIC")
+				} else {
+					nsgId = append(nsgId, *nic.Properties.NetworkSecurityGroup.ID)
+					c.logger.Debugf("Network Security Group ID: %s", nsgId)
 				}
 				for _, ipConf := range nic.Properties.IPConfigurations {
 					if ipConf.Properties == nil || ipConf.Properties.Subnet == nil || !strings.Contains(*ipConf.Properties.Subnet.ID, vNetName) {
@@ -88,7 +103,7 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 					}
 					publicIP := ""
 					if ipConf.Properties.PublicIPAddress != nil {
-						pip, err := publicIPClient.Get(ctx, parseResourceGroupName(*ipConf.Properties.PublicIPAddress.ID), parseResourceName(*ipConf.Properties.PublicIPAddress.ID), nil)
+						pip, err := publicIPClient.Get(ctx, getResourceGroupName(*ipConf.Properties.PublicIPAddress.ID), getResourceName(*ipConf.Properties.PublicIPAddress.ID), nil)
 						if err == nil && pip.Properties != nil && pip.Properties.IPAddress != nil {
 							publicIP = *pip.Properties.IPAddress
 						}
@@ -109,24 +124,52 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 							}
 						}
 					}
-					c.logger.Debug("Azure vmstatus = ", vmStatus)
+					c.logger.Info("Azure vmstatus = ", vmStatus)
+
+					// nicID := *vm.Properties.NetworkProfile.NetworkInterfaces[0].ID
+					// nicName := getResourceName(nicID)
+
+					// // Create a new network client
+					// resourceGroupName := getResourceGroupName(*nicRef.ID)
+					// networkClient, err := armnetwork.NewInterfacesClient(input.AccountId, c.cred, nil)
+					// if err != nil {
+					// 	c.logger.Errorf("failed to create network client: %v", err)
+					// }
+
+					// // Get the network interface
+					// nic, err := networkClient.Get(ctx, resourceGroupName, nicName, nil)
+					// if err != nil {
+					// 	c.logger.Errorf("failed to get network interface: %v", err)
+					// }
+
+					// // Get the network security group ID
+					// if nic.Properties.NetworkSecurityGroup == nil {
+					// 	c.logger.Debugf("No security group associated with the NIC")
+					// }
+					// nsgID := *nic.Properties.NetworkSecurityGroup.ID
+					// c.logger.Debugf("Network Security Group ID: %s", nsgID)
+
 					// Construct and append the instance
 					instance := types.Instance{
-						ID:        *vm.ID,
-						Name:      *vm.Name,
-						Type:      string(*vm.Properties.HardwareProfile.VMSize),
-						PublicIP:  publicIP,
-						PrivateIP: privateIP,
-						SubnetID:  *ipConf.Properties.Subnet.ID,
-						VPCID:     vNetID,
-						Labels:    convertToStringMap(vm.Tags),
-						State:     string(*vm.Properties.ProvisioningState),
-						Region:    *vm.Location,
-						Provider:  "Azure",
-						AccountID: input.AccountId,
+						ID:               *vm.ID,
+						Name:             *vm.Name,
+						Type:             string(*vm.Properties.HardwareProfile.VMSize),
+						PublicIP:         publicIP,
+						PrivateIP:        privateIP,
+						SubnetID:         *ipConf.Properties.Subnet.ID,
+						VPCID:            vNetID,
+						Labels:           convertToStringMap(vm.Tags),
+						State:            string(*vm.Properties.ProvisioningState),
+						Region:           *vm.Location,
+						Provider:         "Azure",
+						AccountID:        input.AccountId,
+						SecurityGroupIDs: nsgId,
+						InterfaceIDs:     interfaceIds,
+
 						//SelfLink: *vm.Properties.,
 						// LastSyncTime and Zone fields require additional logic or assumptions
 					}
+
 					instances = append(instances, instance)
 					c.logger.Debugf("Azure Instance = %v", instance)
 					break // Assuming a single NIC per VM for simplicity

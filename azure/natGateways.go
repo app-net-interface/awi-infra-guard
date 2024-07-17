@@ -65,7 +65,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 			// Extract VNet ID from the first associated subnet
 			if natGateway.Properties.Subnets != nil && len(natGateway.Properties.Subnets) > 0 {
 				subnetID = *(natGateway.Properties.Subnets)[0].ID
-				//subnetId = extractLastSegment(subnetID)
+				//subnetId = getResourceName(subnetID)
 
 				// Split the subnet ID to get the resource group name
 				parts := strings.Split(subnetID, "/")
@@ -77,7 +77,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 			// Assuming the first public IP association is the primary one
 			if natGateway.Properties.PublicIPAddresses != nil && len(natGateway.Properties.PublicIPAddresses) > 0 {
 				publicIPID := *(natGateway.Properties.PublicIPAddresses)[0].ID
-				publicIpName := extractLastSegment(publicIPID)
+				publicIpName := getResourceName(publicIPID)
 				// Optionally, make a call to get the actual IP address from the Public IP resource
 				publicIPResp, err := publicIPClient.Get(ctx, rgName, publicIpName, nil)
 				if err != nil {
@@ -107,4 +107,3 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 	}
 	return natGateways, err
 }
-

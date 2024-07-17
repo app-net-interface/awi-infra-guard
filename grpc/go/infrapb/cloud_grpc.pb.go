@@ -40,6 +40,7 @@ type CloudProviderServiceClient interface {
 	GetVPCIDWithTag(ctx context.Context, in *GetVPCIDWithTagRequest, opts ...grpc.CallOption) (*GetVPCIDWithTagResponse, error)
 	ListCloudClusters(ctx context.Context, in *ListCloudClustersRequest, opts ...grpc.CallOption) (*ListCloudClustersResponse, error)
 	Summary(ctx context.Context, in *SummaryRequest, opts ...grpc.CallOption) (*SummaryResponse, error)
+	SearchResources(ctx context.Context, in *SearchResourcesRequest, opts ...grpc.CallOption) (*SearchResourcesResponse, error)
 }
 
 type cloudProviderServiceClient struct {
@@ -239,6 +240,15 @@ func (c *cloudProviderServiceClient) Summary(ctx context.Context, in *SummaryReq
 	return out, nil
 }
 
+func (c *cloudProviderServiceClient) SearchResources(ctx context.Context, in *SearchResourcesRequest, opts ...grpc.CallOption) (*SearchResourcesResponse, error) {
+	out := new(SearchResourcesResponse)
+	err := c.cc.Invoke(ctx, "/infra.CloudProviderService/SearchResources", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CloudProviderServiceServer is the server API for CloudProviderService service.
 // All implementations must embed UnimplementedCloudProviderServiceServer
 // for forward compatibility
@@ -265,6 +275,7 @@ type CloudProviderServiceServer interface {
 	GetVPCIDWithTag(context.Context, *GetVPCIDWithTagRequest) (*GetVPCIDWithTagResponse, error)
 	ListCloudClusters(context.Context, *ListCloudClustersRequest) (*ListCloudClustersResponse, error)
 	Summary(context.Context, *SummaryRequest) (*SummaryResponse, error)
+	SearchResources(context.Context, *SearchResourcesRequest) (*SearchResourcesResponse, error)
 	mustEmbedUnimplementedCloudProviderServiceServer()
 }
 
@@ -334,6 +345,9 @@ func (UnimplementedCloudProviderServiceServer) ListCloudClusters(context.Context
 }
 func (UnimplementedCloudProviderServiceServer) Summary(context.Context, *SummaryRequest) (*SummaryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Summary not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) SearchResources(context.Context, *SearchResourcesRequest) (*SearchResourcesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchResources not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) mustEmbedUnimplementedCloudProviderServiceServer() {}
 
@@ -726,6 +740,24 @@ func _CloudProviderService_Summary_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudProviderService_SearchResources_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchResourcesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).SearchResources(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/infra.CloudProviderService/SearchResources",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).SearchResources(ctx, req.(*SearchResourcesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CloudProviderService_ServiceDesc is the grpc.ServiceDesc for CloudProviderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -816,6 +848,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Summary",
 			Handler:    _CloudProviderService_Summary_Handler,
+		},
+		{
+			MethodName: "SearchResources",
+			Handler:    _CloudProviderService_SearchResources_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

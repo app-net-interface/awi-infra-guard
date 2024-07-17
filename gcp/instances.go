@@ -576,13 +576,15 @@ func getNetwork(networks []types.VPC, subnetworks []types.Subnet, networkInterfa
 			}
 		}
 	}
-	subnetwork := strings.Split(networkInterfaces[0].GetSubnetwork(), "/")
-	if len(subnetwork) != 0 {
-		name := subnetwork[len(subnetwork)-1]
-		for _, v := range subnetworks {
-			if v.Name == name || v.SubnetId == name {
-				subnetID = v.SubnetId
-				break
+	if len(subnetworks) > 0 {
+		subnetwork := strings.Split(networkInterfaces[0].GetSubnetwork(), "/")
+		if len(subnetwork) != 0 {
+			name := subnetwork[len(subnetwork)-1]
+			for _, v := range subnetworks {
+				if v.Name == name || v.SubnetId == name {
+					subnetID = v.SubnetId
+					break
+				}
 			}
 		}
 	}

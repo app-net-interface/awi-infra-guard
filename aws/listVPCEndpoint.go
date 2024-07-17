@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -32,7 +33,10 @@ import (
 func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error) {
 
 	var vpces []types.VPCEndpoint
-	// List all regions to ensure NAT Gateways from every region are considered
+	var mutex sync.Mutex
+	var wg sync.WaitGroup
+
+	// List all regions to ensure VPC Endpoints from every region are considered
 	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
 		AllRegions: aws.Bool(true),
 	})
@@ -40,25 +44,36 @@ func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEn
 		c.logger.Errorf("Unable to describe regions, %v", err)
 		return vpces, err
 	}
-	for _, region := range regionResult.Regions {
-		c.logger.Debugf("Listing VPC Endpoints for AWS account %s and region %s ", params.AccountId, *region.RegionName)
-		regionalCfg, err := config.LoadDefaultConfig(ctx,
-			config.WithRegion(*region.RegionName),
-		)
-		if err != nil {
-			c.logger.Errorf("Unable to load SDK config for region %s, %v", *region.RegionName, err)
-			continue
-		}
 
-		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
-		regVpces, err := c.ListVPCEndpointsInRegion(ec2RegionalClient, *region.RegionName)
-		if err != nil {
-			//c.logger.Warnf("Error listing VPC Endpoints in region %s: %v", *region.RegionName, err)
-			continue
-		}
-		vpces = append(vpces, regVpces...)
+	for _, region := range regionResult.Regions {
+		wg.Add(1)
+		go func(regionName string) {
+			defer wg.Done()
+
+			c.logger.Debugf("Listing VPC Endpoints for AWS account %s and region %s ", params.AccountId, regionName)
+			regionalCfg, err := config.LoadDefaultConfig(ctx,
+				config.WithRegion(regionName),
+			)
+			if err != nil {
+				c.logger.Errorf("Unable to load SDK config for region %s, %v", regionName, err)
+				return
+			}
+
+			ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
+			regVpces, err := c.ListVPCEndpointsInRegion(ec2RegionalClient, regionName)
+			if err != nil {
+				//c.logger.Warnf("Error listing VPC Endpoints in region %s: %v", regionName, err)
+				return
+			}
+
+			mutex.Lock()
+			vpces = append(vpces, regVpces...)
+			mutex.Unlock()
+		}(*region.RegionName)
 	}
-	return vpces, err
+
+	wg.Wait()
+	return vpces, nil
 }
 
 func (c *Client) ListVPCEndpointsInRegion(client *ec2.Client, region string) ([]types.VPCEndpoint, error) {

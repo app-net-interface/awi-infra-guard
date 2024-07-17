@@ -3,18 +3,88 @@ import * as jspb from 'google-protobuf'
 import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
 
 
+export class VPC extends jspb.Message {
+  getId(): string;
+  setId(value: string): VPC;
+
+  getName(): string;
+  setName(value: string): VPC;
+
+  getRegion(): string;
+  setRegion(value: string): VPC;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): VPC;
+
+  getIpv4Cidr(): string;
+  setIpv4Cidr(value: string): VPC;
+
+  getIpv6Cidr(): string;
+  setIpv6Cidr(value: string): VPC;
+
+  getProject(): string;
+  setProject(value: string): VPC;
+
+  getProvider(): string;
+  setProvider(value: string): VPC;
+
+  getAccountId(): string;
+  setAccountId(value: string): VPC;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): VPC;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): VPC;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): VPC;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): VPC;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): VPC;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): VPC;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VPC.AsObject;
+  static toObject(includeInstance: boolean, msg: VPC): VPC.AsObject;
+  static serializeBinaryToWriter(message: VPC, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VPC;
+  static deserializeBinaryFromReader(message: VPC, reader: jspb.BinaryReader): VPC;
+}
+
+export namespace VPC {
+  export type AsObject = {
+    id: string,
+    name: string,
+    region: string,
+    labelsMap: Array<[string, string]>,
+    ipv4Cidr: string,
+    ipv6Cidr: string,
+    project: string,
+    provider: string,
+    accountId: string,
+    lastSyncTime: string,
+    selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+}
+
 export class Instance extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): Instance;
+
+  getAccountId(): string;
+  setAccountId(value: string): Instance;
+
   getId(): string;
   setId(value: string): Instance;
 
   getName(): string;
   setName(value: string): Instance;
-
-  getPublicip(): string;
-  setPublicip(value: string): Instance;
-
-  getPrivateip(): string;
-  setPrivateip(value: string): Instance;
 
   getSubnetid(): string;
   setSubnetid(value: string): Instance;
@@ -31,20 +101,40 @@ export class Instance extends jspb.Message {
   getZone(): string;
   setZone(value: string): Instance;
 
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): Instance;
+  getPublicip(): string;
+  setPublicip(value: string): Instance;
 
-  getProvider(): string;
-  setProvider(value: string): Instance;
+  getPrivateip(): string;
+  setPrivateip(value: string): Instance;
 
-  getAccountId(): string;
-  setAccountId(value: string): Instance;
+  getSecuritygroupidsList(): Array<string>;
+  setSecuritygroupidsList(value: Array<string>): Instance;
+  clearSecuritygroupidsList(): Instance;
+  addSecuritygroupids(value: string, index?: number): Instance;
+
+  getInterfaceidsList(): Array<string>;
+  setInterfaceidsList(value: Array<string>): Instance;
+  clearInterfaceidsList(): Instance;
+  addInterfaceids(value: string, index?: number): Instance;
 
   getState(): string;
   setState(value: string): Instance;
 
   getType(): string;
   setType(value: string): Instance;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): Instance;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Instance;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): Instance;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Instance;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): Instance;
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): Instance;
@@ -62,20 +152,24 @@ export class Instance extends jspb.Message {
 
 export namespace Instance {
   export type AsObject = {
+    provider: string,
+    accountId: string,
     id: string,
     name: string,
-    publicip: string,
-    privateip: string,
     subnetid: string,
     project: string,
     vpcid: string,
     region: string,
     zone: string,
-    labelsMap: Array<[string, string]>,
-    provider: string,
-    accountId: string,
+    publicip: string,
+    privateip: string,
+    securitygroupidsList: Array<string>,
+    interfaceidsList: Array<string>,
     state: string,
     type: string,
+    labelsMap: Array<[string, string]>,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     lastSyncTime: string,
     selfLink: string,
   }
@@ -118,6 +212,16 @@ export class Subnet extends jspb.Message {
   getSelfLink(): string;
   setSelfLink(value: string): Subnet;
 
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Subnet;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): Subnet;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Subnet;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): Subnet;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Subnet.AsObject;
   static toObject(includeInstance: boolean, msg: Subnet): Subnet.AsObject;
@@ -140,64 +244,8 @@ export namespace Subnet {
     accountId: string,
     lastSyncTime: string,
     selfLink: string,
-  }
-}
-
-export class VPC extends jspb.Message {
-  getId(): string;
-  setId(value: string): VPC;
-
-  getName(): string;
-  setName(value: string): VPC;
-
-  getRegion(): string;
-  setRegion(value: string): VPC;
-
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): VPC;
-
-  getIpv4Cidr(): string;
-  setIpv4Cidr(value: string): VPC;
-
-  getIpv6Cidr(): string;
-  setIpv6Cidr(value: string): VPC;
-
-  getProject(): string;
-  setProject(value: string): VPC;
-
-  getProvider(): string;
-  setProvider(value: string): VPC;
-
-  getAccountId(): string;
-  setAccountId(value: string): VPC;
-
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): VPC;
-
-  getSelfLink(): string;
-  setSelfLink(value: string): VPC;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): VPC.AsObject;
-  static toObject(includeInstance: boolean, msg: VPC): VPC.AsObject;
-  static serializeBinaryToWriter(message: VPC, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): VPC;
-  static deserializeBinaryFromReader(message: VPC, reader: jspb.BinaryReader): VPC;
-}
-
-export namespace VPC {
-  export type AsObject = {
-    id: string,
-    name: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
-    ipv4Cidr: string,
-    ipv6Cidr: string,
-    project: string,
-    provider: string,
-    accountId: string,
-    lastSyncTime: string,
-    selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
   }
 }
 
@@ -297,6 +345,16 @@ export class ACL extends jspb.Message {
   getSelfLink(): string;
   setSelfLink(value: string): ACL;
 
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): ACL;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): ACL;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): ACL;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): ACL;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ACL.AsObject;
   static toObject(includeInstance: boolean, msg: ACL): ACL.AsObject;
@@ -318,6 +376,8 @@ export namespace ACL {
     project: string,
     lastSyncTime: string,
     selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
   }
 
   export class ACLRule extends jspb.Message {
@@ -404,6 +464,16 @@ export class SecurityGroup extends jspb.Message {
   getSelfLink(): string;
   setSelfLink(value: string): SecurityGroup;
 
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): SecurityGroup;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): SecurityGroup;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): SecurityGroup;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): SecurityGroup;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SecurityGroup.AsObject;
   static toObject(includeInstance: boolean, msg: SecurityGroup): SecurityGroup.AsObject;
@@ -425,6 +495,8 @@ export namespace SecurityGroup {
     project: string,
     lastSyncTime: string,
     selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
   }
 
   export class SecurityGroupRule extends jspb.Message {
@@ -497,6 +569,16 @@ export class RouteTable extends jspb.Message {
   getSelfLink(): string;
   setSelfLink(value: string): RouteTable;
 
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): RouteTable;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): RouteTable;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): RouteTable;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): RouteTable;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): RouteTable.AsObject;
   static toObject(includeInstance: boolean, msg: RouteTable): RouteTable.AsObject;
@@ -518,6 +600,8 @@ export namespace RouteTable {
     project: string,
     lastSyncTime: string,
     selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
   }
 
   export class Route extends jspb.Message {
@@ -1003,6 +1087,16 @@ export class Cluster extends jspb.Message {
   getSelfLink(): string;
   setSelfLink(value: string): Cluster;
 
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Cluster;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): Cluster;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Cluster;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): Cluster;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Cluster.AsObject;
   static toObject(includeInstance: boolean, msg: Cluster): Cluster.AsObject;
@@ -1025,6 +1119,8 @@ export namespace Cluster {
     id: string,
     lastSyncTime: string,
     selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
   }
 }
 

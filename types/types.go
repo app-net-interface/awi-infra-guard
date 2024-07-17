@@ -101,22 +101,24 @@ func (v *VPC) GetProvider() string {
 }
 
 type Instance struct {
-	ID           string
-	Name         string
-	PublicIP     string
-	PrivateIP    string
-	SubnetID     string
-	VPCID        string
-	Labels       map[string]string
-	State        string
-	Project      string
-	Region       string
-	Zone         string
-	Provider     string
-	AccountID    string
-	Type         string
-	LastSyncTime string
-	SelfLink     string
+	ID               string
+	Name             string
+	PublicIP         string
+	PrivateIP        string
+	SubnetID         string
+	VPCID            string
+	Labels           map[string]string
+	State            string
+	Project          string
+	Region           string
+	Zone             string
+	Provider         string
+	AccountID        string
+	Type             string
+	SecurityGroupIDs []string
+	InterfaceIDs     []string
+	LastSyncTime     string
+	SelfLink         string
 }
 
 func (v Instance) DbId() string {
@@ -170,6 +172,7 @@ type Subnet struct {
 	AccountID    string
 	SelfLink     string
 	LastSyncTime string
+	RouteTableID []string
 }
 
 func (v *Subnet) DbId() string {
@@ -365,6 +368,7 @@ type SecurityGroup struct {
 	Rules        []SecurityGroupRule
 	SelfLink     string
 	LastSyncTime string
+	Instances    []string
 }
 
 type SecurityGroupRule struct {
@@ -386,6 +390,19 @@ func (v *SecurityGroup) GetProvider() string {
 	return v.Provider
 }
 
+type Firewall struct {
+	Name         string
+	ID           string
+	Provider     string
+	VpcID        string
+	Region       string
+	Labels       map[string]string
+	AccountID    string
+	Rules        []ACLRule
+	SelfLink     string
+	LastSyncTime string
+}
+
 type ACL struct {
 	Name         string
 	ID           string
@@ -397,6 +414,7 @@ type ACL struct {
 	Rules        []ACLRule
 	SelfLink     string
 	LastSyncTime string
+	Subnets      []string
 }
 
 type ACLRule struct {

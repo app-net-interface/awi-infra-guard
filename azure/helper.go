@@ -164,7 +164,7 @@ func (c *Client) ListAllACLs(ctx context.Context, input *infrapb.ListACLsRequest
 }
 
 // Helper functions to parse IDs and convert tags
-func parseResourceGroupName(resourceID string) string {
+func getResourceGroupName(resourceID string) string {
 	parts := strings.Split(resourceID, "/")
 	for i, part := range parts {
 		if part == "resourceGroups" {
@@ -174,9 +174,10 @@ func parseResourceGroupName(resourceID string) string {
 	return ""
 }
 
-func parseResourceName(resourceID string) string {
-	parts := strings.Split(resourceID, "/")
-	return parts[len(parts)-1]
+// Helper function to extract the last segment of a resource ID (commonly used to get the name or ID of the resource)
+func getResourceName(resourceID string) string {
+	segments := strings.Split(resourceID, "/")
+	return segments[len(segments)-1]
 }
 
 func convertToStringMap(tags map[string]*string) map[string]string {
@@ -237,10 +238,4 @@ func isIPv4CIDR(cidr string) bool {
 		return false // Not a valid CIDR notation
 	}
 	return ip.To4() != nil // Returns true if CIDR is IPv4
-}
-
-// Helper function to extract the last segment of a resource ID (commonly used to get the name or ID of the resource)
-func extractLastSegment(resourceID string) string {
-	segments := strings.Split(resourceID, "/")
-	return segments[len(segments)-1]
 }

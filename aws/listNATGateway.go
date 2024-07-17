@@ -20,6 +20,7 @@ package aws
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -29,8 +30,11 @@ import (
 )
 
 func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGatewaysRequest) ([]types.NATGateway, error) {
-
 	var natGateways []types.NATGateway
+	// Create a wait group to synchronize the goroutines
+	var wg sync.WaitGroup
+	// Create a mutex to synchronize access to natGateways slice
+	var mu sync.Mutex
 	// List all regions to ensure NAT Gateways from every region are considered
 	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
 		AllRegions: aws.Bool(true),
@@ -40,33 +44,42 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 		return natGateways, err
 	}
 	for _, region := range regionResult.Regions {
-		c.logger.Debugf("Listing NAT Gateways for AWS account %s and region %s ", params.AccountId, *region.RegionName)
-		regionalCfg, err := config.LoadDefaultConfig(ctx,
-			config.WithRegion(*region.RegionName),
-		)
-		if err != nil {
-			c.logger.Errorf("Unable to load SDK config for region %s, %v", *region.RegionName, err)
-			continue
-		}
+		wg.Add(1)
+		go func(regionName string) {
+			defer wg.Done()
 
-		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
-		ngs, err := c.ListNATGatewaysInRegion(ec2RegionalClient, *region.RegionName)
-		if err != nil {
-			//c.logger.Errorf("Error listing NAT Gateways in region %s: %v", *region.RegionName, err)
-			continue
-		}
+			c.logger.Debugf("Listing NAT Gateways for AWS account %s and region %s ", params.AccountId, regionName)
+			regionalCfg, err := config.LoadDefaultConfig(ctx,
+				config.WithRegion(regionName),
+			)
+			if err != nil {
+				c.logger.Errorf("Unable to load SDK config for region %s, %v", regionName, err)
+				return
+			}
 
-		//for i, natGateway := range natGateways {
-		//	c.logger.Infof("NAT GW [%d] %+v\n", i, natGateway)
-		//}
-		natGateways = append(natGateways, ngs...)
+			ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
+			ngs, err := c.ListNATGatewaysInRegion(ec2RegionalClient, regionName)
+			if err != nil {
+				c.logger.Errorf("Error listing NAT Gateways in region %s: %v", regionName, err)
+				return
+			}
+
+			// Lock the mutex before appending to natGateways slice
+			mu.Lock()
+			natGateways = append(natGateways, ngs...)
+			mu.Unlock()
+		}(*region.RegionName)
 	}
-	//c.logger.Infof("NAT GW to be writtend %+v ", natGateways)
-	for i, _ := range natGateways {
-		c.logger.Debugf("NAT GW [%d] %+v\n", i, natGateways[i])
+
+	// Wait for all goroutines to finish
+	wg.Wait()
+
+	// Set the AccountID for each NAT gateway
+	for i := range natGateways {
 		natGateways[i].AccountID = params.AccountId
 	}
-	return natGateways, err
+
+	return natGateways, nil
 }
 
 func (c *Client) ListNATGatewaysInRegion(client *ec2.Client, region string) ([]types.NATGateway, error) {

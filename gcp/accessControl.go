@@ -52,7 +52,7 @@ func (c *Client) ListACLs(ctx context.Context, params *infrapb.ListACLsRequest) 
 		}
 
 		for _, item := range iter.Items {
-			acl := convertFirewall(projectID, networks, item)
+			acl := convertACL(projectID, networks, item)
 			if !(params.GetVpcId() == "" || net.id == acl.VpcID || net.name == acl.VpcID) {
 				continue
 			}
@@ -200,12 +200,11 @@ func (c *Client) AddInboundAllowRuleByInstanceIPMatch(ctx context.Context,
 	return ruleId, instances, nil
 }
 
-func convertFirewall(projectID string, networks []types.VPC, firewall *compute.Firewall) types.ACL {
+func convertACL(projectID string, networks []types.VPC, firewall *compute.Firewall) types.ACL {
 	if firewall == nil {
 		return types.ACL{}
 	}
-
-	rules := make([]types.ACLRule, 0, len(firewall.Allowed))
+	rules := make([]types.ACLRule, 0, len(firewall.Allowed) + len(firewall.Denied))
 	for _, rule := range firewall.Allowed {
 		rules = append(rules, types.ACLRule{
 			Number:            int(firewall.Priority),

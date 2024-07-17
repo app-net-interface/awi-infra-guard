@@ -17,10 +17,32 @@
 
 package gcp
 
-import "strings"
+import (
+	"net"
+	"slices"
+	"strings"
+)
 
 // Helper function to extract the last segment of a resource URL, typically the ID or name.
 func extractResourceID(url string) string {
 	parts := strings.Split(url, "/")
 	return parts[len(parts)-1]
+}
+
+func isIPv4CIDR(cidr string) bool {
+	ip, _, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return false // Not a valid CIDR notation
+	}
+	return ip.To4() != nil // Returns true if CIDR is IPv4
+}
+
+// ContainsAny checks if any element of slice2 is present in slice1
+func ContainsAny(slice1, slice2 []string) bool {
+	for _, item := range slice2 {
+		if slices.Contains(slice1, item) {
+			return true
+		}
+	}
+	return false
 }

@@ -22,41 +22,6 @@ package infra;
 option go_package = "./;infrapb";
 import "google/protobuf/timestamp.proto";
 
-message Instance {
-    string id = 1;
-    string name = 2;
-    string publicIP = 3;
-    string privateIP = 4;
-    string subnetID = 5;
-    string project = 6;
-    string vpcId = 7;
-    string region = 8;
-    string zone = 9;
-    map<string, string> labels = 10;
-    string provider = 11;
-    string account_id = 12;
-    string state = 13;
-    string type = 14;
-    string last_sync_time = 15;
-    string self_link = 16;
-}
-
-message Subnet {
-    string id = 1;
-    string name = 2;
-    string cidr_block = 3;
-    string vpc_id = 4;
-    string zone = 5;
-    string region = 6;
-    map<string, string> labels = 7;
-    string project = 8;
-
-    string provider = 10;
-    string account_id = 11;
-    string last_sync_time = 12;
-    string self_link = 13;
-    
-}
 
 message VPC {
     string id = 1;
@@ -70,6 +35,48 @@ message VPC {
     string account_id = 11;
     string last_sync_time = 12;
     string self_link = 13;
+    google.protobuf.Timestamp created_at = 17;
+    google.protobuf.Timestamp updated_at = 18;
+}
+
+message Instance {
+    string provider = 1;
+    string account_id = 2;
+    string id = 3;
+    string name = 4;
+    string subnetID = 5;
+    string project = 6;
+    string vpcId = 7;
+    string region = 8;
+    string zone = 9;
+    string publicIP = 10;
+    string privateIP = 11;
+    repeated string securityGroupIds = 12;
+    repeated string interfaceIds = 13;
+    string state = 14;
+    string type = 15;
+    map<string, string> labels = 16;
+    google.protobuf.Timestamp created_at = 17;
+    google.protobuf.Timestamp updated_at = 18;
+    string last_sync_time = 19;
+    string self_link = 20;
+}
+
+message Subnet {
+    string id = 1;
+    string name = 2;
+    string cidr_block = 3;
+    string vpc_id = 4;
+    string zone = 5;
+    string region = 6;
+    map<string, string> labels = 7;
+    string project = 8;
+    string provider = 10;
+    string account_id = 11;
+    string last_sync_time = 12;
+    string self_link = 13;  
+    google.protobuf.Timestamp created_at = 17;
+    google.protobuf.Timestamp updated_at = 18;
 }
 
 message Account {
@@ -104,9 +111,10 @@ message ACL {
     repeated ACLRule rules = 7;
     map<string, string> labels = 8;
     string project = 9;
-
     string last_sync_time = 10;
     string self_link = 11;
+    google.protobuf.Timestamp created_at = 17;
+    google.protobuf.Timestamp updated_at = 18;
 }
 
 
@@ -129,6 +137,9 @@ message SecurityGroup {
 
     string last_sync_time = 10;
     string self_link = 11;
+    repeated string attached_running_instances = 12;
+    google.protobuf.Timestamp created_at = 17;
+    google.protobuf.Timestamp updated_at = 18;
 }
 
 
@@ -150,6 +161,10 @@ message RouteTable {
 
     string last_sync_time = 10;
     string self_link = 11;
+    google.protobuf.Timestamp created_at = 17;
+    google.protobuf.Timestamp updated_at = 18;
+
+
 }
 
 message Router {
@@ -269,6 +284,8 @@ message Router {
     string id = 12;
     string last_sync_time = 13;
     string self_link = 14;
+    google.protobuf.Timestamp created_at = 17;
+    google.protobuf.Timestamp updated_at = 18;
 }
 
 message Node {
@@ -280,6 +297,7 @@ message Node {
 
     string last_sync_time = 6;
     string self_link = 7;
+
 }
 
 message Namespace {

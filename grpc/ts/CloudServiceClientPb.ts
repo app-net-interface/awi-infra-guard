@@ -942,5 +942,48 @@ export class CloudProviderServiceClient {
     this.methodDescriptorSummary);
   }
 
+  methodDescriptorSearchResources = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/SearchResources',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.SearchResourcesRequest,
+    cloud_pb.SearchResourcesResponse,
+    (request: cloud_pb.SearchResourcesRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.SearchResourcesResponse.deserializeBinary
+  );
+
+  searchResources(
+    request: cloud_pb.SearchResourcesRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.SearchResourcesResponse>;
+
+  searchResources(
+    request: cloud_pb.SearchResourcesRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.SearchResourcesResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.SearchResourcesResponse>;
+
+  searchResources(
+    request: cloud_pb.SearchResourcesRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.SearchResourcesResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/SearchResources',
+        request,
+        metadata || {},
+        this.methodDescriptorSearchResources,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/SearchResources',
+    request,
+    metadata || {},
+    this.methodDescriptorSearchResources);
+  }
+
 }
 

@@ -21,6 +21,10 @@ grpc.web = require('grpc-web');
 
 
 var types_pb = require('./types_pb.js')
+
+var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js')
+
+var google_protobuf_field_mask_pb = require('google-protobuf/google/protobuf/field_mask_pb.js')
 const proto = {};
 proto.infra = require('./cloud_pb.js');
 
@@ -1354,6 +1358,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.summary =
       request,
       metadata || {},
       methodDescriptor_CloudProviderService_Summary);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.SearchResourcesRequest,
+ *   !proto.infra.SearchResourcesResponse>}
+ */
+const methodDescriptor_CloudProviderService_SearchResources = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/SearchResources',
+  grpc.web.MethodType.UNARY,
+  proto.infra.SearchResourcesRequest,
+  proto.infra.SearchResourcesResponse,
+  /**
+   * @param {!proto.infra.SearchResourcesRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.SearchResourcesResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.SearchResourcesRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.SearchResourcesResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.SearchResourcesResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.searchResources =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/SearchResources',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_SearchResources,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.SearchResourcesRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.SearchResourcesResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.searchResources =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/SearchResources',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_SearchResources);
 };
 
 
