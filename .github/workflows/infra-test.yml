@@ -1,6 +1,8 @@
 name: Test infrastructure
 on:
-  pull_request:
+  push:
+    branches: 
+      - main
 
 env:
   TF_CLOUD_ORGANIZATION: "ani-hcp"
@@ -12,26 +14,25 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    permissions:
-        contents: read
     steps:
     - uses: actions/checkout@v3
 
     - name: Upload Configuration
-      uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.0.0
-      id: apply-upload
+      uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.3.0
+      id: upload
       with:
         workspace: ${{ env.TF_WORKSPACE }}
         directory: ${{ env.CONFIG_DIRECTORY }}
     - name: Create Apply Run
-      uses: hashicorp/tfc-workflows-github/actions/create-run@v1.0.0
-      id: aplly-run
+      uses: hashicorp/tfc-workflows-github/actions/create-run@v1.3.0
+      id: create-run
       with:
         workspace: ${{ env.TF_WORKSPACE }}
-        configuration_version: ${{ steps.plan-upload.outputs.configuration_version_id }}
+        configuration_version: ${{ steps.upload.outputs.configuration_version_id }}
     - name: Apply
-      uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.0.0
+      uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.3.0
       id: apply
+      if: fromJSON(steps.create-run.outputs.payload).data.attributes.actions.IsConfirmable
       with:
-        run: ${{ steps.apply-run.outputs.run_id }}
+        run: ${{ steps.create-run.outputs.run_id }}
         comment: "Apply Run from GitHub Actions CI ${{ github.sha }}"
