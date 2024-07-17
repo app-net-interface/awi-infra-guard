@@ -106,19 +106,45 @@ Example:
 $ grpc_cli call localhost:50052 ListInstances "provider: 'aws', vpc_id: 'vpc-04a1eaad3aa81310f'"
 connecting to localhost:50052
 instances {
-  id: "i-07cedcd7c771da56e"
-  name: "machine-learning-dataset-vm-1"
-  privateIP: "10.60.1.186"
-  subnetID: "subnet-0fac44e425b433ef4"
-  vpcId: "vpc-04a1eaad3aa81310f"
+            "labels": [
+                {
+                    "key": "CreatedBy",
+                    "value": "terraform"
+                },
+                {
+                    "key": "Name",
+                    "value": "sdwan-vmanage-00"
+                },
+                {
+                    "key": "owner",
+                    "value": "natal"
+                },
+                {
+                    "key": "project",
+                    "value": "xxx"
+                },
+                {
+                    "key": "ApplicationName",
+                    "value": "Cisco SD-WAN Control Plane"
+                }
+            ],
+            "id": "i-xxxx",
+            "name": "sdwan-vmanage-00",
+            "publicIP": "",
+            "privateIP": "10.128.0.32",
+            "subnetID": "subnet-xxx",
+            "project": "",
+            "vpcId": "vpc-xxx",
+            "region": "us-west-2",
+            "zone": "us-west-2a",
+            "provider": "AWS",
+            "account_id": "xxxxxx",
+            "state": "running",
+            "type": "c5.4xlarge",
+            "last_sync_time": "2024-06-14T17:25:30Z",
+            "self_link": "https://us-west-2.console.aws.amazon.com/xxxx"
 }
-instances {
-  id: "i-0ea4ada9d758c0d4a"
-  name: "dataset-database"
-  privateIP: "10.60.1.193"
-  subnetID: "subnet-0fac44e425b433ef4"
-  vpcId: "vpc-04a1eaad3aa81310f"
-}
+
 Rpc succeeded with OK status
 
 $ grpc_cli call localhost:50052 ListClusters ""
