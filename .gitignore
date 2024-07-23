@@ -13,3 +13,6 @@ connector/demo/*.pem
 **/.terraform.lock.hcl
 **/terraform.tfstate
 **/terraform.tfstate.backup
+.github/.secrets
+.github/artifacts
+

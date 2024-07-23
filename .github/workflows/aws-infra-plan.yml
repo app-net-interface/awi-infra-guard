@@ -1,6 +1,8 @@
 name: Plan infrastructure with terraform
 on:
-  pull_request:
+  push:
+    branches:
+      - main
 
 env:
   TF_CLOUD_ORGANIZATION: "ani-hcp"

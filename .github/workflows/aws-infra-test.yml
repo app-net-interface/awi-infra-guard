@@ -1,38 +1,71 @@
 name: Test infrastructure
 on:
-  push:
-    branches: 
-      - main
+  pull_request:
 
 env:
-  TF_CLOUD_ORGANIZATION: "ani-hcp"
-  TF_API_TOKEN: "${{ secrets.TF_API_TOKEN }}"
-  TF_WORKSPACE: "awi-infra-guard-workspace"
-  CONFIG_DIRECTORY: "./terraform"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
+  create:
+    name: Create resources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.2
+      - name: Terraform init
+        id: init
+        run: terraform init
+        working-directory: ./terraform/aws
+      - name: Terraform plan
+        id: plan
+        run: terraform plan -out=tfplan
+        working-directory: ./terraform/aws
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: ./terraform/aws
+
+      - name: Upload Terraform state
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform_state
+          path: ./terraform/aws/terraform.tfstate
+
   test:
-    name: Test
+    name: Infrastructure tests
+    needs: create
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - name: Sleep for 5 minutes
+        run: sleep 300
+  
+  destroy:
+    name: Destroy resources
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    - name: Upload Configuration
-      uses: hashicorp/tfc-workflows-github/actions/upload-configuration@v1.3.0
-      id: upload
-      with:
-        workspace: ${{ env.TF_WORKSPACE }}
-        directory: ${{ env.CONFIG_DIRECTORY }}
-    - name: Create Apply Run
-      uses: hashicorp/tfc-workflows-github/actions/create-run@v1.3.0
-      id: create-run
-      with:
-        workspace: ${{ env.TF_WORKSPACE }}
-        configuration_version: ${{ steps.upload.outputs.configuration_version_id }}
-    - name: Apply
-      uses: hashicorp/tfc-workflows-github/actions/apply-run@v1.3.0
-      id: apply
-      if: fromJSON(steps.create-run.outputs.payload).data.attributes.actions.IsConfirmable
-      with:
-        run: ${{ steps.create-run.outputs.run_id }}
-        comment: "Apply Run from GitHub Actions CI ${{ github.sha }}"
+      - name: Download Terraform state
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform_state
+          path: ./terraform/aws
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.2
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ./terraform/aws
+      - name: Destroy Terraform configuration
+        run: terraform destroy -auto-approve
+        working-directory: ./terraform/aws
