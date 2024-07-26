@@ -8,6 +8,9 @@ on:
       aws_secret_access_key:
         description: 'AWS Secret Access Key'
         required: true
+      self_hosted_runner_name:
+        description: 'AWS Secret Access Key'
+        required: true
 
 env:
   AWS_ACCESS_KEY_ID: ${{ github.event.inputs.aws_access_key_id }}
@@ -47,7 +50,7 @@ jobs:
   test:
     name: Infrastructure tests
     needs: create
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
     steps:
       - name: Sleep for 5 minutes
         run: sleep 300
