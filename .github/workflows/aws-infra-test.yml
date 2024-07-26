@@ -1,10 +1,17 @@
 name: Test infrastructure
 on: 
   workflow_dispatch:
+    inputs:
+      aws_access_key_id:
+        description: 'AWS Access Key ID'
+        required: true
+      aws_secret_access_key:
+        description: 'AWS Secret Access Key'
+        required: true
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: ${{ github.event.inputs.aws_access_key_id }}
+  AWS_SECRET_ACCESS_KEY: ${{ github.event.inputs.aws_secret_access_key }}
 
 jobs:
   create:
