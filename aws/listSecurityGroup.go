@@ -30,73 +30,83 @@ import (
 	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
-func (c *Client) ListSecurityGroups(ctx context.Context, input *infrapb.ListSecurityGroupsRequest) ([]types.SecurityGroup, error) {
+func (c *Client) ListSecurityGroups(ctx context.Context, param *infrapb.ListSecurityGroupsRequest) ([]types.SecurityGroup, error) {
+	c.logger.Infof("List instances")
+	c.creds = param.Creds
+	c.accountID = param.AccountId
 	builder := newFilterBuilder()
-	builder.withVPC(input.GetVpcId())
-	getParam := &ec2.DescribeSecurityGroupsInput{
-		Filters: builder.build(),
-	}
-	if input.GetRegion() == "" || input.GetRegion() == "all" {
+	builder.withVPC(param.GetVpcId())
+
+	filters := builder.build()
+
+	if param.GetRegion() == "" || param.GetRegion() == "all" {
 		var (
-			wg            sync.WaitGroup
-			allSgs        []types.SecurityGroup
-			resultChannel = make(chan []types.SecurityGroup)
-			errorChannel  = make(chan error)
+			wg                sync.WaitGroup
+			allSecurityGroups []types.SecurityGroup
+			allErrors         []error
+			resultChannel     = make(chan regionResult)
 		)
 
-		regionalClients, err := c.getAllClientsForProfile(input.GetAccountId())
+		regionalClients, err := c.getAllClientsForProfile(param.GetAccountId())
 		if err != nil {
 			return nil, err
 		}
-		for regionName, awsRegionClient := range regionalClients {
+		for regionName := range regionalClients {
 			wg.Add(1)
-			go func(regionName string, awsRegionClient awsClient) {
+			go func(ctx context.Context) {
 				defer wg.Done()
 
-				out, err := awsRegionClient.ec2Client.DescribeSecurityGroups(ctx, getParam)
-				if err != nil {
-					errorChannel <- fmt.Errorf("could not get AWS security groups: %v", err)
-					return
+				sgs, err := c.getSecurityGroupsForRegion(ctx, regionName, filters)
+				resultChannel <- regionResult{
+					region: regionName,
+					sgs:    sgs,
+					err:    err,
 				}
-
-				securityGroups := convertSecurityGroups(c.defaultAccountID, c.defaultRegion, input.GetAccountId(), regionName, out.SecurityGroups)
-				resultChannel <- securityGroups
-			}(regionName, awsRegionClient)
+			}(ctx)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
-			close(errorChannel)
 		}()
 
-		for sgs := range resultChannel {
-			allSgs = append(allSgs, sgs...)
+		for result := range resultChannel {
+			if result.err != nil {
+				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+			} else {
+				allSecurityGroups = append(allSecurityGroups, result.sgs...)
+			}
 		}
 
-		if err := <-errorChannel; err != nil {
-			return nil, err
+		if len(allErrors) > 0 {
+			return allSecurityGroups, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
-		return allSgs, nil
+		return allSecurityGroups, nil
 	}
-	client, err := c.getEC2Client(ctx, input.GetAccountId(), input.GetRegion())
-	if err != nil {
-		return nil, err
-	}
-	out, err := client.DescribeSecurityGroups(ctx, getParam)
-	if err != nil {
-		return nil, err
-	}
-	return convertSecurityGroups(c.defaultAccountID, c.defaultRegion, input.GetAccountId(), input.GetRegion(), out.SecurityGroups), nil
+	return c.getSecurityGroupsForRegion(ctx, param.Region, filters)
 }
 
-func convertSecurityGroups(defaultAccount, defaultRegion, account, region string, awsSGs []awsTypes.SecurityGroup) []types.SecurityGroup {
+func (c *Client) getSecurityGroupsForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter) ([]types.SecurityGroup, error) {
+	client, err := c.getEC2Client(ctx, c.accountID, regionName)
+	if err != nil {
+		return nil, err
+	}
+	// Call DescribeVpcs operation
+	resp, err := client.DescribeSecurityGroups(ctx, &ec2.DescribeSecurityGroupsInput{
+		Filters: filters,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return convertSecurityGroups(c.defaultRegion, regionName, resp.SecurityGroups), nil
+}
+
+func convertSecurityGroups( defaultRegion,region string, awsSGs []awsTypes.SecurityGroup) []types.SecurityGroup {
 	if region == "" {
 		region = defaultRegion
 	}
-	if account == "" {
-		account = defaultAccount
-	}
+
 	out := make([]types.SecurityGroup, 0, len(awsSGs))
 	for _, sg := range awsSGs {
 		sgLink := fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#SecurityGroup:groupId=%s", region, region, aws.ToString(sg.GroupId))
@@ -106,7 +116,7 @@ func convertSecurityGroups(defaultAccount, defaultRegion, account, region string
 			Provider:  providerName,
 			VpcID:     convertString(sg.VpcId),
 			Region:    region,
-			AccountID: account,
+			AccountID: *sg.OwnerId,
 			Labels:    convertTags(sg.Tags),
 			Rules:     convertSecurityGroupRules(sg.IpPermissions, sg.IpPermissionsEgress),
 			SelfLink:  sgLink,

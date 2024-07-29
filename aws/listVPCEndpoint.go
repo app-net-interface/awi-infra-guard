@@ -25,59 +25,74 @@ import (
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error) {
 
-	var vpces []types.VPCEndpoint
-	var mutex sync.Mutex
-	var wg sync.WaitGroup
-
-	// List all regions to ensure VPC Endpoints from every region are considered
-	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
-		AllRegions: aws.Bool(true),
-	})
-	if err != nil {
-		c.logger.Errorf("Unable to describe regions, %v", err)
-		return vpces, err
+	c.creds = params.Creds
+	c.accountID = params.AccountId
+	builder := newFilterBuilder()
+	for k, v := range params.Labels {
+		builder.withTag(k, v)
 	}
+	filters := builder.build()
 
-	for _, region := range regionResult.Regions {
-		wg.Add(1)
-		go func(regionName string) {
-			defer wg.Done()
+	if params.GetRegion() == "" || params.GetRegion() == "all" {
+		var (
+			wg            sync.WaitGroup
+			allVPCEs      []types.VPCEndpoint
+			allErrors     []error
+			resultChannel = make(chan regionResult)
+		)
+		regions, err := c.getAllRegions(ctx)
+		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
+			return nil, err
+		}
+		for _, region := range regions {
+			wg.Add(1)
+			go func(regionName string) {
+				defer wg.Done()
+				vpces, err := c.getVPCEsForRegion(ctx, regionName, filters)
+				resultChannel <- regionResult{
+					region: regionName,
+					vpces:  vpces,
+					err:    err,
+				}
+			}(*region.RegionName)
+		}
 
-			c.logger.Debugf("Listing VPC Endpoints for AWS account %s and region %s ", params.AccountId, regionName)
-			regionalCfg, err := config.LoadDefaultConfig(ctx,
-				config.WithRegion(regionName),
-			)
-			if err != nil {
-				c.logger.Errorf("Unable to load SDK config for region %s, %v", regionName, err)
-				return
+		go func() {
+			wg.Wait()
+			close(resultChannel)
+		}()
+
+		for result := range resultChannel {
+			if result.err != nil {
+				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+			} else {
+				allVPCEs = append(allVPCEs, result.vpces...)
 			}
+		}
 
-			ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
-			regVpces, err := c.ListVPCEndpointsInRegion(ec2RegionalClient, regionName)
-			if err != nil {
-				//c.logger.Warnf("Error listing VPC Endpoints in region %s: %v", regionName, err)
-				return
-			}
-
-			mutex.Lock()
-			vpces = append(vpces, regVpces...)
-			mutex.Unlock()
-		}(*region.RegionName)
+		if len(allErrors) > 0 {
+			return allVPCEs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
+		}
+		return allVPCEs, nil
 	}
-
-	wg.Wait()
-	return vpces, nil
+	return c.getVPCEsForRegion(ctx, params.Region, nil)
 }
 
-func (c *Client) ListVPCEndpointsInRegion(client *ec2.Client, region string) ([]types.VPCEndpoint, error) {
+func (c *Client) getVPCEsForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.VPCEndpoint, error) {
 	var veps []types.VPCEndpoint
+
+	client, err := c.getEC2Client(ctx, c.accountID, regionName)
+	if err != nil {
+		return nil, err
+	}
 	paginator := ec2.NewDescribeVpcEndpointsPaginator(client, &ec2.DescribeVpcEndpointsInput{})
 
 	for paginator.HasMorePages() {
@@ -110,14 +125,14 @@ func (c *Client) ListVPCEndpointsInRegion(client *ec2.Client, region string) ([]
 				AccountID:     *vep.OwnerId,
 				Name:          name,
 				VPCId:         *vep.VpcId,
-				Region:        region,
+				Region:        regionName,
 				State:         state,
 				Labels:        labels,
 				ServiceName:   serviceName,
 				SubnetIds:     subnetIds,
 				RouteTableIds: routeTableIds,
 				CreatedAt:     vep.CreationTimestamp,
-				SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#EndpointDetails:vpcEndpointId=%s", region, region, *vep.VpcEndpointId),
+				SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#EndpointDetails:vpcEndpointId=%s", regionName, regionName, *vep.VpcEndpointId),
 			})
 		}
 	}

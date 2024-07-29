@@ -1,8 +1,8 @@
 import * as jspb from 'google-protobuf'
 
-import * as types_pb from './types_pb';
 import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
 import * as google_protobuf_field_mask_pb from 'google-protobuf/google/protobuf/field_mask_pb';
+import * as types_pb from './types_pb';
 
 
 export class ListAccountsRequest extends jspb.Message {
@@ -29,6 +29,11 @@ export class ListAccountsResponse extends jspb.Message {
   clearAccountsList(): ListAccountsResponse;
   addAccounts(value?: types_pb.Account, index?: number): types_pb.Account;
 
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListAccountsResponse;
+  hasErr(): boolean;
+  clearErr(): ListAccountsResponse;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListAccountsResponse.AsObject;
   static toObject(includeInstance: boolean, msg: ListAccountsResponse): ListAccountsResponse.AsObject;
@@ -40,6 +45,7 @@ export class ListAccountsResponse extends jspb.Message {
 export namespace ListAccountsResponse {
   export type AsObject = {
     accountsList: Array<types_pb.Account.AsObject>,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -49,6 +55,11 @@ export class ListRegionsRequest extends jspb.Message {
 
   getAccountId(): string;
   setAccountId(value: string): ListRegionsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListRegionsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListRegionsRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListRegionsRequest.AsObject;
@@ -62,6 +73,12 @@ export namespace ListRegionsRequest {
   export type AsObject = {
     provider: string,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 3,
   }
 }
 
@@ -70,6 +87,11 @@ export class ListRegionsResponse extends jspb.Message {
   setRegionsList(value: Array<types_pb.Region>): ListRegionsResponse;
   clearRegionsList(): ListRegionsResponse;
   addRegions(value?: types_pb.Region, index?: number): types_pb.Region;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListRegionsResponse;
+  hasErr(): boolean;
+  clearErr(): ListRegionsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListRegionsResponse.AsObject;
@@ -82,6 +104,7 @@ export class ListRegionsResponse extends jspb.Message {
 export namespace ListRegionsResponse {
   export type AsObject = {
     regionsList: Array<types_pb.Region.AsObject>,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -98,6 +121,11 @@ export class ListVPCRequest extends jspb.Message {
   getAccountId(): string;
   setAccountId(value: string): ListVPCRequest;
 
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListVPCRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListVPCRequest;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListVPCRequest.AsObject;
   static toObject(includeInstance: boolean, msg: ListVPCRequest): ListVPCRequest.AsObject;
@@ -112,6 +140,12 @@ export namespace ListVPCRequest {
     region: string,
     labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 5,
   }
 }
 
@@ -123,6 +157,11 @@ export class ListVPCResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListVPCResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListVPCResponse;
+  hasErr(): boolean;
+  clearErr(): ListVPCResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListVPCResponse.AsObject;
@@ -136,6 +175,7 @@ export namespace ListVPCResponse {
   export type AsObject = {
     vpcsList: Array<types_pb.VPC.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -158,6 +198,11 @@ export class ListInstancesRequest extends jspb.Message {
   getAccountId(): string;
   setAccountId(value: string): ListInstancesRequest;
 
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListInstancesRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListInstancesRequest;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListInstancesRequest.AsObject;
   static toObject(includeInstance: boolean, msg: ListInstancesRequest): ListInstancesRequest.AsObject;
@@ -174,6 +219,12 @@ export namespace ListInstancesRequest {
     labelsMap: Array<[string, string]>,
     region: string,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 7,
   }
 }
 
@@ -185,6 +236,11 @@ export class ListInstancesResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListInstancesResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListInstancesResponse;
+  hasErr(): boolean;
+  clearErr(): ListInstancesResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListInstancesResponse.AsObject;
@@ -198,6 +254,7 @@ export namespace ListInstancesResponse {
   export type AsObject = {
     instancesList: Array<types_pb.Instance.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -211,8 +268,16 @@ export class ListACLsRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListACLsRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListACLsRequest;
+
   getAccountId(): string;
   setAccountId(value: string): ListACLsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListACLsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListACLsRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListACLsRequest.AsObject;
@@ -227,7 +292,14 @@ export namespace ListACLsRequest {
     provider: string,
     vpcId: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -239,6 +311,11 @@ export class ListACLsResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListACLsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListACLsResponse;
+  hasErr(): boolean;
+  clearErr(): ListACLsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListACLsResponse.AsObject;
@@ -252,6 +329,7 @@ export namespace ListACLsResponse {
   export type AsObject = {
     aclsList: Array<types_pb.ACL.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -265,8 +343,16 @@ export class ListSecurityGroupsRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListSecurityGroupsRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListSecurityGroupsRequest;
+
   getAccountId(): string;
   setAccountId(value: string): ListSecurityGroupsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListSecurityGroupsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListSecurityGroupsRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListSecurityGroupsRequest.AsObject;
@@ -281,7 +367,14 @@ export namespace ListSecurityGroupsRequest {
     provider: string,
     vpcId: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -293,6 +386,11 @@ export class ListSecurityGroupsResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListSecurityGroupsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListSecurityGroupsResponse;
+  hasErr(): boolean;
+  clearErr(): ListSecurityGroupsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListSecurityGroupsResponse.AsObject;
@@ -306,6 +404,7 @@ export namespace ListSecurityGroupsResponse {
   export type AsObject = {
     securityGroupsList: Array<types_pb.SecurityGroup.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -319,8 +418,16 @@ export class ListRouteTablesRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListRouteTablesRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListRouteTablesRequest;
+
   getAccountId(): string;
   setAccountId(value: string): ListRouteTablesRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListRouteTablesRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListRouteTablesRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListRouteTablesRequest.AsObject;
@@ -335,7 +442,14 @@ export namespace ListRouteTablesRequest {
     provider: string,
     vpcId: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -347,6 +461,11 @@ export class ListRouteTablesResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListRouteTablesResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListRouteTablesResponse;
+  hasErr(): boolean;
+  clearErr(): ListRouteTablesResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListRouteTablesResponse.AsObject;
@@ -360,6 +479,7 @@ export namespace ListRouteTablesResponse {
   export type AsObject = {
     routeTablesList: Array<types_pb.RouteTable.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -373,8 +493,16 @@ export class ListNATGatewaysRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListNATGatewaysRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListNATGatewaysRequest;
+
   getAccountId(): string;
   setAccountId(value: string): ListNATGatewaysRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListNATGatewaysRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListNATGatewaysRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListNATGatewaysRequest.AsObject;
@@ -389,7 +517,14 @@ export namespace ListNATGatewaysRequest {
     provider: string,
     vpcId: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -401,6 +536,11 @@ export class ListNATGatewaysResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListNATGatewaysResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListNATGatewaysResponse;
+  hasErr(): boolean;
+  clearErr(): ListNATGatewaysResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListNATGatewaysResponse.AsObject;
@@ -414,6 +554,7 @@ export namespace ListNATGatewaysResponse {
   export type AsObject = {
     natGatewaysList: Array<types_pb.NATGateway.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -427,8 +568,16 @@ export class ListRoutersRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListRoutersRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListRoutersRequest;
+
   getAccountId(): string;
   setAccountId(value: string): ListRoutersRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListRoutersRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListRoutersRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListRoutersRequest.AsObject;
@@ -443,7 +592,14 @@ export namespace ListRoutersRequest {
     provider: string,
     vpcId: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -455,6 +611,11 @@ export class ListRoutersResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListRoutersResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListRoutersResponse;
+  hasErr(): boolean;
+  clearErr(): ListRoutersResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListRoutersResponse.AsObject;
@@ -468,6 +629,7 @@ export namespace ListRoutersResponse {
   export type AsObject = {
     routersList: Array<types_pb.Router.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -481,8 +643,16 @@ export class ListInternetGatewaysRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListInternetGatewaysRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListInternetGatewaysRequest;
+
   getAccountId(): string;
   setAccountId(value: string): ListInternetGatewaysRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListInternetGatewaysRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListInternetGatewaysRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListInternetGatewaysRequest.AsObject;
@@ -497,7 +667,14 @@ export namespace ListInternetGatewaysRequest {
     provider: string,
     vpcId: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -509,6 +686,11 @@ export class ListInternetGatewaysResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListInternetGatewaysResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListInternetGatewaysResponse;
+  hasErr(): boolean;
+  clearErr(): ListInternetGatewaysResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListInternetGatewaysResponse.AsObject;
@@ -522,6 +704,7 @@ export namespace ListInternetGatewaysResponse {
   export type AsObject = {
     igwsList: Array<types_pb.IGW.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -533,6 +716,11 @@ export class ListVPCEndpointsResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListVPCEndpointsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListVPCEndpointsResponse;
+  hasErr(): boolean;
+  clearErr(): ListVPCEndpointsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListVPCEndpointsResponse.AsObject;
@@ -546,6 +734,7 @@ export namespace ListVPCEndpointsResponse {
   export type AsObject = {
     vepsList: Array<types_pb.VPCEndpoint.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -559,8 +748,16 @@ export class ListPublicIPsRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListPublicIPsRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListPublicIPsRequest;
+
   getAccountId(): string;
   setAccountId(value: string): ListPublicIPsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListPublicIPsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListPublicIPsRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListPublicIPsRequest.AsObject;
@@ -575,7 +772,14 @@ export namespace ListPublicIPsRequest {
     provider: string,
     vpcId: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -587,6 +791,11 @@ export class ListPublicIPsResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListPublicIPsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListPublicIPsResponse;
+  hasErr(): boolean;
+  clearErr(): ListPublicIPsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListPublicIPsResponse.AsObject;
@@ -600,6 +809,7 @@ export namespace ListPublicIPsResponse {
   export type AsObject = {
     publicIpsList: Array<types_pb.PublicIP.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -613,8 +823,16 @@ export class ListVPCEndpointsRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListVPCEndpointsRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListVPCEndpointsRequest;
+
   getAccountId(): string;
   setAccountId(value: string): ListVPCEndpointsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListVPCEndpointsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListVPCEndpointsRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListVPCEndpointsRequest.AsObject;
@@ -629,7 +847,14 @@ export namespace ListVPCEndpointsRequest {
     provider: string,
     vpcId: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -646,8 +871,16 @@ export class GetSubnetRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): GetSubnetRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): GetSubnetRequest;
+
   getAccountId(): string;
   setAccountId(value: string): GetSubnetRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetSubnetRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetSubnetRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetSubnetRequest.AsObject;
@@ -663,7 +896,14 @@ export namespace GetSubnetRequest {
     vpcId: string,
     id: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 7,
   }
 }
 
@@ -672,6 +912,11 @@ export class GetSubnetResponse extends jspb.Message {
   setSubnet(value?: types_pb.Subnet): GetSubnetResponse;
   hasSubnet(): boolean;
   clearSubnet(): GetSubnetResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetSubnetResponse;
+  hasErr(): boolean;
+  clearErr(): GetSubnetResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetSubnetResponse.AsObject;
@@ -684,6 +929,7 @@ export class GetSubnetResponse extends jspb.Message {
 export namespace GetSubnetResponse {
   export type AsObject = {
     subnet?: types_pb.Subnet.AsObject,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -709,6 +955,11 @@ export class ListSubnetsRequest extends jspb.Message {
   getAccountId(): string;
   setAccountId(value: string): ListSubnetsRequest;
 
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListSubnetsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListSubnetsRequest;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListSubnetsRequest.AsObject;
   static toObject(includeInstance: boolean, msg: ListSubnetsRequest): ListSubnetsRequest.AsObject;
@@ -726,6 +977,12 @@ export namespace ListSubnetsRequest {
     labelsMap: Array<[string, string]>,
     region: string,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 8,
   }
 }
 
@@ -737,6 +994,11 @@ export class ListSubnetsResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListSubnetsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListSubnetsResponse;
+  hasErr(): boolean;
+  clearErr(): ListSubnetsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListSubnetsResponse.AsObject;
@@ -750,6 +1012,7 @@ export namespace ListSubnetsResponse {
   export type AsObject = {
     subnetsList: Array<types_pb.Subnet.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -763,8 +1026,16 @@ export class GetVPCIDForCIDRRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): GetVPCIDForCIDRRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): GetVPCIDForCIDRRequest;
+
   getAccountId(): string;
   setAccountId(value: string): GetVPCIDForCIDRRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetVPCIDForCIDRRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetVPCIDForCIDRRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetVPCIDForCIDRRequest.AsObject;
@@ -779,13 +1050,25 @@ export namespace GetVPCIDForCIDRRequest {
     provider: string,
     cidr: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
 export class GetVPCIDForCIDRResponse extends jspb.Message {
   getVpcId(): string;
   setVpcId(value: string): GetVPCIDForCIDRResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetVPCIDForCIDRResponse;
+  hasErr(): boolean;
+  clearErr(): GetVPCIDForCIDRResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetVPCIDForCIDRResponse.AsObject;
@@ -798,6 +1081,7 @@ export class GetVPCIDForCIDRResponse extends jspb.Message {
 export namespace GetVPCIDForCIDRResponse {
   export type AsObject = {
     vpcId: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -805,14 +1089,19 @@ export class GetCIDRsForLabelsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetCIDRsForLabelsRequest;
 
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): GetCIDRsForLabelsRequest;
-
   getRegion(): string;
   setRegion(value: string): GetCIDRsForLabelsRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): GetCIDRsForLabelsRequest;
+
   getAccountId(): string;
   setAccountId(value: string): GetCIDRsForLabelsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetCIDRsForLabelsRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetCIDRsForLabelsRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetCIDRsForLabelsRequest.AsObject;
@@ -825,9 +1114,15 @@ export class GetCIDRsForLabelsRequest extends jspb.Message {
 export namespace GetCIDRsForLabelsRequest {
   export type AsObject = {
     provider: string,
-    labelsMap: Array<[string, string]>,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 5,
   }
 }
 
@@ -836,6 +1131,11 @@ export class GetCIDRsForLabelsResponse extends jspb.Message {
   setCidrsList(value: Array<string>): GetCIDRsForLabelsResponse;
   clearCidrsList(): GetCIDRsForLabelsResponse;
   addCidrs(value: string, index?: number): GetCIDRsForLabelsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetCIDRsForLabelsResponse;
+  hasErr(): boolean;
+  clearErr(): GetCIDRsForLabelsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetCIDRsForLabelsResponse.AsObject;
@@ -848,6 +1148,7 @@ export class GetCIDRsForLabelsResponse extends jspb.Message {
 export namespace GetCIDRsForLabelsResponse {
   export type AsObject = {
     cidrsList: Array<string>,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -855,14 +1156,19 @@ export class GetIPsForLabelsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetIPsForLabelsRequest;
 
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): GetIPsForLabelsRequest;
-
   getRegion(): string;
   setRegion(value: string): GetIPsForLabelsRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): GetIPsForLabelsRequest;
+
   getAccountId(): string;
   setAccountId(value: string): GetIPsForLabelsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetIPsForLabelsRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetIPsForLabelsRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetIPsForLabelsRequest.AsObject;
@@ -875,9 +1181,15 @@ export class GetIPsForLabelsRequest extends jspb.Message {
 export namespace GetIPsForLabelsRequest {
   export type AsObject = {
     provider: string,
-    labelsMap: Array<[string, string]>,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 5,
   }
 }
 
@@ -886,6 +1198,11 @@ export class GetIPsForLabelsResponse extends jspb.Message {
   setIpsList(value: Array<string>): GetIPsForLabelsResponse;
   clearIpsList(): GetIPsForLabelsResponse;
   addIps(value: string, index?: number): GetIPsForLabelsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetIPsForLabelsResponse;
+  hasErr(): boolean;
+  clearErr(): GetIPsForLabelsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetIPsForLabelsResponse.AsObject;
@@ -898,6 +1215,7 @@ export class GetIPsForLabelsResponse extends jspb.Message {
 export namespace GetIPsForLabelsResponse {
   export type AsObject = {
     ipsList: Array<string>,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -917,6 +1235,11 @@ export class GetInstancesForLabelsRequest extends jspb.Message {
   getAccountId(): string;
   setAccountId(value: string): GetInstancesForLabelsRequest;
 
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetInstancesForLabelsRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetInstancesForLabelsRequest;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetInstancesForLabelsRequest.AsObject;
   static toObject(includeInstance: boolean, msg: GetInstancesForLabelsRequest): GetInstancesForLabelsRequest.AsObject;
@@ -932,6 +1255,12 @@ export namespace GetInstancesForLabelsRequest {
     labelsMap: Array<[string, string]>,
     region: string,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -940,6 +1269,11 @@ export class GetInstancesForLabelsResponse extends jspb.Message {
   setInstancesList(value: Array<types_pb.Instance>): GetInstancesForLabelsResponse;
   clearInstancesList(): GetInstancesForLabelsResponse;
   addInstances(value?: types_pb.Instance, index?: number): types_pb.Instance;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetInstancesForLabelsResponse;
+  hasErr(): boolean;
+  clearErr(): GetInstancesForLabelsResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetInstancesForLabelsResponse.AsObject;
@@ -952,6 +1286,7 @@ export class GetInstancesForLabelsResponse extends jspb.Message {
 export namespace GetInstancesForLabelsResponse {
   export type AsObject = {
     instancesList: Array<types_pb.Instance.AsObject>,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -968,8 +1303,16 @@ export class GetVPCIDWithTagRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): GetVPCIDWithTagRequest;
 
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): GetVPCIDWithTagRequest;
+
   getAccountId(): string;
   setAccountId(value: string): GetVPCIDWithTagRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetVPCIDWithTagRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetVPCIDWithTagRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetVPCIDWithTagRequest.AsObject;
@@ -985,13 +1328,25 @@ export namespace GetVPCIDWithTagRequest {
     key: string,
     value: string,
     region: string,
+    labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 7,
   }
 }
 
 export class GetVPCIDWithTagResponse extends jspb.Message {
   getVpcId(): string;
   setVpcId(value: string): GetVPCIDWithTagResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetVPCIDWithTagResponse;
+  hasErr(): boolean;
+  clearErr(): GetVPCIDWithTagResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): GetVPCIDWithTagResponse.AsObject;
@@ -1004,6 +1359,7 @@ export class GetVPCIDWithTagResponse extends jspb.Message {
 export namespace GetVPCIDWithTagResponse {
   export type AsObject = {
     vpcId: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -1023,6 +1379,11 @@ export class ListCloudClustersRequest extends jspb.Message {
   getAccountId(): string;
   setAccountId(value: string): ListCloudClustersRequest;
 
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListCloudClustersRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListCloudClustersRequest;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListCloudClustersRequest.AsObject;
   static toObject(includeInstance: boolean, msg: ListCloudClustersRequest): ListCloudClustersRequest.AsObject;
@@ -1038,6 +1399,12 @@ export namespace ListCloudClustersRequest {
     vpcId: string,
     labelsMap: Array<[string, string]>,
     accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
   }
 }
 
@@ -1049,6 +1416,11 @@ export class ListCloudClustersResponse extends jspb.Message {
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListCloudClustersResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListCloudClustersResponse;
+  hasErr(): boolean;
+  clearErr(): ListCloudClustersResponse;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): ListCloudClustersResponse.AsObject;
@@ -1062,6 +1434,7 @@ export namespace ListCloudClustersResponse {
   export type AsObject = {
     clustersList: Array<types_pb.Cluster.AsObject>,
     lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
   }
 }
 
@@ -1198,6 +1571,11 @@ export class SummaryResponse extends jspb.Message {
   hasStatuses(): boolean;
   clearStatuses(): SummaryResponse;
 
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): SummaryResponse;
+  hasErr(): boolean;
+  clearErr(): SummaryResponse;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SummaryResponse.AsObject;
   static toObject(includeInstance: boolean, msg: SummaryResponse): SummaryResponse.AsObject;
@@ -1210,6 +1588,7 @@ export namespace SummaryResponse {
   export type AsObject = {
     count?: Counters.AsObject,
     statuses?: StatusSummary.AsObject,
+    err?: types_pb.Error.AsObject,
   }
 }
 

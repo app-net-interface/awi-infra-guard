@@ -60,6 +60,9 @@ func (c *Client) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest
 }
 
 func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsRequest) ([]types.Subnet, error) {
+	c.logger.Infof("List Subnets")
+	c.creds = params.Creds
+	c.accountID = params.AccountId
 	builder := newFilterBuilder()
 	builder.withVPC(params.GetVpcId())
 	for k, v := range params.GetLabels() {
@@ -71,62 +74,71 @@ func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsReq
 	if params.GetCidr() != "" {
 		builder.withCIDR(params.GetCidr())
 	}
-	input := &ec2.DescribeSubnetsInput{
-		Filters: builder.build(),
-	}
+	filters := builder.build()
+
 	if params.GetRegion() == "" || params.GetRegion() == "all" {
 		var (
-			wg            sync.WaitGroup
-			allSubnets    []types.Subnet
-			resultChannel = make(chan []types.Subnet)
-			errorChannel  = make(chan error)
+			wg         sync.WaitGroup
+			allSubnets []types.Subnet
+			allErrors  []error
+
+			resultChannel = make(chan regionResult)
 		)
 
-		regionalClients, err := c.getAllClientsForProfile(params.GetAccountId())
+		regions, err := c.getAllRegions(ctx)
 		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
 			return nil, err
 		}
-		for regionName, awsRegionClient := range regionalClients {
+
+		for _, region := range regions {
 			wg.Add(1)
-			go func(regionName string, awsRegionClient awsClient) {
+			go func(regionName string) {
 				defer wg.Done()
-
-				out, err := awsRegionClient.ec2Client.DescribeSubnets(ctx, input)
-				if err != nil {
-					errorChannel <- fmt.Errorf("could not get AWS subnets: %v", err)
-					return
+				subnets, err := c.getSubnetsForRegion(ctx, *region.RegionName, filters)
+				resultChannel <- regionResult{
+					region:  *region.RegionName,
+					subnets: subnets,
+					err:     err,
 				}
-
-				subnets := convertSubnets(c.defaultAccountID, c.defaultRegion, params.GetAccountId(), regionName, out.Subnets)
-				resultChannel <- subnets
-			}(regionName, awsRegionClient)
+			}(*region.RegionName)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
-			close(errorChannel)
 		}()
 
-		for subnets := range resultChannel {
-			allSubnets = append(allSubnets, subnets...)
+		for result := range resultChannel {
+			if result.err != nil {
+				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+			} else {
+				allSubnets = append(allSubnets, result.subnets...)
+			}
 		}
 
-		if err := <-errorChannel; err != nil {
-			return nil, err
+		if len(allErrors) > 0 {
+			return allSubnets, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
 		return allSubnets, nil
 	}
+	return c.getSubnetsForRegion(ctx, params.Region, filters)
+}
 
-	client, err := c.getEC2Client(ctx, params.GetAccountId(), params.GetRegion())
+func (c *Client) getSubnetsForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.Subnet, error) {
+	client, err := c.getEC2Client(ctx, c.accountID, regionName)
 	if err != nil {
 		return nil, err
 	}
-	out, err := client.DescribeSubnets(ctx, input)
+	// Call DescribeVpcs operation
+	resp, err := client.DescribeSubnets(ctx, &ec2.DescribeSubnetsInput{
+		Filters: filters,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("could not get AWS subnets: %v", err)
+		return nil, err
 	}
-	return convertSubnets(c.defaultAccountID, c.defaultRegion, params.GetAccountId(), params.GetRegion(), out.Subnets), nil
+	return convertSubnets(c.defaultAccountID, c.defaultRegion, c.accountID, regionName, resp.Subnets), nil
 }
 
 func convertSubnets(defaultAccount, defaultRegion, account, region string, subnets []awstypes.Subnet) []types.Subnet {

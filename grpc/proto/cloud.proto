@@ -17,12 +17,11 @@
 
 syntax = "proto3";
 package infra;
-import "types.proto";
-
-
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
+import "types.proto";
+
 
 option go_package = "./;infrapb";
 
@@ -79,15 +78,18 @@ message ListAccountsRequest {
 
 message ListAccountsResponse {
     repeated Account accounts = 1;
+    Error err = 2;
 }
 
 message ListRegionsRequest {
     string provider = 1;
     string account_id = 2;
+    optional Credentials creds = 3;
 }
 
 message ListRegionsResponse {
     repeated Region regions = 1;
+    Error err = 2;
 }
 
 // ListVPC
@@ -96,11 +98,14 @@ message ListVPCRequest {
     string region = 2;
     map<string, string> labels = 3;
     string account_id = 4;
+    optional Credentials creds = 5;
+    
 }
 
 message ListVPCResponse {
     repeated VPC vpcs = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 // ListInstances
@@ -111,108 +116,134 @@ message ListInstancesRequest {
     map<string, string> labels = 4;
     string region = 5;
     string account_id = 6;
+    optional Credentials creds = 7;
 }
 
 message ListInstancesResponse {
     repeated Instance instances = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListACLsRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 message ListACLsResponse {
     repeated ACL acls = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListSecurityGroupsRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 message ListSecurityGroupsResponse {
     repeated SecurityGroup security_groups = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListRouteTablesRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 
 message ListRouteTablesResponse {
     repeated RouteTable route_tables = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListNATGatewaysRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 message ListNATGatewaysResponse {
     repeated NATGateway nat_gateways = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListRoutersRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 message ListRoutersResponse {
     repeated Router routers = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListInternetGatewaysRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 message ListInternetGatewaysResponse {
     repeated IGW igws = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListVPCEndpointsResponse {
     repeated VPCEndpoint veps = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListPublicIPsRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 message ListPublicIPsResponse {
     repeated PublicIP public_ips = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message ListVPCEndpointsRequest {
     string provider = 1;
     string vpc_id = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 // GetSubnet
@@ -221,11 +252,14 @@ message GetSubnetRequest {
     string vpc_id = 2;
     string id = 3;
     string region = 4;
-    string account_id = 5;
+    map<string, string> labels = 5;
+    string account_id = 6;
+    optional Credentials creds = 7;
 }
 
 message GetSubnetResponse {
     Subnet subnet = 1;
+    Error err = 3;
 }
 
 // ListSubnets
@@ -237,11 +271,13 @@ message ListSubnetsRequest {
     map<string, string> labels = 5;
     string region = 6;
     string account_id = 7;
+    optional Credentials creds = 8;
 }
 
 message ListSubnetsResponse {
     repeated Subnet subnets = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 // GetVPCIDForCIDR
@@ -249,35 +285,44 @@ message GetVPCIDForCIDRRequest {
     string provider = 1;
     string cidr = 2;
     string region = 3;
-    string account_id = 4;
+    map<string, string> labels = 4;
+    string account_id = 5;
+
+    optional Credentials creds = 6;
 }
 
 message GetVPCIDForCIDRResponse {
     string vpc_id = 1;
+    Error err = 3;
 }
 
 // GetCIDRsForLabels
 message GetCIDRsForLabelsRequest {
     string provider = 1;
-    map<string, string> labels = 2;
-    string region = 3;
+    string region = 2;
+    map<string, string> labels = 3;
     string account_id = 4;
+    optional Credentials creds = 5;
 }
 
 message GetCIDRsForLabelsResponse {
     repeated string cidrs = 1;
+    Error err = 3;
 }
 
 // GetIPsForLabels
 message GetIPsForLabelsRequest {
     string provider = 1;
-    map<string, string> labels = 2;
-    string region = 3;
+    string region = 2;
+    map<string, string> labels = 3;
+
     string account_id = 4;
+    optional Credentials creds = 5;
 }
 
 message GetIPsForLabelsResponse {
     repeated string ips = 1;
+    Error err = 3;
 }
 
 // GetInstancesForLabels
@@ -287,10 +332,12 @@ message GetInstancesForLabelsRequest {
     map<string, string> labels = 3;
     string region = 4;
     string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 message GetInstancesForLabelsResponse {
     repeated Instance instances = 1;
+    Error err = 3;
 }
 
 // GetVPCIDWithTag
@@ -299,11 +346,15 @@ message GetVPCIDWithTagRequest {
     string key = 2;
     string value = 3;
     string region = 4;
-    string account_id = 5;
+    map<string, string> labels = 5;
+
+    string account_id = 6;
+    optional Credentials creds = 7;
 }
 
 message GetVPCIDWithTagResponse {
     string vpc_id = 1;
+    Error err = 3;
 }
 
 message ListCloudClustersRequest {
@@ -312,11 +363,13 @@ message ListCloudClustersRequest {
     string vpc_id = 3;
     map<string, string> labels = 4;
     string account_id = 5;
+    optional Credentials creds = 6;
 }
 
 message ListCloudClustersResponse {
     repeated Cluster clusters = 1;
     string last_sync_time = 2;
+    Error err = 3;
 }
 
 message SummaryRequest {
@@ -351,6 +404,7 @@ message StatusSummary {
 message SummaryResponse {
     Counters count = 1;
     StatusSummary statuses = 2;
+    Error err = 3;
 }
 
 // Request message for searching resources

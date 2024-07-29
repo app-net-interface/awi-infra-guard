@@ -31,67 +31,77 @@ import (
 )
 
 func (c *Client) ListInstances(ctx context.Context, params *infrapb.ListInstancesRequest) ([]types.Instance, error) {
+	c.logger.Infof("List instances")
+	c.creds = params.Creds
+	c.accountID = params.AccountId
+
 	builder := newFilterBuilder()
 	builder.withVPC(params.GetVpcId())
 	for k, v := range params.GetLabels() {
 		builder.withTag(k, v)
 	}
 	builder.withAvailabilityZone(params.GetZone())
-	in := &ec2.DescribeInstancesInput{
-		Filters: builder.build(),
-	}
-	if params.GetRegion() == "" || params.GetRegion() == "all" {
+	filters := builder.build()
+	if params.Region == "" || params.GetRegion() == "all" {
 		var (
 			wg            sync.WaitGroup
 			allInstances  []types.Instance
-			resultChannel = make(chan []types.Instance)
-			errorChannel  = make(chan error)
+			allErrors     []error
+			resultChannel = make(chan regionResult)
 		)
-
-		regionalClients, err := c.getAllClientsForProfile(params.GetAccountId())
+		regions, err := c.getAllRegions(ctx)
 		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
 			return nil, err
 		}
-		for regionName, awsRegionClient := range regionalClients {
+		for _, region := range regions {
 			wg.Add(1)
-			go func(regionName string, awsRegionClient awsClient) {
+			go func(regionName string) {
 				defer wg.Done()
-
-				out, err := awsRegionClient.ec2Client.DescribeInstances(ctx, in)
-				if err != nil {
-					errorChannel <- fmt.Errorf("could not get AWS instances: %v", err)
-					return
+				instances, err := c.getInstancesForRegion(ctx, regionName, filters)
+				resultChannel <- regionResult{
+					region:    regionName,
+					instances: instances,
+					err:       err,
 				}
-
-				instances := convertInstances(c.defaultAccountID, c.defaultRegion, params.GetAccountId(), regionName, out.Reservations)
-				resultChannel <- instances
-			}(regionName, awsRegionClient)
+			}(*region.RegionName)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
-			close(errorChannel)
 		}()
 
-		for instances := range resultChannel {
-			allInstances = append(allInstances, instances...)
+		for result := range resultChannel {
+			if result.err != nil {
+				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+			} else {
+				allInstances = append(allInstances, result.instances...)
+			}
 		}
 
-		if err := <-errorChannel; err != nil {
-			return nil, err
+		if len(allErrors) > 0 {
+			return allInstances, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
 		return allInstances, nil
 	}
-	client, err := c.getEC2Client(ctx, params.GetAccountId(), params.GetRegion())
+	return c.getInstancesForRegion(ctx, params.Region, filters)
+}
+
+func (c *Client) getInstancesForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.Instance, error) {
+	client, err := c.getEC2Client(ctx, c.accountID, regionName)
 	if err != nil {
 		return nil, err
 	}
-	out, err := client.DescribeInstances(ctx, in)
+	// Call DescribeVpcs operation
+	resp, err := client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
+		Filters: filters,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("could not get AWS instances: %v", err)
+		return nil, err
 	}
-	return convertInstances(c.defaultAccountID, c.defaultRegion, params.GetAccountId(), params.GetRegion(), out.Reservations), nil
+	return convertInstances(c.defaultAccountID, c.defaultRegion, c.accountID, regionName, resp.Reservations), nil
 }
 
 func convertInstances(defaultAccount, defaultRegion, account, region string, reservations []awstypes.Reservation) []types.Instance {

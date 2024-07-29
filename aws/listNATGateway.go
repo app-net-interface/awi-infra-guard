@@ -24,66 +24,74 @@ import (
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGatewaysRequest) ([]types.NATGateway, error) {
-	var natGateways []types.NATGateway
-	// Create a wait group to synchronize the goroutines
-	var wg sync.WaitGroup
-	// Create a mutex to synchronize access to natGateways slice
-	var mu sync.Mutex
-	// List all regions to ensure NAT Gateways from every region are considered
-	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
-		AllRegions: aws.Bool(true),
-	})
-	if err != nil {
-		c.logger.Errorf("Unable to describe regions, %v", err)
-		return natGateways, err
-	}
-	for _, region := range regionResult.Regions {
-		wg.Add(1)
-		go func(regionName string) {
-			defer wg.Done()
+	c.creds = params.Creds
+	c.accountID = params.AccountId
 
-			c.logger.Debugf("Listing NAT Gateways for AWS account %s and region %s ", params.AccountId, regionName)
-			regionalCfg, err := config.LoadDefaultConfig(ctx,
-				config.WithRegion(regionName),
-			)
-			if err != nil {
-				c.logger.Errorf("Unable to load SDK config for region %s, %v", regionName, err)
-				return
+	builder := newFilterBuilder()
+	builder.withVPC(params.GetVpcId())
+	for k, v := range params.GetLabels() {
+		builder.withTag(k, v)
+	}
+	filters := builder.build()
+	if params.GetRegion() == "" || params.GetRegion() == "all" {
+		var (
+			wg            sync.WaitGroup
+			allNGWs       []types.NATGateway
+			allErrors     []error
+			resultChannel = make(chan regionResult)
+		)
+
+		// List all regions to ensure Internet Gateways from every region are considered
+		regions, err := c.getAllRegions(ctx)
+		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
+			return nil, err
+		}
+
+		for _, region := range regions {
+			wg.Add(1)
+			go func(regionName string) {
+				defer wg.Done()
+				regNgws, err := c.getNATGatewaysForRegion(ctx, regionName, filters)
+				resultChannel <- regionResult{
+					region: *region.RegionName,
+					ngws:   regNgws,
+					err:    err,
+				}
+			}(*region.RegionName)
+		}
+		go func() {
+			wg.Wait()
+			close(resultChannel)
+		}()
+
+		for result := range resultChannel {
+			if result.err != nil {
+				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+			} else {
+				allNGWs = append(allNGWs, result.ngws...)
 			}
+		}
 
-			ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
-			ngs, err := c.ListNATGatewaysInRegion(ec2RegionalClient, regionName)
-			if err != nil {
-				c.logger.Errorf("Error listing NAT Gateways in region %s: %v", regionName, err)
-				return
-			}
-
-			// Lock the mutex before appending to natGateways slice
-			mu.Lock()
-			natGateways = append(natGateways, ngs...)
-			mu.Unlock()
-		}(*region.RegionName)
+		if len(allErrors) > 0 {
+			return allNGWs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
+		}
 	}
-
-	// Wait for all goroutines to finish
-	wg.Wait()
-
-	// Set the AccountID for each NAT gateway
-	for i := range natGateways {
-		natGateways[i].AccountID = params.AccountId
-	}
-
-	return natGateways, nil
+	return c.getNATGatewaysForRegion(ctx, params.Region, filters)
 }
 
-func (c *Client) ListNATGatewaysInRegion(client *ec2.Client, region string) ([]types.NATGateway, error) {
+func (c *Client) getNATGatewaysForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.NATGateway, error) {
 	var natGateways []types.NATGateway
+	client, err := c.getEC2Client(ctx, c.accountID, regionName)
+	if err != nil {
+		return nil, err
+	}
 	paginator := ec2.NewDescribeNatGatewaysPaginator(client, &ec2.DescribeNatGatewaysInput{})
 
 	for paginator.HasMorePages() {
@@ -118,14 +126,15 @@ func (c *Client) ListNATGatewaysInRegion(client *ec2.Client, region string) ([]t
 				Provider:  c.GetName(),
 				Name:      name,
 				VpcId:     *ngw.VpcId,
-				Region:    region,
+				Region:    regionName,
 				State:     string(ngw.State),
 				PublicIp:  publicIp,
 				PrivateIp: privateIp,
 				SubnetId:  convertString(ngw.SubnetId),
+				AccountID: c.accountID,
 				Labels:    labels,
 				CreatedAt: *ngw.CreateTime,
-				SelfLink:  fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#NatGatewayDetails:natGatewayId=%s", region, region, *ngw.NatGatewayId),
+				SelfLink:  fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#NatGatewayDetails:natGatewayId=%s", regionName, regionName, *ngw.NatGatewayId),
 			})
 		}
 	}

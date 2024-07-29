@@ -15,12 +15,12 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = (function() { return this || window || global || self || Function('return this')(); }).call(null);
 
-var types_pb = require('./types_pb.js');
-goog.object.extend(proto, types_pb);
 var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
 goog.object.extend(proto, google_protobuf_timestamp_pb);
 var google_protobuf_field_mask_pb = require('google-protobuf/google/protobuf/field_mask_pb.js');
 goog.object.extend(proto, google_protobuf_field_mask_pb);
+var types_pb = require('./types_pb.js');
+goog.object.extend(proto, types_pb);
 goog.exportSymbol('proto.infra.Counters', null, global);
 goog.exportSymbol('proto.infra.GetCIDRsForLabelsRequest', null, global);
 goog.exportSymbol('proto.infra.GetCIDRsForLabelsResponse', null, global);
@@ -1203,7 +1203,8 @@ proto.infra.ListAccountsResponse.prototype.toObject = function(opt_includeInstan
 proto.infra.ListAccountsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     accountsList: jspb.Message.toObjectList(msg.getAccountsList(),
-    types_pb.Account.toObject, includeInstance)
+    types_pb.Account.toObject, includeInstance),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1245,6 +1246,11 @@ proto.infra.ListAccountsResponse.deserializeBinaryFromReader = function(msg, rea
       reader.readMessage(value,types_pb.Account.deserializeBinaryFromReader);
       msg.addAccounts(value);
       break;
+    case 2:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1280,6 +1286,14 @@ proto.infra.ListAccountsResponse.serializeBinaryToWriter = function(message, wri
       1,
       f,
       types_pb.Account.serializeBinaryToWriter
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      2,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -1323,6 +1337,43 @@ proto.infra.ListAccountsResponse.prototype.clearAccountsList = function() {
 };
 
 
+/**
+ * optional Error err = 2;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListAccountsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 2));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListAccountsResponse} returns this
+*/
+proto.infra.ListAccountsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListAccountsResponse} returns this
+ */
+proto.infra.ListAccountsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListAccountsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
 
 
 
@@ -1356,7 +1407,8 @@ proto.infra.ListRegionsRequest.prototype.toObject = function(opt_includeInstance
 proto.infra.ListRegionsRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 2, "")
+    accountId: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1401,6 +1453,11 @@ proto.infra.ListRegionsRequest.deserializeBinaryFromReader = function(msg, reade
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
       break;
+    case 3:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1444,6 +1501,14 @@ proto.infra.ListRegionsRequest.serializeBinaryToWriter = function(message, write
       f
     );
   }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
+    );
+  }
 };
 
 
@@ -1480,6 +1545,43 @@ proto.infra.ListRegionsRequest.prototype.getAccountId = function() {
  */
 proto.infra.ListRegionsRequest.prototype.setAccountId = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional Credentials creds = 3;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListRegionsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListRegionsRequest} returns this
+*/
+proto.infra.ListRegionsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListRegionsRequest} returns this
+ */
+proto.infra.ListRegionsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListRegionsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 3) != null;
 };
 
 
@@ -1523,7 +1625,8 @@ proto.infra.ListRegionsResponse.prototype.toObject = function(opt_includeInstanc
 proto.infra.ListRegionsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     regionsList: jspb.Message.toObjectList(msg.getRegionsList(),
-    types_pb.Region.toObject, includeInstance)
+    types_pb.Region.toObject, includeInstance),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1565,6 +1668,11 @@ proto.infra.ListRegionsResponse.deserializeBinaryFromReader = function(msg, read
       reader.readMessage(value,types_pb.Region.deserializeBinaryFromReader);
       msg.addRegions(value);
       break;
+    case 2:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1600,6 +1708,14 @@ proto.infra.ListRegionsResponse.serializeBinaryToWriter = function(message, writ
       1,
       f,
       types_pb.Region.serializeBinaryToWriter
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      2,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -1643,6 +1759,43 @@ proto.infra.ListRegionsResponse.prototype.clearRegionsList = function() {
 };
 
 
+/**
+ * optional Error err = 2;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListRegionsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 2));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListRegionsResponse} returns this
+*/
+proto.infra.ListRegionsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 2, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListRegionsResponse} returns this
+ */
+proto.infra.ListRegionsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListRegionsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 2) != null;
+};
+
+
 
 
 
@@ -1678,7 +1831,8 @@ proto.infra.ListVPCRequest.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     region: jspb.Message.getFieldWithDefault(msg, 2, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    accountId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1733,6 +1887,11 @@ proto.infra.ListVPCRequest.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
       break;
+    case 5:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1785,6 +1944,14 @@ proto.infra.ListVPCRequest.serializeBinaryToWriter = function(message, writer) {
     writer.writeString(
       4,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      5,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -1866,6 +2033,43 @@ proto.infra.ListVPCRequest.prototype.setAccountId = function(value) {
 };
 
 
+/**
+ * optional Credentials creds = 5;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListVPCRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 5));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListVPCRequest} returns this
+*/
+proto.infra.ListVPCRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 5, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListVPCRequest} returns this
+ */
+proto.infra.ListVPCRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListVPCRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 5) != null;
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -1907,7 +2111,8 @@ proto.infra.ListVPCResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     vpcsList: jspb.Message.toObjectList(msg.getVpcsList(),
     types_pb.VPC.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1953,6 +2158,11 @@ proto.infra.ListVPCResponse.deserializeBinaryFromReader = function(msg, reader) 
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -1995,6 +2205,14 @@ proto.infra.ListVPCResponse.serializeBinaryToWriter = function(message, writer) 
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -2056,6 +2274,43 @@ proto.infra.ListVPCResponse.prototype.setLastSyncTime = function(value) {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListVPCResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListVPCResponse} returns this
+*/
+proto.infra.ListVPCResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListVPCResponse} returns this
+ */
+proto.infra.ListVPCResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListVPCResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -2093,7 +2348,8 @@ proto.infra.ListInstancesRequest.toObject = function(includeInstance, msg) {
     zone: jspb.Message.getFieldWithDefault(msg, 3, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     region: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 6, "")
+    accountId: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2155,6 +2411,11 @@ proto.infra.ListInstancesRequest.deserializeBinaryFromReader = function(msg, rea
     case 6:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 7:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -2222,6 +2483,14 @@ proto.infra.ListInstancesRequest.serializeBinaryToWriter = function(message, wri
     writer.writeString(
       6,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      7,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -2339,6 +2608,43 @@ proto.infra.ListInstancesRequest.prototype.setAccountId = function(value) {
 };
 
 
+/**
+ * optional Credentials creds = 7;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListInstancesRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 7));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListInstancesRequest} returns this
+*/
+proto.infra.ListInstancesRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 7, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListInstancesRequest} returns this
+ */
+proto.infra.ListInstancesRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListInstancesRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 7) != null;
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -2380,7 +2686,8 @@ proto.infra.ListInstancesResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     instancesList: jspb.Message.toObjectList(msg.getInstancesList(),
     types_pb.Instance.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2426,6 +2733,11 @@ proto.infra.ListInstancesResponse.deserializeBinaryFromReader = function(msg, re
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -2468,6 +2780,14 @@ proto.infra.ListInstancesResponse.serializeBinaryToWriter = function(message, wr
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -2529,6 +2849,43 @@ proto.infra.ListInstancesResponse.prototype.setLastSyncTime = function(value) {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListInstancesResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListInstancesResponse} returns this
+*/
+proto.infra.ListInstancesResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListInstancesResponse} returns this
+ */
+proto.infra.ListInstancesResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListInstancesResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -2564,7 +2921,9 @@ proto.infra.ListACLsRequest.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2614,8 +2973,19 @@ proto.infra.ListACLsRequest.deserializeBinaryFromReader = function(msg, reader) 
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -2667,11 +3037,23 @@ proto.infra.ListACLsRequest.serializeBinaryToWriter = function(message, writer) 
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -2732,11 +3114,33 @@ proto.infra.ListACLsRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.ListACLsRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.ListACLsRequest} returns this
+ */
+proto.infra.ListACLsRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.ListACLsRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -2745,7 +3149,44 @@ proto.infra.ListACLsRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.ListACLsRequest} returns this
  */
 proto.infra.ListACLsRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListACLsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListACLsRequest} returns this
+*/
+proto.infra.ListACLsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListACLsRequest} returns this
+ */
+proto.infra.ListACLsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListACLsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -2790,7 +3231,8 @@ proto.infra.ListACLsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     aclsList: jspb.Message.toObjectList(msg.getAclsList(),
     types_pb.ACL.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2836,6 +3278,11 @@ proto.infra.ListACLsResponse.deserializeBinaryFromReader = function(msg, reader)
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -2878,6 +3325,14 @@ proto.infra.ListACLsResponse.serializeBinaryToWriter = function(message, writer)
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -2939,6 +3394,43 @@ proto.infra.ListACLsResponse.prototype.setLastSyncTime = function(value) {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListACLsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListACLsResponse} returns this
+*/
+proto.infra.ListACLsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListACLsResponse} returns this
+ */
+proto.infra.ListACLsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListACLsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -2974,7 +3466,9 @@ proto.infra.ListSecurityGroupsRequest.toObject = function(includeInstance, msg) 
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -3024,8 +3518,19 @@ proto.infra.ListSecurityGroupsRequest.deserializeBinaryFromReader = function(msg
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -3077,11 +3582,23 @@ proto.infra.ListSecurityGroupsRequest.serializeBinaryToWriter = function(message
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -3142,11 +3659,33 @@ proto.infra.ListSecurityGroupsRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.ListSecurityGroupsRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.ListSecurityGroupsRequest} returns this
+ */
+proto.infra.ListSecurityGroupsRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.ListSecurityGroupsRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -3155,7 +3694,44 @@ proto.infra.ListSecurityGroupsRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.ListSecurityGroupsRequest} returns this
  */
 proto.infra.ListSecurityGroupsRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListSecurityGroupsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListSecurityGroupsRequest} returns this
+*/
+proto.infra.ListSecurityGroupsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListSecurityGroupsRequest} returns this
+ */
+proto.infra.ListSecurityGroupsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListSecurityGroupsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -3200,7 +3776,8 @@ proto.infra.ListSecurityGroupsResponse.toObject = function(includeInstance, msg)
   var f, obj = {
     securityGroupsList: jspb.Message.toObjectList(msg.getSecurityGroupsList(),
     types_pb.SecurityGroup.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -3246,6 +3823,11 @@ proto.infra.ListSecurityGroupsResponse.deserializeBinaryFromReader = function(ms
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -3288,6 +3870,14 @@ proto.infra.ListSecurityGroupsResponse.serializeBinaryToWriter = function(messag
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -3349,6 +3939,43 @@ proto.infra.ListSecurityGroupsResponse.prototype.setLastSyncTime = function(valu
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListSecurityGroupsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListSecurityGroupsResponse} returns this
+*/
+proto.infra.ListSecurityGroupsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListSecurityGroupsResponse} returns this
+ */
+proto.infra.ListSecurityGroupsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListSecurityGroupsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -3384,7 +4011,9 @@ proto.infra.ListRouteTablesRequest.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -3434,8 +4063,19 @@ proto.infra.ListRouteTablesRequest.deserializeBinaryFromReader = function(msg, r
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -3487,11 +4127,23 @@ proto.infra.ListRouteTablesRequest.serializeBinaryToWriter = function(message, w
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -3552,11 +4204,33 @@ proto.infra.ListRouteTablesRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.ListRouteTablesRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.ListRouteTablesRequest} returns this
+ */
+proto.infra.ListRouteTablesRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.ListRouteTablesRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -3565,7 +4239,44 @@ proto.infra.ListRouteTablesRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.ListRouteTablesRequest} returns this
  */
 proto.infra.ListRouteTablesRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListRouteTablesRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListRouteTablesRequest} returns this
+*/
+proto.infra.ListRouteTablesRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListRouteTablesRequest} returns this
+ */
+proto.infra.ListRouteTablesRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListRouteTablesRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -3610,7 +4321,8 @@ proto.infra.ListRouteTablesResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     routeTablesList: jspb.Message.toObjectList(msg.getRouteTablesList(),
     types_pb.RouteTable.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -3656,6 +4368,11 @@ proto.infra.ListRouteTablesResponse.deserializeBinaryFromReader = function(msg, 
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -3698,6 +4415,14 @@ proto.infra.ListRouteTablesResponse.serializeBinaryToWriter = function(message, 
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -3759,6 +4484,43 @@ proto.infra.ListRouteTablesResponse.prototype.setLastSyncTime = function(value) 
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListRouteTablesResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListRouteTablesResponse} returns this
+*/
+proto.infra.ListRouteTablesResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListRouteTablesResponse} returns this
+ */
+proto.infra.ListRouteTablesResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListRouteTablesResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -3794,7 +4556,9 @@ proto.infra.ListNATGatewaysRequest.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -3844,8 +4608,19 @@ proto.infra.ListNATGatewaysRequest.deserializeBinaryFromReader = function(msg, r
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -3897,11 +4672,23 @@ proto.infra.ListNATGatewaysRequest.serializeBinaryToWriter = function(message, w
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -3962,11 +4749,33 @@ proto.infra.ListNATGatewaysRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.ListNATGatewaysRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.ListNATGatewaysRequest} returns this
+ */
+proto.infra.ListNATGatewaysRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.ListNATGatewaysRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -3975,7 +4784,44 @@ proto.infra.ListNATGatewaysRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.ListNATGatewaysRequest} returns this
  */
 proto.infra.ListNATGatewaysRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListNATGatewaysRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListNATGatewaysRequest} returns this
+*/
+proto.infra.ListNATGatewaysRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListNATGatewaysRequest} returns this
+ */
+proto.infra.ListNATGatewaysRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListNATGatewaysRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -4020,7 +4866,8 @@ proto.infra.ListNATGatewaysResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     natGatewaysList: jspb.Message.toObjectList(msg.getNatGatewaysList(),
     types_pb.NATGateway.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4066,6 +4913,11 @@ proto.infra.ListNATGatewaysResponse.deserializeBinaryFromReader = function(msg, 
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -4108,6 +4960,14 @@ proto.infra.ListNATGatewaysResponse.serializeBinaryToWriter = function(message, 
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -4169,6 +5029,43 @@ proto.infra.ListNATGatewaysResponse.prototype.setLastSyncTime = function(value) 
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListNATGatewaysResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListNATGatewaysResponse} returns this
+*/
+proto.infra.ListNATGatewaysResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListNATGatewaysResponse} returns this
+ */
+proto.infra.ListNATGatewaysResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListNATGatewaysResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -4204,7 +5101,9 @@ proto.infra.ListRoutersRequest.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4254,8 +5153,19 @@ proto.infra.ListRoutersRequest.deserializeBinaryFromReader = function(msg, reade
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -4307,11 +5217,23 @@ proto.infra.ListRoutersRequest.serializeBinaryToWriter = function(message, write
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -4372,11 +5294,33 @@ proto.infra.ListRoutersRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.ListRoutersRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.ListRoutersRequest} returns this
+ */
+proto.infra.ListRoutersRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.ListRoutersRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -4385,7 +5329,44 @@ proto.infra.ListRoutersRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.ListRoutersRequest} returns this
  */
 proto.infra.ListRoutersRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListRoutersRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListRoutersRequest} returns this
+*/
+proto.infra.ListRoutersRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListRoutersRequest} returns this
+ */
+proto.infra.ListRoutersRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListRoutersRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -4430,7 +5411,8 @@ proto.infra.ListRoutersResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     routersList: jspb.Message.toObjectList(msg.getRoutersList(),
     types_pb.Router.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4476,6 +5458,11 @@ proto.infra.ListRoutersResponse.deserializeBinaryFromReader = function(msg, read
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -4518,6 +5505,14 @@ proto.infra.ListRoutersResponse.serializeBinaryToWriter = function(message, writ
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -4579,6 +5574,43 @@ proto.infra.ListRoutersResponse.prototype.setLastSyncTime = function(value) {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListRoutersResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListRoutersResponse} returns this
+*/
+proto.infra.ListRoutersResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListRoutersResponse} returns this
+ */
+proto.infra.ListRoutersResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListRoutersResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -4614,7 +5646,9 @@ proto.infra.ListInternetGatewaysRequest.toObject = function(includeInstance, msg
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4664,8 +5698,19 @@ proto.infra.ListInternetGatewaysRequest.deserializeBinaryFromReader = function(m
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -4717,11 +5762,23 @@ proto.infra.ListInternetGatewaysRequest.serializeBinaryToWriter = function(messa
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -4782,11 +5839,33 @@ proto.infra.ListInternetGatewaysRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.ListInternetGatewaysRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.ListInternetGatewaysRequest} returns this
+ */
+proto.infra.ListInternetGatewaysRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.ListInternetGatewaysRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -4795,7 +5874,44 @@ proto.infra.ListInternetGatewaysRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.ListInternetGatewaysRequest} returns this
  */
 proto.infra.ListInternetGatewaysRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListInternetGatewaysRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListInternetGatewaysRequest} returns this
+*/
+proto.infra.ListInternetGatewaysRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListInternetGatewaysRequest} returns this
+ */
+proto.infra.ListInternetGatewaysRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListInternetGatewaysRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -4840,7 +5956,8 @@ proto.infra.ListInternetGatewaysResponse.toObject = function(includeInstance, ms
   var f, obj = {
     igwsList: jspb.Message.toObjectList(msg.getIgwsList(),
     types_pb.IGW.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4886,6 +6003,11 @@ proto.infra.ListInternetGatewaysResponse.deserializeBinaryFromReader = function(
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -4928,6 +6050,14 @@ proto.infra.ListInternetGatewaysResponse.serializeBinaryToWriter = function(mess
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -4989,6 +6119,43 @@ proto.infra.ListInternetGatewaysResponse.prototype.setLastSyncTime = function(va
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListInternetGatewaysResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListInternetGatewaysResponse} returns this
+*/
+proto.infra.ListInternetGatewaysResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListInternetGatewaysResponse} returns this
+ */
+proto.infra.ListInternetGatewaysResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListInternetGatewaysResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -5030,7 +6197,8 @@ proto.infra.ListVPCEndpointsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     vepsList: jspb.Message.toObjectList(msg.getVepsList(),
     types_pb.VPCEndpoint.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5076,6 +6244,11 @@ proto.infra.ListVPCEndpointsResponse.deserializeBinaryFromReader = function(msg,
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -5118,6 +6291,14 @@ proto.infra.ListVPCEndpointsResponse.serializeBinaryToWriter = function(message,
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -5179,6 +6360,43 @@ proto.infra.ListVPCEndpointsResponse.prototype.setLastSyncTime = function(value)
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListVPCEndpointsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListVPCEndpointsResponse} returns this
+*/
+proto.infra.ListVPCEndpointsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListVPCEndpointsResponse} returns this
+ */
+proto.infra.ListVPCEndpointsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListVPCEndpointsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -5214,7 +6432,9 @@ proto.infra.ListPublicIPsRequest.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5264,8 +6484,19 @@ proto.infra.ListPublicIPsRequest.deserializeBinaryFromReader = function(msg, rea
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -5317,11 +6548,23 @@ proto.infra.ListPublicIPsRequest.serializeBinaryToWriter = function(message, wri
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -5382,11 +6625,33 @@ proto.infra.ListPublicIPsRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.ListPublicIPsRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.ListPublicIPsRequest} returns this
+ */
+proto.infra.ListPublicIPsRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.ListPublicIPsRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -5395,7 +6660,44 @@ proto.infra.ListPublicIPsRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.ListPublicIPsRequest} returns this
  */
 proto.infra.ListPublicIPsRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListPublicIPsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListPublicIPsRequest} returns this
+*/
+proto.infra.ListPublicIPsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListPublicIPsRequest} returns this
+ */
+proto.infra.ListPublicIPsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListPublicIPsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -5440,7 +6742,8 @@ proto.infra.ListPublicIPsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     publicIpsList: jspb.Message.toObjectList(msg.getPublicIpsList(),
     types_pb.PublicIP.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5486,6 +6789,11 @@ proto.infra.ListPublicIPsResponse.deserializeBinaryFromReader = function(msg, re
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -5528,6 +6836,14 @@ proto.infra.ListPublicIPsResponse.serializeBinaryToWriter = function(message, wr
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -5589,6 +6905,43 @@ proto.infra.ListPublicIPsResponse.prototype.setLastSyncTime = function(value) {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListPublicIPsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListPublicIPsResponse} returns this
+*/
+proto.infra.ListPublicIPsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListPublicIPsResponse} returns this
+ */
+proto.infra.ListPublicIPsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListPublicIPsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -5624,7 +6977,9 @@ proto.infra.ListVPCEndpointsRequest.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5674,8 +7029,19 @@ proto.infra.ListVPCEndpointsRequest.deserializeBinaryFromReader = function(msg, 
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -5727,11 +7093,23 @@ proto.infra.ListVPCEndpointsRequest.serializeBinaryToWriter = function(message, 
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -5792,11 +7170,33 @@ proto.infra.ListVPCEndpointsRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.ListVPCEndpointsRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.ListVPCEndpointsRequest} returns this
+ */
+proto.infra.ListVPCEndpointsRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.ListVPCEndpointsRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -5805,7 +7205,44 @@ proto.infra.ListVPCEndpointsRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.ListVPCEndpointsRequest} returns this
  */
 proto.infra.ListVPCEndpointsRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListVPCEndpointsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListVPCEndpointsRequest} returns this
+*/
+proto.infra.ListVPCEndpointsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListVPCEndpointsRequest} returns this
+ */
+proto.infra.ListVPCEndpointsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListVPCEndpointsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -5845,7 +7282,9 @@ proto.infra.GetSubnetRequest.toObject = function(includeInstance, msg) {
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     id: jspb.Message.getFieldWithDefault(msg, 3, ""),
     region: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 5, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5899,8 +7338,19 @@ proto.infra.GetSubnetRequest.deserializeBinaryFromReader = function(msg, reader)
       msg.setRegion(value);
       break;
     case 5:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 6:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 7:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -5959,11 +7409,23 @@ proto.infra.GetSubnetRequest.serializeBinaryToWriter = function(message, writer)
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(5, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      5,
+      6,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      7,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -6042,11 +7504,33 @@ proto.infra.GetSubnetRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 5;
+ * map<string, string> labels = 5;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.GetSubnetRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 5, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.GetSubnetRequest} returns this
+ */
+proto.infra.GetSubnetRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 6;
  * @return {string}
  */
 proto.infra.GetSubnetRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
@@ -6055,7 +7539,44 @@ proto.infra.GetSubnetRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.GetSubnetRequest} returns this
  */
 proto.infra.GetSubnetRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 5, value);
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional Credentials creds = 7;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.GetSubnetRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 7));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.GetSubnetRequest} returns this
+*/
+proto.infra.GetSubnetRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 7, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetSubnetRequest} returns this
+ */
+proto.infra.GetSubnetRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetSubnetRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 7) != null;
 };
 
 
@@ -6091,7 +7612,8 @@ proto.infra.GetSubnetResponse.prototype.toObject = function(opt_includeInstance)
  */
 proto.infra.GetSubnetResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    subnet: (f = msg.getSubnet()) && types_pb.Subnet.toObject(includeInstance, f)
+    subnet: (f = msg.getSubnet()) && types_pb.Subnet.toObject(includeInstance, f),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -6133,6 +7655,11 @@ proto.infra.GetSubnetResponse.deserializeBinaryFromReader = function(msg, reader
       reader.readMessage(value,types_pb.Subnet.deserializeBinaryFromReader);
       msg.setSubnet(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -6168,6 +7695,14 @@ proto.infra.GetSubnetResponse.serializeBinaryToWriter = function(message, writer
       1,
       f,
       types_pb.Subnet.serializeBinaryToWriter
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -6210,6 +7745,43 @@ proto.infra.GetSubnetResponse.prototype.hasSubnet = function() {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.GetSubnetResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.GetSubnetResponse} returns this
+*/
+proto.infra.GetSubnetResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetSubnetResponse} returns this
+ */
+proto.infra.GetSubnetResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetSubnetResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -6248,7 +7820,8 @@ proto.infra.ListSubnetsRequest.toObject = function(includeInstance, msg) {
     cidr: jspb.Message.getFieldWithDefault(msg, 4, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     region: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 7, "")
+    accountId: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -6314,6 +7887,11 @@ proto.infra.ListSubnetsRequest.deserializeBinaryFromReader = function(msg, reade
     case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 8:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -6388,6 +7966,14 @@ proto.infra.ListSubnetsRequest.serializeBinaryToWriter = function(message, write
     writer.writeString(
       7,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      8,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -6523,6 +8109,43 @@ proto.infra.ListSubnetsRequest.prototype.setAccountId = function(value) {
 };
 
 
+/**
+ * optional Credentials creds = 8;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListSubnetsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 8));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListSubnetsRequest} returns this
+*/
+proto.infra.ListSubnetsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 8, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListSubnetsRequest} returns this
+ */
+proto.infra.ListSubnetsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListSubnetsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 8) != null;
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -6564,7 +8187,8 @@ proto.infra.ListSubnetsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     subnetsList: jspb.Message.toObjectList(msg.getSubnetsList(),
     types_pb.Subnet.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -6610,6 +8234,11 @@ proto.infra.ListSubnetsResponse.deserializeBinaryFromReader = function(msg, read
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -6652,6 +8281,14 @@ proto.infra.ListSubnetsResponse.serializeBinaryToWriter = function(message, writ
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -6713,6 +8350,43 @@ proto.infra.ListSubnetsResponse.prototype.setLastSyncTime = function(value) {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListSubnetsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListSubnetsResponse} returns this
+*/
+proto.infra.ListSubnetsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListSubnetsResponse} returns this
+ */
+proto.infra.ListSubnetsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListSubnetsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -6748,7 +8422,9 @@ proto.infra.GetVPCIDForCIDRRequest.toObject = function(includeInstance, msg) {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     cidr: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -6798,8 +8474,19 @@ proto.infra.GetVPCIDForCIDRRequest.deserializeBinaryFromReader = function(msg, r
       msg.setRegion(value);
       break;
     case 4:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -6851,11 +8538,23 @@ proto.infra.GetVPCIDForCIDRRequest.serializeBinaryToWriter = function(message, w
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(4, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      4,
+      5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -6916,11 +8615,33 @@ proto.infra.GetVPCIDForCIDRRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 4;
+ * map<string, string> labels = 4;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.GetVPCIDForCIDRRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 4, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.GetVPCIDForCIDRRequest} returns this
+ */
+proto.infra.GetVPCIDForCIDRRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 5;
  * @return {string}
  */
 proto.infra.GetVPCIDForCIDRRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
 };
 
 
@@ -6929,7 +8650,44 @@ proto.infra.GetVPCIDForCIDRRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.GetVPCIDForCIDRRequest} returns this
  */
 proto.infra.GetVPCIDForCIDRRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
+  return jspb.Message.setProto3StringField(this, 5, value);
+};
+
+
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.GetVPCIDForCIDRRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.GetVPCIDForCIDRRequest} returns this
+*/
+proto.infra.GetVPCIDForCIDRRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetVPCIDForCIDRRequest} returns this
+ */
+proto.infra.GetVPCIDForCIDRRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetVPCIDForCIDRRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
 };
 
 
@@ -6965,7 +8723,8 @@ proto.infra.GetVPCIDForCIDRResponse.prototype.toObject = function(opt_includeIns
  */
 proto.infra.GetVPCIDForCIDRResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    vpcId: jspb.Message.getFieldWithDefault(msg, 1, "")
+    vpcId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -7006,6 +8765,11 @@ proto.infra.GetVPCIDForCIDRResponse.deserializeBinaryFromReader = function(msg, 
       var value = /** @type {string} */ (reader.readString());
       msg.setVpcId(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -7042,6 +8806,14 @@ proto.infra.GetVPCIDForCIDRResponse.serializeBinaryToWriter = function(message, 
       f
     );
   }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
+    );
+  }
 };
 
 
@@ -7060,6 +8832,43 @@ proto.infra.GetVPCIDForCIDRResponse.prototype.getVpcId = function() {
  */
 proto.infra.GetVPCIDForCIDRResponse.prototype.setVpcId = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.GetVPCIDForCIDRResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.GetVPCIDForCIDRResponse} returns this
+*/
+proto.infra.GetVPCIDForCIDRResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetVPCIDForCIDRResponse} returns this
+ */
+proto.infra.GetVPCIDForCIDRResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetVPCIDForCIDRResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
 };
 
 
@@ -7096,9 +8905,10 @@ proto.infra.GetCIDRsForLabelsRequest.prototype.toObject = function(opt_includeIn
 proto.infra.GetCIDRsForLabelsRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    region: jspb.Message.getFieldWithDefault(msg, 2, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    accountId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -7140,18 +8950,23 @@ proto.infra.GetCIDRsForLabelsRequest.deserializeBinaryFromReader = function(msg,
       msg.setProvider(value);
       break;
     case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setRegion(value);
+      break;
+    case 3:
       var value = msg.getLabelsMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
       break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setRegion(value);
-      break;
     case 4:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 5:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -7189,22 +9004,30 @@ proto.infra.GetCIDRsForLabelsRequest.serializeBinaryToWriter = function(message,
       f
     );
   }
-  f = message.getLabelsMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(2, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
-  }
   f = message.getRegion();
   if (f.length > 0) {
     writer.writeString(
-      3,
+      2,
       f
     );
+  }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(3, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
       4,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      5,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -7229,14 +9052,32 @@ proto.infra.GetCIDRsForLabelsRequest.prototype.setProvider = function(value) {
 
 
 /**
- * map<string, string> labels = 2;
+ * optional string region = 2;
+ * @return {string}
+ */
+proto.infra.GetCIDRsForLabelsRequest.prototype.getRegion = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.GetCIDRsForLabelsRequest} returns this
+ */
+proto.infra.GetCIDRsForLabelsRequest.prototype.setRegion = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * map<string, string> labels = 3;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.GetCIDRsForLabelsRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 2, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 3, opt_noLazyCreate,
       null));
 };
 
@@ -7248,24 +9089,6 @@ proto.infra.GetCIDRsForLabelsRequest.prototype.getLabelsMap = function(opt_noLaz
 proto.infra.GetCIDRsForLabelsRequest.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
   return this;};
-
-
-/**
- * optional string region = 3;
- * @return {string}
- */
-proto.infra.GetCIDRsForLabelsRequest.prototype.getRegion = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.infra.GetCIDRsForLabelsRequest} returns this
- */
-proto.infra.GetCIDRsForLabelsRequest.prototype.setRegion = function(value) {
-  return jspb.Message.setProto3StringField(this, 3, value);
-};
 
 
 /**
@@ -7283,6 +9106,43 @@ proto.infra.GetCIDRsForLabelsRequest.prototype.getAccountId = function() {
  */
 proto.infra.GetCIDRsForLabelsRequest.prototype.setAccountId = function(value) {
   return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
+/**
+ * optional Credentials creds = 5;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.GetCIDRsForLabelsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 5));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.GetCIDRsForLabelsRequest} returns this
+*/
+proto.infra.GetCIDRsForLabelsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 5, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetCIDRsForLabelsRequest} returns this
+ */
+proto.infra.GetCIDRsForLabelsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetCIDRsForLabelsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 5) != null;
 };
 
 
@@ -7325,7 +9185,8 @@ proto.infra.GetCIDRsForLabelsResponse.prototype.toObject = function(opt_includeI
  */
 proto.infra.GetCIDRsForLabelsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    cidrsList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f
+    cidrsList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -7366,6 +9227,11 @@ proto.infra.GetCIDRsForLabelsResponse.deserializeBinaryFromReader = function(msg
       var value = /** @type {string} */ (reader.readString());
       msg.addCidrs(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -7400,6 +9266,14 @@ proto.infra.GetCIDRsForLabelsResponse.serializeBinaryToWriter = function(message
     writer.writeRepeatedString(
       1,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -7442,6 +9316,43 @@ proto.infra.GetCIDRsForLabelsResponse.prototype.clearCidrsList = function() {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.GetCIDRsForLabelsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.GetCIDRsForLabelsResponse} returns this
+*/
+proto.infra.GetCIDRsForLabelsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetCIDRsForLabelsResponse} returns this
+ */
+proto.infra.GetCIDRsForLabelsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetCIDRsForLabelsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -7475,9 +9386,10 @@ proto.infra.GetIPsForLabelsRequest.prototype.toObject = function(opt_includeInst
 proto.infra.GetIPsForLabelsRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    region: jspb.Message.getFieldWithDefault(msg, 2, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 4, "")
+    accountId: jspb.Message.getFieldWithDefault(msg, 4, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -7519,18 +9431,23 @@ proto.infra.GetIPsForLabelsRequest.deserializeBinaryFromReader = function(msg, r
       msg.setProvider(value);
       break;
     case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setRegion(value);
+      break;
+    case 3:
       var value = msg.getLabelsMap();
       reader.readMessage(value, function(message, reader) {
         jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
          });
       break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setRegion(value);
-      break;
     case 4:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 5:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -7568,22 +9485,30 @@ proto.infra.GetIPsForLabelsRequest.serializeBinaryToWriter = function(message, w
       f
     );
   }
-  f = message.getLabelsMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(2, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
-  }
   f = message.getRegion();
   if (f.length > 0) {
     writer.writeString(
-      3,
+      2,
       f
     );
+  }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(3, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
       4,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      5,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -7608,14 +9533,32 @@ proto.infra.GetIPsForLabelsRequest.prototype.setProvider = function(value) {
 
 
 /**
- * map<string, string> labels = 2;
+ * optional string region = 2;
+ * @return {string}
+ */
+proto.infra.GetIPsForLabelsRequest.prototype.getRegion = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.infra.GetIPsForLabelsRequest} returns this
+ */
+proto.infra.GetIPsForLabelsRequest.prototype.setRegion = function(value) {
+  return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * map<string, string> labels = 3;
  * @param {boolean=} opt_noLazyCreate Do not create the map if
  * empty, instead returning `undefined`
  * @return {!jspb.Map<string,string>}
  */
 proto.infra.GetIPsForLabelsRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
   return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 2, opt_noLazyCreate,
+      jspb.Message.getMapField(this, 3, opt_noLazyCreate,
       null));
 };
 
@@ -7627,24 +9570,6 @@ proto.infra.GetIPsForLabelsRequest.prototype.getLabelsMap = function(opt_noLazyC
 proto.infra.GetIPsForLabelsRequest.prototype.clearLabelsMap = function() {
   this.getLabelsMap().clear();
   return this;};
-
-
-/**
- * optional string region = 3;
- * @return {string}
- */
-proto.infra.GetIPsForLabelsRequest.prototype.getRegion = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/**
- * @param {string} value
- * @return {!proto.infra.GetIPsForLabelsRequest} returns this
- */
-proto.infra.GetIPsForLabelsRequest.prototype.setRegion = function(value) {
-  return jspb.Message.setProto3StringField(this, 3, value);
-};
 
 
 /**
@@ -7662,6 +9587,43 @@ proto.infra.GetIPsForLabelsRequest.prototype.getAccountId = function() {
  */
 proto.infra.GetIPsForLabelsRequest.prototype.setAccountId = function(value) {
   return jspb.Message.setProto3StringField(this, 4, value);
+};
+
+
+/**
+ * optional Credentials creds = 5;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.GetIPsForLabelsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 5));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.GetIPsForLabelsRequest} returns this
+*/
+proto.infra.GetIPsForLabelsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 5, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetIPsForLabelsRequest} returns this
+ */
+proto.infra.GetIPsForLabelsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetIPsForLabelsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 5) != null;
 };
 
 
@@ -7704,7 +9666,8 @@ proto.infra.GetIPsForLabelsResponse.prototype.toObject = function(opt_includeIns
  */
 proto.infra.GetIPsForLabelsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    ipsList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f
+    ipsList: (f = jspb.Message.getRepeatedField(msg, 1)) == null ? undefined : f,
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -7745,6 +9708,11 @@ proto.infra.GetIPsForLabelsResponse.deserializeBinaryFromReader = function(msg, 
       var value = /** @type {string} */ (reader.readString());
       msg.addIps(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -7779,6 +9747,14 @@ proto.infra.GetIPsForLabelsResponse.serializeBinaryToWriter = function(message, 
     writer.writeRepeatedString(
       1,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -7821,6 +9797,43 @@ proto.infra.GetIPsForLabelsResponse.prototype.clearIpsList = function() {
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.GetIPsForLabelsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.GetIPsForLabelsResponse} returns this
+*/
+proto.infra.GetIPsForLabelsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetIPsForLabelsResponse} returns this
+ */
+proto.infra.GetIPsForLabelsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetIPsForLabelsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -7857,7 +9870,8 @@ proto.infra.GetInstancesForLabelsRequest.toObject = function(includeInstance, ms
     vpcId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
     region: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 5, "")
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -7915,6 +9929,11 @@ proto.infra.GetInstancesForLabelsRequest.deserializeBinaryFromReader = function(
     case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -7975,6 +9994,14 @@ proto.infra.GetInstancesForLabelsRequest.serializeBinaryToWriter = function(mess
     writer.writeString(
       5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -8074,6 +10101,43 @@ proto.infra.GetInstancesForLabelsRequest.prototype.setAccountId = function(value
 };
 
 
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.GetInstancesForLabelsRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.GetInstancesForLabelsRequest} returns this
+*/
+proto.infra.GetInstancesForLabelsRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetInstancesForLabelsRequest} returns this
+ */
+proto.infra.GetInstancesForLabelsRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetInstancesForLabelsRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -8114,7 +10178,8 @@ proto.infra.GetInstancesForLabelsResponse.prototype.toObject = function(opt_incl
 proto.infra.GetInstancesForLabelsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     instancesList: jspb.Message.toObjectList(msg.getInstancesList(),
-    types_pb.Instance.toObject, includeInstance)
+    types_pb.Instance.toObject, includeInstance),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -8156,6 +10221,11 @@ proto.infra.GetInstancesForLabelsResponse.deserializeBinaryFromReader = function
       reader.readMessage(value,types_pb.Instance.deserializeBinaryFromReader);
       msg.addInstances(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -8191,6 +10261,14 @@ proto.infra.GetInstancesForLabelsResponse.serializeBinaryToWriter = function(mes
       1,
       f,
       types_pb.Instance.serializeBinaryToWriter
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -8234,6 +10312,43 @@ proto.infra.GetInstancesForLabelsResponse.prototype.clearInstancesList = functio
 };
 
 
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.GetInstancesForLabelsResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.GetInstancesForLabelsResponse} returns this
+*/
+proto.infra.GetInstancesForLabelsResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetInstancesForLabelsResponse} returns this
+ */
+proto.infra.GetInstancesForLabelsResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetInstancesForLabelsResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
+};
+
+
 
 
 
@@ -8270,7 +10385,9 @@ proto.infra.GetVPCIDWithTagRequest.toObject = function(includeInstance, msg) {
     key: jspb.Message.getFieldWithDefault(msg, 2, ""),
     value: jspb.Message.getFieldWithDefault(msg, 3, ""),
     region: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    accountId: jspb.Message.getFieldWithDefault(msg, 5, "")
+    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    accountId: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -8324,8 +10441,19 @@ proto.infra.GetVPCIDWithTagRequest.deserializeBinaryFromReader = function(msg, r
       msg.setRegion(value);
       break;
     case 5:
+      var value = msg.getLabelsMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
+      break;
+    case 6:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 7:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -8384,11 +10512,23 @@ proto.infra.GetVPCIDWithTagRequest.serializeBinaryToWriter = function(message, w
       f
     );
   }
+  f = message.getLabelsMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(5, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
+  }
   f = message.getAccountId();
   if (f.length > 0) {
     writer.writeString(
-      5,
+      6,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      7,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -8467,11 +10607,33 @@ proto.infra.GetVPCIDWithTagRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string account_id = 5;
+ * map<string, string> labels = 5;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
+ */
+proto.infra.GetVPCIDWithTagRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 5, opt_noLazyCreate,
+      null));
+};
+
+
+/**
+ * Clears values from the map. The map will be non-null.
+ * @return {!proto.infra.GetVPCIDWithTagRequest} returns this
+ */
+proto.infra.GetVPCIDWithTagRequest.prototype.clearLabelsMap = function() {
+  this.getLabelsMap().clear();
+  return this;};
+
+
+/**
+ * optional string account_id = 6;
  * @return {string}
  */
 proto.infra.GetVPCIDWithTagRequest.prototype.getAccountId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
@@ -8480,7 +10642,44 @@ proto.infra.GetVPCIDWithTagRequest.prototype.getAccountId = function() {
  * @return {!proto.infra.GetVPCIDWithTagRequest} returns this
  */
 proto.infra.GetVPCIDWithTagRequest.prototype.setAccountId = function(value) {
-  return jspb.Message.setProto3StringField(this, 5, value);
+  return jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional Credentials creds = 7;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.GetVPCIDWithTagRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 7));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.GetVPCIDWithTagRequest} returns this
+*/
+proto.infra.GetVPCIDWithTagRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 7, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetVPCIDWithTagRequest} returns this
+ */
+proto.infra.GetVPCIDWithTagRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetVPCIDWithTagRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 7) != null;
 };
 
 
@@ -8516,7 +10715,8 @@ proto.infra.GetVPCIDWithTagResponse.prototype.toObject = function(opt_includeIns
  */
 proto.infra.GetVPCIDWithTagResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    vpcId: jspb.Message.getFieldWithDefault(msg, 1, "")
+    vpcId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -8557,6 +10757,11 @@ proto.infra.GetVPCIDWithTagResponse.deserializeBinaryFromReader = function(msg, 
       var value = /** @type {string} */ (reader.readString());
       msg.setVpcId(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -8593,6 +10798,14 @@ proto.infra.GetVPCIDWithTagResponse.serializeBinaryToWriter = function(message, 
       f
     );
   }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
+    );
+  }
 };
 
 
@@ -8611,6 +10824,43 @@ proto.infra.GetVPCIDWithTagResponse.prototype.getVpcId = function() {
  */
 proto.infra.GetVPCIDWithTagResponse.prototype.setVpcId = function(value) {
   return jspb.Message.setProto3StringField(this, 1, value);
+};
+
+
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.GetVPCIDWithTagResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.GetVPCIDWithTagResponse} returns this
+*/
+proto.infra.GetVPCIDWithTagResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.GetVPCIDWithTagResponse} returns this
+ */
+proto.infra.GetVPCIDWithTagResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.GetVPCIDWithTagResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
 };
 
 
@@ -8650,7 +10900,8 @@ proto.infra.ListCloudClustersRequest.toObject = function(includeInstance, msg) {
     region: jspb.Message.getFieldWithDefault(msg, 2, ""),
     vpcId: jspb.Message.getFieldWithDefault(msg, 3, ""),
     labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
-    accountId: jspb.Message.getFieldWithDefault(msg, 5, "")
+    accountId: jspb.Message.getFieldWithDefault(msg, 5, ""),
+    creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -8708,6 +10959,11 @@ proto.infra.ListCloudClustersRequest.deserializeBinaryFromReader = function(msg,
     case 5:
       var value = /** @type {string} */ (reader.readString());
       msg.setAccountId(value);
+      break;
+    case 6:
+      var value = new types_pb.Credentials;
+      reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
+      msg.setCreds(value);
       break;
     default:
       reader.skipField();
@@ -8768,6 +11024,14 @@ proto.infra.ListCloudClustersRequest.serializeBinaryToWriter = function(message,
     writer.writeString(
       5,
       f
+    );
+  }
+  f = message.getCreds();
+  if (f != null) {
+    writer.writeMessage(
+      6,
+      f,
+      types_pb.Credentials.serializeBinaryToWriter
     );
   }
 };
@@ -8867,6 +11131,43 @@ proto.infra.ListCloudClustersRequest.prototype.setAccountId = function(value) {
 };
 
 
+/**
+ * optional Credentials creds = 6;
+ * @return {?proto.infra.Credentials}
+ */
+proto.infra.ListCloudClustersRequest.prototype.getCreds = function() {
+  return /** @type{?proto.infra.Credentials} */ (
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 6));
+};
+
+
+/**
+ * @param {?proto.infra.Credentials|undefined} value
+ * @return {!proto.infra.ListCloudClustersRequest} returns this
+*/
+proto.infra.ListCloudClustersRequest.prototype.setCreds = function(value) {
+  return jspb.Message.setWrapperField(this, 6, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListCloudClustersRequest} returns this
+ */
+proto.infra.ListCloudClustersRequest.prototype.clearCreds = function() {
+  return this.setCreds(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListCloudClustersRequest.prototype.hasCreds = function() {
+  return jspb.Message.getField(this, 6) != null;
+};
+
+
 
 /**
  * List of repeated fields within this message type.
@@ -8908,7 +11209,8 @@ proto.infra.ListCloudClustersResponse.toObject = function(includeInstance, msg) 
   var f, obj = {
     clustersList: jspb.Message.toObjectList(msg.getClustersList(),
     types_pb.Cluster.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
+    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -8954,6 +11256,11 @@ proto.infra.ListCloudClustersResponse.deserializeBinaryFromReader = function(msg
       var value = /** @type {string} */ (reader.readString());
       msg.setLastSyncTime(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -8996,6 +11303,14 @@ proto.infra.ListCloudClustersResponse.serializeBinaryToWriter = function(message
     writer.writeString(
       2,
       f
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -9054,6 +11369,43 @@ proto.infra.ListCloudClustersResponse.prototype.getLastSyncTime = function() {
  */
 proto.infra.ListCloudClustersResponse.prototype.setLastSyncTime = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.ListCloudClustersResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.ListCloudClustersResponse} returns this
+*/
+proto.infra.ListCloudClustersResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.ListCloudClustersResponse} returns this
+ */
+proto.infra.ListCloudClustersResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.ListCloudClustersResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
 };
 
 
@@ -9999,7 +12351,8 @@ proto.infra.SummaryResponse.prototype.toObject = function(opt_includeInstance) {
 proto.infra.SummaryResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     count: (f = msg.getCount()) && proto.infra.Counters.toObject(includeInstance, f),
-    statuses: (f = msg.getStatuses()) && proto.infra.StatusSummary.toObject(includeInstance, f)
+    statuses: (f = msg.getStatuses()) && proto.infra.StatusSummary.toObject(includeInstance, f),
+    err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -10046,6 +12399,11 @@ proto.infra.SummaryResponse.deserializeBinaryFromReader = function(msg, reader) 
       reader.readMessage(value,proto.infra.StatusSummary.deserializeBinaryFromReader);
       msg.setStatuses(value);
       break;
+    case 3:
+      var value = new types_pb.Error;
+      reader.readMessage(value,types_pb.Error.deserializeBinaryFromReader);
+      msg.setErr(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -10089,6 +12447,14 @@ proto.infra.SummaryResponse.serializeBinaryToWriter = function(message, writer) 
       2,
       f,
       proto.infra.StatusSummary.serializeBinaryToWriter
+    );
+  }
+  f = message.getErr();
+  if (f != null) {
+    writer.writeMessage(
+      3,
+      f,
+      types_pb.Error.serializeBinaryToWriter
     );
   }
 };
@@ -10165,6 +12531,43 @@ proto.infra.SummaryResponse.prototype.clearStatuses = function() {
  */
 proto.infra.SummaryResponse.prototype.hasStatuses = function() {
   return jspb.Message.getField(this, 2) != null;
+};
+
+
+/**
+ * optional Error err = 3;
+ * @return {?proto.infra.Error}
+ */
+proto.infra.SummaryResponse.prototype.getErr = function() {
+  return /** @type{?proto.infra.Error} */ (
+    jspb.Message.getWrapperField(this, types_pb.Error, 3));
+};
+
+
+/**
+ * @param {?proto.infra.Error|undefined} value
+ * @return {!proto.infra.SummaryResponse} returns this
+*/
+proto.infra.SummaryResponse.prototype.setErr = function(value) {
+  return jspb.Message.setWrapperField(this, 3, value);
+};
+
+
+/**
+ * Clears the message field making it undefined.
+ * @return {!proto.infra.SummaryResponse} returns this
+ */
+proto.infra.SummaryResponse.prototype.clearErr = function() {
+  return this.setErr(undefined);
+};
+
+
+/**
+ * Returns whether this field is set.
+ * @return {boolean}
+ */
+proto.infra.SummaryResponse.prototype.hasErr = function() {
+  return jspb.Message.getField(this, 3) != null;
 };
 
 

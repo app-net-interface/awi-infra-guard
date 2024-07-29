@@ -31,88 +31,88 @@ import (
 
 func (c *Client) ListPublicIPs(ctx context.Context, params *infrapb.ListPublicIPsRequest) ([]types.PublicIP, error) {
 
-	var publicIPs []types.PublicIP
+	c.creds = params.Creds
+	c.accountID = params.AccountId
 	accountId := params.GetAccountId()
-	region := params.GetRegion()
-	builder := newFilterBuilder()
 
-	in := &ec2.DescribeAddressesInput{
-		Filters: builder.build(),
-	}
-	if region == "" {
-		region = c.defaultRegion
-	}
-	if accountId == "" {
+	if c.accountID == "" {
 		accountId = c.defaultAccountID
 	}
+
+	builder := newFilterBuilder()
+	filters := builder.build()
 
 	c.logger.Infof("*******Requesting Public IP for account id %s ****", accountId)
 	if params.GetRegion() == "" || params.GetRegion() == "all" {
 		var (
 			wg            sync.WaitGroup
 			allPublicIPs  []types.PublicIP
-			resultChannel = make(chan []types.PublicIP)
-			errorChannel  = make(chan error)
+			allErrors     []error
+			resultChannel = make(chan regionResult)
 		)
-		regionalClients, err := c.getAllClientsForProfile(accountId)
+
+		regions, err := c.getAllRegions(ctx)
 		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
 			return nil, err
 		}
-
-		for regionName, awsRegionClient := range regionalClients {
+		for _, region := range regions {
 			wg.Add(1)
-			go func(regionName string, awsRegionClient awsClient) {
+			go func(regionName string) {
 				defer wg.Done()
-
-				out, err := awsRegionClient.ec2Client.DescribeAddresses(ctx, in)
-				if err != nil {
-					c.logger.Warnf("Failed to elastic ips %v", err)
-					errorChannel <- fmt.Errorf("could not get elastic ips: %v", err)
-					return
+				pips, err := c.getPublicIPForRegion(ctx, regionName, filters)
+				resultChannel <- regionResult{
+					region: regionName,
+					pips:   pips,
+					err:    err,
 				}
-				reservations, err := c.getInstances(ctx, accountId, region, builder)
-				if err != nil {
-					c.logger.Warnf("Failed to get instances %s", err)
-				}
-				publicIPs, err = convertPublicIPs(accountId, regionName, out.Addresses, reservations)
-				if err != nil {
-					c.logger.Warnf("Failed to convert to public ip %s", err)
-				}
-				resultChannel <- publicIPs
-			}(regionName, awsRegionClient)
+			}(*region.RegionName)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
-			close(errorChannel)
 		}()
 
-		for publicIPs := range resultChannel {
-			allPublicIPs = append(allPublicIPs, publicIPs...)
+		for result := range resultChannel {
+			if result.err != nil {
+				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+			} else {
+				allPublicIPs = append(allPublicIPs, result.pips...)
+			}
 		}
 
-		if err := <-errorChannel; err != nil {
-			return nil, err
+		if len(allErrors) > 0 {
+			return allPublicIPs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
 		return allPublicIPs, nil
 	}
-	client, err := c.getEC2Client(ctx, params.GetAccountId(), params.GetRegion())
+	return c.getPublicIPForRegion(ctx, params.Region, filters)
+}
+
+func (c *Client) getPublicIPForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.PublicIP, error) {
+	client, err := c.getEC2Client(ctx, c.accountID, regionName)
 	if err != nil {
 		return nil, err
 	}
-	out, err := client.DescribeAddresses(ctx, in)
+	// Call DescribeVpcs operation
+	resp, err := client.DescribeAddresses(ctx, &ec2.DescribeAddressesInput{
+		Filters: filters,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("could not get AWS public IPs: %v", err)
 	}
-	reservations, err := c.getInstances(ctx, accountId, region, builder)
+	builder := newFilterBuilder()
+	builder.filters = filters
+	reservations, err := c.getInstances(ctx, c.accountID, regionName, builder)
 	if err != nil {
 		c.logger.Warnf("Failed to get instances %s", err)
 	}
-	return convertPublicIPs(region, accountId, out.Addresses, reservations)
+	return c.convertPublicIPs(c.accountID, regionName, resp.Addresses, reservations)
 }
 
-func convertPublicIPs(account, region string, addresses []awstypes.Address, reservations []awstypes.Reservation) ([]types.PublicIP, error) {
+func (c *Client) convertPublicIPs(account, region string, addresses []awstypes.Address, reservations []awstypes.Reservation) ([]types.PublicIP, error) {
 
 	staticIPs := make([]types.PublicIP, 0, len(addresses))
 	var instancePublicIPs []types.PublicIP
@@ -125,7 +125,7 @@ func convertPublicIPs(account, region string, addresses []awstypes.Address, rese
 			InstanceId: aws.ToString(address.InstanceId),
 			PublicIP:   aws.ToString(address.PublicIp),
 			Provider:   providerName,
-			AccountID:  account,
+			AccountID:  c.accountID,
 			Type:       "static",
 			Labels:     convertTags(address.Tags),
 			PrivateIP:  aws.ToString(address.PrivateIpAddress),

@@ -24,61 +24,75 @@ import (
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error) {
-	var (
-		igws []types.IGW
-		wg   sync.WaitGroup
-		mu   sync.Mutex
-		err  error
-	)
 
-	// List all regions to ensure NAT Gateways from every region are considered
-	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
-		AllRegions: aws.Bool(true),
-	})
-	if err != nil {
-		c.logger.Errorf("Unable to describe regions, %v", err)
-		return igws, err
+	c.creds = params.Creds
+	c.accountID = params.AccountId
+
+	builder := newFilterBuilder()
+	builder.withVPC(params.GetVpcId())
+	for k, v := range params.GetLabels() {
+		builder.withTag(k, v)
 	}
+	filters := builder.build()
+	if params.GetRegion() == "" || params.GetRegion() == "all" {
+		var (
+			wg            sync.WaitGroup
+			allIGWs       []types.IGW
+			allErrors     []error
+			resultChannel = make(chan regionResult)
+		)
 
-	for _, region := range regionResult.Regions {
-		wg.Add(1)
-		go func(regionName string) {
-			defer wg.Done()
+		// List all regions to ensure Internet Gateways from every region are considered
+		regions, err := c.getAllRegions(ctx)
+		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
+			return nil, err
+		}
 
-			c.logger.Debugf("Listing Internet Gateways for AWS account %s and region %s ", params.AccountId, regionName)
-			regionalCfg, err := config.LoadDefaultConfig(ctx,
-				config.WithRegion(regionName),
-			)
-			if err != nil {
-				c.logger.Warnf("Unable to load SDK config for region %s, %v", regionName, err)
-				return
+		for _, region := range regions {
+			wg.Add(1)
+			go func(regionName string) {
+				defer wg.Done()
+				regIgws, err := c.getInternetGatewaysForRegion(ctx, regionName, filters)
+				resultChannel <- regionResult{
+					region: *region.RegionName,
+					igws:   regIgws,
+					err:    err,
+				}
+			}(*region.RegionName)
+		}
+		go func() {
+			wg.Wait()
+			close(resultChannel)
+		}()
+
+		for result := range resultChannel {
+			if result.err != nil {
+				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+			} else {
+				allIGWs = append(allIGWs, result.igws...)
 			}
+		}
 
-			ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
-			regIgws, err := c.ListInternetGatewaysInRegion(ec2RegionalClient, regionName)
-			if err != nil {
-				//c.logger.Warnf("Failed to list Internet Gateways in region %s: %v", regionName, err)
-				return
-			}
-
-			mu.Lock()
-			igws = append(igws, regIgws...)
-			mu.Unlock()
-		}(*region.RegionName)
+		if len(allErrors) > 0 {
+			return allIGWs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
+		}
 	}
-
-	wg.Wait()
-	return igws, err
+	return c.getInternetGatewaysForRegion(ctx, params.Region, filters)
 }
 
-func (c *Client) ListInternetGatewaysInRegion(client *ec2.Client, region string) ([]types.IGW, error) {
+func (c *Client) getInternetGatewaysForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.IGW, error) {
 	var igws []types.IGW
+	client, err := c.getEC2Client(ctx, c.accountID, regionName)
+	if err != nil {
+		return nil, err
+	}
 	paginator := ec2.NewDescribeInternetGatewaysPaginator(client, &ec2.DescribeInternetGatewaysInput{})
 
 	for paginator.HasMorePages() {
@@ -110,10 +124,10 @@ func (c *Client) ListInternetGatewaysInRegion(client *ec2.Client, region string)
 				AccountID:     *igw.OwnerId,
 				Name:          name,
 				AttachedVpcId: vpcId,
-				Region:        region,
+				Region:        regionName,
 				State:         state,
 				Labels:        labels,
-				SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#InternetGateway:internetGatewayId=%s", region, region, *igw.InternetGatewayId),
+				SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#InternetGateway:internetGatewayId=%s", regionName, regionName, *igw.InternetGatewayId),
 			})
 		}
 	}

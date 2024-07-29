@@ -3,6 +3,296 @@ import * as jspb from 'google-protobuf'
 import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
 
 
+export class Error extends jspb.Message {
+  getCode(): number;
+  setCode(value: number): Error;
+
+  getErrormessage(): string;
+  setErrormessage(value: string): Error;
+
+  getServerity(): string;
+  setServerity(value: string): Error;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Error.AsObject;
+  static toObject(includeInstance: boolean, msg: Error): Error.AsObject;
+  static serializeBinaryToWriter(message: Error, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Error;
+  static deserializeBinaryFromReader(message: Error, reader: jspb.BinaryReader): Error;
+}
+
+export namespace Error {
+  export type AsObject = {
+    code: number,
+    errormessage: string,
+    serverity: string,
+  }
+}
+
+export class AwsRole extends jspb.Message {
+  getRoleArn(): string;
+  setRoleArn(value: string): AwsRole;
+
+  getRoleSessionName(): string;
+  setRoleSessionName(value: string): AwsRole;
+
+  getDurationSeconds(): number;
+  setDurationSeconds(value: number): AwsRole;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): AwsRole.AsObject;
+  static toObject(includeInstance: boolean, msg: AwsRole): AwsRole.AsObject;
+  static serializeBinaryToWriter(message: AwsRole, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): AwsRole;
+  static deserializeBinaryFromReader(message: AwsRole, reader: jspb.BinaryReader): AwsRole;
+}
+
+export namespace AwsRole {
+  export type AsObject = {
+    roleArn: string,
+    roleSessionName: string,
+    durationSeconds: number,
+  }
+}
+
+export class GcpRole extends jspb.Message {
+  getServiceAccount(): string;
+  setServiceAccount(value: string): GcpRole;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GcpRole.AsObject;
+  static toObject(includeInstance: boolean, msg: GcpRole): GcpRole.AsObject;
+  static serializeBinaryToWriter(message: GcpRole, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GcpRole;
+  static deserializeBinaryFromReader(message: GcpRole, reader: jspb.BinaryReader): GcpRole;
+}
+
+export namespace GcpRole {
+  export type AsObject = {
+    serviceAccount: string,
+  }
+}
+
+export class AzureRole extends jspb.Message {
+  getManagedIdentity(): string;
+  setManagedIdentity(value: string): AzureRole;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): AzureRole.AsObject;
+  static toObject(includeInstance: boolean, msg: AzureRole): AzureRole.AsObject;
+  static serializeBinaryToWriter(message: AzureRole, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): AzureRole;
+  static deserializeBinaryFromReader(message: AzureRole, reader: jspb.BinaryReader): AzureRole;
+}
+
+export namespace AzureRole {
+  export type AsObject = {
+    managedIdentity: string,
+  }
+}
+
+export class RoleBasedAuth extends jspb.Message {
+  getAwsRole(): AwsRole | undefined;
+  setAwsRole(value?: AwsRole): RoleBasedAuth;
+  hasAwsRole(): boolean;
+  clearAwsRole(): RoleBasedAuth;
+
+  getGcpRole(): GcpRole | undefined;
+  setGcpRole(value?: GcpRole): RoleBasedAuth;
+  hasGcpRole(): boolean;
+  clearGcpRole(): RoleBasedAuth;
+
+  getAzureRole(): AzureRole | undefined;
+  setAzureRole(value?: AzureRole): RoleBasedAuth;
+  hasAzureRole(): boolean;
+  clearAzureRole(): RoleBasedAuth;
+
+  getRoleCase(): RoleBasedAuth.RoleCase;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): RoleBasedAuth.AsObject;
+  static toObject(includeInstance: boolean, msg: RoleBasedAuth): RoleBasedAuth.AsObject;
+  static serializeBinaryToWriter(message: RoleBasedAuth, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): RoleBasedAuth;
+  static deserializeBinaryFromReader(message: RoleBasedAuth, reader: jspb.BinaryReader): RoleBasedAuth;
+}
+
+export namespace RoleBasedAuth {
+  export type AsObject = {
+    awsRole?: AwsRole.AsObject,
+    gcpRole?: GcpRole.AsObject,
+    azureRole?: AzureRole.AsObject,
+  }
+
+  export enum RoleCase { 
+    ROLE_NOT_SET = 0,
+    AWS_ROLE = 1,
+    GCP_ROLE = 2,
+    AZURE_ROLE = 3,
+  }
+}
+
+export class AwsUserAuth extends jspb.Message {
+  getAccessKeyId(): string;
+  setAccessKeyId(value: string): AwsUserAuth;
+
+  getSecretAccessKey(): string;
+  setSecretAccessKey(value: string): AwsUserAuth;
+
+  getSessionToken(): string;
+  setSessionToken(value: string): AwsUserAuth;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): AwsUserAuth.AsObject;
+  static toObject(includeInstance: boolean, msg: AwsUserAuth): AwsUserAuth.AsObject;
+  static serializeBinaryToWriter(message: AwsUserAuth, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): AwsUserAuth;
+  static deserializeBinaryFromReader(message: AwsUserAuth, reader: jspb.BinaryReader): AwsUserAuth;
+}
+
+export namespace AwsUserAuth {
+  export type AsObject = {
+    accessKeyId: string,
+    secretAccessKey: string,
+    sessionToken: string,
+  }
+}
+
+export class GcpUserAuth extends jspb.Message {
+  getApiKey(): string;
+  setApiKey(value: string): GcpUserAuth;
+
+  getJsonKey(): string;
+  setJsonKey(value: string): GcpUserAuth;
+
+  getAuthMethodCase(): GcpUserAuth.AuthMethodCase;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GcpUserAuth.AsObject;
+  static toObject(includeInstance: boolean, msg: GcpUserAuth): GcpUserAuth.AsObject;
+  static serializeBinaryToWriter(message: GcpUserAuth, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GcpUserAuth;
+  static deserializeBinaryFromReader(message: GcpUserAuth, reader: jspb.BinaryReader): GcpUserAuth;
+}
+
+export namespace GcpUserAuth {
+  export type AsObject = {
+    apiKey: string,
+    jsonKey: string,
+  }
+
+  export enum AuthMethodCase { 
+    AUTH_METHOD_NOT_SET = 0,
+    API_KEY = 1,
+    JSON_KEY = 2,
+  }
+}
+
+export class AzureUserAuth extends jspb.Message {
+  getClientId(): string;
+  setClientId(value: string): AzureUserAuth;
+
+  getClientSecret(): string;
+  setClientSecret(value: string): AzureUserAuth;
+
+  getTenantId(): string;
+  setTenantId(value: string): AzureUserAuth;
+
+  getCertificatePath(): string;
+  setCertificatePath(value: string): AzureUserAuth;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): AzureUserAuth.AsObject;
+  static toObject(includeInstance: boolean, msg: AzureUserAuth): AzureUserAuth.AsObject;
+  static serializeBinaryToWriter(message: AzureUserAuth, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): AzureUserAuth;
+  static deserializeBinaryFromReader(message: AzureUserAuth, reader: jspb.BinaryReader): AzureUserAuth;
+}
+
+export namespace AzureUserAuth {
+  export type AsObject = {
+    clientId: string,
+    clientSecret: string,
+    tenantId: string,
+    certificatePath: string,
+  }
+}
+
+export class UserBasedAuth extends jspb.Message {
+  getAwsUserAuth(): AwsUserAuth | undefined;
+  setAwsUserAuth(value?: AwsUserAuth): UserBasedAuth;
+  hasAwsUserAuth(): boolean;
+  clearAwsUserAuth(): UserBasedAuth;
+
+  getGcpUserAuth(): GcpUserAuth | undefined;
+  setGcpUserAuth(value?: GcpUserAuth): UserBasedAuth;
+  hasGcpUserAuth(): boolean;
+  clearGcpUserAuth(): UserBasedAuth;
+
+  getAzureUserAuth(): AzureUserAuth | undefined;
+  setAzureUserAuth(value?: AzureUserAuth): UserBasedAuth;
+  hasAzureUserAuth(): boolean;
+  clearAzureUserAuth(): UserBasedAuth;
+
+  getUserAuthCase(): UserBasedAuth.UserAuthCase;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): UserBasedAuth.AsObject;
+  static toObject(includeInstance: boolean, msg: UserBasedAuth): UserBasedAuth.AsObject;
+  static serializeBinaryToWriter(message: UserBasedAuth, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): UserBasedAuth;
+  static deserializeBinaryFromReader(message: UserBasedAuth, reader: jspb.BinaryReader): UserBasedAuth;
+}
+
+export namespace UserBasedAuth {
+  export type AsObject = {
+    awsUserAuth?: AwsUserAuth.AsObject,
+    gcpUserAuth?: GcpUserAuth.AsObject,
+    azureUserAuth?: AzureUserAuth.AsObject,
+  }
+
+  export enum UserAuthCase { 
+    USER_AUTH_NOT_SET = 0,
+    AWS_USER_AUTH = 1,
+    GCP_USER_AUTH = 2,
+    AZURE_USER_AUTH = 3,
+  }
+}
+
+export class Credentials extends jspb.Message {
+  getRoleBasedAuth(): RoleBasedAuth | undefined;
+  setRoleBasedAuth(value?: RoleBasedAuth): Credentials;
+  hasRoleBasedAuth(): boolean;
+  clearRoleBasedAuth(): Credentials;
+
+  getUserBasedAuth(): UserBasedAuth | undefined;
+  setUserBasedAuth(value?: UserBasedAuth): Credentials;
+  hasUserBasedAuth(): boolean;
+  clearUserBasedAuth(): Credentials;
+
+  getAuthCase(): Credentials.AuthCase;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Credentials.AsObject;
+  static toObject(includeInstance: boolean, msg: Credentials): Credentials.AsObject;
+  static serializeBinaryToWriter(message: Credentials, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Credentials;
+  static deserializeBinaryFromReader(message: Credentials, reader: jspb.BinaryReader): Credentials;
+}
+
+export namespace Credentials {
+  export type AsObject = {
+    roleBasedAuth?: RoleBasedAuth.AsObject,
+    userBasedAuth?: UserBasedAuth.AsObject,
+  }
+
+  export enum AuthCase { 
+    AUTH_NOT_SET = 0,
+    ROLE_BASED_AUTH = 1,
+    USER_BASED_AUTH = 2,
+  }
+}
+
 export class VPC extends jspb.Message {
   getId(): string;
   setId(value: string): VPC;
@@ -464,6 +754,11 @@ export class SecurityGroup extends jspb.Message {
   getSelfLink(): string;
   setSelfLink(value: string): SecurityGroup;
 
+  getAttachedRunningInstancesList(): Array<string>;
+  setAttachedRunningInstancesList(value: Array<string>): SecurityGroup;
+  clearAttachedRunningInstancesList(): SecurityGroup;
+  addAttachedRunningInstances(value: string, index?: number): SecurityGroup;
+
   getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
   setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): SecurityGroup;
   hasCreatedAt(): boolean;
@@ -495,6 +790,7 @@ export namespace SecurityGroup {
     project: string,
     lastSyncTime: string,
     selfLink: string,
+    attachedRunningInstancesList: Array<string>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
   }

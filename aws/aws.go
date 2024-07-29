@@ -24,12 +24,14 @@ import (
 	//"github.com/app-net-interface/awi-infra-guard/connector/aws"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
@@ -45,7 +47,7 @@ type Client struct {
 	accountID        string
 	profiles         []types.Account
 	clients          map[string]awsRegionalClientSet
-
+	creds            *infrapb.Credentials
 	defaultAWSClient awsClient
 	logger           *logrus.Logger
 }
@@ -58,8 +60,23 @@ type awsClient struct {
 	eksClient *eks.Client
 }
 
-func GetProfiles(ctx context.Context, cfg aws.Config, logger *logrus.Logger) []types.Account {
+type regionResult struct {
+	region    string
+	vpcs      []types.VPC
+	instances []types.Instance
+	subnets   []types.Subnet
+	sgs       []types.SecurityGroup
+	ngws      []types.NATGateway
+	acls      []types.ACL
+	igws      []types.IGW
+	pips      []types.PublicIP
+	vpces     []types.VPCEndpoint
+	routers   []types.Router
+	rts       []types.RouteTable
+	err       error
+}
 
+func GetProfiles(ctx context.Context, cfg aws.Config, logger *logrus.Logger) []types.Account {
 	profiles := make([]types.Account, 0)
 	configFile, err := ini.Load(config.DefaultSharedCredentialsFilename())
 	if err != nil {
@@ -222,7 +239,51 @@ func (c *Client) getAllClientsForProfile(profile string) (awsRegionalClientSet, 
 	return clients, nil
 }
 
-func (c *Client) getEC2Client(ctx context.Context, account, region string) (*ec2.Client, error) {
+func (c *Client) getEC2ClientFromRole(ctx context.Context, region string) (*ec2.Client, error) {
+
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		c.logger.Errorf("unable to load SDK config, %v", err)
+		return nil, err
+	}
+	// Initialize the Auth with IAM and STS clients
+	auth := &Auth{
+		iam: iam.NewFromConfig(cfg),
+	}
+	roleArn := c.creds.GetRoleBasedAuth().GetAwsRole().RoleArn
+	sessionName := c.creds.GetRoleBasedAuth().GetAwsRole().RoleSessionName
+
+	// Assume the role
+	output, err := auth.AssumeRole(ctx, cfg, roleArn, sessionName)
+	if err != nil {
+		c.logger.Errorf("Failed to assume role: %s", err)
+		return nil, err
+	}
+	// if region == "" {
+	// 	region = c.defaultRegion
+	// }
+	c.logger.Infof("Assumed role for user with ARN %s and Id %s", *output.AssumedRoleUser.Arn, *output.AssumedRoleUser.AssumedRoleId)
+
+	// Create a new configuration with the assumed role credentials
+	assumedCfg, err := config.LoadDefaultConfig(ctx,
+		config.WithCredentialsProvider(
+			stscreds.NewAssumeRoleProvider(sts.NewFromConfig(cfg), roleArn),
+		), config.WithRegion(region),
+	)
+	if err != nil {
+		c.logger.Errorf("Failed to create assumed role configuration: %v", err)
+		return nil, err
+	}
+
+	return ec2.NewFromConfig(assumedCfg), nil
+}
+
+func (c *Client) getEC2Client(ctx context.Context, account string, region string) (*ec2.Client, error) {
+
+	// Get Client for role based auth
+	if c.creds != nil && c.creds.GetRoleBasedAuth() != nil && c.creds.GetRoleBasedAuth().GetAwsRole().RoleArn != "" {
+		return c.getEC2ClientFromRole(ctx, region)
+	}
 	if useDefaultConfig(region, c.defaultRegion, account) {
 		return c.defaultAWSClient.ec2Client, nil
 	}
@@ -256,7 +317,17 @@ func (c *Client) getEKSClient(ctx context.Context, account, region string) (*eks
 }
 
 func (c *Client) getAllRegions(ctx context.Context) ([]awstypes.Region, error) {
-	allRegions, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{})
+	var client *ec2.Client
+	var err error
+	if c.creds != nil && c.creds.GetRoleBasedAuth() != nil && c.creds.GetRoleBasedAuth().GetAwsRole().RoleArn != "" {
+		client, err = c.getEC2ClientFromRole(ctx, "")
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		client = c.defaultAWSClient.ec2Client
+	}
+	allRegions, err := client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{})
 	if err != nil {
 		return nil, err
 	}

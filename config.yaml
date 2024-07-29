@@ -21,8 +21,8 @@ port: 50052
 # hostname: 127.0.0.1
 
 # use local database, if true periodically sync resources from the cloud and serve resources to the client based on local database
-#useLocalDB: false
-useLocalDB: true
+useLocalDB: false
+#useLocalDB: true
 
 # Logging Level: Possible options are PANIC, FATAL, ERROR, INFO, WARN, DEBUG, TRACE
 logLevel: INFO
@@ -33,8 +33,8 @@ providers:
     type: cloud
   #- name: azure
   #  type: cloud
-  - name: gcp
-    type: cloud
+  #- name: gcp
+  #  type: cloud
 
 #Support for K8S
 kubernetesSupported: true

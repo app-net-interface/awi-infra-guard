@@ -16,12 +16,73 @@
 // SPDX-License-Identifier: Apache-2.0
 
 syntax = "proto3";
-
 package infra;
 
 option go_package = "./;infrapb";
 import "google/protobuf/timestamp.proto";
 
+message Error {
+    int32 code = 1;
+    string errorMessage = 2;
+    string serverity = 3;
+}
+
+message AwsRole {
+    string role_arn = 1; // AWS: Role ARN
+    string role_session_name = 2; // AWS: Session Name
+    int32 duration_seconds = 3; // Optional: Session duration in seconds
+}
+
+message GcpRole {
+    string service_account = 1; // GCP: Service Account Email
+}
+
+message AzureRole {
+    string managed_identity = 1; // Azure: Managed Identity Client ID
+}
+
+message RoleBasedAuth {
+    oneof role {
+        AwsRole aws_role = 1;
+        GcpRole gcp_role = 2;
+        AzureRole azure_role = 3;
+    }
+}
+
+message AwsUserAuth {
+    string access_key_id = 1; // AWS: Access Key ID
+    string secret_access_key = 2; // AWS: Secret Access Key
+    string session_token = 3; // Optional: Session Token for temporary credentials
+}
+
+message GcpUserAuth {
+    oneof auth_method {
+        string api_key = 1; // GCP: API Key
+        string json_key = 2; // GCP: Service Account JSON key file content
+    }
+}
+
+message AzureUserAuth {
+    string client_id = 1; // Azure: Client ID
+    string client_secret = 2; // Azure: Client Secret
+    string tenant_id = 3; // Azure: Tenant ID
+    string certificate_path = 4; // Optional: Path to certificate file for certificate-based auth
+}
+
+message UserBasedAuth {
+    oneof user_auth {
+        AwsUserAuth aws_user_auth = 1;
+        GcpUserAuth gcp_user_auth = 2;
+        AzureUserAuth azure_user_auth = 3;
+    }
+}
+
+message Credentials {
+    oneof auth {
+        RoleBasedAuth role_based_auth = 1;
+        UserBasedAuth user_based_auth = 2;
+    }
+}
 
 message VPC {
     string id = 1;

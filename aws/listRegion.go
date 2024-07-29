@@ -22,28 +22,27 @@ import (
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 func (c *Client) ListRegions(ctx context.Context, params *infrapb.ListRegionsRequest) ([]types.Region, error) {
 
+	var awsRegions []awsTypes.Region
 	var regions []types.Region
-	// List all regions to ensure NAT Gateways from every region are considered
-	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
-		AllRegions: aws.Bool(true),
-	})
-	if err != nil {
-		c.logger.Errorf("Unable to describe regions, %v", err)
-		return regions, err
-	}
-	for _, region := range regionResult.Regions {
-	//	c.logger.Debugf("%d.%s", count, *region.RegionName)
+
+	c.accountID = params.AccountId
+	c.creds = params.Creds
+
+	awsRegions, err := c.getAllRegions(ctx)
+
+	for _, region := range awsRegions {
+		//	c.logger.Debugf("%d.%s", count, *region.RegionName)
 		regions = append(regions, types.Region{
 			ID:       *region.RegionName,
 			Name:     *region.RegionName,
 			Provider: providerName,
 		})
 	}
+	c.logger.Infof("Found %d regions enabled in this account", len(regions)-1)
 	return regions, err
 }

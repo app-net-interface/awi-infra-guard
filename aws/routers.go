@@ -23,7 +23,6 @@ import (
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 )
@@ -32,9 +31,7 @@ func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersReq
 
 	var routers []types.Router
 	c.accountID = params.AccountId
-	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
-		AllRegions: aws.Bool(true),
-	})
+	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{})
 	if err != nil {
 		c.logger.Errorf("Unable to describe regions, %v", err)
 		return routers, err

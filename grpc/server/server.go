@@ -142,7 +142,6 @@ func initConfig(configFilePath string, c *config.Config) error {
 		return fmt.Errorf("unable to decode providers into struct: %v", err)
 	}
 
-
 	if c.UseLocalDB {
 		var syncConfig config.SyncConfig
 		if err := viper.UnmarshalKey("syncConfig", &syncConfig); err != nil {
@@ -265,49 +264,53 @@ func (s *Server) ListRegions(ctx context.Context, in *infrapb.ListRegionsRequest
 }
 
 func (s *Server) ListVPC(ctx context.Context, in *infrapb.ListVPCRequest) (*infrapb.ListVPCResponse, error) {
+	var errorMessage string
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
-	if err != nil {
-		return nil, err
-	}
 	vpcs, err := cloudProvider.ListVPC(ctx, in)
 	if err != nil {
-		return nil, err
+		errorMessage = err.Error()
 	}
-	var t string
-	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.VPCType))
-	if err != nil {
+	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.VPCType))
+	if e != nil {
 		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.VPCType, cloudProvider.GetName())
-	} else {
-		t = syncTime.Time
 	}
-
 	return &infrapb.ListVPCResponse{
-		LastSyncTime: t,
+		LastSyncTime: syncTime.Time,
 		Vpcs:         typesVpcsToGrpc(vpcs),
-	}, nil
+		Err: &infrapb.Error{
+			Code:         100,
+			ErrorMessage: errorMessage,
+			Serverity:    "Severe",
+		},
+	}, err
 }
 
 func (s *Server) ListInstances(ctx context.Context, in *infrapb.ListInstancesRequest) (*infrapb.ListInstancesResponse, error) {
+	var errorMessage string
+
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
 	if err != nil {
 		return nil, err
 	}
 	instances, err := cloudProvider.ListInstances(ctx, in)
 	if err != nil {
+		errorMessage = err.Error()
 		return nil, err
 	}
-	var t string
-	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.InstanceType))
-	if err != nil {
+	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.InstanceType))
+	if e != nil {
 		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.InstanceType, cloudProvider.GetName())
-	} else {
-		t = syncTime.Time
 	}
 
 	return &infrapb.ListInstancesResponse{
-		LastSyncTime: t,
+		LastSyncTime: syncTime.Time,
 		Instances:    typesInstanceToGrpc(instances),
-	}, nil
+		Err: &infrapb.Error{
+			Code:         100,
+			ErrorMessage: errorMessage,
+			Serverity:    "Severe",
+		},
+	}, err
 }
 func (s *Server) ListSubnets(ctx context.Context, in *infrapb.ListSubnetsRequest) (*infrapb.ListSubnetsResponse, error) {
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)

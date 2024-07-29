@@ -159,14 +159,14 @@ func (s *RealProviderStrategy) GetProvider(ctx context.Context, cloud string) (C
 		if s.gcpClient == nil {
 			return nil, fmt.Errorf("GCP client is not initizalized")
 		}
-		s.providers = append(s.providers, s.awsClient)
+		s.providers = append(s.providers, s.gcpClient)
 
 		return s.gcpClient, nil
 	case "azure":
 		if s.azureClient == nil {
 			return nil, fmt.Errorf("Azure client is not initizalized")
 		}
-		s.providers = append(s.providers, s.awsClient)
+		s.providers = append(s.providers, s.azureClient)
 		return s.azureClient, nil
 	}
 	return nil, fmt.Errorf("unsupported provider")

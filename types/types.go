@@ -54,6 +54,12 @@ const (
 	NamespaceType     = "Namespace"
 )
 
+type Error struct {
+	code     int32
+	message  string
+	severity string
+}
+
 type Region struct {
 	ID           string
 	Name         string
