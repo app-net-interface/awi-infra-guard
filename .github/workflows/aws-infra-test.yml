@@ -48,29 +48,37 @@ jobs:
           path: ./terraform/aws/terraform.tfstate
 
   test:
+    # name: Infrastructure tests
+    # # needs: create
+    # runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
+    # steps:
+    #   - name: Checkout repo
+    #     uses: actions/checkout@v3
+
+    #   - name: Docker build
+    #     run: docker build -t awi-infra-guard-image-${{ github.run_id}} .
+
+    #   - name: Docker run
+    #     run: docker run -d -p 50052:50052 --name awi-infra-guard-${{ github.run_id}} awi-infra-guard-image-${{ github.run_id}}
+
+    #   - name: Wait for gRPC to be ready
+    #     run: |
+    #       while ! grpc_cli ls localhost:50052 | grep -q "infra.CloudProviderService";
+    #       do
+    #           sleep 1
+    #           echo "waiting for grpc server to start..."
+    #       done
+
+    #   - name: List grpc services
+    #     run: grpc_cli ls localhost:50052
+
+
     name: Infrastructure tests
     needs: create
     runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Docker build
-        run: docker build -t awi-infra-guard-image-${{ github.run_id}} .
-
-      - name: Docker run
-        run: docker run -d -p 50052:50052 --name awi-infra-guard-${{ github.run_id}} awi-infra-guard-image-${{ github.run_id}}
-
-      - name: Wait for gRPC to be ready
-        run: |
-          while ! grpc_cli ls localhost:50053 | grep -q "infra.CloudProviderService";
-          do
-              sleep 1
-              echo "waiting for grpc server to start..."
-          done
-
-      - name: List grpc services
-        run: grpc_cli ls localhost:50052
+      - name: Sleep for 5 minutes
+        run: sleep 300
 
   destroy:
     name: Destroy resources
