@@ -93,7 +93,9 @@ func (c *Client) getVPCEsForRegion(ctx context.Context, regionName string, filte
 	if err != nil {
 		return nil, err
 	}
-	paginator := ec2.NewDescribeVpcEndpointsPaginator(client, &ec2.DescribeVpcEndpointsInput{})
+	paginator := ec2.NewDescribeVpcEndpointsPaginator(client, &ec2.DescribeVpcEndpointsInput{
+		Filters: filters,
+	})
 
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(context.Background())
@@ -101,8 +103,17 @@ func (c *Client) getVPCEsForRegion(ctx context.Context, regionName string, filte
 			return nil, err
 		}
 		for _, vep := range page.VpcEndpoints {
-			var name, state, serviceName, subnetIds, routeTableIds string
+			var name, state, vepType, serviceName, subnetIds, routeTableIds string
 			labels := make(map[string]string)
+
+			switch vep.VpcEndpointType {
+			case awstypes.VpcEndpointTypeGateway:
+				vepType = "Gateway"
+			case awstypes.VpcEndpointTypeInterface:
+				vepType = "Interface"
+			case awstypes.VpcEndpointTypeGatewayLoadBalancer:
+				vepType = "GatewayLoadbalancer"
+			}
 
 			// Extracting Name from Tags
 			for _, tag := range vep.Tags {
@@ -114,6 +125,7 @@ func (c *Client) getVPCEsForRegion(ctx context.Context, regionName string, filte
 			if vep.ServiceName != nil {
 				serviceName = *vep.ServiceName
 			}
+			state = string(vep.State)
 
 			//var subnetIds, routeTableIds []string
 			subnetIds = strings.Join(vep.SubnetIds, ",")
@@ -128,11 +140,46 @@ func (c *Client) getVPCEsForRegion(ctx context.Context, regionName string, filte
 				Region:        regionName,
 				State:         state,
 				Labels:        labels,
+				Type:          vepType,
 				ServiceName:   serviceName,
 				SubnetIds:     subnetIds,
 				RouteTableIds: routeTableIds,
 				CreatedAt:     vep.CreationTimestamp,
 				SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#EndpointDetails:vpcEndpointId=%s", regionName, regionName, *vep.VpcEndpointId),
+			})
+		}
+	}
+
+	p2 := ec2.NewDescribeInstanceConnectEndpointsPaginator(client, &ec2.DescribeInstanceConnectEndpointsInput{})
+
+	for p2.HasMorePages() {
+		page, err := p2.NextPage(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		for _, vep := range page.InstanceConnectEndpoints {
+			var name string
+			labels := make(map[string]string)
+
+			// Extracting Name from Tags
+			for _, tag := range vep.Tags {
+				if *tag.Key == "Name" || *tag.Key == "name" {
+					name = *tag.Value
+				}
+				labels[*tag.Key] = *tag.Value
+			}
+
+			veps = append(veps, types.VPCEndpoint{
+				Provider:  c.GetName(),
+				ID:        *vep.InstanceConnectEndpointId,
+				AccountID: *vep.OwnerId,
+				Name:      name,
+				VPCId:     *vep.VpcId,
+				Region:    regionName,
+				State:     string(vep.State),
+				Labels:    labels,
+				CreatedAt: vep.CreatedAt,
+				SelfLink:  fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#InstanceConnectEndpointDetails:instanceConnectEndpointId=%s", regionName, regionName, *vep.InstanceConnectEndpointId),
 			})
 		}
 	}

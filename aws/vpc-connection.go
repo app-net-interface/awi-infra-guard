@@ -67,8 +67,8 @@ func (c *Client) ConnectVPCs(ctx context.Context, input t.VPCConnectionParams) (
 		select {
 		case <-timer.C:
 			// Timeout reached
-			msg := fmt.Sprintf("failed to finish connect VPCs operation within timeout")
-			c.logger.Errorf(msg)
+			msg := "failed to finish connect VPCs operation within timeout"
+			c.logger.Errorf("failed to finish connect VPCs operation within timeout")
 			return t.VPCConnectionOutput{}, fmt.Errorf(msg)
 		default:
 			// Try the operation
@@ -106,7 +106,7 @@ func (c *Client) ConnectVPC(ctx context.Context, input t.SingleVPCConnectionPara
 		select {
 		case <-timer.C:
 			// Timeout reached
-			msg := fmt.Sprintf("failed to finish connect VPC operation within timeout")
+			msg := "failed to finish connect VPC operation within timeout"
 			c.logger.Errorf(msg)
 			return t.SingleVPCConnectionOutput{}, fmt.Errorf(msg)
 		default:
@@ -531,7 +531,7 @@ func (c *Client) createTransitGatewayRoutesTables(ctx context.Context, account, 
 		return nil, err
 	}
 
-	// Check if any Transit Gateways RT were found - This is a bug here. 
+	// Check if any Transit Gateways RT were found - This is a bug here.
 	if len(output.TransitGatewayRouteTables) > 0 {
 		c.logger.Infof("AWI Transit Gateway Route Table already exists")
 		return output.TransitGatewayRouteTables[0].TransitGatewayRouteTableId, nil

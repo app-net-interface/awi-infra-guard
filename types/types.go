@@ -344,6 +344,7 @@ type VPCEndpoint struct {
 	RouteTableIds string            `json:"route_table_ids,omitempty"`
 	SubnetIds     string            `json:"subnet_ids,omitempty"`
 	ServiceName   string            `json:"service_name,omitempty"`
+	Type          string            `json:"type,omitempty"`
 	Labels        map[string]string `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	CreatedAt     *time.Time        `json:"created_at,omitempty"`
 	UpdatedAt     *time.Time        `json:"updated_at,omitempty"`

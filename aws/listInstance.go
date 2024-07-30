@@ -32,8 +32,10 @@ import (
 
 func (c *Client) ListInstances(ctx context.Context, params *infrapb.ListInstancesRequest) ([]types.Instance, error) {
 	c.logger.Infof("List instances")
+
 	c.creds = params.Creds
 	c.accountID = params.AccountId
+
 
 	builder := newFilterBuilder()
 	builder.withVPC(params.GetVpcId())

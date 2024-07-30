@@ -20,44 +20,84 @@ package aws
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersRequest) ([]types.Router, error) {
 
-	var routers []types.Router
 	c.accountID = params.AccountId
-	regionResult, err := c.defaultAWSClient.ec2Client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{})
-	if err != nil {
-		c.logger.Errorf("Unable to describe regions, %v", err)
-		return routers, err
+	c.creds = params.Creds
+	builder := newFilterBuilder()
+	for k, v := range params.GetLabels() {
+		builder.withTag(k, v)
 	}
-	for _, region := range regionResult.Regions {
-		regionalCfg, err := config.LoadDefaultConfig(ctx,
-			config.WithRegion(*region.RegionName),
-		)
-		ec2RegionalClient := ec2.NewFromConfig(regionalCfg)
-		regionalRouters, err := c.ListRoutersForRegion(ec2RegionalClient, *region.RegionName)
-		if err != nil {
-			//c.logger.Warnf("Error listing Transit Gateways in region %s: %v", *region.RegionName, err)
-			continue
-		}
-		routers = append(routers, regionalRouters...)
+	filters := builder.build()
 
+	if params.Region == "" || params.GetRegion() == "all" {
+		var (
+			wg            sync.WaitGroup
+			allRouters    []types.Router
+			allErrors     []error
+			resultChannel = make(chan regionResult)
+		)
+		regions, err := c.getAllRegions(ctx)
+		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
+			return nil, err
+		}
+		for _, region := range regions {
+			wg.Add(1)
+			go func(regionName string) {
+				defer wg.Done()
+				routers, err := c.getRoutersForRegion(ctx, regionName, filters)
+				resultChannel <- regionResult{
+					region:  regionName,
+					routers: routers,
+					err:     err,
+				}
+			}(*region.RegionName)
+		}
+
+		go func() {
+			wg.Wait()
+			close(resultChannel)
+		}()
+
+		for result := range resultChannel {
+			if result.err != nil {
+				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+			} else {
+				allRouters = append(allRouters, result.routers...)
+			}
+		}
+
+		if len(allErrors) > 0 {
+			return allRouters, fmt.Errorf("errors occurred in some regions: %v", allErrors)
+		}
+		return allRouters, nil
 	}
-	return routers, nil
+	return c.getRoutersForRegion(ctx, params.Region, filters)
 }
 
-func (c *Client) ListRoutersForRegion(client *ec2.Client, region string) ([]types.Router, error) {
+func (c *Client) getRoutersForRegion(ctx context.Context, region string, filters []awsTypes.Filter) ([]types.Router, error) {
 
 	var routers []types.Router
 	var CIDRBlock string
 
-	paginator := ec2.NewDescribeTransitGatewaysPaginator(client, &ec2.DescribeTransitGatewaysInput{})
+	client, err := c.getEC2Client(ctx, c.accountID, region)
+	if err != nil {
+		return nil, err
+	}
+
+	paginator := ec2.NewDescribeTransitGatewaysPaginator(client, &ec2.DescribeTransitGatewaysInput{
+		Filters: filters,
+	})
 
 	for paginator.HasMorePages() {
 

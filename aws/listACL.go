@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
-	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 func (c *Client) ListACLs(ctx context.Context, params *infrapb.ListACLsRequest) ([]types.ACL, error) {
@@ -70,7 +69,7 @@ func (c *Client) ListACLs(ctx context.Context, params *infrapb.ListACLsRequest) 
 	return c.getACLsForRegion(ctx, params.Region, filters)
 }
 
-func (c *Client) getACLsForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.ACL, error) {
+func (c *Client) getACLsForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter) ([]types.ACL, error) {
 	client, err := c.getEC2Client(ctx, c.accountID, regionName)
 	if err != nil {
 		return nil, err
@@ -82,15 +81,12 @@ func (c *Client) getACLsForRegion(ctx context.Context, regionName string, filter
 	if err != nil {
 		return nil, err
 	}
-	return convertACLs(c.defaultAccountID, c.defaultRegion, c.accountID, regionName, resp.NetworkAcls), nil
+	return convertACLs(c.defaultRegion, regionName, resp.NetworkAcls), nil
 }
 
-func convertACLs(defaultAccount, defaultRegion, account, region string, awsACLs []awsTypes.NetworkAcl) []types.ACL {
+func convertACLs(defaultRegion, region string, awsACLs []awsTypes.NetworkAcl) []types.ACL {
 	if region == "" {
 		region = defaultRegion
-	}
-	if account == "" {
-		account = defaultAccount
 	}
 	out := make([]types.ACL, 0, len(awsACLs))
 	for _, acl := range awsACLs {
@@ -110,7 +106,7 @@ func convertACLs(defaultAccount, defaultRegion, account, region string, awsACLs 
 				rule.Number = int(*r.RuleNumber)
 			}
 			if r.Egress != nil {
-				if *r.Egress == true {
+				if *r.Egress {
 					rule.Direction = "Egress"
 				} else {
 					rule.Direction = "Ingress"

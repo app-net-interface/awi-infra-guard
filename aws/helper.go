@@ -17,9 +17,21 @@
 
 package aws
 
+import "strings"
+
 func convertString(s *string) string {
 	if s == nil {
 		return ""
 	}
 	return *s
+}
+
+// ExtractAccountID extracts the account ID from an AWS ARN string
+func ExtractAccountID(arn string) string {
+    parts := strings.Split(arn, ":")
+    
+    if len(parts) >= 5 {
+        return parts[4]
+    }
+    return ""
 }

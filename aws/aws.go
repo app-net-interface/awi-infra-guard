@@ -172,9 +172,7 @@ func (c *Client) GetName() string {
 
 func (c *Client) ListAccounts() []types.Account {
 	accounts := make([]types.Account, 0, len(c.profiles))
-	for _, v := range c.profiles {
-		accounts = append(accounts, v)
-	}
+	accounts = append(accounts, c.profiles...)
 	return accounts
 }
 
@@ -252,6 +250,9 @@ func (c *Client) getEC2ClientFromRole(ctx context.Context, region string) (*ec2.
 	}
 	roleArn := c.creds.GetRoleBasedAuth().GetAwsRole().RoleArn
 	sessionName := c.creds.GetRoleBasedAuth().GetAwsRole().RoleSessionName
+	if c.accountID == "" {
+		c.accountID = ExtractAccountID(roleArn)
+	}
 
 	// Assume the role
 	output, err := auth.AssumeRole(ctx, cfg, roleArn, sessionName)
@@ -262,7 +263,7 @@ func (c *Client) getEC2ClientFromRole(ctx context.Context, region string) (*ec2.
 	// if region == "" {
 	// 	region = c.defaultRegion
 	// }
-	c.logger.Infof("Assumed role for user with ARN %s and Id %s", *output.AssumedRoleUser.Arn, *output.AssumedRoleUser.AssumedRoleId)
+	c.logger.Debugf("Assumed role for user with ARN %s and Id %s", *output.AssumedRoleUser.Arn, *output.AssumedRoleUser.AssumedRoleId)
 
 	// Create a new configuration with the assumed role credentials
 	assumedCfg, err := config.LoadDefaultConfig(ctx,
@@ -294,7 +295,7 @@ func (c *Client) getEC2Client(ctx context.Context, account string, region string
 	return client.ec2Client, nil
 }
 
-func (c *Client) getELBClient(ctx context.Context, account, region string) (*elasticloadbalancing.Client, error) {
+func (c *Client) getELBClient(_ context.Context, account, region string) (*elasticloadbalancing.Client, error) {
 	if useDefaultConfig(region, c.defaultRegion, account) {
 		return c.defaultAWSClient.lbClient, nil
 	}
@@ -305,7 +306,7 @@ func (c *Client) getELBClient(ctx context.Context, account, region string) (*ela
 	return client.lbClient, nil
 }
 
-func (c *Client) getEKSClient(ctx context.Context, account, region string) (*eks.Client, error) {
+func (c *Client) getEKSClient(_ context.Context, account, region string) (*eks.Client, error) {
 	if useDefaultConfig(region, c.defaultRegion, account) {
 		return c.defaultAWSClient.eksClient, nil
 	}

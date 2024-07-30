@@ -62,9 +62,9 @@ func (c *Client) createTransitGateway(ctx context.Context, account, region strin
 }
 
 // TBD: Delete the transit gateway with id .
-func (c *Client) deleteTransitGateway(ctx context.Context, account, TransitGatewayId string) (e error) {
-	return e
-}
+// func (c *Client) deleteTransitGateway(ctx context.Context, account, TransitGatewayId string) (e error) {
+// 	return e
+// }
 
 func (c *Client) findTransitGatewayByName(ctx context.Context, transitGatewayName string, account, region string) (*string, error) {
 	// Describe Transit Gateways with filters to find by name

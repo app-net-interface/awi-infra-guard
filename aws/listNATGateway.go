@@ -92,7 +92,9 @@ func (c *Client) getNATGatewaysForRegion(ctx context.Context, regionName string,
 	if err != nil {
 		return nil, err
 	}
-	paginator := ec2.NewDescribeNatGatewaysPaginator(client, &ec2.DescribeNatGatewaysInput{})
+	paginator := ec2.NewDescribeNatGatewaysPaginator(client, &ec2.DescribeNatGatewaysInput{
+		Filter: filters,
+	})
 
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(context.Background())

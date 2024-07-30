@@ -25,7 +25,7 @@ import (
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListInternetGatewaysRequest) ([]types.IGW, error) {
@@ -87,13 +87,15 @@ func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListI
 	return c.getInternetGatewaysForRegion(ctx, params.Region, filters)
 }
 
-func (c *Client) getInternetGatewaysForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.IGW, error) {
+func (c *Client) getInternetGatewaysForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter) ([]types.IGW, error) {
 	var igws []types.IGW
 	client, err := c.getEC2Client(ctx, c.accountID, regionName)
 	if err != nil {
 		return nil, err
 	}
-	paginator := ec2.NewDescribeInternetGatewaysPaginator(client, &ec2.DescribeInternetGatewaysInput{})
+	paginator := ec2.NewDescribeInternetGatewaysPaginator(client, &ec2.DescribeInternetGatewaysInput{
+		Filters: filters,
+	})
 
 	for paginator.HasMorePages() {
 		page, err := paginator.NextPage(context.Background())

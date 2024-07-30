@@ -63,7 +63,6 @@ func (s *StrategyWithDB) GetProvider(ctx context.Context, cloud string) (provide
 		return nil, fmt.Errorf("couldn't find provider %s", cloud)
 	}
 	s.logger.Infof("Using local DB for %s provider", cloud)
-
 	return prov, nil
 }
 

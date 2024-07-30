@@ -81,16 +81,14 @@ func (c *Client) getRouteTablesForRegion(ctx context.Context, regionName string,
 	if err != nil {
 		return nil, err
 	}
-	return convertRouteTables(c.defaultAccountID, c.defaultRegion, c.accountID, regionName, resp.RouteTables), nil
+	return convertRouteTables(c.defaultRegion, regionName, resp.RouteTables), nil
 }
 
-func convertRouteTables(defaultAccount, defaultRegion, account, region string, awsRts []awsTypes.RouteTable) []types.RouteTable {
+func convertRouteTables(defaultRegion, region string, awsRts []awsTypes.RouteTable) []types.RouteTable {
 	if region == "" {
 		region = defaultRegion
 	}
-	if account == "" {
-		account = defaultAccount
-	}
+
 	out := make([]types.RouteTable, 0, len(awsRts))
 	for _, rt := range awsRts {
 		routes := make([]types.Route, 0, len(rt.Routes))
