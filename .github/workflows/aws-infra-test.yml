@@ -12,95 +12,104 @@ on:
         description: 'AWS Secret Access Key'
         required: true
 
-env:
-  AWS_ACCESS_KEY_ID: ${{ github.event.inputs.aws_access_key_id }}
-  AWS_SECRET_ACCESS_KEY: ${{ github.event.inputs.aws_secret_access_key }}
-
 jobs:
-  create:
-    name: Create resources
-    runs-on: ubuntu-latest
+  # create:
+  #   name: Create resources
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v3
       
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.2
-      - name: Terraform init
-        id: init
-        run: terraform init
-        working-directory: ./terraform/aws
-      - name: Terraform plan
-        id: plan
-        run: terraform plan -out=tfplan
-        working-directory: ./terraform/aws
-      - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
-        working-directory: ./terraform/aws
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: 1.9.2
+  #     - name: Terraform init
+  #       id: init
+  #       run: terraform init
+  #       working-directory: ./terraform/aws
+  #     - name: Terraform plan
+  #       id: plan
+  #       run: terraform plan -out=tfplan
+  #       working-directory: ./terraform/aws
+  #     - name: Terraform Apply
+  #       run: terraform apply -auto-approve tfplan
+  #       working-directory: ./terraform/aws
 
-      - name: Upload Terraform state
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform_state
-          path: ./terraform/aws/terraform.tfstate
+  #     - name: Upload Terraform state
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: terraform_state
+  #         path: ./terraform/aws/terraform.tfstate
 
   test:
-    # name: Infrastructure tests
-    # # needs: create
-    # runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
-    # steps:
-    #   - name: Checkout repo
-    #     uses: actions/checkout@v3
-
-    #   - name: Docker build
-    #     run: docker build -t awi-infra-guard-image-${{ github.run_id}} .
-
-    #   - name: Docker run
-    #     run: docker run -d -p 50052:50052 --name awi-infra-guard-${{ github.run_id}} awi-infra-guard-image-${{ github.run_id}}
-
-    #   - name: Wait for gRPC to be ready
-    #     run: |
-    #       while ! grpc_cli ls localhost:50052 | grep -q "infra.CloudProviderService";
-    #       do
-    #           sleep 1
-    #           echo "waiting for grpc server to start..."
-    #       done
-
-    #   - name: List grpc services
-    #     run: grpc_cli ls localhost:50052
-
-
     name: Infrastructure tests
-    needs: create
+    # needs: create
     runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
+    env:
+      AWS_ACCESS_KEY_ID: ${{ github.event.inputs.aws_access_key_id }}
+      AWS_SECRET_ACCESS_KEY: ${{ github.event.inputs.aws_secret_access_key }}
     steps:
-      - name: Sleep for 5 minutes
-        run: sleep 300
+      - name: Mask Secrets
+        run: |
+          echo ::add-mask::$AWS_ACCESS_KEY_ID
+          echo ::add-mask::$AWS_SECRET_ACCESS_KEY
 
-  destroy:
-    name: Destroy resources
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Download Terraform state
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform_state
-          path: ./terraform/aws
+      - name: Docker build
+        run: docker build -t awi-infra-guard-image-${{ github.run_id}} .
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.2
-      - name: Initialize Terraform
-        run: terraform init
-        working-directory: ./terraform/aws
-      - name: Destroy Terraform configuration
-        run: terraform destroy -auto-approve
-        working-directory: ./terraform/aws
+      - name: Docker run
+        run: docker run -d -p 50052:50052 --mount type=bind,source=$HOME/.aws/credentials,target=/root/.aws/credentials,readonly --name awi-infra-guard-${{ github.run_id}} awi-infra-guard-image-${{ github.run_id}}
+
+      - name: Wait for gRPC server to be ready
+        run: |
+          while ! grpc_cli ls localhost:50052 | grep -q "infra.CloudProviderService";
+          do
+              sleep 1
+          done
+          echo "gRPC server ready"
+
+      - name: Check if VPC exists
+        run: |
+          if grpc_cli call localhost:50052 ListVPC "provider: 'aws', region: 'us-east-2'" | grep -q "vpc-025f05e7507dde253"; then
+            echo "OK"
+          else
+            echo "FAIL"
+          fi
+
+
+    # name: Infrastructure tests
+    # needs: create
+    # runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
+    # steps:
+    #   - name: Sleep for 5 minutes
+    #     run: sleep 300
+
+  # destroy:
+  #   name: Destroy resources
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v3
+
+  #     - name: Download Terraform state
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: terraform_state
+  #         path: ./terraform/aws
+
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v3
+  #       with:
+  #         terraform_version: 1.9.2
+  #     - name: Initialize Terraform
+  #       run: terraform init
+  #       working-directory: ./terraform/aws
+  #     - name: Destroy Terraform configuration
+  #       run: terraform destroy -auto-approve
+  #       working-directory: ./terraform/aws
