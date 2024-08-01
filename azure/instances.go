@@ -124,8 +124,6 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 							}
 						}
 					}
-					c.logger.Info("Azure vmstatus = ", vmStatus)
-
 					// nicID := *vm.Properties.NetworkProfile.NetworkInterfaces[0].ID
 					// nicName := getResourceName(nicID)
 
@@ -151,15 +149,16 @@ func (c *Client) ListInstances(ctx context.Context, input *infrapb.ListInstances
 
 					// Construct and append the instance
 					instance := types.Instance{
-						ID:               *vm.ID,
-						Name:             *vm.Name,
-						Type:             string(*vm.Properties.HardwareProfile.VMSize),
-						PublicIP:         publicIP,
-						PrivateIP:        privateIP,
-						SubnetID:         *ipConf.Properties.Subnet.ID,
-						VPCID:            vNetID,
-						Labels:           convertToStringMap(vm.Tags),
-						State:            string(*vm.Properties.ProvisioningState),
+						ID:        *vm.ID,
+						Name:      *vm.Name,
+						Type:      string(*vm.Properties.HardwareProfile.VMSize),
+						PublicIP:  publicIP,
+						PrivateIP: privateIP,
+						SubnetID:  *ipConf.Properties.Subnet.ID,
+						VPCID:     vNetID,
+						Labels:    convertToStringMap(vm.Tags),
+						//State:            string(*vm.Properties.ProvisioningState),
+						State:            vmStatus,
 						Region:           *vm.Location,
 						Provider:         "Azure",
 						AccountID:        input.AccountId,

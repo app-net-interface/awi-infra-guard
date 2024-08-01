@@ -31,10 +31,10 @@ import (
 )
 
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
-	c.logger.Debugf("List VPCs")
 	if params == nil {
 		params = &infrapb.ListVPCRequest{}
 	} else {
+		c.logger.Infof("Listing VPC for account %s and region %s", params.AccountId, params.Region)
 		c.creds = params.Creds
 		c.accountID = params.AccountId
 	}
@@ -89,14 +89,14 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 		if len(allErrors) > 0 {
 			return allVPCs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
-		c.logger.Debugf("In account %s Found %d VPCs across all regions", c.accountID, len(allVPCs)-1)
+		c.logger.Infof("In account %s Found %d VPCs across %d regions", c.accountID, len(allVPCs), len(regions))
 		return allVPCs, nil
 	}
 	return c.getVPCsForRegion(ctx, params.Region, filters)
 }
 
 func (c *Client) getVPCsForRegion(ctx context.Context, region string, filters []awstypes.Filter) ([]types.VPC, error) {
-	c.logger.Infof("Retreiving vpcs for region %s", region)
+	c.logger.Debugf("Retreiving VPCs for account[%s] and region[%s]", c.accountID, region)
 	client, err := c.getEC2Client(ctx, c.accountID, region)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (c *Client) getVPCsForRegion(ctx context.Context, region string, filters []
 	if err != nil {
 		return nil, err
 	}
-	c.logger.Debugf("In account %s Found %d VPCs in region %s", c.accountID, len(resp.Vpcs)-1, region)
+	c.logger.Debugf("In account %s Found %d VPCs in region %s", c.accountID, len(resp.Vpcs), region)
 	return convertVPCs(resp.Vpcs, c.defaultRegion, region), nil
 }
 
@@ -119,8 +119,6 @@ func convertVPCs(vpcs []awstypes.Vpc, defaultRegion string, region string) []typ
 
 	result := make([]types.VPC, 0, len(vpcs))
 	for _, vpc := range vpcs {
-		fmt.Printf("Found vpc %sin region %s with account id %s \n", *vpc.VpcId, region, *vpc.OwnerId)
-
 		var ipv6CIDR string
 		if len(vpc.Ipv6CidrBlockAssociationSet) > 0 {
 			for _, ipv6Association := range vpc.Ipv6CidrBlockAssociationSet {

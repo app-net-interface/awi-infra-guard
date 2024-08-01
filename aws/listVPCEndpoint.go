@@ -77,6 +77,7 @@ func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEn
 				allVPCEs = append(allVPCEs, result.vpces...)
 			}
 		}
+		c.logger.Infof("In account %s Found %d VPC Endpoints across %d regions", c.accountID, len(allVPCEs), len(regions))
 
 		if len(allErrors) > 0 {
 			return allVPCEs, fmt.Errorf("errors occurred in some regions: %v", allErrors)

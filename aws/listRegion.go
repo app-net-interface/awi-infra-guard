@@ -43,6 +43,6 @@ func (c *Client) ListRegions(ctx context.Context, params *infrapb.ListRegionsReq
 			Provider: providerName,
 		})
 	}
-	c.logger.Infof("Found %d regions enabled in this account", len(regions)-1)
+	c.logger.Debugf("Found %d regions enabled in account %s \n regions are : \n %+v ", len(regions), c.accountID, regions)
 	return regions, err
 }

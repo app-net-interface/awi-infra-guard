@@ -60,6 +60,7 @@ func (c *Client) ListRouteTables(ctx context.Context, params *infrapb.ListRouteT
 				allRouteTables = append(allRouteTables, result.rts...)
 			}
 		}
+		c.logger.Infof("In account %s Found %d route tables across %d regions", c.accountID, len(allRouteTables), len(regions))
 
 		if len(allErrors) > 0 {
 			return allRouteTables, fmt.Errorf("errors occurred in some regions: %v", allErrors)

@@ -103,7 +103,7 @@ func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsReq
 				}
 			}(*region.RegionName)
 		}
-
+		c.logger.Infof("In account %s Found %d subnets across %d regions", c.accountID, len(allSubnets), len(regions))
 		go func() {
 			wg.Wait()
 			close(resultChannel)

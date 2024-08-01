@@ -47,22 +47,23 @@ func (c *Client) ListSecurityGroups(ctx context.Context, param *infrapb.ListSecu
 			resultChannel     = make(chan regionResult)
 		)
 
-		regionalClients, err := c.getAllClientsForProfile(param.GetAccountId())
+		regions, err := c.getAllRegions(ctx)
 		if err != nil {
+			c.logger.Errorf("Unable to describe regions, %v", err)
 			return nil, err
 		}
-		for regionName := range regionalClients {
+		for _, region := range regions {
 			wg.Add(1)
-			go func(ctx context.Context) {
+			go func(region string) {
 				defer wg.Done()
 
-				sgs, err := c.getSecurityGroupsForRegion(ctx, regionName, filters)
+				sgs, err := c.getSecurityGroupsForRegion(ctx, region, filters)
 				resultChannel <- regionResult{
-					region: regionName,
+					region: region,
 					sgs:    sgs,
 					err:    err,
 				}
-			}(ctx)
+			}(*region.RegionName)
 		}
 
 		go func() {
@@ -78,6 +79,7 @@ func (c *Client) ListSecurityGroups(ctx context.Context, param *infrapb.ListSecu
 				allSecurityGroups = append(allSecurityGroups, result.sgs...)
 			}
 		}
+		c.logger.Infof("In account %s Found %d security groups across %d regions", c.accountID, len(allSecurityGroups), len(regions))
 
 		if len(allErrors) > 0 {
 			return allSecurityGroups, fmt.Errorf("errors occurred in some regions: %v", allErrors)
@@ -102,7 +104,7 @@ func (c *Client) getSecurityGroupsForRegion(ctx context.Context, regionName stri
 	return convertSecurityGroups(c.defaultRegion, regionName, resp.SecurityGroups), nil
 }
 
-func convertSecurityGroups( defaultRegion,region string, awsSGs []awsTypes.SecurityGroup) []types.SecurityGroup {
+func convertSecurityGroups(defaultRegion, region string, awsSGs []awsTypes.SecurityGroup) []types.SecurityGroup {
 	if region == "" {
 		region = defaultRegion
 	}

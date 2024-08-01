@@ -60,7 +60,7 @@ func (c *Client) ListACLs(ctx context.Context, params *infrapb.ListACLsRequest) 
 				allACLs = append(allACLs, result.acls...)
 			}
 		}
-
+		c.logger.Infof("In account %s Found %d ACLs across %d regions", c.accountID, len(allACLs), len(regions))
 		if len(allErrors) > 0 {
 			return allACLs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}

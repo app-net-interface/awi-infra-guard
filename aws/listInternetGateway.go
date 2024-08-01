@@ -79,6 +79,7 @@ func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListI
 				allIGWs = append(allIGWs, result.igws...)
 			}
 		}
+		c.logger.Infof("In account %s Found %d IGWs across %d regions", c.accountID, len(allIGWs), len(regions))
 
 		if len(allErrors) > 0 {
 			return allIGWs, fmt.Errorf("errors occurred in some regions: %v", allErrors)

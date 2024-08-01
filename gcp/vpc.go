@@ -56,7 +56,7 @@ type network struct {
 //     will be returned.
 
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
-	c.logger.Debugf("Syncing GCP VPCs")
+	c.logger.Debugf("Listing VPCs for account %s", params.AccountId)
 
 	if params == nil {
 		params = &infrapb.ListVPCRequest{}

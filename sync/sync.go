@@ -19,6 +19,8 @@ package sync
 
 import (
 	"context"
+	"reflect"
+	"runtime"
 	"sync"
 	"time"
 
@@ -48,14 +50,22 @@ type Syncer struct {
 	strategy provider.Strategy
 }
 
-func (s *Syncer) Sync(done chan<- struct{}) {
-	//Sync VPC
+func (s *Syncer) ParallelSync(ctx context.Context, done chan<- struct{}) {
 	defer func() {
 		done <- struct{}{}
 	}()
 	s.logger.Errorf("*****************Sync Start*****************")
 	allResource := s.sc.HasCloudResource("all")
 	var wg sync.WaitGroup
+
+	if allResource || s.sc.HasCloudResource("region") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncRegions(ctx)
+		}()
+	}
 
 	if allResource || s.sc.HasCloudResource("vpc") {
 		wg.Add(1)
@@ -65,14 +75,7 @@ func (s *Syncer) Sync(done chan<- struct{}) {
 			s.syncVPC(ctx)
 		}()
 	}
-	if allResource || s.sc.HasCloudResource("region") {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			ctx := context.Background()
-			s.syncRegions(ctx)
-		}()
-	}
+
 	if allResource || s.sc.HasCloudResource("instance") {
 		wg.Add(1)
 		go func() {
@@ -198,10 +201,84 @@ func (s *Syncer) Sync(done chan<- struct{}) {
 	s.logger.Errorf("*****************K8S Sync End*****************")
 }
 
+func (s *Syncer) Sync(ctx context.Context, done chan<- struct{}) {
+	defer func() {
+		done <- struct{}{}
+	}()
+	s.logger.Errorf("*****************Sync Start*****************")
+	allResource := s.sc.HasCloudResource("all")
+
+	if allResource || s.sc.HasCloudResource("region") {
+		s.syncRegions(ctx)
+	}
+
+	if allResource || s.sc.HasCloudResource("vpc") {
+		s.syncVPC(ctx)
+	}
+
+	if allResource || s.sc.HasCloudResource("instance") {
+
+		s.syncInstances(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("publicip") {
+
+		s.syncPublicIPs(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("subnet") {
+
+		s.syncSubnets(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("acl") {
+
+		s.syncACLs(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("routetable") {
+
+		s.syncRouteTables(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("securitygroup") {
+
+		s.syncSecurityGroups(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("natgateway") {
+
+		s.syncNATGateways(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("router") {
+
+		s.syncRouters(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("internetgateway") {
+
+		s.syncIGWs(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("vpcendpoint") {
+
+		s.syncVPCEndpoints(ctx)
+	}
+
+	// Kubernetes
+	s.logger.Errorf("*****************Cloud Sync End*****************")
+
+	s.logger.Errorf("*****************K8S Sync Start*****************")
+
+	s.syncClusters(ctx)
+
+	s.syncPods(ctx)
+
+	s.syncNamespaces(ctx)
+
+	s.syncK8SServices(ctx)
+
+	s.syncK8SSsNodes(ctx)
+
+	s.logger.Errorf("*****************K8S Sync End*****************")
+}
+
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
-	s.logger.Infof("Starting periodical sync of cloud resources")
+	s.logger.Infof("Starting periodical sync of cloud resources every %s seconds", s.sc.SyncWaitTime.String())
 	done := make(chan struct{}, 1)
-	s.Sync(done)
+	s.Sync(ctx, done)
 	ticker := time.NewTicker(s.sc.SyncWaitTime)
 	for {
 		select {
@@ -209,7 +286,7 @@ func (s *Syncer) SyncPeriodically(ctx context.Context) {
 			go func() {
 				select {
 				case <-done:
-					s.Sync(done)
+					s.Sync(ctx, done)
 				default:
 					s.logger.Errorf("Previous sync operation is still running, skipping this sync")
 				}
@@ -337,15 +414,16 @@ func genericCloudSync[P interface {
 	deleteFunc func(string) error) error {
 
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Second*60)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*900)
 	defer cancel()
 	var allRemoteObj []P
 	syncTime := make(map[string]types.SyncTime)
+	//var tType T
 	for _, cloudProvider := range s.strategy.GetAllProviders() {
 		t := time.Now().UTC().Format(time.RFC3339)
 		ok := false
 		for _, account := range cloudProvider.ListAccounts() {
-			s.logger.Infof("Found account %s with name %s and provider %s", account.ID, account.Name, cloudProvider.GetName())
+			s.logger.Debugf("Calling function %s for account %s and provider %s ", runtime.FuncForPC(reflect.ValueOf(listF).Pointer()).Name(), account.ID, cloudProvider.GetName())
 			remoteObjs, err := listF(ctx, cloudProvider, account.ID)
 			if err != nil {
 				s.logger.Errorf("Sync error: failed to List %s in provider %s: %v",

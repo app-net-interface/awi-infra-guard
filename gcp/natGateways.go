@@ -32,6 +32,8 @@ import (
 func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGatewaysRequest) ([]types.NATGateway, error) {
 
 	var natGateways []types.NATGateway
+	var vpcId string
+	var region string
 
 	client, err := compute.NewRoutersRESTClient(ctx)
 	if err != nil {
@@ -69,13 +71,20 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 						subnetResourceID := nat.Subnetworks[0]
 						subnetName = extractResourceID(*subnetResourceID.Name)
 					}
+					if router.Network != nil {
+						vpcId = extractResourceID(*router.Network)
+					}
+					if router.Region != nil {
+						region = extractResourceID(*router.Region)
+					}
+
 					natGateway := types.NATGateway{
 						ID:        strconv.FormatUint(*router.Id, 10),
 						Provider:  c.GetName(),
 						Name:      routerName,
 						AccountID: params.AccountId,
-						VpcId:     *router.Network,
-						Region:    *router.Region,
+						VpcId:     vpcId,
+						Region:    region,
 						State:     "Available", // Assuming ACTIVE
 						//CreatedAt:    timestamppb.New(router.GetCreationTimestamp()),
 						LastSyncTime: time.Now().Format(time.RFC3339),

@@ -31,11 +31,10 @@ import (
 )
 
 func (c *Client) ListInstances(ctx context.Context, params *infrapb.ListInstancesRequest) ([]types.Instance, error) {
-	c.logger.Infof("List instances")
+	c.logger.Debugf("Listing instances for account %s, vpc %s and region %s ", params.AccountId, params.VpcId, params.Region)
 
 	c.creds = params.Creds
 	c.accountID = params.AccountId
-
 
 	builder := newFilterBuilder()
 	builder.withVPC(params.GetVpcId())
@@ -82,6 +81,7 @@ func (c *Client) ListInstances(ctx context.Context, params *infrapb.ListInstance
 				allInstances = append(allInstances, result.instances...)
 			}
 		}
+		c.logger.Infof("In account %s Found %d instances across %d regions", c.accountID, len(allInstances), len(regions))
 
 		if len(allErrors) > 0 {
 			return allInstances, fmt.Errorf("errors occurred in some regions: %v", allErrors)

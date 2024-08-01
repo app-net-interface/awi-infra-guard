@@ -76,6 +76,7 @@ func (c *Client) ListRouters(ctx context.Context, params *infrapb.ListRoutersReq
 				allRouters = append(allRouters, result.routers...)
 			}
 		}
+		c.logger.Infof("In account %s Found %d routers across %d regions", c.accountID, len(allRouters), len(regions))
 
 		if len(allErrors) > 0 {
 			return allRouters, fmt.Errorf("errors occurred in some regions: %v", allErrors)

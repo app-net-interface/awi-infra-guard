@@ -78,6 +78,7 @@ func (c *Client) ListNATGateways(ctx context.Context, params *infrapb.ListNATGat
 				allNGWs = append(allNGWs, result.ngws...)
 			}
 		}
+		c.logger.Infof("In account %s Found %d NGWs across %d regions", c.accountID, len(allNGWs), len(regions))
 
 		if len(allErrors) > 0 {
 			return allNGWs, fmt.Errorf("errors occurred in some regions: %v", allErrors)

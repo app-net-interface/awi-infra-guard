@@ -82,6 +82,7 @@ func (c *Client) ListPublicIPs(ctx context.Context, params *infrapb.ListPublicIP
 				allPublicIPs = append(allPublicIPs, result.pips...)
 			}
 		}
+		c.logger.Infof("In account %s Found %d public ips across %d regions", c.accountID, len(allPublicIPs), len(regions))
 
 		if len(allErrors) > 0 {
 			return allPublicIPs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
