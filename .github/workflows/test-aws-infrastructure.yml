@@ -1,0 +1,30 @@
+name: Test using AWS infrastructure
+on:
+  workflow_dispatch:
+    inputs:
+      self_hosted_runner_name:
+        description: 'Self-hosted runner name'
+        required: true
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets[format('{0}_AWS_ACCESS_KEY_ID', github.triggering_actor)] }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets[format('{0}_AWS_SECRET_ACCESS_KEY', github.triggering_actor)] }}
+
+jobs:
+  test:
+    name: Infrastructure tests
+    runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
+    steps:
+      - name: Check if gRPC server is ready
+        run: |
+          if grpc_cli ls localhost:50052 | grep -q "infra.CloudProviderService"; then
+            echo "gRPC server ready"
+          fi
+
+      - name: Check if VPC exists
+        run: |
+          if grpc_cli call localhost:50052 ListVPC "provider: 'aws', region: 'us-east-2'" | grep -q "vpc-025f05e7507dde253"; then
+            echo "OK"
+          else
+            echo "FAIL"
+          fi
