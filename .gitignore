@@ -15,4 +15,5 @@ connector/demo/*.pem
 **/terraform.tfstate.backup
 .github/.secrets
 .github/artifacts
+.github/workflow_config.yaml
 

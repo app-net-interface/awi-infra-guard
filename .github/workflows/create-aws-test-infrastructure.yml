@@ -1,6 +1,10 @@
 name: Create AWS test infrastructure
 on: 
   workflow_dispatch:
+    inputs:
+      self_hosted_runner_name:
+        description: 'Self-hosted runner name'
+        required: true
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets[format('{0}_AWS_ACCESS_KEY_ID', github.triggering_actor)] }}
@@ -9,7 +13,7 @@ env:
 jobs:
   create:
     name: Create resources
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
 
     steps:
       - name: Checkout repo

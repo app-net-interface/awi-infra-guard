@@ -2,8 +2,8 @@ name: Destroy AWS test infrastructure
 on: 
   workflow_dispatch:
     inputs:
-      create_workflow_run_id:
-        description: 'Run ID of a workflow that created resources'
+      self_hosted_runner_name:
+        description: 'Self-hosted runner name'
         required: true
 
 env:
@@ -13,26 +13,18 @@ env:
 jobs:
   destroy:
     name: Destroy resources
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Download Terraform state
-        uses: actions/download-artifact@v4
-        with:
-          name: terraform_state
-          path: ./terraform/aws
-          github-token: ${{ secrets[format('{0}_GH_PAT', github.triggering_actor)] }}
-          run-id: ${{ inputs.create_workflow_run_id }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.2
-      - name: Initialize Terraform
-        run: terraform init
+      - name: Check if state file is present
+        run: ls -al
         working-directory: ./terraform/aws
-      - name: Destroy Terraform configuration
-        run: terraform destroy -auto-approve
-        working-directory: ./terraform/aws
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v3
+      #   with:
+      #     terraform_version: 1.9.2
+      # - name: Initialize Terraform
+      #   run: terraform init
+      #   working-directory: ./terraform/aws
+      # - name: Destroy Terraform configuration
+      #   run: terraform destroy -auto-approve
+      #   working-directory: ./terraform/aws

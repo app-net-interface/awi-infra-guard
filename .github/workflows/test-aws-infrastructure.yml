@@ -6,10 +6,6 @@ on:
         description: 'Self-hosted runner name'
         required: true
 
-env:
-  AWS_ACCESS_KEY_ID: ${{ secrets[format('{0}_AWS_ACCESS_KEY_ID', github.triggering_actor)] }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets[format('{0}_AWS_SECRET_ACCESS_KEY', github.triggering_actor)] }}
-
 jobs:
   test:
     name: Infrastructure tests
