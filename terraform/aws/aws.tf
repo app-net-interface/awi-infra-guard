@@ -13,8 +13,7 @@ resource "aws_instance" "web-server-instance" {
   instance_type = "t2.micro"
 
   tags = {
-    Name     = "web-server"
-    ANI_TEST = "ani-test-web-server"
+    Name     = "ani-test-web-server"
   }
 }
 

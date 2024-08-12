@@ -17,10 +17,6 @@ jobs:
             echo "gRPC server ready"
           fi
 
-      - name: Check if VPC exists
-        run: |
-          if grpc_cli call localhost:50052 ListVPC "provider: 'aws', region: 'us-east-2'" | grep -q "vpc-025f05e7507dde253"; then
-            echo "OK"
-          else
-            echo "FAIL"
-          fi
+      - name: Run tests
+        run: ./test_list_instances.sh
+        working-directory: ./terraform/aws/tests
