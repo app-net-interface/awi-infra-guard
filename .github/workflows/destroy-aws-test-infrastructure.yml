@@ -15,16 +15,17 @@ jobs:
     name: Destroy resources
     runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
     steps:
-      - name: Check if state file is present
-        run: ls -al
+      # - name: Check if state file is present
+      #   run: |
+      #     if test -f terraform.tfstate; then
+      #   working-directory: ./terraform/aws
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.2
+      - name: Initialize Terraform
+        run: terraform init
         working-directory: ./terraform/aws
-      # - name: Setup Terraform
-      #   uses: hashicorp/setup-terraform@v3
-      #   with:
-      #     terraform_version: 1.9.2
-      # - name: Initialize Terraform
-      #   run: terraform init
-      #   working-directory: ./terraform/aws
-      # - name: Destroy Terraform configuration
-      #   run: terraform destroy -auto-approve
-      #   working-directory: ./terraform/aws
+      - name: Destroy Terraform configuration
+        run: terraform destroy -auto-approve
+        working-directory: ./terraform/aws
