@@ -17,10 +17,8 @@ jobs:
           clean: false
 
       - name: Check if gRPC server is ready
-        run: |
-          if grpc_cli ls localhost:50052 | grep -q "infra.CloudProviderService"; then
-            echo "gRPC server ready"
-          fi
+        run: ./test_grpc_server.sh
+        working-directory: ./grpc/tests
 
       - name: Run tests
         run: ./run_tests.sh
