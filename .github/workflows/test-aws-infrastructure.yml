@@ -11,6 +11,11 @@ jobs:
     name: Infrastructure tests
     runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          clean: false
+
       - name: Check if gRPC server is ready
         run: |
           if grpc_cli ls localhost:50052 | grep -q "infra.CloudProviderService"; then
@@ -18,5 +23,5 @@ jobs:
           fi
 
       - name: Run tests
-        run: ./test_list_instances.sh
-        working-directory: ./terraform/aws/tests
+        run: ./run_tests.sh
+        working-directory: ./grpc/tests

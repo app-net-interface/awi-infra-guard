@@ -20,7 +20,7 @@ resource "aws_instance" "web-server-instance" {
 # resource "aws_vpc" "web-server-instance" {
 #   cidr_block = "10.0.0.0/16"
 #   tags = {
-#     Name = "production"
+#     Name = "ani-test-vpc"
 #   }
 # }
 
