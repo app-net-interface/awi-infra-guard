@@ -16,7 +16,7 @@ test_names=(
     "ani-test-route-table"
     )
 
-error_count=$1
+error_count=0
 for test_name in "${test_names[@]}"; do
     if echo "$response" | jq -e --arg tag "$test_name" 'any(.routeTables[]; .name == $tag)' > /dev/null; then
         echo "[V] Route table with name $test_name found"

@@ -16,7 +16,7 @@ test_names=(
     "ani-test-vpc"
     )
 
-error_count=$1
+error_count=0
 for test_name in "${test_names[@]}"; do
     if echo "$response" | jq -e --arg tag "$test_name" 'any(.vpcs[]; .name == $tag)' > /dev/null; then
         echo "[V] VPC with name $test_name found"

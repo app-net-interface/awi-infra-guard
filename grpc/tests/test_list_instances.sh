@@ -16,7 +16,7 @@ test_names=(
     "ani-test-web-server"
     )
 
-error_count=$1
+error_count=0
 for test_name in "${test_names[@]}"; do
     if echo "$response" | jq -e --arg test_name "$test_name" 'any(.instances[]; .name == $test_name and .state == "running")' > /dev/null; then
         echo "[V] Instance with name $test_name found"

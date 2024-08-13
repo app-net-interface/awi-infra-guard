@@ -15,10 +15,11 @@ jobs:
     name: Destroy resources
     runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
     steps:
-      # - name: Check if state file is present
-      #   run: |
-      #     if test -f terraform.tfstate; then
-      #   working-directory: ./terraform/aws
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          clean: false
+          
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
