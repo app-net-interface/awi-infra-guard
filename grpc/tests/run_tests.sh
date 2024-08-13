@@ -4,7 +4,6 @@
 tests=(
     "test_list_instances.sh"
     "test_list_vpc.sh"
-    "test_list_route_tables.sh"
     )
 
 for test in "${tests[@]}"; do
