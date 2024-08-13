@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io/fs"
 	"net"
-	"strings"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -733,147 +732,6 @@ func (s *Server) ListCloudClusters(ctx context.Context, in *infrapb.ListCloudClu
 	}, nil
 }
 
-func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infrapb.SummaryResponse, error) {
-	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
-	if err != nil {
-		return nil, err
-	}
-	accounts := cloudProvider.ListAccounts()
-	vpcs, err := cloudProvider.ListVPC(ctx, &infrapb.ListVPCRequest{})
-	if err != nil {
-		return nil, err
-	}
-	subnets, err := cloudProvider.ListSubnets(ctx, &infrapb.ListSubnetsRequest{})
-	if err != nil {
-		return nil, err
-	}
-	instances, err := cloudProvider.ListInstances(ctx, &infrapb.ListInstancesRequest{})
-	if err != nil {
-		return nil, err
-	}
-	vmStateSummary := make(map[string]int32)
-	for _, vm := range instances {
-		vmStateSummary[strings.ToLower(vm.State)] += 1
-	}
-	vmTypeSummary := make(map[string]int32)
-	for _, vm := range instances {
-		vmTypeSummary[strings.ToLower(vm.Type)] += 1
-	}
-	acls, err := cloudProvider.ListACLs(ctx, &infrapb.ListACLsRequest{})
-	if err != nil {
-		return nil, err
-	}
-	sgs, err := cloudProvider.ListSecurityGroups(ctx, &infrapb.ListSecurityGroupsRequest{})
-	if err != nil {
-		return nil, err
-	}
-	routeTables, err := cloudProvider.ListRouteTables(ctx, &infrapb.ListRouteTablesRequest{})
-	if err != nil {
-		return nil, err
-	}
-
-	natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{})
-	if err != nil {
-		return nil, err
-	}
-
-	routers, err := cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{})
-	if err != nil {
-		return nil, err
-	}
-
-	igws, err := cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{})
-	if err != nil {
-		return nil, err
-	}
-
-	vpcEndpoints, err := cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{})
-	if err != nil {
-		return nil, err
-	}
-	publicIPs, err := cloudProvider.ListPublicIPs(ctx, &infrapb.ListPublicIPsRequest{})
-	if err != nil {
-		return nil, err
-	}
-
-	// Kubernetes Resources
-
-	clusters, err := cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{})
-	if err != nil {
-		return nil, err
-	}
-	k8sProvider, err := s.strategy.GetKubernetesProvider()
-	if err != nil {
-		return nil, err
-	}
-	var podsCount int
-	pods, err := k8sProvider.ListPods(ctx, "", nil)
-	if err != nil {
-		return nil, err
-	}
-	podsStateSummary := make(map[string]int32)
-	for _, pod := range pods {
-		podsStateSummary[strings.ToLower(pod.State)] += 1
-		for _, cl := range clusters {
-			if pod.Cluster == cl.Name {
-				podsCount++
-			}
-		}
-	}
-	var servicesCount int
-	services, err := k8sProvider.ListServices(ctx, "", nil)
-	if err != nil {
-		return nil, err
-	}
-	for _, serv := range services {
-		for _, cl := range clusters {
-			if serv.Cluster == cl.Name {
-				servicesCount++
-			}
-		}
-	}
-	var namespacesCount int
-	namespaces, err := k8sProvider.ListNamespaces(ctx, "", nil)
-	if err != nil {
-		return nil, err
-	}
-	for _, namespace := range namespaces {
-		for _, cl := range clusters {
-			if namespace.Cluster == cl.Name {
-				namespacesCount++
-			}
-		}
-	}
-
-	return &infrapb.SummaryResponse{
-		Count: &infrapb.Counters{
-			Accounts:       int32(len(accounts)),
-			Vpc:            int32(len(vpcs)),
-			Subnets:        int32(len(subnets)),
-			RouteTables:    int32(len(routeTables)),
-			Instances:      int32(len(instances)),
-			Acls:           int32(len(acls)),
-			SecurityGroups: int32(len(sgs)),
-			NatGateways:    int32(len(natGateways)),
-			Routers:        int32(len(routers)),
-			Igws:           int32(len(igws)),
-			VpcEndpoints:   int32(len(vpcEndpoints)),
-			PublicIps:      int32(len(publicIPs)),
-
-			//Kubernetes
-			Clusters:   int32(len(clusters)),
-			Pods:       int32(podsCount),
-			Services:   int32(servicesCount),
-			Namespaces: int32(namespacesCount),
-		},
-		Statuses: &infrapb.StatusSummary{
-			VmStatus:  vmStateSummary,
-			PodStatus: podsStateSummary,
-			VmTypes:   vmTypeSummary,
-		},
-	}, nil
-}
-
 func (s *Server) ListClusters(ctx context.Context, in *infrapb.ListClustersRequest) (*infrapb.ListClustersResponse, error) {
 	k8sProvider, err := s.strategy.GetKubernetesProvider()
 	if err != nil {
@@ -1010,7 +868,7 @@ func (s *Server) unaryServerInterceptor(ctx context.Context, req interface{}, in
 	resp, err := handler(ctx, req)
 
 	// Log response
-	s.logger.Infof("Request = %v", req)
+	s.logger.Infof("Request = %+v", req)
 	s.logger.Debugf("Unary Response - Method:%s, Response:%v, Error:%v\n", info.FullMethod, resp, err)
 
 	return resp, err

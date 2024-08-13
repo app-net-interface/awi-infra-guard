@@ -54,7 +54,7 @@ func (s *Syncer) ParallelSync(ctx context.Context, done chan<- struct{}) {
 	defer func() {
 		done <- struct{}{}
 	}()
-	s.logger.Errorf("*****************Sync Start*****************")
+	s.logger.Infof("*****************Sync Start*****************")
 	allResource := s.sc.HasCloudResource("all")
 	var wg sync.WaitGroup
 
@@ -196,16 +196,16 @@ func (s *Syncer) ParallelSync(ctx context.Context, done chan<- struct{}) {
 
 	wg.Wait()
 
-	s.logger.Errorf("*****************Cloud Sync End*****************")
-	s.logger.Errorf("*****************K8S Sync Start*****************")
-	s.logger.Errorf("*****************K8S Sync End*****************")
+	s.logger.Infof("*****************Cloud Sync End*****************")
+	s.logger.Infof("*****************K8S Sync Start*****************")
+	s.logger.Infof("*****************K8S Sync End*****************")
 }
 
 func (s *Syncer) Sync(ctx context.Context, done chan<- struct{}) {
 	defer func() {
 		done <- struct{}{}
 	}()
-	s.logger.Errorf("*****************Sync Start*****************")
+	s.logger.Infof("*****************Sync Start*****************")
 	allResource := s.sc.HasCloudResource("all")
 
 	if allResource || s.sc.HasCloudResource("region") {

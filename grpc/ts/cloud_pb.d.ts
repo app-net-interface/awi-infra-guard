@@ -112,14 +112,14 @@ export class ListVPCRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListVPCRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): ListVPCRequest;
+
   getRegion(): string;
   setRegion(value: string): ListVPCRequest;
 
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListVPCRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListVPCRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListVPCRequest;
@@ -137,9 +137,9 @@ export class ListVPCRequest extends jspb.Message {
 export namespace ListVPCRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
     region: string,
     labelsMap: Array<[string, string]>,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -183,6 +183,12 @@ export class ListInstancesRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListInstancesRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): ListInstancesRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListInstancesRequest;
+
   getVpcId(): string;
   setVpcId(value: string): ListInstancesRequest;
 
@@ -191,12 +197,6 @@ export class ListInstancesRequest extends jspb.Message {
 
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListInstancesRequest;
-
-  getRegion(): string;
-  setRegion(value: string): ListInstancesRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListInstancesRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListInstancesRequest;
@@ -214,11 +214,11 @@ export class ListInstancesRequest extends jspb.Message {
 export namespace ListInstancesRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
+    region: string,
     vpcId: string,
     zone: string,
     labelsMap: Array<[string, string]>,
-    region: string,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -262,17 +262,17 @@ export class ListACLsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListACLsRequest;
 
-  getVpcId(): string;
-  setVpcId(value: string): ListACLsRequest;
+  getAccountId(): string;
+  setAccountId(value: string): ListACLsRequest;
 
   getRegion(): string;
   setRegion(value: string): ListACLsRequest;
 
+  getVpcId(): string;
+  setVpcId(value: string): ListACLsRequest;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListACLsRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListACLsRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListACLsRequest;
@@ -290,10 +290,10 @@ export class ListACLsRequest extends jspb.Message {
 export namespace ListACLsRequest {
   export type AsObject = {
     provider: string,
-    vpcId: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
     accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -337,17 +337,17 @@ export class ListSecurityGroupsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListSecurityGroupsRequest;
 
-  getVpcId(): string;
-  setVpcId(value: string): ListSecurityGroupsRequest;
+  getAccountId(): string;
+  setAccountId(value: string): ListSecurityGroupsRequest;
 
   getRegion(): string;
   setRegion(value: string): ListSecurityGroupsRequest;
 
+  getVpcId(): string;
+  setVpcId(value: string): ListSecurityGroupsRequest;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListSecurityGroupsRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListSecurityGroupsRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListSecurityGroupsRequest;
@@ -365,10 +365,10 @@ export class ListSecurityGroupsRequest extends jspb.Message {
 export namespace ListSecurityGroupsRequest {
   export type AsObject = {
     provider: string,
-    vpcId: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
     accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -412,17 +412,17 @@ export class ListRouteTablesRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListRouteTablesRequest;
 
-  getVpcId(): string;
-  setVpcId(value: string): ListRouteTablesRequest;
+  getAccountId(): string;
+  setAccountId(value: string): ListRouteTablesRequest;
 
   getRegion(): string;
   setRegion(value: string): ListRouteTablesRequest;
 
+  getVpcId(): string;
+  setVpcId(value: string): ListRouteTablesRequest;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListRouteTablesRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListRouteTablesRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListRouteTablesRequest;
@@ -440,10 +440,10 @@ export class ListRouteTablesRequest extends jspb.Message {
 export namespace ListRouteTablesRequest {
   export type AsObject = {
     provider: string,
-    vpcId: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
     accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -487,17 +487,17 @@ export class ListNATGatewaysRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListNATGatewaysRequest;
 
-  getVpcId(): string;
-  setVpcId(value: string): ListNATGatewaysRequest;
+  getAccountId(): string;
+  setAccountId(value: string): ListNATGatewaysRequest;
 
   getRegion(): string;
   setRegion(value: string): ListNATGatewaysRequest;
 
+  getVpcId(): string;
+  setVpcId(value: string): ListNATGatewaysRequest;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListNATGatewaysRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListNATGatewaysRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListNATGatewaysRequest;
@@ -515,10 +515,10 @@ export class ListNATGatewaysRequest extends jspb.Message {
 export namespace ListNATGatewaysRequest {
   export type AsObject = {
     provider: string,
-    vpcId: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
     accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -562,17 +562,17 @@ export class ListRoutersRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListRoutersRequest;
 
-  getVpcId(): string;
-  setVpcId(value: string): ListRoutersRequest;
+  getAccountId(): string;
+  setAccountId(value: string): ListRoutersRequest;
 
   getRegion(): string;
   setRegion(value: string): ListRoutersRequest;
 
+  getVpcId(): string;
+  setVpcId(value: string): ListRoutersRequest;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListRoutersRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListRoutersRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListRoutersRequest;
@@ -590,10 +590,10 @@ export class ListRoutersRequest extends jspb.Message {
 export namespace ListRoutersRequest {
   export type AsObject = {
     provider: string,
-    vpcId: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
     accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -637,17 +637,17 @@ export class ListInternetGatewaysRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListInternetGatewaysRequest;
 
-  getVpcId(): string;
-  setVpcId(value: string): ListInternetGatewaysRequest;
+  getAccountId(): string;
+  setAccountId(value: string): ListInternetGatewaysRequest;
 
   getRegion(): string;
   setRegion(value: string): ListInternetGatewaysRequest;
 
+  getVpcId(): string;
+  setVpcId(value: string): ListInternetGatewaysRequest;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListInternetGatewaysRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListInternetGatewaysRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListInternetGatewaysRequest;
@@ -665,10 +665,10 @@ export class ListInternetGatewaysRequest extends jspb.Message {
 export namespace ListInternetGatewaysRequest {
   export type AsObject = {
     provider: string,
-    vpcId: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
     accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -708,6 +708,51 @@ export namespace ListInternetGatewaysResponse {
   }
 }
 
+export class ListVPCEndpointsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListVPCEndpointsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListVPCEndpointsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListVPCEndpointsRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListVPCEndpointsRequest;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListVPCEndpointsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListVPCEndpointsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListVPCEndpointsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVPCEndpointsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVPCEndpointsRequest): ListVPCEndpointsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListVPCEndpointsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVPCEndpointsRequest;
+  static deserializeBinaryFromReader(message: ListVPCEndpointsRequest, reader: jspb.BinaryReader): ListVPCEndpointsRequest;
+}
+
+export namespace ListVPCEndpointsRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
+  }
+}
+
 export class ListVPCEndpointsResponse extends jspb.Message {
   getVepsList(): Array<types_pb.VPCEndpoint>;
   setVepsList(value: Array<types_pb.VPCEndpoint>): ListVPCEndpointsResponse;
@@ -742,17 +787,17 @@ export class ListPublicIPsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListPublicIPsRequest;
 
-  getVpcId(): string;
-  setVpcId(value: string): ListPublicIPsRequest;
+  getAccountId(): string;
+  setAccountId(value: string): ListPublicIPsRequest;
 
   getRegion(): string;
   setRegion(value: string): ListPublicIPsRequest;
 
+  getVpcId(): string;
+  setVpcId(value: string): ListPublicIPsRequest;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListPublicIPsRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListPublicIPsRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListPublicIPsRequest;
@@ -770,10 +815,10 @@ export class ListPublicIPsRequest extends jspb.Message {
 export namespace ListPublicIPsRequest {
   export type AsObject = {
     provider: string,
-    vpcId: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
     accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -813,54 +858,15 @@ export namespace ListPublicIPsResponse {
   }
 }
 
-export class ListVPCEndpointsRequest extends jspb.Message {
-  getProvider(): string;
-  setProvider(value: string): ListVPCEndpointsRequest;
-
-  getVpcId(): string;
-  setVpcId(value: string): ListVPCEndpointsRequest;
-
-  getRegion(): string;
-  setRegion(value: string): ListVPCEndpointsRequest;
-
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): ListVPCEndpointsRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListVPCEndpointsRequest;
-
-  getCreds(): types_pb.Credentials | undefined;
-  setCreds(value?: types_pb.Credentials): ListVPCEndpointsRequest;
-  hasCreds(): boolean;
-  clearCreds(): ListVPCEndpointsRequest;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): ListVPCEndpointsRequest.AsObject;
-  static toObject(includeInstance: boolean, msg: ListVPCEndpointsRequest): ListVPCEndpointsRequest.AsObject;
-  static serializeBinaryToWriter(message: ListVPCEndpointsRequest, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): ListVPCEndpointsRequest;
-  static deserializeBinaryFromReader(message: ListVPCEndpointsRequest, reader: jspb.BinaryReader): ListVPCEndpointsRequest;
-}
-
-export namespace ListVPCEndpointsRequest {
-  export type AsObject = {
-    provider: string,
-    vpcId: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
-    accountId: string,
-    creds?: types_pb.Credentials.AsObject,
-  }
-
-  export enum CredsCase { 
-    _CREDS_NOT_SET = 0,
-    CREDS = 6,
-  }
-}
-
 export class GetSubnetRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetSubnetRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): GetSubnetRequest;
+
+  getRegion(): string;
+  setRegion(value: string): GetSubnetRequest;
 
   getVpcId(): string;
   setVpcId(value: string): GetSubnetRequest;
@@ -868,14 +874,8 @@ export class GetSubnetRequest extends jspb.Message {
   getId(): string;
   setId(value: string): GetSubnetRequest;
 
-  getRegion(): string;
-  setRegion(value: string): GetSubnetRequest;
-
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): GetSubnetRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): GetSubnetRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): GetSubnetRequest;
@@ -893,11 +893,11 @@ export class GetSubnetRequest extends jspb.Message {
 export namespace GetSubnetRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
+    region: string,
     vpcId: string,
     id: string,
-    region: string,
     labelsMap: Array<[string, string]>,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -937,6 +937,12 @@ export class ListSubnetsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListSubnetsRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): ListSubnetsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListSubnetsRequest;
+
   getVpcId(): string;
   setVpcId(value: string): ListSubnetsRequest;
 
@@ -948,12 +954,6 @@ export class ListSubnetsRequest extends jspb.Message {
 
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListSubnetsRequest;
-
-  getRegion(): string;
-  setRegion(value: string): ListSubnetsRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListSubnetsRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListSubnetsRequest;
@@ -971,12 +971,12 @@ export class ListSubnetsRequest extends jspb.Message {
 export namespace ListSubnetsRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
+    region: string,
     vpcId: string,
     zone: string,
     cidr: string,
     labelsMap: Array<[string, string]>,
-    region: string,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -1020,17 +1020,17 @@ export class GetVPCIDForCIDRRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetVPCIDForCIDRRequest;
 
-  getCidr(): string;
-  setCidr(value: string): GetVPCIDForCIDRRequest;
+  getAccountId(): string;
+  setAccountId(value: string): GetVPCIDForCIDRRequest;
 
   getRegion(): string;
   setRegion(value: string): GetVPCIDForCIDRRequest;
 
+  getCidr(): string;
+  setCidr(value: string): GetVPCIDForCIDRRequest;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): GetVPCIDForCIDRRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): GetVPCIDForCIDRRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): GetVPCIDForCIDRRequest;
@@ -1048,10 +1048,10 @@ export class GetVPCIDForCIDRRequest extends jspb.Message {
 export namespace GetVPCIDForCIDRRequest {
   export type AsObject = {
     provider: string,
-    cidr: string,
-    region: string,
-    labelsMap: Array<[string, string]>,
     accountId: string,
+    region: string,
+    cidr: string,
+    labelsMap: Array<[string, string]>,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -1089,14 +1089,14 @@ export class GetCIDRsForLabelsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetCIDRsForLabelsRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): GetCIDRsForLabelsRequest;
+
   getRegion(): string;
   setRegion(value: string): GetCIDRsForLabelsRequest;
 
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): GetCIDRsForLabelsRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): GetCIDRsForLabelsRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): GetCIDRsForLabelsRequest;
@@ -1114,9 +1114,9 @@ export class GetCIDRsForLabelsRequest extends jspb.Message {
 export namespace GetCIDRsForLabelsRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
     region: string,
     labelsMap: Array<[string, string]>,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -1156,14 +1156,14 @@ export class GetIPsForLabelsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetIPsForLabelsRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): GetIPsForLabelsRequest;
+
   getRegion(): string;
   setRegion(value: string): GetIPsForLabelsRequest;
 
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): GetIPsForLabelsRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): GetIPsForLabelsRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): GetIPsForLabelsRequest;
@@ -1181,9 +1181,9 @@ export class GetIPsForLabelsRequest extends jspb.Message {
 export namespace GetIPsForLabelsRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
     region: string,
     labelsMap: Array<[string, string]>,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -1223,17 +1223,17 @@ export class GetInstancesForLabelsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetInstancesForLabelsRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): GetInstancesForLabelsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): GetInstancesForLabelsRequest;
+
   getVpcId(): string;
   setVpcId(value: string): GetInstancesForLabelsRequest;
 
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): GetInstancesForLabelsRequest;
-
-  getRegion(): string;
-  setRegion(value: string): GetInstancesForLabelsRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): GetInstancesForLabelsRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): GetInstancesForLabelsRequest;
@@ -1251,10 +1251,10 @@ export class GetInstancesForLabelsRequest extends jspb.Message {
 export namespace GetInstancesForLabelsRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
+    region: string,
     vpcId: string,
     labelsMap: Array<[string, string]>,
-    region: string,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -1294,20 +1294,20 @@ export class GetVPCIDWithTagRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetVPCIDWithTagRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): GetVPCIDWithTagRequest;
+
+  getRegion(): string;
+  setRegion(value: string): GetVPCIDWithTagRequest;
+
   getKey(): string;
   setKey(value: string): GetVPCIDWithTagRequest;
 
   getValue(): string;
   setValue(value: string): GetVPCIDWithTagRequest;
 
-  getRegion(): string;
-  setRegion(value: string): GetVPCIDWithTagRequest;
-
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): GetVPCIDWithTagRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): GetVPCIDWithTagRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): GetVPCIDWithTagRequest;
@@ -1325,11 +1325,11 @@ export class GetVPCIDWithTagRequest extends jspb.Message {
 export namespace GetVPCIDWithTagRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
+    region: string,
     key: string,
     value: string,
-    region: string,
     labelsMap: Array<[string, string]>,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -1367,6 +1367,9 @@ export class ListCloudClustersRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListCloudClustersRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): ListCloudClustersRequest;
+
   getRegion(): string;
   setRegion(value: string): ListCloudClustersRequest;
 
@@ -1375,9 +1378,6 @@ export class ListCloudClustersRequest extends jspb.Message {
 
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): ListCloudClustersRequest;
-
-  getAccountId(): string;
-  setAccountId(value: string): ListCloudClustersRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListCloudClustersRequest;
@@ -1395,10 +1395,10 @@ export class ListCloudClustersRequest extends jspb.Message {
 export namespace ListCloudClustersRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
     region: string,
     vpcId: string,
     labelsMap: Array<[string, string]>,
-    accountId: string,
     creds?: types_pb.Credentials.AsObject,
   }
 
@@ -1442,6 +1442,15 @@ export class SummaryRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): SummaryRequest;
 
+  getAccountId(): string;
+  setAccountId(value: string): SummaryRequest;
+
+  getRegion(): string;
+  setRegion(value: string): SummaryRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): SummaryRequest;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SummaryRequest.AsObject;
   static toObject(includeInstance: boolean, msg: SummaryRequest): SummaryRequest.AsObject;
@@ -1453,6 +1462,9 @@ export class SummaryRequest extends jspb.Message {
 export namespace SummaryRequest {
   export type AsObject = {
     provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
   }
 }
 
@@ -1505,6 +1517,9 @@ export class Counters extends jspb.Message {
   getPublicIps(): number;
   setPublicIps(value: number): Counters;
 
+  getInternetGateways(): number;
+  setInternetGateways(value: number): Counters;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Counters.AsObject;
   static toObject(includeInstance: boolean, msg: Counters): Counters.AsObject;
@@ -1531,6 +1546,7 @@ export namespace Counters {
     igws: number,
     vpcEndpoints: number,
     publicIps: number,
+    internetGateways: number,
   }
 }
 
