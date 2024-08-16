@@ -9,14 +9,15 @@ tests=(
     "test_list_internet_gateways.sh"
     )
 
+test_error=false
 for test in "${tests[@]}"; do
-    sh $test
+    ./$test
     if [ $? -eq 1 ]; then
-        test_error=1
+        test_error=true
     fi
 done
 
-if [ $test_error -eq 1 ]; then
+if $test_error; then
     echo "Tests failed"
     exit 1
 else

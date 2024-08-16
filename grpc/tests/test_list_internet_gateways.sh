@@ -1,23 +1,12 @@
 #!/bin/bash
 
-echo "\n-------------Test ListInternetGateways-------------\n"
+source ./utils.sh
 
-server="localhost:50052"
+echo -e "\n-------------Test ListInternetGateways-------------\n"
 
-response=$(grpc_cli call $server ListInternetGateways "provider: 'aws'" --timeout=30 --json_output 2>error_file)
-
-# Check for endpoint errors
-if cat error_file | grep -q "Rpc failed with status code"; then
-    error_message=$(cat error_file | sed -n '/error message:/s/.*error message: //p')
-    echo "Error calling ListInternetGateways endpoint:" $error_message
-    rm error_file
-    exit 1
-fi
-rm error_file
-
-# Check if response not empty
-if echo $response | jq -e '. == {}'  > /dev/null; then
-    echo "No internet gateways were found"
+response=$(call_endpoint ListInternetGateways)
+if [ $? -eq 1 ]; then
+    echo $response
     exit 1
 fi
 
@@ -26,17 +15,32 @@ test_names=(
     "ani-test-internet-gateway"
     )
 
-error_count=0
+# Fields required in resources
+required_fields=(
+    "provider"
+    "accountId"
+    "id"
+    "region"
+)
+
+missing_fields=0
+missing_instances=0
 for test_name in "${test_names[@]}"; do
     if echo "$response" | jq -e --arg tag "$test_name" 'any(.igws[]; .name == $tag and .state == "available")' > /dev/null; then
         echo "[V] Internet gateway with name $test_name found"
+        internet_gateway=$(echo $response | jq ".igws[] | select(.name == \"$test_name\" )")
+        check_fields "$internet_gateway" "$required_fields"
     else
         echo "[X] Internet gateway with name $test_name not found"
-        error_count=$((error_count+1))
+        missing_instances=$((missing_instances+1))
     fi
 done
 
-if [[ "$error_count" -gt 0 ]]; then
-    echo "Internet gateways not found: $error_count"
+if [[ "$missing_instances" -gt 0 ]]; then
+    echo "Internet gateways not found: $missing_instances"
+    exit 1
+fi
+
+if [[ "$missing_fields" -gt 0 ]]; then
     exit 1
 fi
