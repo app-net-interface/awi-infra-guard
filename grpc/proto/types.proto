@@ -84,6 +84,20 @@ message Credentials {
     }
 }
 
+message Account {
+    string provider = 1;
+    string id = 2;
+    string name = 3;
+    string last_sync_time = 4;
+}
+message Region {
+    string provider = 1;
+    string id = 2;
+    string name = 3;
+    string last_sync_time = 4;
+}
+
+
 message VPC {
     string id = 1;
     string name = 2;
@@ -140,18 +154,6 @@ message Subnet {
     google.protobuf.Timestamp updated_at = 18;
 }
 
-message Account {
-    string provider = 1;
-    string id = 2;
-    string name = 3;
-    string last_sync_time = 4;
-}
-message Region {
-    string provider = 1;
-    string id = 2;
-    string name = 3;
-    string last_sync_time = 4;
-}
 
 message ACL {
     string provider = 1;
@@ -397,4 +399,152 @@ message K8sService {
     string project = 10;
     string last_sync_time = 11;
     string self_link = 12;
+}
+
+// Specifies the type of load balancer (e.g., Application, Network, Classic, Global)
+enum LoadBalancerType {
+    ALB = 0;
+    NLB = 1;
+    ELB = 2;
+    GLB = 3;
+    UNKNOWN = 4;
+}
+
+message LoadBalancer {
+    string id = 1;
+    string name = 2;
+    LoadBalancerType type = 3;
+
+    // Specifies whether the load balancer is internal or internet-facing
+    enum Scheme {
+        INTERNET_FACING = 0;
+        INTERNAL = 1;
+    }
+    Scheme scheme = 4;
+
+    // Cross-cloud association
+    string vpc_id = 5; // Association with VPC
+    repeated string instance_ids = 6; // Instances registered to the load balancer
+    repeated string target_group_ids = 7; // Target groups associated with the load balancer (normalized concept)
+
+    // Listener and Protocols for routing traffic
+    message Listener {
+        string listener_id = 1;
+        string protocol = 2; // e.g., HTTP, HTTPS, TCP, UDP
+        int32 port = 3;
+        string target_group_id = 4; // Association with a Target Group
+    }
+    repeated Listener listeners = 8;
+
+    // Cross-zone load balancing and other settings
+    bool cross_zone_load_balancing = 9;
+    bool access_logs_enabled = 10; // Whether access logs are enabled
+    string logging_bucket = 11; // Destination for access logs
+
+    repeated string public_ips = 12; // Public IPs (if internet-facing)
+    repeated string private_ips = 13; // Private IPs (if internal)
+
+    string region = 14;
+    string zone = 15;
+    map<string, string> labels = 16;
+    string project = 17;
+    string provider = 18; // e.g., AWS, Azure, GCP
+    string account_id = 19;
+    string last_sync_time = 20;
+    string self_link = 21;
+    google.protobuf.Timestamp created_at = 22;
+    google.protobuf.Timestamp updated_at = 23;
+}
+
+message NetworkInterface {
+    string id = 1;
+    string name = 2;
+
+    // Association with other resources
+    string subnet_id = 3; // Association with Subnet
+    string vpc_id = 4; // Association with VPC
+    string instance_id = 5; // Association with Instance/VM
+
+    // Network interface identifiers
+    string mac_address = 6; // MAC address of the network interface
+    string public_ip = 7; // Primary public IP address (if any)
+    string private_ip = 8; // Primary private IP address
+
+    // Support for secondary private IP addresses (AWS, Azure, GCP)
+    repeated string secondary_private_ips = 9;
+
+    // Status fields
+    enum Status {
+        ATTACHED = 0;
+        DETACHED = 1;
+        UNKNOWN = 2;
+    }
+    Status status = 10;
+
+    // Attachment details for how the interface is associated with an instance/VM
+    message Attachment {
+        string instance_id = 1;
+        string attachment_id = 2;
+        string device_index = 3; // The index of the device on the instance (e.g., eth0, eth1)
+        google.protobuf.Timestamp attach_time = 4;
+        bool delete_on_termination = 5; // Whether to delete the interface when the instance is terminated
+    }
+    Attachment attachment = 11;
+
+    // DNS settings for the interface
+    string dns_name = 12; // DNS name (if available)
+    repeated string dns_servers = 13; // DNS servers assigned to the interface
+
+    // Security groups associated with the interface
+    repeated string security_group_ids = 14;
+
+    // IP forwarding (used in cases like load balancers or NAT)
+    bool ip_forwarding = 15;
+
+    // Network performance metrics (e.g., bandwidth, MTU size)
+    int32 mtu = 16; // Maximum Transmission Unit size
+    string bandwidth = 17; // Bandwidth of the network interface
+
+    // Cross-cloud compatibility fields
+    string region = 18;
+    string zone = 19;
+    map<string, string> labels = 20;
+    string project = 21;
+    string provider = 22; // e.g., AWS, Azure, GCP
+    string account_id = 23;
+    string last_sync_time = 24;
+    string self_link = 25;
+    google.protobuf.Timestamp created_at = 26;
+    google.protobuf.Timestamp updated_at = 27;
+}
+ // Specifies the type of key pair (e.g., RSA, ED25519)
+ enum KeyPairType {
+    RSA = 0;
+    ED25519 = 1;
+    OTHER = 2; // For future extensibility or unknown types
+}
+
+message KeyPair {
+    string id = 1;
+    string name = 2;
+    
+   
+    KeyPairType key_pair_type = 3;
+
+    string public_key = 4;
+    string private_key_fingerprint = 5; // Only store fingerprint for security
+
+    // Association with instances/VMs
+    repeated string instance_ids = 6;
+
+    // Cross-cloud fields
+    string region = 7;
+    string project = 8;
+    string provider = 9; // e.g., AWS, Azure, GCP
+    string account_id = 10;
+    map<string, string> labels = 11;
+    string last_sync_time = 12;
+    string self_link = 13;
+    google.protobuf.Timestamp created_at = 14;
+    google.protobuf.Timestamp updated_at = 15;
 }
