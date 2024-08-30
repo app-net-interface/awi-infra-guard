@@ -410,50 +410,37 @@ enum LoadBalancerType {
     UNKNOWN = 4;
 }
 
-message LoadBalancer {
+message LB {
     string id = 1;
     string name = 2;
-    LoadBalancerType type = 3;
-
-    // Specifies whether the load balancer is internal or internet-facing
-    enum Scheme {
-        INTERNET_FACING = 0;
-        INTERNAL = 1;
-    }
-    Scheme scheme = 4;
-
-    // Cross-cloud association
-    string vpc_id = 5; // Association with VPC
-    repeated string instance_ids = 6; // Instances registered to the load balancer
-    repeated string target_group_ids = 7; // Target groups associated with the load balancer (normalized concept)
-
-    // Listener and Protocols for routing traffic
+    string load_balancer_type = 3;
+    string scheme = 4;
+    string vpc_id = 5;
+    string dns_name = 6;  
+    repeated string instance_ids = 7;
+    repeated string target_group_ids = 8;
     message Listener {
         string listener_id = 1;
-        string protocol = 2; // e.g., HTTP, HTTPS, TCP, UDP
+        string protocol = 2;
         int32 port = 3;
-        string target_group_id = 4; // Association with a Target Group
+        string target_group_id = 4;
     }
-    repeated Listener listeners = 8;
-
-    // Cross-zone load balancing and other settings
-    bool cross_zone_load_balancing = 9;
-    bool access_logs_enabled = 10; // Whether access logs are enabled
-    string logging_bucket = 11; // Destination for access logs
-
-    repeated string public_ips = 12; // Public IPs (if internet-facing)
-    repeated string private_ips = 13; // Private IPs (if internal)
-
-    string region = 14;
-    string zone = 15;
-    map<string, string> labels = 16;
-    string project = 17;
-    string provider = 18; // e.g., AWS, Azure, GCP
-    string account_id = 19;
-    string last_sync_time = 20;
-    string self_link = 21;
-    google.protobuf.Timestamp created_at = 22;
-    google.protobuf.Timestamp updated_at = 23;
+    repeated Listener listeners = 9;
+    bool cross_zone_load_balancing = 10;
+    bool access_logs_enabled = 11;
+    string logging_bucket = 12;
+    repeated string ip_addresses = 13;
+    string ip_address_type = 14;
+    string region = 15;
+    string zone = 16;
+    map<string, string> labels = 17;
+    string project = 18;
+    string provider = 19;
+    string account_id = 20;
+    string last_sync_time = 21;
+    string self_link = 22;
+    google.protobuf.Timestamp created_at = 23;
+    google.protobuf.Timestamp updated_at = 24;
 }
 
 message NetworkInterface {
@@ -473,13 +460,7 @@ message NetworkInterface {
     // Support for secondary private IP addresses (AWS, Azure, GCP)
     repeated string secondary_private_ips = 9;
 
-    // Status fields
-    enum Status {
-        ATTACHED = 0;
-        DETACHED = 1;
-        UNKNOWN = 2;
-    }
-    Status status = 10;
+    string status = 10;
 
     // Attachment details for how the interface is associated with an instance/VM
     message Attachment {

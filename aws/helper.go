@@ -17,13 +17,17 @@
 
 package aws
 
-import "strings"
+import (
+	"fmt"
+	"reflect"
+	"strings"
+)
 
 func convertString(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
+    if s == nil {
+        return ""
+    }
+    return *s
 }
 
 // ExtractAccountID extracts the account ID from an AWS ARN string
@@ -34,4 +38,32 @@ func ExtractAccountID(arn string) string {
         return parts[4]
     }
     return ""
+}
+
+// PrintResources prints the details of any slice of AWS resources
+func PrintResources(resources interface{}, resourceType string) {
+    value := reflect.ValueOf(resources)
+    if value.Kind() != reflect.Slice {
+        fmt.Printf("Error: Expected a slice of %s, got %T\n", resourceType, resources)
+        return
+    }
+
+    fmt.Printf("=== %s ===\n", resourceType)
+    for i := 0; i < value.Len(); i++ {
+        resource := value.Index(i)
+        fmt.Printf("Resource %d:\n", i+1)
+        printFields(resource)
+        fmt.Println()
+    }
+    fmt.Printf("Total %s: %d\n", resourceType, value.Len())
+}
+
+func printFields(v reflect.Value) {
+    t := v.Type()
+    for i := 0; i < v.NumField(); i++ {
+        field := v.Field(i)
+        fieldName := t.Field(i).Name
+        fieldValue := field.Interface()
+        fmt.Printf("  %s: %v\n", fieldName, fieldValue)
+    }
 }

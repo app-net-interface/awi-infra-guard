@@ -38,6 +38,7 @@ const (
 	igwTable               = "igws"
 	vpcEndpointTable       = "vpcEndpoints"
 	publicIPTable          = "publicIPs"
+	lbTable                = "lbs"
 
 	syncTimeTable = "sync_time"
 )
@@ -62,6 +63,7 @@ var tableNames = []string{
 	aclTable,
 	securityGroupTable,
 	publicIPTable,
+	lbTable,
 	syncTimeTable,
 }
 
@@ -148,7 +150,15 @@ type Client interface {
 	ListSecurityGroups() ([]*types.SecurityGroup, error)
 	DeleteSecurityGroup(id string) error
 
-	// Kubernets
+	// Load Balancers
+	ListLBs() ([]*types.LB, error)
+	PutLB(*types.LB) error
+	GetLB(string) (*types.LB, error)
+	DeleteLB(string) error
+
+	/* End of cloud provider functions */
+
+	// Begining Kubernets
 
 	//  Cluster
 	PutCluster(cluster *types.Cluster) error

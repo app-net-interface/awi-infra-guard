@@ -39,7 +39,7 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 		//fmt.Printf("Subscription ID : %s\n", subscriptionID)
 		vnetClient, err := armnetwork.NewVirtualNetworksClient(account.ID, c.cred, nil)
 		if err != nil {
-			fmt.Printf("failed to create VNet client: %w", err)
+			c.logger.Errorf("failed to create VNet client: %v", err)
 			return nil, err
 		}
 		pager := vnetClient.NewListAllPager(nil)
@@ -47,6 +47,7 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 		for pager.More() {
 			resp, err := pager.NextPage(ctx)
 			if err != nil {
+				
 				return nil, fmt.Errorf("failed to get the next page of VNets: %w", err)
 			}
 			for _, vnet := range resp.VirtualNetworkListResult.Value {

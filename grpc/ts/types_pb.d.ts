@@ -293,6 +293,66 @@ export namespace Credentials {
   }
 }
 
+export class Account extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): Account;
+
+  getId(): string;
+  setId(value: string): Account;
+
+  getName(): string;
+  setName(value: string): Account;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Account;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Account.AsObject;
+  static toObject(includeInstance: boolean, msg: Account): Account.AsObject;
+  static serializeBinaryToWriter(message: Account, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Account;
+  static deserializeBinaryFromReader(message: Account, reader: jspb.BinaryReader): Account;
+}
+
+export namespace Account {
+  export type AsObject = {
+    provider: string,
+    id: string,
+    name: string,
+    lastSyncTime: string,
+  }
+}
+
+export class Region extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): Region;
+
+  getId(): string;
+  setId(value: string): Region;
+
+  getName(): string;
+  setName(value: string): Region;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): Region;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): Region.AsObject;
+  static toObject(includeInstance: boolean, msg: Region): Region.AsObject;
+  static serializeBinaryToWriter(message: Region, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): Region;
+  static deserializeBinaryFromReader(message: Region, reader: jspb.BinaryReader): Region;
+}
+
+export namespace Region {
+  export type AsObject = {
+    provider: string,
+    id: string,
+    name: string,
+    lastSyncTime: string,
+  }
+}
+
 export class VPC extends jspb.Message {
   getId(): string;
   setId(value: string): VPC;
@@ -536,66 +596,6 @@ export namespace Subnet {
     selfLink: string,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
-  }
-}
-
-export class Account extends jspb.Message {
-  getProvider(): string;
-  setProvider(value: string): Account;
-
-  getId(): string;
-  setId(value: string): Account;
-
-  getName(): string;
-  setName(value: string): Account;
-
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): Account;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Account.AsObject;
-  static toObject(includeInstance: boolean, msg: Account): Account.AsObject;
-  static serializeBinaryToWriter(message: Account, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Account;
-  static deserializeBinaryFromReader(message: Account, reader: jspb.BinaryReader): Account;
-}
-
-export namespace Account {
-  export type AsObject = {
-    provider: string,
-    id: string,
-    name: string,
-    lastSyncTime: string,
-  }
-}
-
-export class Region extends jspb.Message {
-  getProvider(): string;
-  setProvider(value: string): Region;
-
-  getId(): string;
-  setId(value: string): Region;
-
-  getName(): string;
-  setName(value: string): Region;
-
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): Region;
-
-  serializeBinary(): Uint8Array;
-  toObject(includeInstance?: boolean): Region.AsObject;
-  static toObject(includeInstance: boolean, msg: Region): Region.AsObject;
-  static serializeBinaryToWriter(message: Region, writer: jspb.BinaryWriter): void;
-  static deserializeBinary(bytes: Uint8Array): Region;
-  static deserializeBinaryFromReader(message: Region, reader: jspb.BinaryReader): Region;
-}
-
-export namespace Region {
-  export type AsObject = {
-    provider: string,
-    id: string,
-    name: string,
-    lastSyncTime: string,
   }
 }
 
@@ -1633,3 +1633,419 @@ export namespace K8sService {
 
 }
 
+export class LB extends jspb.Message {
+  getId(): string;
+  setId(value: string): LB;
+
+  getName(): string;
+  setName(value: string): LB;
+
+  getLoadBalancerType(): string;
+  setLoadBalancerType(value: string): LB;
+
+  getScheme(): string;
+  setScheme(value: string): LB;
+
+  getVpcId(): string;
+  setVpcId(value: string): LB;
+
+  getDnsName(): string;
+  setDnsName(value: string): LB;
+
+  getInstanceIdsList(): Array<string>;
+  setInstanceIdsList(value: Array<string>): LB;
+  clearInstanceIdsList(): LB;
+  addInstanceIds(value: string, index?: number): LB;
+
+  getTargetGroupIdsList(): Array<string>;
+  setTargetGroupIdsList(value: Array<string>): LB;
+  clearTargetGroupIdsList(): LB;
+  addTargetGroupIds(value: string, index?: number): LB;
+
+  getListenersList(): Array<LB.Listener>;
+  setListenersList(value: Array<LB.Listener>): LB;
+  clearListenersList(): LB;
+  addListeners(value?: LB.Listener, index?: number): LB.Listener;
+
+  getCrossZoneLoadBalancing(): boolean;
+  setCrossZoneLoadBalancing(value: boolean): LB;
+
+  getAccessLogsEnabled(): boolean;
+  setAccessLogsEnabled(value: boolean): LB;
+
+  getLoggingBucket(): string;
+  setLoggingBucket(value: string): LB;
+
+  getIpAddressesList(): Array<string>;
+  setIpAddressesList(value: Array<string>): LB;
+  clearIpAddressesList(): LB;
+  addIpAddresses(value: string, index?: number): LB;
+
+  getIpAddressType(): string;
+  setIpAddressType(value: string): LB;
+
+  getRegion(): string;
+  setRegion(value: string): LB;
+
+  getZone(): string;
+  setZone(value: string): LB;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): LB;
+
+  getProject(): string;
+  setProject(value: string): LB;
+
+  getProvider(): string;
+  setProvider(value: string): LB;
+
+  getAccountId(): string;
+  setAccountId(value: string): LB;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): LB;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): LB;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): LB;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): LB;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): LB;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): LB;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LB.AsObject;
+  static toObject(includeInstance: boolean, msg: LB): LB.AsObject;
+  static serializeBinaryToWriter(message: LB, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LB;
+  static deserializeBinaryFromReader(message: LB, reader: jspb.BinaryReader): LB;
+}
+
+export namespace LB {
+  export type AsObject = {
+    id: string,
+    name: string,
+    loadBalancerType: string,
+    scheme: string,
+    vpcId: string,
+    dnsName: string,
+    instanceIdsList: Array<string>,
+    targetGroupIdsList: Array<string>,
+    listenersList: Array<LB.Listener.AsObject>,
+    crossZoneLoadBalancing: boolean,
+    accessLogsEnabled: boolean,
+    loggingBucket: string,
+    ipAddressesList: Array<string>,
+    ipAddressType: string,
+    region: string,
+    zone: string,
+    labelsMap: Array<[string, string]>,
+    project: string,
+    provider: string,
+    accountId: string,
+    lastSyncTime: string,
+    selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+
+  export class Listener extends jspb.Message {
+    getListenerId(): string;
+    setListenerId(value: string): Listener;
+
+    getProtocol(): string;
+    setProtocol(value: string): Listener;
+
+    getPort(): number;
+    setPort(value: number): Listener;
+
+    getTargetGroupId(): string;
+    setTargetGroupId(value: string): Listener;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): Listener.AsObject;
+    static toObject(includeInstance: boolean, msg: Listener): Listener.AsObject;
+    static serializeBinaryToWriter(message: Listener, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): Listener;
+    static deserializeBinaryFromReader(message: Listener, reader: jspb.BinaryReader): Listener;
+  }
+
+  export namespace Listener {
+    export type AsObject = {
+      listenerId: string,
+      protocol: string,
+      port: number,
+      targetGroupId: string,
+    }
+  }
+
+}
+
+export class NetworkInterface extends jspb.Message {
+  getId(): string;
+  setId(value: string): NetworkInterface;
+
+  getName(): string;
+  setName(value: string): NetworkInterface;
+
+  getSubnetId(): string;
+  setSubnetId(value: string): NetworkInterface;
+
+  getVpcId(): string;
+  setVpcId(value: string): NetworkInterface;
+
+  getInstanceId(): string;
+  setInstanceId(value: string): NetworkInterface;
+
+  getMacAddress(): string;
+  setMacAddress(value: string): NetworkInterface;
+
+  getPublicIp(): string;
+  setPublicIp(value: string): NetworkInterface;
+
+  getPrivateIp(): string;
+  setPrivateIp(value: string): NetworkInterface;
+
+  getSecondaryPrivateIpsList(): Array<string>;
+  setSecondaryPrivateIpsList(value: Array<string>): NetworkInterface;
+  clearSecondaryPrivateIpsList(): NetworkInterface;
+  addSecondaryPrivateIps(value: string, index?: number): NetworkInterface;
+
+  getStatus(): string;
+  setStatus(value: string): NetworkInterface;
+
+  getAttachment(): NetworkInterface.Attachment | undefined;
+  setAttachment(value?: NetworkInterface.Attachment): NetworkInterface;
+  hasAttachment(): boolean;
+  clearAttachment(): NetworkInterface;
+
+  getDnsName(): string;
+  setDnsName(value: string): NetworkInterface;
+
+  getDnsServersList(): Array<string>;
+  setDnsServersList(value: Array<string>): NetworkInterface;
+  clearDnsServersList(): NetworkInterface;
+  addDnsServers(value: string, index?: number): NetworkInterface;
+
+  getSecurityGroupIdsList(): Array<string>;
+  setSecurityGroupIdsList(value: Array<string>): NetworkInterface;
+  clearSecurityGroupIdsList(): NetworkInterface;
+  addSecurityGroupIds(value: string, index?: number): NetworkInterface;
+
+  getIpForwarding(): boolean;
+  setIpForwarding(value: boolean): NetworkInterface;
+
+  getMtu(): number;
+  setMtu(value: number): NetworkInterface;
+
+  getBandwidth(): string;
+  setBandwidth(value: string): NetworkInterface;
+
+  getRegion(): string;
+  setRegion(value: string): NetworkInterface;
+
+  getZone(): string;
+  setZone(value: string): NetworkInterface;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): NetworkInterface;
+
+  getProject(): string;
+  setProject(value: string): NetworkInterface;
+
+  getProvider(): string;
+  setProvider(value: string): NetworkInterface;
+
+  getAccountId(): string;
+  setAccountId(value: string): NetworkInterface;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): NetworkInterface;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): NetworkInterface;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): NetworkInterface;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): NetworkInterface;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): NetworkInterface;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): NetworkInterface;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): NetworkInterface.AsObject;
+  static toObject(includeInstance: boolean, msg: NetworkInterface): NetworkInterface.AsObject;
+  static serializeBinaryToWriter(message: NetworkInterface, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): NetworkInterface;
+  static deserializeBinaryFromReader(message: NetworkInterface, reader: jspb.BinaryReader): NetworkInterface;
+}
+
+export namespace NetworkInterface {
+  export type AsObject = {
+    id: string,
+    name: string,
+    subnetId: string,
+    vpcId: string,
+    instanceId: string,
+    macAddress: string,
+    publicIp: string,
+    privateIp: string,
+    secondaryPrivateIpsList: Array<string>,
+    status: string,
+    attachment?: NetworkInterface.Attachment.AsObject,
+    dnsName: string,
+    dnsServersList: Array<string>,
+    securityGroupIdsList: Array<string>,
+    ipForwarding: boolean,
+    mtu: number,
+    bandwidth: string,
+    region: string,
+    zone: string,
+    labelsMap: Array<[string, string]>,
+    project: string,
+    provider: string,
+    accountId: string,
+    lastSyncTime: string,
+    selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+
+  export class Attachment extends jspb.Message {
+    getInstanceId(): string;
+    setInstanceId(value: string): Attachment;
+
+    getAttachmentId(): string;
+    setAttachmentId(value: string): Attachment;
+
+    getDeviceIndex(): string;
+    setDeviceIndex(value: string): Attachment;
+
+    getAttachTime(): google_protobuf_timestamp_pb.Timestamp | undefined;
+    setAttachTime(value?: google_protobuf_timestamp_pb.Timestamp): Attachment;
+    hasAttachTime(): boolean;
+    clearAttachTime(): Attachment;
+
+    getDeleteOnTermination(): boolean;
+    setDeleteOnTermination(value: boolean): Attachment;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): Attachment.AsObject;
+    static toObject(includeInstance: boolean, msg: Attachment): Attachment.AsObject;
+    static serializeBinaryToWriter(message: Attachment, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): Attachment;
+    static deserializeBinaryFromReader(message: Attachment, reader: jspb.BinaryReader): Attachment;
+  }
+
+  export namespace Attachment {
+    export type AsObject = {
+      instanceId: string,
+      attachmentId: string,
+      deviceIndex: string,
+      attachTime?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+      deleteOnTermination: boolean,
+    }
+  }
+
+}
+
+export class KeyPair extends jspb.Message {
+  getId(): string;
+  setId(value: string): KeyPair;
+
+  getName(): string;
+  setName(value: string): KeyPair;
+
+  getKeyPairType(): KeyPairType;
+  setKeyPairType(value: KeyPairType): KeyPair;
+
+  getPublicKey(): string;
+  setPublicKey(value: string): KeyPair;
+
+  getPrivateKeyFingerprint(): string;
+  setPrivateKeyFingerprint(value: string): KeyPair;
+
+  getInstanceIdsList(): Array<string>;
+  setInstanceIdsList(value: Array<string>): KeyPair;
+  clearInstanceIdsList(): KeyPair;
+  addInstanceIds(value: string, index?: number): KeyPair;
+
+  getRegion(): string;
+  setRegion(value: string): KeyPair;
+
+  getProject(): string;
+  setProject(value: string): KeyPair;
+
+  getProvider(): string;
+  setProvider(value: string): KeyPair;
+
+  getAccountId(): string;
+  setAccountId(value: string): KeyPair;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): KeyPair;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): KeyPair;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): KeyPair;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): KeyPair;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): KeyPair;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): KeyPair;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): KeyPair;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): KeyPair.AsObject;
+  static toObject(includeInstance: boolean, msg: KeyPair): KeyPair.AsObject;
+  static serializeBinaryToWriter(message: KeyPair, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): KeyPair;
+  static deserializeBinaryFromReader(message: KeyPair, reader: jspb.BinaryReader): KeyPair;
+}
+
+export namespace KeyPair {
+  export type AsObject = {
+    id: string,
+    name: string,
+    keyPairType: KeyPairType,
+    publicKey: string,
+    privateKeyFingerprint: string,
+    instanceIdsList: Array<string>,
+    region: string,
+    project: string,
+    provider: string,
+    accountId: string,
+    labelsMap: Array<[string, string]>,
+    lastSyncTime: string,
+    selfLink: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+}
+
+export enum LoadBalancerType { 
+  ALB = 0,
+  NLB = 1,
+  ELB = 2,
+  GLB = 3,
+  UNKNOWN = 4,
+}
+export enum KeyPairType { 
+  RSA = 0,
+  ED25519 = 1,
+  OTHER = 2,
+}

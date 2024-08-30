@@ -265,6 +265,9 @@ func (s *Server) ListRegions(ctx context.Context, in *infrapb.ListRegionsRequest
 func (s *Server) ListVPC(ctx context.Context, in *infrapb.ListVPCRequest) (*infrapb.ListVPCResponse, error) {
 	var errorMessage string
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
 	vpcs, err := cloudProvider.ListVPC(ctx, in)
 	if err != nil {
 		errorMessage = err.Error()
@@ -293,7 +296,6 @@ func (s *Server) ListInstances(ctx context.Context, in *infrapb.ListInstancesReq
 	}
 	instances, err := cloudProvider.ListInstances(ctx, in)
 	if err != nil {
-		errorMessage = err.Error()
 		return nil, err
 	}
 	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.InstanceType))
@@ -523,6 +525,33 @@ func (s *Server) ListPublicIPs(ctx context.Context, in *infrapb.ListPublicIPsReq
 	}, nil
 }
 
+func (s *Server) ListLBs(ctx context.Context, in *infrapb.ListLBsRequest) (*infrapb.ListLBsResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+
+	lbs, err := cloudProvider.ListLBs(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+
+	var t string
+	syncTime, err := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.LBType))
+	if err != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.LBType, cloudProvider.GetName())
+	} else {
+		t = syncTime.Time
+	}
+
+	return &infrapb.ListLBsResponse{
+		LastSyncTime: t,
+		Lbs:          typesLBToGrpc(lbs),
+	}, nil
+}
+
+/* End List functions */
+
 func (s *Server) GetVPCIDForCIDR(ctx context.Context, in *infrapb.GetVPCIDForCIDRRequest) (*infrapb.GetVPCIDForCIDRResponse, error) {
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
 	if err != nil {
@@ -709,6 +738,8 @@ func (s *Server) RefreshInboundAllowRule(ctx context.Context, in *infrapb.Refres
 		Subnets:   typesSubnetsToGrpc(subnets),
 	}, nil
 }
+
+// Kubernetes Resources
 
 func (s *Server) ListCloudClusters(ctx context.Context, in *infrapb.ListCloudClustersRequest) (*infrapb.ListCloudClustersResponse, error) {
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)

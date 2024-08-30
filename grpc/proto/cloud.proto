@@ -22,7 +22,6 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 import "types.proto";
 
-
 option go_package = "./;infrapb";
 
 
@@ -52,6 +51,8 @@ service CloudProviderService {
     rpc ListInternetGateways (ListInternetGatewaysRequest) returns (ListInternetGatewaysResponse) {}
     rpc ListVPCEndpoints (ListVPCEndpointsRequest) returns (ListVPCEndpointsResponse) {}
     rpc ListPublicIPs (ListPublicIPsRequest) returns (ListPublicIPsResponse) {}
+    rpc ListLBs (ListLBsRequest) returns (ListLBsResponse) {}
+
 
     
     //Add New List Cloud Resource RPCs above this
@@ -243,6 +244,22 @@ message ListPublicIPsResponse {
     string last_sync_time = 2;
     Error err = 3;
 }
+
+message ListLBsRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    string vpc_id = 4;
+    map<string, string> labels = 5;
+    optional Credentials creds = 6;
+}
+
+message ListLBsResponse {
+    repeated LB lbs = 1;
+    string last_sync_time = 2;
+    Error err = 3;
+}
+
 
 // GetSubnet
 message GetSubnetRequest {

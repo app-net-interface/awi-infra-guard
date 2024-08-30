@@ -444,6 +444,36 @@ func (p *providerWithDB) ListPublicIPs(ctx context.Context, params *infrapb.List
 	return providerPublicIPs, nil
 }
 
+func (p *providerWithDB) ListLBs(ctx context.Context, params *infrapb.ListLBsRequest) ([]types.LB, error) {
+	dbLBs, err := p.dbClient.ListLBs()
+	if err != nil {
+		return nil, err
+	}
+	var providersLBs []types.LB
+	for _, lb := range dbLBs {
+		if !strings.EqualFold(lb.Provider, p.realProvider.GetName()) {
+			fmt.Printf("LB provider don't match %s  --- %s \n", p.realProvider.GetName(), lb.Provider)
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != lb.AccountID {
+			fmt.Printf("LB account ID don't match %s  --- %s \n", params.GetAccountId(), lb.AccountID)
+			continue
+		}
+		if params.GetRegion() != "global" {
+			if params.GetRegion() != "" && params.GetRegion() != lb.Region {
+				fmt.Printf("LB region don't match %s  --- %s \n", params.GetRegion(), lb.Region)
+				continue
+			}
+		}
+		if params.GetVpcId() != "" && params.GetVpcId() != lb.VPCID {
+			fmt.Printf("LB VPC ID don't match %s  --- %s \n", params.GetVpcId(), lb.VPCID)
+			continue
+		}
+		providersLBs = append(providersLBs, *lb)
+	}
+	return providersLBs, nil
+}
+
 func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {
 	dbSubnet, err := p.dbClient.GetSubnet(types.CloudID(p.realProvider.GetName(), params.GetId()))
 	if err != nil {

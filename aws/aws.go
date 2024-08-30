@@ -30,7 +30,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
-	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
+	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
+	elbv2 "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/sirupsen/logrus"
@@ -55,9 +56,10 @@ type Client struct {
 type awsRegionalClientSet map[string]awsClient
 
 type awsClient struct {
-	ec2Client *ec2.Client
-	lbClient  *elasticloadbalancing.Client
-	eksClient *eks.Client
+	ec2Client   *ec2.Client
+	lbClient    *elb.Client
+	eksClient   *eks.Client
+	elbv2Client *elbv2.Client
 }
 
 type regionResult struct {
@@ -73,6 +75,7 @@ type regionResult struct {
 	vpces     []types.VPCEndpoint
 	routers   []types.Router
 	rts       []types.RouteTable
+	lbs       []types.LB
 	err       error
 }
 
@@ -141,8 +144,9 @@ func NewClient(ctx context.Context, logger *logrus.Logger) (*Client, error) {
 	profiles := GetProfiles(ctx, cfg, logger)
 
 	client := ec2.NewFromConfig(cfg)
-	lbClient := elasticloadbalancing.NewFromConfig(cfg)
+	lbClient := elb.NewFromConfig(cfg)
 	eksClient := eks.NewFromConfig(cfg)
+	elbv2Client := elbv2.NewFromConfig(cfg)
 
 	allRegions, err := client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{})
 	if err != nil {
@@ -156,9 +160,10 @@ func NewClient(ctx context.Context, logger *logrus.Logger) (*Client, error) {
 		defaultRegion:    cfg.Region,
 		defaultAccountID: defaultAccountID,
 		defaultAWSClient: awsClient{
-			ec2Client: client,
-			lbClient:  lbClient,
-			eksClient: eksClient,
+			ec2Client:   client,
+			lbClient:    lbClient,
+			eksClient:   eksClient,
+			elbv2Client: elbv2Client,
 		},
 		clients:  clients,
 		logger:   logger,
@@ -295,15 +300,78 @@ func (c *Client) getEC2Client(ctx context.Context, account string, region string
 	return client.ec2Client, nil
 }
 
-func (c *Client) getELBClient(_ context.Context, account, region string) (*elasticloadbalancing.Client, error) {
-	if useDefaultConfig(region, c.defaultRegion, account) {
-		return c.defaultAWSClient.lbClient, nil
-	}
-	client, err := c.getClientsForProfileAndRegion(account, region)
-	if err != nil {
-		return nil, err
-	}
-	return client.lbClient, nil
+func (c *Client) getELBClient(ctx context.Context, account string, region string) (*elb.Client, error) {
+    if c.creds != nil && c.creds.GetRoleBasedAuth() != nil && c.creds.GetRoleBasedAuth().GetAwsRole().RoleArn != "" {
+        elbClient, _, err := c.getELBClientFromRole(ctx, region)
+        return elbClient, err
+    }
+    if useDefaultConfig(region, c.defaultRegion, account) {
+        return c.defaultAWSClient.lbClient, nil
+    }
+    client, err := c.getClientsForProfileAndRegion(account, region)
+    if err != nil {
+        return nil, err
+    }
+    return client.lbClient, nil
+}
+
+func (c *Client) getELBv2Client(ctx context.Context, account string, region string) (*elbv2.Client, error) {
+    if c.creds != nil && c.creds.GetRoleBasedAuth() != nil && c.creds.GetRoleBasedAuth().GetAwsRole().RoleArn != "" {
+        _, elbv2Client, err := c.getELBClientFromRole(ctx, region)
+        return elbv2Client, err
+    }
+    if useDefaultConfig(region, c.defaultRegion, account) {
+        return c.defaultAWSClient.elbv2Client, nil
+    }
+    client, err := c.getClientsForProfileAndRegion(account, region)
+    if err != nil {
+        return nil, err
+    }
+    return client.elbv2Client, nil
+}
+
+func (c *Client) getELBClientFromRole(ctx context.Context, region string) (*elb.Client, *elbv2.Client, error) {
+    cfg, err := config.LoadDefaultConfig(ctx)
+    if err != nil {
+        c.logger.Errorf("unable to load SDK config, %v", err)
+        return nil, nil, err
+    }
+
+    // Initialize the Auth with IAM and STS clients
+    auth := &Auth{
+        iam: iam.NewFromConfig(cfg),
+    }
+    roleArn := c.creds.GetRoleBasedAuth().GetAwsRole().RoleArn
+    sessionName := c.creds.GetRoleBasedAuth().GetAwsRole().RoleSessionName
+    if c.accountID == "" {
+        c.accountID = ExtractAccountID(roleArn)
+    }
+
+    // Assume the role
+    output, err := auth.AssumeRole(ctx, cfg, roleArn, sessionName)
+    if err != nil {
+        c.logger.Errorf("Failed to assume role: %s", err)
+        return nil, nil, err
+    }
+
+    c.logger.Debugf("Assumed role for user with ARN %s and Id %s", *output.AssumedRoleUser.Arn, *output.AssumedRoleUser.AssumedRoleId)
+
+    // Create a new configuration with the assumed role credentials
+    assumedCfg, err := config.LoadDefaultConfig(ctx,
+        config.WithCredentialsProvider(
+            stscreds.NewAssumeRoleProvider(sts.NewFromConfig(cfg), roleArn),
+        ), config.WithRegion(region),
+    )
+    if err != nil {
+        c.logger.Errorf("Failed to create assumed role configuration: %v", err)
+        return nil, nil, err
+    }
+
+    // Create and return both ELB and ELBv2 clients
+    elbClient := elb.NewFromConfig(assumedCfg)
+    elbv2Client := elbv2.NewFromConfig(assumedCfg)
+
+    return elbClient, elbv2Client, nil
 }
 
 func (c *Client) getEKSClient(_ context.Context, account, region string) (*eks.Client, error) {

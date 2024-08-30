@@ -20,13 +20,13 @@ package aws
 import (
 	"context"
 
+	"github.com/app-net-interface/awi-infra-guard/types"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awstypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
-
-	"github.com/app-net-interface/awi-infra-guard/types"
+	elbv2 "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 )
 
 func getAllClients(ctx context.Context, allRegions []awstypes.Region, allProfiles []types.Account) (clients map[string]awsRegionalClientSet, err error) {
@@ -43,9 +43,10 @@ func getAllClients(ctx context.Context, allRegions []awstypes.Region, allProfile
 				return nil, err
 			}
 			clientSet[regionName] = awsClient{
-				ec2Client: ec2.NewFromConfig(cfg),
-				lbClient:  elasticloadbalancing.NewFromConfig(cfg),
-				eksClient: eks.NewFromConfig(cfg),
+				ec2Client:   ec2.NewFromConfig(cfg),
+				lbClient:    elasticloadbalancing.NewFromConfig(cfg),
+				eksClient:   eks.NewFromConfig(cfg),
+				elbv2Client: elbv2.NewFromConfig(cfg),
 			}
 		}
 		clients[account.Name] = clientSet

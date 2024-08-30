@@ -52,6 +52,7 @@ const (
 	K8sServiceType    = "K8sService"
 	K8sNodeType       = "K8sNode"
 	NamespaceType     = "Namespace"
+	LBType            = "LB"
 )
 
 type Error struct {
@@ -79,6 +80,8 @@ func (r *Region) SetSyncTime(time string) {
 func (r *Region) GetProvider() string {
 	return r.Provider
 }
+
+/* Start resource types */
 
 type VPC struct {
 	ID           string
@@ -446,86 +449,57 @@ func (v *ACL) GetProvider() string {
 	return v.Provider
 }
 
-type SyncTime struct {
-	Provider     string
-	ResourceType string
-	Time         string
+// LBListener represents a listener for a load balancer
+type LBListener struct {
+	ListenerID    string
+	Protocol      string
+	Port          int32
+	TargetGroupID string
 }
 
-func (v *SyncTime) DbId() string {
-	return SyncTimeKey(v.Provider, v.ResourceType)
+// LB represents a load balancer
+type LB struct {
+	ID                     string
+	Name                   string
+	Provider               string
+	Type                   string
+	DNSName                string
+	Scheme                 string
+	VPCID                  string
+	InstanceIDs            []string
+	TargetGroupIDs         []string
+	Listeners              []LBListener
+	CrossZoneLoadBalancing bool
+	AccessLogsEnabled      bool
+	LoggingBucket          string
+	IPAddresses            []string
+	IPAddressType          string
+	Region                 string
+	Zone                   string
+	Labels                 map[string]string
+	Project                string
+	AccountID              string
+	LastSyncTime           string
+	SelfLink               string
+	CreatedAt              time.Time
 }
 
-func (v *SyncTime) SetSyncTime(time string) {
-
+func (lb *LB) DbId() string {
+	return CloudID(lb.Provider, lb.ID)
 }
 
-func (v *SyncTime) GetProvider() string {
-	return v.Provider
+func (lb *LB) SetSyncTime(t string) {
+	lb.LastSyncTime = t
 }
 
-func CloudID(provider, id string) string {
-	return provider + ":" + id
+func (lb *LB) GetProvider() string {
+	return lb.Provider
 }
 
-func SyncTimeKey(provider string, typ string) string {
-	return fmt.Sprintf("%s/%s", provider, typ)
-}
+// End LB
+/* End resource types */
 
-func SyncTimeKeyDecode(s string) (provider, type_ string, err error) {
-	split := strings.Split(s, "/")
-	if len(split) != 2 {
-		return "", "", fmt.Errorf("Failed to determine provider and type from key %s", s)
-	}
-	return split[0], split[1], nil
-}
-
-type DestinationDetails struct {
-	Provider string
-	VPC      string
-	Region   string
-}
-
-type SingleVPCConnectionParams struct {
-	ConnID      string
-	VpcID       string
-	Region      string
-	Destination DestinationDetails
-}
-
-type VPCConnectionParams struct {
-	ConnID  string
-	Vpc1ID  string
-	Vpc2ID  string
-	Region1 string
-	Region2 string
-}
-
-type VPCConnectionOutput struct {
-	Region1 string
-	Region2 string
-}
-
-type SingleVPCConnectionOutput struct {
-	Region string
-}
-
-type VPCDisconnectionParams struct {
-	ConnID  string
-	Vpc1ID  string
-	Vpc2ID  string
-	Region1 string
-	Region2 string
-}
-
-type SingleVPCDisconnectionParams struct {
-	ConnID string
-	VpcID  string
-	Region string
-}
-
-type VPCDisconnectionOutput struct {
-}
+/* Start Kubernetes types */
 
 //Kubernetes
 
@@ -659,3 +633,93 @@ func KubernetesID(cluster, namespace, name string) string {
 	}
 	return n
 }
+
+/* End Kubernetes types */
+
+/* Start SyncTime types */
+
+type SyncTime struct {
+	Provider     string
+	ResourceType string
+	Time         string
+}
+
+func (v *SyncTime) DbId() string {
+	return SyncTimeKey(v.Provider, v.ResourceType)
+}
+
+func (v *SyncTime) SetSyncTime(time string) {
+
+}
+
+func (v *SyncTime) GetProvider() string {
+	return v.Provider
+}
+
+func CloudID(provider, id string) string {
+	return provider + ":" + id
+}
+
+func SyncTimeKey(provider string, typ string) string {
+	return fmt.Sprintf("%s/%s", provider, typ)
+}
+
+func SyncTimeKeyDecode(s string) (provider, type_ string, err error) {
+	split := strings.Split(s, "/")
+	if len(split) != 2 {
+		return "", "", fmt.Errorf("failed to determine provider and type from key %s", s)
+	}
+	return split[0], split[1], nil
+}
+
+/* End SyncTime types */
+
+/* Start Connection types */
+type DestinationDetails struct {
+	Provider string
+	VPC      string
+	Region   string
+}
+
+type SingleVPCConnectionParams struct {
+	ConnID      string
+	VpcID       string
+	Region      string
+	Destination DestinationDetails
+}
+
+type VPCConnectionParams struct {
+	ConnID  string
+	Vpc1ID  string
+	Vpc2ID  string
+	Region1 string
+	Region2 string
+}
+
+type VPCConnectionOutput struct {
+	Region1 string
+	Region2 string
+}
+
+type SingleVPCConnectionOutput struct {
+	Region string
+}
+
+type VPCDisconnectionParams struct {
+	ConnID  string
+	Vpc1ID  string
+	Vpc2ID  string
+	Region1 string
+	Region2 string
+}
+
+type SingleVPCDisconnectionParams struct {
+	ConnID string
+	VpcID  string
+	Region string
+}
+
+type VPCDisconnectionOutput struct {
+}
+
+/* End Connection types */

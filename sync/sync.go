@@ -156,6 +156,14 @@ func (s *Syncer) ParallelSync(ctx context.Context, done chan<- struct{}) {
 			s.syncVPCEndpoints(ctx)
 		}()
 	}
+	if allResource || s.sc.HasCloudResource("lb") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncLBs(ctx)
+		}()
+	}
 
 	// Kubernetes
 
@@ -255,6 +263,9 @@ func (s *Syncer) Sync(ctx context.Context, done chan<- struct{}) {
 	if allResource || s.sc.HasCloudResource("vpcendpoint") {
 
 		s.syncVPCEndpoints(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("lb") {
+		s.syncLBs(ctx)
 	}
 
 	// Kubernetes
@@ -372,6 +383,16 @@ func (s *Syncer) syncVPCEndpoints(ctx context.Context) {
 	}, s.logger, s.dbClient.ListVPCEndpoints, s.dbClient.PutVPCEndpoint, s.dbClient.DeleteVPCEndpoint)
 }
 
+
+func (s *Syncer) syncLBs(ctx context.Context) {
+	genericCloudSync[*types.LB](s, types.LBType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.LB, error) {
+		return cloudProvider.ListLBs(ctx, &infrapb.ListLBsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListLBs, s.dbClient.PutLB, s.dbClient.DeleteLB)
+}
+
+/* End sync cloud resources */
+/* Start sync kubernetes resources */
+
 func (s *Syncer) syncClusters(ctx context.Context) {
 	genericCloudSync[*types.Cluster](s, types.ClusterType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.Cluster, error) {
 		return cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{AccountId: accountID})
@@ -401,6 +422,7 @@ func (s *Syncer) syncK8SSsNodes(ctx context.Context) {
 		return k8sProvider.ListNodes(ctx, clusterName, nil)
 	}, s.logger, s.dbClient.ListKubernetesNodes, s.dbClient.PutKubernetesNode, s.dbClient.DeleteKubernetesNode)
 }
+
 
 func genericCloudSync[P interface {
 	*T

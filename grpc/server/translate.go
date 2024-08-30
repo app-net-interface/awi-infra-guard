@@ -323,6 +323,54 @@ func typesPublicIPsToGrpc(in []types.PublicIP) []*infrapb.PublicIP {
 	return out
 }
 
+func typesLBToGrpc(in []types.LB) []*infrapb.LB {
+	if len(in) == 0 {
+		fmt.Println("No LBs found")
+		return nil
+	}
+	out := make([]*infrapb.LB, 0, len(in))
+
+	for _, lb := range in {
+		out = append(out, &infrapb.LB{
+			Id:                     lb.ID,
+			Name:                   lb.Name,
+			VpcId:                  lb.VPCID,
+			DnsName:                lb.DNSName,
+			Provider:               lb.Provider,
+			AccountId:              lb.AccountID,
+			Listeners:              typesLBListenersToGrpc(lb.Listeners),
+			LoadBalancerType:       lb.Type,
+			Scheme:                 lb.Scheme,
+			Region:                 lb.Region,
+			InstanceIds:            lb.InstanceIDs,
+			TargetGroupIds:         lb.TargetGroupIDs,
+			CrossZoneLoadBalancing: lb.CrossZoneLoadBalancing,
+			AccessLogsEnabled:      lb.AccessLogsEnabled,
+			LoggingBucket:          lb.LoggingBucket,
+			IpAddresses:            lb.IPAddresses,
+			IpAddressType:          lb.IPAddressType,
+			Zone:                   lb.Zone,
+			Labels:                 lb.Labels,
+			Project:                lb.Project,
+			CreatedAt:              timestamppb.New(lb.CreatedAt),
+		})
+	}
+	return out
+}
+
+func typesLBListenersToGrpc(in []types.LBListener) []*infrapb.LB_Listener {
+	out := make([]*infrapb.LB_Listener, 0, len(in))
+	for _, listener := range in {
+		out = append(out, &infrapb.LB_Listener{
+			ListenerId:    listener.ListenerID,
+			Protocol:      listener.Protocol,
+			Port:          int32(listener.Port),
+			TargetGroupId: listener.TargetGroupID,
+		})
+	}
+	return out
+}
+
 // Kubernetes Types
 
 func typesPodsToGrpc(in []types.Pod) []*infrapb.Pod {

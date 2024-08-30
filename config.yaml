@@ -49,21 +49,23 @@ syncConfig:
   dbFileName: "infra.db"
   resources: 
     cloud:
-      - region
-      - vpc
-      - instance
-      - subnet
-      - securitygroup
-      - routeTable
-      - router
-      - natGateway
-      - internetGateway
-      - vpcEndpoint
-      - vpnConnection
-      - publicIP
-      - acl
-      - loadBalancer
-      - apiGateway
+       - region
+      # - vpc
+       - lb
+
+      # - instance
+      # - subnet
+      # - securitygroup
+      # - routeTable
+      # - router
+      # - natGateway
+      # - internetGateway
+      # - vpcEndpoint
+      # - vpnConnection
+      # - publicIP
+      # - acl
+      # - loadBalancer
+      # - apiGateway
     kubernetes:
       - clusters
       - nodes

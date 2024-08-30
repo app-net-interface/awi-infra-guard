@@ -371,3 +371,20 @@ func (client *boltClient) ListSyncTimes() ([]*types.SyncTime, error) {
 func (client *boltClient) DeleteSyncTime(id string) error {
 	return delete_(client, id, syncTimeTable)
 }
+
+// LB
+func (client *boltClient) PutLB(lb *types.LB) error {
+	return update(client, lb, lb.DbId(), lbTable)
+}
+
+func (client *boltClient) GetLB(id string) (*types.LB, error) {
+	return get[types.LB](client, id, lbTable)
+}
+
+func (client *boltClient) ListLBs() ([]*types.LB, error) {
+	return list[types.LB](client, lbTable)
+}
+
+func (client *boltClient) DeleteLB(id string) error {
+	return delete_(client, id, lbTable)
+}

@@ -28,7 +28,7 @@ import (
 func (c *Client) ListAccounts() []types.Account {
 	client, err := armsubscriptions.NewClient(c.cred, nil)
 	if err != nil {
-		c.logger.Errorf("failed to create subscriptions client: %w", err)
+		c.logger.Errorf("failed to create subscriptions client: %v", err)
 		return nil
 	}
 

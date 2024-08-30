@@ -858,6 +858,81 @@ export namespace ListPublicIPsResponse {
   }
 }
 
+export class ListLBsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListLBsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListLBsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListLBsRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListLBsRequest;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListLBsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListLBsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListLBsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListLBsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListLBsRequest): ListLBsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListLBsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListLBsRequest;
+  static deserializeBinaryFromReader(message: ListLBsRequest, reader: jspb.BinaryReader): ListLBsRequest;
+}
+
+export namespace ListLBsRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
+  }
+}
+
+export class ListLBsResponse extends jspb.Message {
+  getLbsList(): Array<types_pb.LB>;
+  setLbsList(value: Array<types_pb.LB>): ListLBsResponse;
+  clearLbsList(): ListLBsResponse;
+  addLbs(value?: types_pb.LB, index?: number): types_pb.LB;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListLBsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListLBsResponse;
+  hasErr(): boolean;
+  clearErr(): ListLBsResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListLBsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListLBsResponse): ListLBsResponse.AsObject;
+  static serializeBinaryToWriter(message: ListLBsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListLBsResponse;
+  static deserializeBinaryFromReader(message: ListLBsResponse, reader: jspb.BinaryReader): ListLBsResponse;
+}
+
+export namespace ListLBsResponse {
+  export type AsObject = {
+    lbsList: Array<types_pb.LB.AsObject>,
+    lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
 export class GetSubnetRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetSubnetRequest;
