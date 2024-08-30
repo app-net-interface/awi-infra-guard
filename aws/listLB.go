@@ -1,9 +1,25 @@
+// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
+// All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http:www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package aws
 
 import (
 	"context"
 	"fmt"
-	"net"
 	"sync"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
@@ -269,18 +285,6 @@ func (c *Client) convertClassicELBToLoadBalancer(lb elbTypes.LoadBalancerDescrip
 	}
 }
 
-func getIPsFromDNS(dnsName string) ([]string, error) {
-	ips, err := net.LookupIP(dnsName)
-	if err != nil {
-		return nil, fmt.Errorf("error looking up IP addresses: %v", err)
-	}
-
-	var publicIPs []string
-	for _, ip := range ips {
-		publicIPs = append(publicIPs, ip.String())
-	}
-	return publicIPs, nil
-}
 
 func getIPsV1(lb elbTypes.LoadBalancerDescription) ([]string, error) {
 	if lb.DNSName != nil {

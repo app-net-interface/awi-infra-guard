@@ -455,7 +455,7 @@ message NetworkInterface {
     // Network interface identifiers
     string mac_address = 6; // MAC address of the network interface
     string public_ip = 7; // Primary public IP address (if any)
-    string private_ip = 8; // Primary private IP address
+    repeated string private_ips = 8; // Primary private IP address
 
     // Support for secondary private IP addresses (AWS, Azure, GCP)
     repeated string secondary_private_ips = 9;

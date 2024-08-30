@@ -14331,7 +14331,7 @@ proto.infra.LB.prototype.hasUpdatedAt = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.infra.NetworkInterface.repeatedFields_ = [9,13,14];
+proto.infra.NetworkInterface.repeatedFields_ = [8,9,13,14];
 
 
 
@@ -14371,7 +14371,7 @@ proto.infra.NetworkInterface.toObject = function(includeInstance, msg) {
     instanceId: jspb.Message.getFieldWithDefault(msg, 5, ""),
     macAddress: jspb.Message.getFieldWithDefault(msg, 6, ""),
     publicIp: jspb.Message.getFieldWithDefault(msg, 7, ""),
-    privateIp: jspb.Message.getFieldWithDefault(msg, 8, ""),
+    privateIpsList: (f = jspb.Message.getRepeatedField(msg, 8)) == null ? undefined : f,
     secondaryPrivateIpsList: (f = jspb.Message.getRepeatedField(msg, 9)) == null ? undefined : f,
     status: jspb.Message.getFieldWithDefault(msg, 10, ""),
     attachment: (f = msg.getAttachment()) && proto.infra.NetworkInterface.Attachment.toObject(includeInstance, f),
@@ -14457,7 +14457,7 @@ proto.infra.NetworkInterface.deserializeBinaryFromReader = function(msg, reader)
       break;
     case 8:
       var value = /** @type {string} */ (reader.readString());
-      msg.setPrivateIp(value);
+      msg.addPrivateIps(value);
       break;
     case 9:
       var value = /** @type {string} */ (reader.readString());
@@ -14618,9 +14618,9 @@ proto.infra.NetworkInterface.serializeBinaryToWriter = function(message, writer)
       f
     );
   }
-  f = message.getPrivateIp();
+  f = message.getPrivateIpsList();
   if (f.length > 0) {
-    writer.writeString(
+    writer.writeRepeatedString(
       8,
       f
     );
@@ -15159,20 +15159,39 @@ proto.infra.NetworkInterface.prototype.setPublicIp = function(value) {
 
 
 /**
- * optional string private_ip = 8;
- * @return {string}
+ * repeated string private_ips = 8;
+ * @return {!Array<string>}
  */
-proto.infra.NetworkInterface.prototype.getPrivateIp = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+proto.infra.NetworkInterface.prototype.getPrivateIpsList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 8));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.infra.NetworkInterface} returns this
+ */
+proto.infra.NetworkInterface.prototype.setPrivateIpsList = function(value) {
+  return jspb.Message.setField(this, 8, value || []);
 };
 
 
 /**
  * @param {string} value
+ * @param {number=} opt_index
  * @return {!proto.infra.NetworkInterface} returns this
  */
-proto.infra.NetworkInterface.prototype.setPrivateIp = function(value) {
-  return jspb.Message.setProto3StringField(this, 8, value);
+proto.infra.NetworkInterface.prototype.addPrivateIps = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 8, value, opt_index);
+};
+
+
+/**
+ * Clears the list making it empty but non-null.
+ * @return {!proto.infra.NetworkInterface} returns this
+ */
+proto.infra.NetworkInterface.prototype.clearPrivateIpsList = function() {
+  return this.setPrivateIpsList([]);
 };
 
 

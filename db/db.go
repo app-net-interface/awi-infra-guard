@@ -39,7 +39,7 @@ const (
 	vpcEndpointTable       = "vpcEndpoints"
 	publicIPTable          = "publicIPs"
 	lbTable                = "lbs"
-
+	networkInterfaceTable  = "network_interfaces"
 	syncTimeTable = "sync_time"
 )
 
@@ -64,6 +64,7 @@ var tableNames = []string{
 	securityGroupTable,
 	publicIPTable,
 	lbTable,
+	networkInterfaceTable,
 	syncTimeTable,
 }
 
@@ -155,6 +156,12 @@ type Client interface {
 	PutLB(*types.LB) error
 	GetLB(string) (*types.LB, error)
 	DeleteLB(string) error
+
+	// Network Interface
+	ListNetworkInterfaces() ([]*types.NetworkInterface, error)
+	PutNetworkInterface(*types.NetworkInterface) error
+	GetNetworkInterface(string) (*types.NetworkInterface, error)
+	DeleteNetworkInterface(string) error
 
 	/* End of cloud provider functions */
 

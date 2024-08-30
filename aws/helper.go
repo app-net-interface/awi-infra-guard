@@ -19,6 +19,7 @@ package aws
 
 import (
 	"fmt"
+	"net"
 	"reflect"
 	"strings"
 )
@@ -67,3 +68,17 @@ func printFields(v reflect.Value) {
         fmt.Printf("  %s: %v\n", fieldName, fieldValue)
     }
 }
+
+func getIPsFromDNS(dnsName string) ([]string, error) {
+	ips, err := net.LookupIP(dnsName)
+	if err != nil {
+		return nil, fmt.Errorf("error looking up IP addresses: %v", err)
+	}
+
+	var publicIPs []string
+	for _, ip := range ips {
+		publicIPs = append(publicIPs, ip.String())
+	}
+	return publicIPs, nil
+}
+

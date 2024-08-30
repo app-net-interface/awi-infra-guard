@@ -550,6 +550,35 @@ func (s *Server) ListLBs(ctx context.Context, in *infrapb.ListLBsRequest) (*infr
 	}, nil
 }
 
+// ... existing imports and code ...
+
+func (s *Server) ListNetworkInterfaces(ctx context.Context, in *infrapb.ListNetworkInterfacesRequest) (*infrapb.ListNetworkInterfacesResponse, error) {
+	var errorMessage string
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	networkInterfaces, err := cloudProvider.ListNetworkInterfaces(ctx, in)
+	if err != nil {
+		errorMessage = err.Error()
+	}
+	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.NetworkInterfaceType))
+	if e != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.NetworkInterfaceType, cloudProvider.GetName())
+	}
+	return &infrapb.ListNetworkInterfacesResponse{
+		LastSyncTime:      syncTime.Time,
+		NetworkInterfaces: typesNetworkInterfacesToGrpc(networkInterfaces),
+		Err: &infrapb.Error{
+			Code:         100,
+			ErrorMessage: errorMessage,
+			Serverity:    "Severe",
+		},
+	}, err
+}
+
+// ... rest of the file ...
+
 /* End List functions */
 
 func (s *Server) GetVPCIDForCIDR(ctx context.Context, in *infrapb.GetVPCIDForCIDRRequest) (*infrapb.GetVPCIDForCIDRResponse, error) {

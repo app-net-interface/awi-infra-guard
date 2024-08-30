@@ -1808,8 +1808,10 @@ export class NetworkInterface extends jspb.Message {
   getPublicIp(): string;
   setPublicIp(value: string): NetworkInterface;
 
-  getPrivateIp(): string;
-  setPrivateIp(value: string): NetworkInterface;
+  getPrivateIpsList(): Array<string>;
+  setPrivateIpsList(value: Array<string>): NetworkInterface;
+  clearPrivateIpsList(): NetworkInterface;
+  addPrivateIps(value: string, index?: number): NetworkInterface;
 
   getSecondaryPrivateIpsList(): Array<string>;
   setSecondaryPrivateIpsList(value: Array<string>): NetworkInterface;
@@ -1897,7 +1899,7 @@ export namespace NetworkInterface {
     instanceId: string,
     macAddress: string,
     publicIp: string,
-    privateIp: string,
+    privateIpsList: Array<string>,
     secondaryPrivateIpsList: Array<string>,
     status: string,
     attachment?: NetworkInterface.Attachment.AsObject,

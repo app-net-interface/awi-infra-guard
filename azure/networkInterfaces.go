@@ -15,7 +15,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package gcp
+package azure
 
 import (
 	"context"
@@ -24,8 +24,8 @@ import (
 	"github.com/app-net-interface/awi-infra-guard/types"
 )
 
-func (c *Client) ListLBs(ctx context.Context, input *infrapb.ListLBsRequest) ([]types.LB, error) {
-	// TODO: Implement GCP-specific logic to list load balancers
+func (c *Client) ListNetworkInterfaces(ctx context.Context, input *infrapb.ListNetworkInterfacesRequest) ([]types.NetworkInterface, error) {
+	// TODO: Implement Azure-specific logic to list network interfaces
 	// This is a placeholder implementation
-	return []types.LB{}, nil
+	return []types.NetworkInterface{}, nil
 }

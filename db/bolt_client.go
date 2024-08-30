@@ -388,3 +388,20 @@ func (client *boltClient) ListLBs() ([]*types.LB, error) {
 func (client *boltClient) DeleteLB(id string) error {
 	return delete_(client, id, lbTable)
 }
+
+// NetworkInterface
+func (client *boltClient) PutNetworkInterface(networkInterface *types.NetworkInterface) error {
+	return update(client, networkInterface, networkInterface.DbId(), networkInterfaceTable)
+}
+
+func (client *boltClient) GetNetworkInterface(id string) (*types.NetworkInterface, error) {
+	return get[types.NetworkInterface](client, id, networkInterfaceTable)
+}
+
+func (client *boltClient) ListNetworkInterfaces() ([]*types.NetworkInterface, error) {
+	return list[types.NetworkInterface](client, networkInterfaceTable)
+}
+
+func (client *boltClient) DeleteNetworkInterface(id string) error {
+	return delete_(client, id, networkInterfaceTable)
+}

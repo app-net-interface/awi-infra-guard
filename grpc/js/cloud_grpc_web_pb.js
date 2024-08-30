@@ -998,6 +998,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listLBs =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListNetworkInterfacesRequest,
+ *   !proto.infra.ListNetworkInterfacesResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListNetworkInterfaces = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListNetworkInterfaces',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListNetworkInterfacesRequest,
+  proto.infra.ListNetworkInterfacesResponse,
+  /**
+   * @param {!proto.infra.ListNetworkInterfacesRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListNetworkInterfacesResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListNetworkInterfacesRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListNetworkInterfacesResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListNetworkInterfacesResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listNetworkInterfaces =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListNetworkInterfaces',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListNetworkInterfaces,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListNetworkInterfacesRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListNetworkInterfacesResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listNetworkInterfaces =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListNetworkInterfaces',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListNetworkInterfaces);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.GetVPCIDForCIDRRequest,
  *   !proto.infra.GetVPCIDForCIDRResponse>}
  */

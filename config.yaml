@@ -49,10 +49,8 @@ syncConfig:
   dbFileName: "infra.db"
   resources: 
     cloud:
-       - region
+      - region
       # - vpc
-       - lb
-
       # - instance
       # - subnet
       # - securitygroup
@@ -64,8 +62,9 @@ syncConfig:
       # - vpnConnection
       # - publicIP
       # - acl
-      # - loadBalancer
       # - apiGateway
+      - lb
+      - networkInterface
     kubernetes:
       - clusters
       - nodes

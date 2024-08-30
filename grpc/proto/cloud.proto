@@ -52,6 +52,9 @@ service CloudProviderService {
     rpc ListVPCEndpoints (ListVPCEndpointsRequest) returns (ListVPCEndpointsResponse) {}
     rpc ListPublicIPs (ListPublicIPsRequest) returns (ListPublicIPsResponse) {}
     rpc ListLBs (ListLBsRequest) returns (ListLBsResponse) {}
+    rpc ListNetworkInterfaces (ListNetworkInterfacesRequest) returns (ListNetworkInterfacesResponse) {}
+
+
 
 
     
@@ -294,6 +297,21 @@ message ListSubnetsResponse {
     string last_sync_time = 2;
     Error err = 3;
 }
+
+message ListNetworkInterfacesRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    string vpc_id = 4;
+    map<string, string> labels = 5;
+    optional Credentials creds = 6;
+}
+
+message ListNetworkInterfacesResponse {
+    repeated NetworkInterface network_interfaces = 1;
+    string last_sync_time = 2;
+    Error err = 3;
+}   
 
 // GetVPCIDForCIDR
 message GetVPCIDForCIDRRequest {

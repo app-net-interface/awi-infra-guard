@@ -51,6 +51,7 @@ const (
 	CloudProviderService_ListVPCEndpoints_FullMethodName      = "/infra.CloudProviderService/ListVPCEndpoints"
 	CloudProviderService_ListPublicIPs_FullMethodName         = "/infra.CloudProviderService/ListPublicIPs"
 	CloudProviderService_ListLBs_FullMethodName               = "/infra.CloudProviderService/ListLBs"
+	CloudProviderService_ListNetworkInterfaces_FullMethodName = "/infra.CloudProviderService/ListNetworkInterfaces"
 	CloudProviderService_GetVPCIDForCIDR_FullMethodName       = "/infra.CloudProviderService/GetVPCIDForCIDR"
 	CloudProviderService_GetCIDRsForLabels_FullMethodName     = "/infra.CloudProviderService/GetCIDRsForLabels"
 	CloudProviderService_GetIPsForLabels_FullMethodName       = "/infra.CloudProviderService/GetIPsForLabels"
@@ -82,6 +83,7 @@ type CloudProviderServiceClient interface {
 	ListVPCEndpoints(ctx context.Context, in *ListVPCEndpointsRequest, opts ...grpc.CallOption) (*ListVPCEndpointsResponse, error)
 	ListPublicIPs(ctx context.Context, in *ListPublicIPsRequest, opts ...grpc.CallOption) (*ListPublicIPsResponse, error)
 	ListLBs(ctx context.Context, in *ListLBsRequest, opts ...grpc.CallOption) (*ListLBsResponse, error)
+	ListNetworkInterfaces(ctx context.Context, in *ListNetworkInterfacesRequest, opts ...grpc.CallOption) (*ListNetworkInterfacesResponse, error)
 	// Add New List Cloud Resource RPCs above this
 	GetVPCIDForCIDR(ctx context.Context, in *GetVPCIDForCIDRRequest, opts ...grpc.CallOption) (*GetVPCIDForCIDRResponse, error)
 	GetCIDRsForLabels(ctx context.Context, in *GetCIDRsForLabelsRequest, opts ...grpc.CallOption) (*GetCIDRsForLabelsResponse, error)
@@ -251,6 +253,16 @@ func (c *cloudProviderServiceClient) ListLBs(ctx context.Context, in *ListLBsReq
 	return out, nil
 }
 
+func (c *cloudProviderServiceClient) ListNetworkInterfaces(ctx context.Context, in *ListNetworkInterfacesRequest, opts ...grpc.CallOption) (*ListNetworkInterfacesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListNetworkInterfacesResponse)
+	err := c.cc.Invoke(ctx, CloudProviderService_ListNetworkInterfaces_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cloudProviderServiceClient) GetVPCIDForCIDR(ctx context.Context, in *GetVPCIDForCIDRRequest, opts ...grpc.CallOption) (*GetVPCIDForCIDRResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetVPCIDForCIDRResponse)
@@ -352,6 +364,7 @@ type CloudProviderServiceServer interface {
 	ListVPCEndpoints(context.Context, *ListVPCEndpointsRequest) (*ListVPCEndpointsResponse, error)
 	ListPublicIPs(context.Context, *ListPublicIPsRequest) (*ListPublicIPsResponse, error)
 	ListLBs(context.Context, *ListLBsRequest) (*ListLBsResponse, error)
+	ListNetworkInterfaces(context.Context, *ListNetworkInterfacesRequest) (*ListNetworkInterfacesResponse, error)
 	// Add New List Cloud Resource RPCs above this
 	GetVPCIDForCIDR(context.Context, *GetVPCIDForCIDRRequest) (*GetVPCIDForCIDRResponse, error)
 	GetCIDRsForLabels(context.Context, *GetCIDRsForLabelsRequest) (*GetCIDRsForLabelsResponse, error)
@@ -412,6 +425,9 @@ func (UnimplementedCloudProviderServiceServer) ListPublicIPs(context.Context, *L
 }
 func (UnimplementedCloudProviderServiceServer) ListLBs(context.Context, *ListLBsRequest) (*ListLBsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListLBs not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) ListNetworkInterfaces(context.Context, *ListNetworkInterfacesRequest) (*ListNetworkInterfacesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNetworkInterfaces not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) GetVPCIDForCIDR(context.Context, *GetVPCIDForCIDRRequest) (*GetVPCIDForCIDRResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVPCIDForCIDR not implemented")
@@ -720,6 +736,24 @@ func _CloudProviderService_ListLBs_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudProviderService_ListNetworkInterfaces_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNetworkInterfacesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).ListNetworkInterfaces(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudProviderService_ListNetworkInterfaces_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).ListNetworkInterfaces(ctx, req.(*ListNetworkInterfacesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CloudProviderService_GetVPCIDForCIDR_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetVPCIDForCIDRRequest)
 	if err := dec(in); err != nil {
@@ -930,6 +964,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListLBs",
 			Handler:    _CloudProviderService_ListLBs_Handler,
+		},
+		{
+			MethodName: "ListNetworkInterfaces",
+			Handler:    _CloudProviderService_ListNetworkInterfaces_Handler,
 		},
 		{
 			MethodName: "GetVPCIDForCIDR",

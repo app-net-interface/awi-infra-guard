@@ -1,7 +1,6 @@
 
 This document serves as a comprehensive guide for adding support for the listing a new cloud resource using awi-infra-guard software. It outlines the required modifications across various components of the application. This example shows how a VPCEndpoint was added, but can be used an example to add any other resource.
 
-
 ## Prerequisites
 
 Familiarity with Go, gRPC, and Protocol Buffers.
@@ -13,7 +12,7 @@ Set up with the complete development environment of the awi-infra-guard project.
 
 Update proto/cloud.proto and proto/types.proto to include definitions and service methods for VPCEndpoints.
 
-```
+``` grpc
 // Update to proto/cloud.proto
 rpc ListVPCEndpoints (ListVPCEndpointsRequest) returns (ListVPCEndpointsResponse) {}
 
@@ -36,13 +35,14 @@ message VPCEndpoint {
     string last_sync_time = 15;
 }
 ```
+
 Run `make generate` in the repository root directory to generate language-specific generated protobuf files.
 
 **2. Server Implementation**
 
 Implement the gRPC server methods in server/server.go and update server/translate.go to handle data translation.
 
-```
+``` go
 // server/server.go
 func (s *Server) ListVPCEndpoints(ctx context.Context, in *infrapb.ListVPCEndpointsRequest) (*infrapb.ListVPCEndpointsResponse, error) {
     // Add your implementation here
@@ -58,7 +58,7 @@ func typesVPCEndpointsToGrpc(in []types.VPCEndpoint) []*infrapb.VPCEndpoint {
 
 Define synchronization logic for VPCEndpoints in sync/sync.go.
 
-```
+``` go
 
 // sync/sync.go
 func (s *Syncer) syncVPCEndpoints() {
@@ -66,10 +66,10 @@ func (s *Syncer) syncVPCEndpoints() {
 }
 
 func (s *Syncer) syncVPCEndpoints() {
-	genericCloudSync[*types.VPCEndpoint](s, types.VPCEndpointType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPCEndpoint, error) {
+ genericCloudSync[*types.VPCEndpoint](s, types.VPCEndpointType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPCEndpoint, error) {
 
-		return cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{AccountId: accountID})
-	}, s.logger, s.dbClient.ListVPCEndpoints, s.dbClient.PutVPCEndpoint, s.dbClient.DeleteVPCEndpoint)
+  return cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{AccountId: accountID})
+ }, s.logger, s.dbClient.ListVPCEndpoints, s.dbClient.PutVPCEndpoint, s.dbClient.DeleteVPCEndpoint)
 }
 ```
 
@@ -77,21 +77,22 @@ func (s *Syncer) syncVPCEndpoints() {
 
 Add or update VPCEndpoint struct definitions in type/types.go.
 
-```
+``` go
 // type/types.go
 type VPCEndpoint struct {
+
 }
 
 func (v *VPCEndpoint) DbId() string {
-	return CloudID(v.Provider, v.ID)
+ return CloudID(v.Provider, v.ID)
 }
 
 func (v *VPCEndpoint) SetSyncTime(time string) {
-	v.LastSyncTime = time
+ v.LastSyncTime = time
 }
 
 func (v *VPCEndpoint) GetProvider() string {
-	return v.Provider
+ return v.Provider
 }
 
 ```
@@ -100,7 +101,7 @@ func (v *VPCEndpoint) GetProvider() string {
 
 Ensure the CloudProvider interface in provider/provider.go supports the ListVPCEndpoints method.
 
-```
+``` go
 // provider/provider.go
 ListVPCEndpoints(ctx context.Context, input *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error)
 ```
@@ -109,7 +110,7 @@ ListVPCEndpoints(ctx context.Context, input *infrapb.ListVPCEndpointsRequest) ([
 
 Implement methods for VPCEndpoints in db/db.go and db/db_strategy.go.
 
-```
+``` go
 // db/db.go
 interface Client {
     ListVPCEndpoints() ([]*types.VPCEndpoint, error)
@@ -123,23 +124,71 @@ func (p *providerWithDB) ListVPCEndpoints(ctx context.Context, params *infrapb.L
     // Implement interaction logic here
 }
 
+// db/db.go
+const vpcEndpointTable = "vpcEndpoints"
+// Add vpcEndpointTable to the tableNames list in db.go
+var tableNames = []string{
+    vpcTable,
+    regionTable,
+    instanceTable,
+    subnetTable,
+    clusterTable,
+    podTable,
+    kubernetesServiceTable,
+    kubernetesNodeTable, 
+    vpcEndpointTable
+}   
 ```
 
 **7. BoltDB Client Implementation**
 
 Add methods to manage VPCEndpoints in BoltDB within boltdb/bolt_client.go.
 
-```
+``` go
 // boltdb/bolt_client.go
 func (client *boltClient) PutVPCEndpoint(vpce *types.VPCEndpoint) error {
-    // Implement put logic here
+    return update(client, vpce, vpce.DbId(), vpcEndpointTable)
 }
+
+func (client *boltClient) GetVPCEndpoint(id string) (*types.VPCEndpoint, error) {
+    return get[types.VPCEndpoint](client, id, vpcEndpointTable)
+}
+
+func (client *boltClient) ListVPCEndpoints() ([]*types.VPCEndpoint, error) {
+    return list[types.VPCEndpoint](client, vpcEndpointTable)
+}
+
+func (client *boltClient) DeleteVPCEndpoint(id string) error {
+    return delete_(client, id, vpcEndpointTable)
+}
+
 ```
 
 **8. Cloud Provider Specific Logic**
 
 Implement cloud-specific logic to list VPCEndpoints in aws/listVPCEndpoint.go, azure.go, gcp.go.
 
-```
+``` go
 func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error) { }
+```
+
+**9. Syncer Implementation**
+
+Implement the syncer logic for VPCEndpoints in sync/sync.go.
+
+``` go
+func (s *Syncer) syncVPCEndpoints(ctx context.Context) {
+    // Implement sync logic here
+}
+```
+
+**10. Configuration**
+
+Add the new resource type to the configuration file. This is used to determine which resources to sync and store in the local boltdb database.
+
+``` yaml
+# config.yaml
+resources:
+  - type: vpcEndpoint
+    enabled: true
 ```

@@ -1091,6 +1091,81 @@ export namespace ListSubnetsResponse {
   }
 }
 
+export class ListNetworkInterfacesRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListNetworkInterfacesRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListNetworkInterfacesRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListNetworkInterfacesRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListNetworkInterfacesRequest;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListNetworkInterfacesRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListNetworkInterfacesRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListNetworkInterfacesRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListNetworkInterfacesRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListNetworkInterfacesRequest): ListNetworkInterfacesRequest.AsObject;
+  static serializeBinaryToWriter(message: ListNetworkInterfacesRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListNetworkInterfacesRequest;
+  static deserializeBinaryFromReader(message: ListNetworkInterfacesRequest, reader: jspb.BinaryReader): ListNetworkInterfacesRequest;
+}
+
+export namespace ListNetworkInterfacesRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
+  }
+}
+
+export class ListNetworkInterfacesResponse extends jspb.Message {
+  getNetworkInterfacesList(): Array<types_pb.NetworkInterface>;
+  setNetworkInterfacesList(value: Array<types_pb.NetworkInterface>): ListNetworkInterfacesResponse;
+  clearNetworkInterfacesList(): ListNetworkInterfacesResponse;
+  addNetworkInterfaces(value?: types_pb.NetworkInterface, index?: number): types_pb.NetworkInterface;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListNetworkInterfacesResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListNetworkInterfacesResponse;
+  hasErr(): boolean;
+  clearErr(): ListNetworkInterfacesResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListNetworkInterfacesResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListNetworkInterfacesResponse): ListNetworkInterfacesResponse.AsObject;
+  static serializeBinaryToWriter(message: ListNetworkInterfacesResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListNetworkInterfacesResponse;
+  static deserializeBinaryFromReader(message: ListNetworkInterfacesResponse, reader: jspb.BinaryReader): ListNetworkInterfacesResponse;
+}
+
+export namespace ListNetworkInterfacesResponse {
+  export type AsObject = {
+    networkInterfacesList: Array<types_pb.NetworkInterface.AsObject>,
+    lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
 export class GetVPCIDForCIDRRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetVPCIDForCIDRRequest;

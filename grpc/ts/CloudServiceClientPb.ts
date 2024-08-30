@@ -684,6 +684,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListLBs);
   }
 
+  methodDescriptorListNetworkInterfaces = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListNetworkInterfaces',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListNetworkInterfacesRequest,
+    cloud_pb.ListNetworkInterfacesResponse,
+    (request: cloud_pb.ListNetworkInterfacesRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListNetworkInterfacesResponse.deserializeBinary
+  );
+
+  listNetworkInterfaces(
+    request: cloud_pb.ListNetworkInterfacesRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListNetworkInterfacesResponse>;
+
+  listNetworkInterfaces(
+    request: cloud_pb.ListNetworkInterfacesRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListNetworkInterfacesResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListNetworkInterfacesResponse>;
+
+  listNetworkInterfaces(
+    request: cloud_pb.ListNetworkInterfacesRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListNetworkInterfacesResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListNetworkInterfaces',
+        request,
+        metadata || {},
+        this.methodDescriptorListNetworkInterfaces,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListNetworkInterfaces',
+    request,
+    metadata || {},
+    this.methodDescriptorListNetworkInterfaces);
+  }
+
   methodDescriptorGetVPCIDForCIDR = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/GetVPCIDForCIDR',
     grpcWeb.MethodType.UNARY,

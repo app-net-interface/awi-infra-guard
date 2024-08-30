@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
-	v1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -34,25 +33,26 @@ const (
 )
 
 const (
-	AccountType       = "Account"
-	RegionType        = "Region"
-	VPCType           = "VPC"
-	InstanceType      = "Instance"
-	SubnetType        = "Subnet"
-	ACLType           = "ACL"
-	SecurityGroupType = "SecurityGroup"
-	RouteTableType    = "RouteTable"
-	NATGatewayType    = "NATGateway"
-	RouterType        = "Router"
-	IGWType           = "IGW"
-	VPCEndpointType   = "VPCEndpoint"
-	PublicIPType      = "PublicIP"
-	ClusterType       = "Cluster"
-	PodsType          = "Pod"
-	K8sServiceType    = "K8sService"
-	K8sNodeType       = "K8sNode"
-	NamespaceType     = "Namespace"
-	LBType            = "LB"
+	AccountType          = "Account"
+	RegionType           = "Region"
+	VPCType              = "VPC"
+	InstanceType         = "Instance"
+	SubnetType           = "Subnet"
+	ACLType              = "ACL"
+	SecurityGroupType    = "SecurityGroup"
+	RouteTableType       = "RouteTable"
+	NATGatewayType       = "NATGateway"
+	RouterType           = "Router"
+	IGWType              = "IGW"
+	VPCEndpointType      = "VPCEndpoint"
+	PublicIPType         = "PublicIP"
+	ClusterType          = "Cluster"
+	PodsType             = "Pod"
+	K8sServiceType       = "K8sService"
+	K8sNodeType          = "K8sNode"
+	NamespaceType        = "Namespace"
+	LBType               = "LB"
+	NetworkInterfaceType = "NetworkInterface"
 )
 
 type Error struct {
@@ -60,6 +60,94 @@ type Error struct {
 	message  string
 	severity string
 }
+
+/* Start SyncTime types */
+
+type SyncTime struct {
+	Provider     string
+	ResourceType string
+	Time         string
+}
+
+func (v *SyncTime) DbId() string {
+	return SyncTimeKey(v.Provider, v.ResourceType)
+}
+
+func (v *SyncTime) SetSyncTime(time string) {
+
+}
+
+func (v *SyncTime) GetProvider() string {
+	return v.Provider
+}
+
+func CloudID(provider, id string) string {
+	return provider + ":" + id
+}
+
+func SyncTimeKey(provider string, typ string) string {
+	return fmt.Sprintf("%s/%s", provider, typ)
+}
+
+func SyncTimeKeyDecode(s string) (provider, type_ string, err error) {
+	split := strings.Split(s, "/")
+	if len(split) != 2 {
+		return "", "", fmt.Errorf("failed to determine provider and type from key %s", s)
+	}
+	return split[0], split[1], nil
+}
+
+/* End SyncTime types */
+
+/* Start Connection types */
+type DestinationDetails struct {
+	Provider string
+	VPC      string
+	Region   string
+}
+
+type SingleVPCConnectionParams struct {
+	ConnID      string
+	VpcID       string
+	Region      string
+	Destination DestinationDetails
+}
+
+type VPCConnectionParams struct {
+	ConnID  string
+	Vpc1ID  string
+	Vpc2ID  string
+	Region1 string
+	Region2 string
+}
+
+type VPCConnectionOutput struct {
+	Region1 string
+	Region2 string
+}
+
+type SingleVPCConnectionOutput struct {
+	Region string
+}
+
+type VPCDisconnectionParams struct {
+	ConnID  string
+	Vpc1ID  string
+	Vpc2ID  string
+	Region1 string
+	Region2 string
+}
+
+type SingleVPCDisconnectionParams struct {
+	ConnID string
+	VpcID  string
+	Region string
+}
+
+type VPCDisconnectionOutput struct {
+}
+
+/* End Connection types */
 
 type Region struct {
 	ID           string
@@ -496,230 +584,40 @@ func (lb *LB) GetProvider() string {
 	return lb.Provider
 }
 
-// End LB
+// End LBtype
+type NetworkInterface struct {
+	ID               string
+	Name             string
+	Provider         string
+	AccountID        string
+	VPCID            string
+	InstanceID       string
+	SubnetID         string
+	AvailabilityZone string
+	Region           string
+	Labels           map[string]string
+	PrivateIPs       []string
+	PublicIP         string
+	SecurityGroupIDs []string
+	MacAddress       string
+	PrivateDNSName   string
+	PublicDNSName    string
+	Description      string
+	Status           string
+	InterfaceType    string
+	LastSyncTime     string
+}
+
+func (n *NetworkInterface) DbId() string {
+	return CloudID(n.Provider, n.ID)
+}
+
+func (n *NetworkInterface) SetSyncTime(time string) {
+	n.LastSyncTime = time
+}
+
+func (n *NetworkInterface) GetProvider() string {
+	return n.Provider
+}
+
 /* End resource types */
-
-/* Start Kubernetes types */
-
-//Kubernetes
-
-type Cluster struct {
-	Name         string
-	FullName     string
-	Arn          string
-	VpcID        string
-	Region       string
-	Project      string
-	Labels       map[string]string
-	Provider     string
-	AccountID    string
-	Id           string
-	SelfLink     string
-	LastSyncTime string
-}
-
-func (v *Cluster) DbId() string {
-	return CloudID(v.Provider, v.Name)
-}
-
-func (v *Cluster) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *Cluster) GetProvider() string {
-	return v.Provider
-}
-
-type Pod struct {
-	Cluster      string
-	Namespace    string
-	Name         string
-	Ip           string
-	Labels       map[string]string
-	State        string
-	SelfLink     string
-	LastSyncTime string
-}
-
-func (v *Pod) DbId() string {
-	return KubernetesID(v.Cluster, v.Namespace, v.Name)
-}
-
-func (v *Pod) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *Pod) GetProvider() string {
-	return v.Cluster
-}
-
-type K8SService struct {
-	Cluster           string
-	Namespace         string
-	Name              string
-	Type              string
-	ProtocolsAndPorts ProtocolsAndPorts
-	Ingresses         []K8sServiceIngress
-	Labels            map[string]string
-	SelfLink          string
-
-	LastSyncTime string
-}
-
-func (v *K8SService) DbId() string {
-	return KubernetesID(v.Cluster, v.Namespace, v.Name)
-}
-
-func (v *K8SService) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *K8SService) GetProvider() string {
-	return v.Cluster
-}
-
-type K8sServiceIngress struct {
-	Hostname string
-	IP       string
-	Ports    []string
-}
-
-type K8sNode struct {
-	Cluster      string
-	Name         string
-	Namespace    string
-	Addresses    []v1.NodeAddress
-	Labels       map[string]string
-	SelfLink     string
-	LastSyncTime string
-}
-
-func (v *K8sNode) DbId() string {
-	return KubernetesID(v.Cluster, v.Namespace, v.Name)
-}
-
-func (v *K8sNode) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *K8sNode) GetProvider() string {
-	return v.Cluster
-}
-
-type Namespace struct {
-	Cluster      string
-	Name         string
-	Labels       map[string]string
-	SelfLink     string
-	LastSyncTime string
-}
-
-func (v *Namespace) DbId() string {
-	return KubernetesID(v.Cluster, v.Name, "")
-}
-
-func (v *Namespace) SetSyncTime(time string) {
-	v.LastSyncTime = time
-}
-
-func (v *Namespace) GetProvider() string {
-	return v.Cluster
-}
-
-func KubernetesID(cluster, namespace, name string) string {
-	n := cluster + "/" + namespace
-	if name != "" {
-		n += "/" + name
-	}
-	return n
-}
-
-/* End Kubernetes types */
-
-/* Start SyncTime types */
-
-type SyncTime struct {
-	Provider     string
-	ResourceType string
-	Time         string
-}
-
-func (v *SyncTime) DbId() string {
-	return SyncTimeKey(v.Provider, v.ResourceType)
-}
-
-func (v *SyncTime) SetSyncTime(time string) {
-
-}
-
-func (v *SyncTime) GetProvider() string {
-	return v.Provider
-}
-
-func CloudID(provider, id string) string {
-	return provider + ":" + id
-}
-
-func SyncTimeKey(provider string, typ string) string {
-	return fmt.Sprintf("%s/%s", provider, typ)
-}
-
-func SyncTimeKeyDecode(s string) (provider, type_ string, err error) {
-	split := strings.Split(s, "/")
-	if len(split) != 2 {
-		return "", "", fmt.Errorf("failed to determine provider and type from key %s", s)
-	}
-	return split[0], split[1], nil
-}
-
-/* End SyncTime types */
-
-/* Start Connection types */
-type DestinationDetails struct {
-	Provider string
-	VPC      string
-	Region   string
-}
-
-type SingleVPCConnectionParams struct {
-	ConnID      string
-	VpcID       string
-	Region      string
-	Destination DestinationDetails
-}
-
-type VPCConnectionParams struct {
-	ConnID  string
-	Vpc1ID  string
-	Vpc2ID  string
-	Region1 string
-	Region2 string
-}
-
-type VPCConnectionOutput struct {
-	Region1 string
-	Region2 string
-}
-
-type SingleVPCConnectionOutput struct {
-	Region string
-}
-
-type VPCDisconnectionParams struct {
-	ConnID  string
-	Vpc1ID  string
-	Vpc2ID  string
-	Region1 string
-	Region2 string
-}
-
-type SingleVPCDisconnectionParams struct {
-	ConnID string
-	VpcID  string
-	Region string
-}
-
-type VPCDisconnectionOutput struct {
-}
-
-/* End Connection types */
