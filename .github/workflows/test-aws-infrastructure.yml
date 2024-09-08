@@ -1,0 +1,25 @@
+name: Test using AWS infrastructure
+on:
+  workflow_dispatch:
+    inputs:
+      self_hosted_runner_name:
+        description: 'Self-hosted runner name'
+        required: true
+
+jobs:
+  test:
+    name: Infrastructure tests
+    runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          clean: false
+
+      - name: Check if gRPC server is ready
+        run: ./test_grpc_server.sh
+        working-directory: ./grpc/tests
+
+      - name: Run tests
+        run: ./run_tests.sh
+        working-directory: ./grpc/tests

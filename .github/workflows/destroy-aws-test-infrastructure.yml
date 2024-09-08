@@ -1,0 +1,32 @@
+name: Destroy AWS test infrastructure
+on: 
+  workflow_dispatch:
+    inputs:
+      self_hosted_runner_name:
+        description: 'Self-hosted runner name'
+        required: true
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets[format('{0}_AWS_ACCESS_KEY_ID', github.triggering_actor)] }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets[format('{0}_AWS_SECRET_ACCESS_KEY', github.triggering_actor)] }}
+
+jobs:
+  destroy:
+    name: Destroy resources
+    runs-on: [self-hosted, "${{ github.event.inputs.self_hosted_runner_name }}"]
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          clean: false
+          
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.2
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ./terraform/aws
+      - name: Destroy Terraform configuration
+        run: terraform destroy -auto-approve
+        working-directory: ./terraform/aws

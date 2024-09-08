@@ -9,3 +9,12 @@ bin/*
 connector/bin/*
 
 connector/demo/*.pem
+**/.terraform
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.backup
+.github/.secrets
+.github/artifacts
+.github/workflow_config.yaml
+grpc/tests/logs
+
