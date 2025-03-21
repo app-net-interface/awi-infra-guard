@@ -727,6 +727,92 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListNetworkInterfaces);
   }
 
+  methodDescriptorListKeyPairs = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListKeyPairs',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListKeyPairsRequest,
+    cloud_pb.ListKeyPairsResponse,
+    (request: cloud_pb.ListKeyPairsRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListKeyPairsResponse.deserializeBinary
+  );
+
+  listKeyPairs(
+    request: cloud_pb.ListKeyPairsRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListKeyPairsResponse>;
+
+  listKeyPairs(
+    request: cloud_pb.ListKeyPairsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListKeyPairsResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListKeyPairsResponse>;
+
+  listKeyPairs(
+    request: cloud_pb.ListKeyPairsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListKeyPairsResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListKeyPairs',
+        request,
+        metadata || {},
+        this.methodDescriptorListKeyPairs,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListKeyPairs',
+    request,
+    metadata || {},
+    this.methodDescriptorListKeyPairs);
+  }
+
+  methodDescriptorListVPNConcentrators = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListVPNConcentrators',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListVPNConcentratorsRequest,
+    cloud_pb.ListVPNConcentratorsResponse,
+    (request: cloud_pb.ListVPNConcentratorsRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListVPNConcentratorsResponse.deserializeBinary
+  );
+
+  listVPNConcentrators(
+    request: cloud_pb.ListVPNConcentratorsRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListVPNConcentratorsResponse>;
+
+  listVPNConcentrators(
+    request: cloud_pb.ListVPNConcentratorsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVPNConcentratorsResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListVPNConcentratorsResponse>;
+
+  listVPNConcentrators(
+    request: cloud_pb.ListVPNConcentratorsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVPNConcentratorsResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListVPNConcentrators',
+        request,
+        metadata || {},
+        this.methodDescriptorListVPNConcentrators,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListVPNConcentrators',
+    request,
+    metadata || {},
+    this.methodDescriptorListVPNConcentrators);
+  }
+
   methodDescriptorGetVPCIDForCIDR = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/GetVPCIDForCIDR',
     grpcWeb.MethodType.UNARY,

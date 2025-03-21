@@ -53,6 +53,8 @@ const (
 	NamespaceType        = "Namespace"
 	LBType               = "LB"
 	NetworkInterfaceType = "NetworkInterface"
+	KeyPairType          = "KeyPair"
+	VPNConcentratorType  = "VPNConcentrator"
 )
 
 type Error struct {
@@ -618,6 +620,61 @@ func (n *NetworkInterface) SetSyncTime(time string) {
 
 func (n *NetworkInterface) GetProvider() string {
 	return n.Provider
+}
+
+type KeyPair struct {
+	ID           string
+	Name         string
+	Region       string
+	Fingerprint  string
+	PublicKey    string
+	KeyPairType  string
+	CreatedAt    time.Time
+	Labels       map[string]string
+	Provider     string
+	AccountID    string
+	LastSyncTime string
+	InstanceIds  []string
+}
+
+func (k *KeyPair) DbId() string {
+	return CloudID(k.Provider, k.ID)
+}
+
+func (k *KeyPair) SetSyncTime(time string) {
+	k.LastSyncTime = time
+}
+
+func (k *KeyPair) GetProvider() string {
+	return k.Provider
+}
+
+type VPNConcentrator struct {
+	ID           string
+	Name         string
+	Provider     string
+	AccountID    string
+	VpcID        string
+	Region       string
+	State        string
+	Type         string
+	ASN          int64
+	Labels       map[string]string
+	CreatedAt    time.Time
+	LastSyncTime string
+	SelfLink     string
+}
+
+func (v *VPNConcentrator) DbId() string {
+	return CloudID(v.Provider, v.ID)
+}
+
+func (v *VPNConcentrator) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *VPNConcentrator) GetProvider() string {
+	return v.Provider
 }
 
 /* End resource types */

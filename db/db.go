@@ -41,6 +41,8 @@ const (
 	lbTable                = "lbs"
 	networkInterfaceTable  = "network_interfaces"
 	syncTimeTable = "sync_time"
+	keyPairTable = "keyPairs"
+	vpnConcentratorTable = "vpnConcentrators"
 )
 
 // Add bolt db table to this list; or it will cause a panic
@@ -66,6 +68,8 @@ var tableNames = []string{
 	lbTable,
 	networkInterfaceTable,
 	syncTimeTable,
+	keyPairTable,
+	vpnConcentratorTable,
 }
 
 type DbObject interface {
@@ -163,6 +167,12 @@ type Client interface {
 	GetNetworkInterface(string) (*types.NetworkInterface, error)
 	DeleteNetworkInterface(string) error
 
+	// Key Pair
+	ListKeyPairs() ([]*types.KeyPair, error)
+	PutKeyPair(*types.KeyPair) error
+	GetKeyPair(string) (*types.KeyPair, error)
+	DeleteKeyPair(string) error
+
 	/* End of cloud provider functions */
 
 	// Begining Kubernets
@@ -199,4 +209,10 @@ type Client interface {
 	GetSyncTime(id string) (*types.SyncTime, error)
 	ListSyncTimes() ([]*types.SyncTime, error)
 	DeleteSyncTime(id string) error
+
+	// VPNConcentrator
+	ListVPNConcentrators() ([]*types.VPNConcentrator, error)
+	PutVPNConcentrator(*types.VPNConcentrator) error
+	GetVPNConcentrator(string) (*types.VPNConcentrator, error)
+	DeleteVPNConcentrator(string) error
 }

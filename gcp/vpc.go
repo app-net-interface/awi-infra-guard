@@ -28,7 +28,9 @@ import (
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
 type network struct {
@@ -122,10 +124,45 @@ func (c *Client) GetVPCIDWithTag(_ context.Context, _ *infrapb.GetVPCIDWithTagRe
 
 func (c *Client) ConvertVPC(ctx context.Context, projectID string, network *computepb.Network) types.VPC {
 	var ipv6Range string
+	var ipv4CIDR string
 
 	if network.InternalIpv6Range != nil {
 		ipv6Range = *network.InternalIpv6Range
 	}
+	// Use GetNetworks (i.e. Get) to fetch the latest network details.
+	_, err := c.networksClient.Get(ctx, &computepb.GetNetworkRequest{
+		Project: projectID,
+		Network: network.GetName(),
+	})
+	if err != nil {
+		c.logger.Warnf("failed to get network details: %v", err)
+	} else {
+		networkName := network.GetName()
+		// Fetch attached subnetworks and their CIDRs.
+		subnets, err := c.getSubnetsForNetwork(ctx, projectID, networkName)
+		if err != nil {
+			fmt.Printf("Error retrieving subnets: %v", err)
+		}
+
+		if len(subnets) == 0 {
+			fmt.Printf("No subnets found for network %s\n", networkName)
+		}
+
+		fmt.Printf("Subnets attached to network %s:\n", networkName)
+		for _, subnet := range subnets {
+			// Extract the region from the subnet's Region URL (e.g., .../regions/us-central1).
+			regionParts := strings.Split(subnet.Region, "/")
+			region := regionParts[len(regionParts)-1]
+			fmt.Printf("Subnet: %s, Region: %s, CIDR: %s\n", subnet.Name, region, subnet.IpCidrRange)
+			// Append the IpCidrRange to ipv4CIDR.
+			if ipv4CIDR == "" {
+				ipv4CIDR = subnet.IpCidrRange
+			} else {
+				ipv4CIDR = ipv4CIDR + "," + subnet.IpCidrRange
+			}
+		}
+	}
+
 	consoleAccesLInk := fmt.Sprintf("https://console.cloud.google.com/networking/networks/details/%s?project=%s", network.GetName(), projectID)
 	return types.VPC{
 		ID:        strconv.FormatUint(network.GetId(), 10),
@@ -134,13 +171,47 @@ func (c *Client) ConvertVPC(ctx context.Context, projectID string, network *comp
 		AccountID: projectID,
 		Provider:  providerName,
 		SelfLink:  consoleAccesLInk,
-		IPv4CIDR:  network.GetIPv4Range(),
+		IPv4CIDR:  ipv4CIDR,
 		IPv6CIDR:  ipv6Range,
 		Project:   projectID,
 		//Labels:    c.GetTags(ctx, projectID, network.GetName()),
 	}
 }
 
+// getSubnetsForNetwork lists all subnetworks attached to the specified network.
+func (c *Client) getSubnetsForNetwork(ctx context.Context, projectID, networkName string) ([]*compute.Subnetwork, error) {
+	// Create a Compute Service client using Application Default Credentials.
+	computeService, err := compute.NewService(ctx, option.WithScopes(compute.ComputeScope))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create compute service: %v", err)
+	}
+
+	// Construct the full self-link for the network.
+	networkSelfLink := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectID, networkName)
+
+	// Use AggregatedList to retrieve all subnetworks in the project.
+	req := computeService.Subnetworks.AggregatedList(projectID)
+	var subnets []*compute.Subnetwork
+
+	// Iterate through pages of results.
+	if err := req.Pages(ctx, func(page *compute.SubnetworkAggregatedList) error {
+		for _, scopedList := range page.Items {
+			if scopedList.Subnetworks != nil {
+				for _, subnet := range scopedList.Subnetworks {
+					// Only include subnets that belong to the specified network.
+					if subnet.Network == networkSelfLink {
+						subnets = append(subnets, subnet)
+					}
+				}
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, fmt.Errorf("failed to list subnetworks: %v", err)
+	}
+
+	return subnets, nil
+}
 func (c *Client) GetTags(ctx context.Context, projectId string, networkName string) map[string]string {
 	tags := make(map[string]string)
 	client, err := resourcemanager.NewTagBindingsRESTClient(ctx)

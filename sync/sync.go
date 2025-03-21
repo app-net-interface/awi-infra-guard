@@ -172,6 +172,14 @@ func (s *Syncer) ParallelSync(ctx context.Context, done chan<- struct{}) {
 			s.syncNetworkInterfaces(ctx)
 		}()
 	}
+	if allResource || s.sc.HasCloudResource("vpnconcentrator") {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			ctx := context.Background()
+			s.syncVPNConcentrators(ctx)
+		}()
+	}
 
 	// Kubernetes
 
@@ -277,6 +285,12 @@ func (s *Syncer) Sync(ctx context.Context, done chan<- struct{}) {
 	}
 	if allResource || s.sc.HasCloudResource("networkinterface") {
 		s.syncNetworkInterfaces(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("keypair") {
+		s.syncKeyPairs(ctx)
+	}
+	if allResource || s.sc.HasCloudResource("vpnconcentrator") {
+		s.syncVPNConcentrators(ctx)
 	}
 
 	// Kubernetes
@@ -404,6 +418,18 @@ func (s *Syncer) syncNetworkInterfaces(ctx context.Context) {
 	genericCloudSync[*types.NetworkInterface](s, types.NetworkInterfaceType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.NetworkInterface, error) {
 		return cloudProvider.ListNetworkInterfaces(ctx, &infrapb.ListNetworkInterfacesRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListNetworkInterfaces, s.dbClient.PutNetworkInterface, s.dbClient.DeleteNetworkInterface)
+}
+
+func (s *Syncer) syncKeyPairs(ctx context.Context) {
+	genericCloudSync[*types.KeyPair](s, types.KeyPairType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.KeyPair, error) {
+		return cloudProvider.ListKeyPairs(ctx, &infrapb.ListKeyPairsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListKeyPairs, s.dbClient.PutKeyPair, s.dbClient.DeleteKeyPair)
+}
+
+func (s *Syncer) syncVPNConcentrators(ctx context.Context) {
+	genericCloudSync[*types.VPNConcentrator](s, types.VPNConcentratorType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPNConcentrator, error) {
+		return cloudProvider.ListVPNConcentrators(ctx, &infrapb.ListVPNConcentratorsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListVPNConcentrators, s.dbClient.PutVPNConcentrator, s.dbClient.DeleteVPNConcentrator)
 }
 
 /* End sync cloud resources */

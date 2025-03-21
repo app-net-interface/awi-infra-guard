@@ -375,16 +375,16 @@ func typesNetworkInterfacesToGrpc(in []types.NetworkInterface) []*infrapb.Networ
 	out := make([]*infrapb.NetworkInterface, len(in))
 	for i, ni := range in {
 		out[i] = &infrapb.NetworkInterface{
-			Id:             ni.ID,
-			Name:           ni.Name,
-			Provider:       ni.Provider,
-			AccountId:      ni.AccountID,
-			VpcId:          ni.VPCID,
-			InstanceId:     ni.InstanceID,
-			MacAddress:     ni.MacAddress,
-			DnsName:        ni.PublicDNSName,
+			Id:         ni.ID,
+			Name:       ni.Name,
+			Provider:   ni.Provider,
+			AccountId:  ni.AccountID,
+			VpcId:      ni.VPCID,
+			InstanceId: ni.InstanceID,
+			MacAddress: ni.MacAddress,
+			DnsName:    ni.PublicDNSName,
 			//Pr: ni.PrivateDNSName,
-			Status:         ni.Status,
+			Status: ni.Status,
 			//InterfaceType:      ni.InterfaceType,
 			LastSyncTime: ni.LastSyncTime,
 			SubnetId:     ni.SubnetID,
@@ -396,4 +396,46 @@ func typesNetworkInterfacesToGrpc(in []types.NetworkInterface) []*infrapb.Networ
 		}
 	}
 	return out
+}
+
+func typesKeyPairsToGrpc(in []types.KeyPair) []*infrapb.KeyPair {
+	out := make([]*infrapb.KeyPair, len(in))
+	for i, kp := range in {
+		out[i] = &infrapb.KeyPair{
+			Id:                    kp.ID,
+			Provider:              kp.Provider,
+			AccountId:             kp.AccountID,
+			Name:                  kp.Name,
+			PrivateKeyFingerprint: kp.Fingerprint,
+			PublicKey:             kp.PublicKey,
+			CreatedAt:             timestamppb.New(kp.CreatedAt),
+			Labels:                kp.Labels,
+			InstanceIds:           kp.InstanceIds,
+			Region:                kp.Region,
+			KeyPairType:           kp.KeyPairType,
+		}
+	}
+	return out
+}
+
+func typesVPNConcentratorsToGrpc(in []types.VPNConcentrator) []*infrapb.VPNConcentrator {
+    out := make([]*infrapb.VPNConcentrator, 0, len(in))
+    for _, vpnc := range in {
+        out = append(out, &infrapb.VPNConcentrator{
+            Id:           vpnc.ID,
+            Name:         vpnc.Name,
+            Provider:     vpnc.Provider,
+            AccountId:    vpnc.AccountID,
+            VpcId:        vpnc.VpcID,
+            Region:       vpnc.Region,
+            State:        vpnc.State,
+            Type:         vpnc.Type,
+            Asn:          vpnc.ASN,
+            Labels:       vpnc.Labels,
+            CreatedAt:    timestamppb.New(vpnc.CreatedAt),
+            LastSyncTime: vpnc.LastSyncTime,
+            SelfLink:     vpnc.SelfLink,
+        })
+    }
+    return out
 }

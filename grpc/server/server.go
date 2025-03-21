@@ -577,6 +577,56 @@ func (s *Server) ListNetworkInterfaces(ctx context.Context, in *infrapb.ListNetw
 	}, err
 }
 
+func (s *Server) ListKeyPairs(ctx context.Context, in *infrapb.ListKeyPairsRequest) (*infrapb.ListKeyPairsResponse, error) {
+	var errorMessage string
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	keyPairs, err := cloudProvider.ListKeyPairs(ctx, in)
+	if err != nil {
+		errorMessage = err.Error()
+	}
+	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.KeyPairType))
+	if e != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.KeyPairType, cloudProvider.GetName())
+	}
+	return &infrapb.ListKeyPairsResponse{
+		LastSyncTime: syncTime.Time,
+		KeyPairs:     typesKeyPairsToGrpc(keyPairs),
+		Err: &infrapb.Error{
+			Code:         100,
+			ErrorMessage: errorMessage,
+			Serverity:    "Severe",
+		},
+	}, err
+}
+
+func (s *Server) ListVPNConcentrators(ctx context.Context, in *infrapb.ListVPNConcentratorsRequest) (*infrapb.ListVPNConcentratorsResponse, error) {
+	var errorMessage string
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	vpncs, err := cloudProvider.ListVPNConcentrators(ctx, in)
+	if err != nil {
+		errorMessage = err.Error()
+	}
+	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.VPNConcentratorType))
+	if e != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.VPNConcentratorType, cloudProvider.GetName())
+	}
+	return &infrapb.ListVPNConcentratorsResponse{
+		LastSyncTime:     syncTime.Time,
+		VpnConcentrators: typesVPNConcentratorsToGrpc(vpncs),
+		Err: &infrapb.Error{
+			Code:         100,
+			ErrorMessage: errorMessage,
+			Serverity:    "Severe",
+		},
+	}, err
+}
+
 // ... rest of the file ...
 
 /* End List functions */
@@ -929,7 +979,7 @@ func (s *Server) unaryServerInterceptor(ctx context.Context, req interface{}, in
 
 	// Log response
 	s.logger.Infof("Request = %+v", req)
-	s.logger.Debugf("Unary Response - Method:%s, Response:%v, Error:%v\n", info.FullMethod, resp, err)
+	s.logger.Infof("Unary Response - Method:%s, Response:%v, Error:%v\n", info.FullMethod, resp, err)
 
 	return resp, err
 }

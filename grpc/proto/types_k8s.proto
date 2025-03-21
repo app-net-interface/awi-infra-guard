@@ -1,0 +1,91 @@
+// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
+// All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http:www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+package infra;
+
+option go_package = "./;infrapb";
+import "google/protobuf/timestamp.proto";
+
+
+  // Kubernetes
+  message Cluster {
+    string name = 1;
+    string full_name = 2;
+    string arn = 3;
+    string vpc_id = 4;
+    string region = 5;
+    string project = 6;
+    map<string, string> labels = 7;
+    string provider = 10;
+    string account_id = 11;
+    string id = 12;
+    string last_sync_time = 13;
+    string self_link = 14;
+    google.protobuf.Timestamp created_at = 17;
+    google.protobuf.Timestamp updated_at = 18;
+}
+
+message Node {
+    string cluster = 1;
+    string name = 2;
+    string namespace = 3;
+    repeated string addresses = 4;
+    string project = 5;
+
+    string last_sync_time = 6;
+    string self_link = 7;
+
+}
+
+message Namespace {
+    string cluster = 1;
+    string name = 2;
+    map<string, string> labels = 3;
+    string project = 4;
+    string last_sync_time = 5;
+    string self_link = 6;
+}
+
+message Pod {
+    string cluster = 1;
+    string namespace = 2;
+    string name = 3;
+    string ip = 4;
+    map<string, string> labels = 5;
+    string state = 6;
+    string project = 7;
+    string last_sync_time = 8;
+    string self_link = 9;
+}
+
+message K8sService {
+    string cluster = 1;
+    string namespace = 2;
+    string name = 3;
+    message Ingress {
+        string hostname = 1;
+        string IP = 2;
+        repeated string ports = 3;
+    }
+    repeated Ingress ingresses = 4;
+    map<string, string> labels = 8;
+    string type = 9;
+    string project = 10;
+    string last_sync_time = 11;
+    string self_link = 12;
+}

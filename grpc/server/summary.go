@@ -32,6 +32,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
 	if err != nil {
+		fmt.Printf("Error retreiving provider %s ", err.Error())
 		return nil, err
 	}
 	if in.AccountId == "" {
@@ -44,6 +45,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 			Region:    in.Region,
 		})
 		if err != nil {
+			fmt.Printf("Error retreiving vpcs %s ", err.Error())
 			return nil, err
 		}
 	}
@@ -54,6 +56,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving subnets %s ", err.Error())
 		return nil, err
 	}
 	instances, err := cloudProvider.ListInstances(ctx, &infrapb.ListInstancesRequest{
@@ -63,6 +66,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving instances %s ", err.Error())
 		return nil, err
 	}
 	vmStateSummary := make(map[string]int32)
@@ -80,6 +84,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving acls %s ", err.Error())
 		return nil, err
 	}
 	sgs, err := cloudProvider.ListSecurityGroups(ctx, &infrapb.ListSecurityGroupsRequest{
@@ -89,6 +94,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving security groups %s ", err.Error())
 		return nil, err
 	}
 	routeTables, err := cloudProvider.ListRouteTables(ctx, &infrapb.ListRouteTablesRequest{
@@ -98,6 +104,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving route tables %s ", err.Error())
 		return nil, err
 	}
 
@@ -108,6 +115,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving nat gateways %s ", err.Error())
 		return nil, err
 	}
 
@@ -118,6 +126,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving internet gateways %s ", err.Error())
 		return nil, err
 	}
 
@@ -128,6 +137,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving routers %s ", err.Error())
 		return nil, err
 	}
 
@@ -138,6 +148,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving vpc endpoints %s ", err.Error())
 		return nil, err
 	}
 	publicIPs, err := cloudProvider.ListPublicIPs(ctx, &infrapb.ListPublicIPsRequest{
@@ -147,6 +158,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		VpcId:     in.VpcId,
 	})
 	if err != nil {
+		fmt.Printf("Error retreiving public ips %s ", err.Error())
 		return nil, err
 	}
 
@@ -211,7 +223,7 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 		}
 	}
 
-	return &infrapb.SummaryResponse{
+	summary := &infrapb.SummaryResponse{
 		Count: &infrapb.Counters{
 			Accounts:       int32(len(accounts)),
 			Vpc:            int32(len(vpcs)),
@@ -237,5 +249,8 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 			PodStatus: podsStateSummary,
 			VmTypes:   vmTypeSummary,
 		},
-	}, nil
+	}
+	fmt.Printf(" ************* Summary: %v\n *************", summary)
+
+	return summary, nil
 }

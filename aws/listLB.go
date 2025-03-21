@@ -151,9 +151,8 @@ func (c *Client) getLBsForRegion(ctx context.Context, regionName string, filters
 	return filteredLBs, nil
 }
 
-func (c *Client) applyFilters(lbs []types.LB, filters []awsTypes.Filter) []types.LB {
-	// Implement filter logic here
-	// This is a placeholder and should be implemented based on your specific requirements
+func (c *Client) applyFilters(lbs []types.LB, _filters_ []awsTypes.Filter) []types.LB {
+	
 	return lbs
 }
 

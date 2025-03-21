@@ -25,8 +25,8 @@ port: 50052
 useLocalDB: true
 
 # Logging Level: Possible options are PANIC, FATAL, ERROR, INFO, WARN, DEBUG, TRACE
-#logLevel: DEBUG
-logLevel: INFO
+logLevel: DEBUG
+#logLevel: INFO
 #logLevel: ERROR
 
 providers:
@@ -44,27 +44,28 @@ kubernetesSupported: true
 syncConfig:
   # how often sync resources from the cloud, if useLocalDB is true
   enabled: true
-  syncWaitTime: "180s" 
+  syncWaitTime: "1500s" 
   # Name of BoltDB database file
   dbFileName: "infra.db"
   resources: 
     cloud:
       - region
-      # - vpc
-      # - instance
-      # - subnet
-      # - securitygroup
-      # - routeTable
-      # - router
-      # - natGateway
-      # - internetGateway
-      # - vpcEndpoint
-      # - vpnConnection
-      # - publicIP
-      # - acl
-      # - apiGateway
+      - vpc
+      - instance
+      - subnet
+      - securitygroup
+      - routeTable
+      - router
+      - natGateway
+      - internetGateway
+      - vpcEndpoint
+      - vpnConnection
+      - publicIP
+      - acl
+      - apiGateway
       - lb
       - networkInterface
+      - keypair
     kubernetes:
       - clusters
       - nodes

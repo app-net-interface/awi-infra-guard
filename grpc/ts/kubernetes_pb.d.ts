@@ -1,6 +1,6 @@
 import * as jspb from 'google-protobuf'
 
-import * as types_pb from './types_pb';
+import * as types_k8s_pb from './types_k8s_pb';
 
 
 export class ListNamespacesRequest extends jspb.Message {
@@ -26,10 +26,10 @@ export namespace ListNamespacesRequest {
 }
 
 export class ListNamespacesResponse extends jspb.Message {
-  getNamespacesList(): Array<types_pb.Namespace>;
-  setNamespacesList(value: Array<types_pb.Namespace>): ListNamespacesResponse;
+  getNamespacesList(): Array<types_k8s_pb.Namespace>;
+  setNamespacesList(value: Array<types_k8s_pb.Namespace>): ListNamespacesResponse;
   clearNamespacesList(): ListNamespacesResponse;
-  addNamespaces(value?: types_pb.Namespace, index?: number): types_pb.Namespace;
+  addNamespaces(value?: types_k8s_pb.Namespace, index?: number): types_k8s_pb.Namespace;
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListNamespacesResponse;
@@ -44,7 +44,7 @@ export class ListNamespacesResponse extends jspb.Message {
 
 export namespace ListNamespacesResponse {
   export type AsObject = {
-    namespacesList: Array<types_pb.Namespace.AsObject>,
+    namespacesList: Array<types_k8s_pb.Namespace.AsObject>,
     lastSyncTime: string,
   }
 }
@@ -72,10 +72,10 @@ export namespace ListNodesRequest {
 }
 
 export class ListNodesResponse extends jspb.Message {
-  getNodesList(): Array<types_pb.Node>;
-  setNodesList(value: Array<types_pb.Node>): ListNodesResponse;
+  getNodesList(): Array<types_k8s_pb.Node>;
+  setNodesList(value: Array<types_k8s_pb.Node>): ListNodesResponse;
   clearNodesList(): ListNodesResponse;
-  addNodes(value?: types_pb.Node, index?: number): types_pb.Node;
+  addNodes(value?: types_k8s_pb.Node, index?: number): types_k8s_pb.Node;
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListNodesResponse;
@@ -90,7 +90,7 @@ export class ListNodesResponse extends jspb.Message {
 
 export namespace ListNodesResponse {
   export type AsObject = {
-    nodesList: Array<types_pb.Node.AsObject>,
+    nodesList: Array<types_k8s_pb.Node.AsObject>,
     lastSyncTime: string,
   }
 }
@@ -118,10 +118,10 @@ export namespace ListPodsRequest {
 }
 
 export class ListPodsResponse extends jspb.Message {
-  getPodsList(): Array<types_pb.Pod>;
-  setPodsList(value: Array<types_pb.Pod>): ListPodsResponse;
+  getPodsList(): Array<types_k8s_pb.Pod>;
+  setPodsList(value: Array<types_k8s_pb.Pod>): ListPodsResponse;
   clearPodsList(): ListPodsResponse;
-  addPods(value?: types_pb.Pod, index?: number): types_pb.Pod;
+  addPods(value?: types_k8s_pb.Pod, index?: number): types_k8s_pb.Pod;
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListPodsResponse;
@@ -136,7 +136,7 @@ export class ListPodsResponse extends jspb.Message {
 
 export namespace ListPodsResponse {
   export type AsObject = {
-    podsList: Array<types_pb.Pod.AsObject>,
+    podsList: Array<types_k8s_pb.Pod.AsObject>,
     lastSyncTime: string,
   }
 }
@@ -164,10 +164,10 @@ export namespace ListServicesRequest {
 }
 
 export class ListServicesResponse extends jspb.Message {
-  getServicesList(): Array<types_pb.K8sService>;
-  setServicesList(value: Array<types_pb.K8sService>): ListServicesResponse;
+  getServicesList(): Array<types_k8s_pb.K8sService>;
+  setServicesList(value: Array<types_k8s_pb.K8sService>): ListServicesResponse;
   clearServicesList(): ListServicesResponse;
-  addServices(value?: types_pb.K8sService, index?: number): types_pb.K8sService;
+  addServices(value?: types_k8s_pb.K8sService, index?: number): types_k8s_pb.K8sService;
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListServicesResponse;
@@ -182,7 +182,7 @@ export class ListServicesResponse extends jspb.Message {
 
 export namespace ListServicesResponse {
   export type AsObject = {
-    servicesList: Array<types_pb.K8sService.AsObject>,
+    servicesList: Array<types_k8s_pb.K8sService.AsObject>,
     lastSyncTime: string,
   }
 }
@@ -202,10 +202,10 @@ export namespace ListClustersRequest {
 }
 
 export class ListClustersResponse extends jspb.Message {
-  getClustersList(): Array<types_pb.Cluster>;
-  setClustersList(value: Array<types_pb.Cluster>): ListClustersResponse;
+  getClustersList(): Array<types_k8s_pb.Cluster>;
+  setClustersList(value: Array<types_k8s_pb.Cluster>): ListClustersResponse;
   clearClustersList(): ListClustersResponse;
-  addClusters(value?: types_pb.Cluster, index?: number): types_pb.Cluster;
+  addClusters(value?: types_k8s_pb.Cluster, index?: number): types_k8s_pb.Cluster;
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListClustersResponse;
@@ -220,7 +220,7 @@ export class ListClustersResponse extends jspb.Message {
 
 export namespace ListClustersResponse {
   export type AsObject = {
-    clustersList: Array<types_pb.Cluster.AsObject>,
+    clustersList: Array<types_k8s_pb.Cluster.AsObject>,
     lastSyncTime: string,
   }
 }

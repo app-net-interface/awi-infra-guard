@@ -473,49 +473,62 @@ func (p *providerWithDB) ListLBs(ctx context.Context, params *infrapb.ListLBsReq
 	}
 	return providersLBs, nil
 }
+
 // ... existing imports and code ...
 
 func (p *providerWithDB) ListNetworkInterfaces(ctx context.Context, params *infrapb.ListNetworkInterfacesRequest) ([]types.NetworkInterface, error) {
-    dbNetworkInterfaces, err := p.dbClient.ListNetworkInterfaces()
-    if err != nil {
-        return nil, err
-    }
-    var providersNetworkInterfaces []types.NetworkInterface
-    for _, ni := range dbNetworkInterfaces {
-        if strings.ToLower(ni.Provider) != strings.ToLower(p.realProvider.GetName()) {
-            continue
-        }
-        if params.GetAccountId() != "" && params.GetAccountId() != ni.AccountID {
-            continue
-        }
-        if params.GetRegion() != "global" {
-            if params.GetRegion() != "" && params.GetRegion() != ni.Region {
-                continue
-            }
-        }
-        if params.GetVpcId() != "" && params.GetVpcId() != ni.VPCID {
-            continue
-        }
-       
+	dbNetworkInterfaces, err := p.dbClient.ListNetworkInterfaces()
+	if err != nil {
+		return nil, err
+	}
+	var providersNetworkInterfaces []types.NetworkInterface
+	for _, ni := range dbNetworkInterfaces {
+		if strings.ToLower(ni.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != ni.AccountID {
+			continue
+		}
+		if params.GetRegion() != "global" {
+			if params.GetRegion() != "" && params.GetRegion() != ni.Region {
+				continue
+			}
+		}
+		if params.GetVpcId() != "" && params.GetVpcId() != ni.VPCID {
+			continue
+		}
 
-        match := true
-        for k, v := range params.GetLabels() {
-            r, ok := ni.Labels[k]
-            if !ok || r != v {
-                match = false
-                break
-            }
-        }
+		providersNetworkInterfaces = append(providersNetworkInterfaces, *ni)
 
-        if match {
-            providersNetworkInterfaces = append(providersNetworkInterfaces, *ni)
-        }
-    }
-    return providersNetworkInterfaces, nil
+	}
+	return providersNetworkInterfaces, nil
+}
+func (p *providerWithDB) ListKeyPairs(ctx context.Context, params *infrapb.ListKeyPairsRequest) ([]types.KeyPair, error) {
+	dbKeyPairs, err := p.dbClient.ListKeyPairs()
+	if err != nil {
+		return nil, err
+	}
+	var providersKeyPairs []types.KeyPair
+	for _, kp := range dbKeyPairs {
+		if strings.ToLower(kp.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != kp.AccountID {
+			continue
+		}
+		if params.GetRegion() != "global" {
+			if params.GetRegion() != "" && params.GetRegion() != kp.Region {
+				continue
+			}
+		}
+
+		providersKeyPairs = append(providersKeyPairs, *kp)
+
+	}
+	return providersKeyPairs, nil
 }
 
 // ... rest of the file ...
-
 
 func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {
 	dbSubnet, err := p.dbClient.GetSubnet(types.CloudID(p.realProvider.GetName(), params.GetId()))
@@ -787,6 +800,7 @@ func (p *KubernetesProviderWithDB) ListNodes(ctx context.Context, clusterName st
 	}
 	return nodes, nil
 }
+
 func (p *KubernetesProviderWithDB) ListPodsCIDRs(ctx context.Context, clusterName string) ([]string, error) {
 	// TODO use local DB
 	return p.realProvider.ListPodsCIDRs(ctx, clusterName)
@@ -810,4 +824,26 @@ func (p *KubernetesProviderWithDB) GetSyncTime(id string) (types.SyncTime, error
 		return types.SyncTime{}, fmt.Errorf("nil sync time for id: %s", id)
 	}
 	return *s, nil
+}
+
+func (p *providerWithDB) ListVPNConcentrators(ctx context.Context, params *infrapb.ListVPNConcentratorsRequest) ([]types.VPNConcentrator, error) {
+    dbVPNConcentrators, err := p.dbClient.ListVPNConcentrators()
+    if err != nil {
+        return nil, err
+    }
+    var providerVPNConcentrators []types.VPNConcentrator
+    for _, vpnc := range dbVPNConcentrators {
+        if strings.ToLower(vpnc.Provider) != strings.ToLower(p.realProvider.GetName()) {
+            continue
+        }
+        if params.GetAccountId() != "" && params.GetAccountId() != vpnc.AccountID {
+            continue
+        }
+        if params.GetRegion() != "" && params.GetRegion() != vpnc.Region {
+            continue
+        }
+
+        providerVPNConcentrators = append(providerVPNConcentrators, *vpnc)
+    }
+    return providerVPNConcentrators, nil
 }

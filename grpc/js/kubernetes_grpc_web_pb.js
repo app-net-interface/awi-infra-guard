@@ -20,7 +20,7 @@ const grpc = {};
 grpc.web = require('grpc-web');
 
 
-var types_pb = require('./types_pb.js')
+var types_k8s_pb = require('./types_k8s_pb.js')
 const proto = {};
 proto.infra = require('./kubernetes_pb.js');
 

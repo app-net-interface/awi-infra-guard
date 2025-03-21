@@ -20,6 +20,7 @@ package infra;
 
 option go_package = "./;infrapb";
 import "google/protobuf/timestamp.proto";
+//import "types_k8s.proto";
 
 message Error {
     int32 code = 1;
@@ -331,77 +332,7 @@ message Router {
     string self_link = 16;
   }
 
-
-  // Kubernetes 
-
-  message Cluster {
-    string name = 1;
-    string full_name = 2;
-    string arn = 3;
-    string vpc_id = 4;
-    string region = 5;
-    string project = 6;
-    map<string, string> labels = 7;
-    string provider = 10;
-    string account_id = 11;
-    string id = 12;
-    string last_sync_time = 13;
-    string self_link = 14;
-    google.protobuf.Timestamp created_at = 17;
-    google.protobuf.Timestamp updated_at = 18;
-}
-
-message Node {
-    string cluster = 1;
-    string name = 2;
-    string namespace = 3;
-    repeated string addresses = 4;
-    string project = 5;
-
-    string last_sync_time = 6;
-    string self_link = 7;
-
-}
-
-message Namespace {
-    string cluster = 1;
-    string name = 2;
-    map<string, string> labels = 3;
-    string project = 4;
-    string last_sync_time = 5;
-    string self_link = 6;
-}
-
-message Pod {
-    string cluster = 1;
-    string namespace = 2;
-    string name = 3;
-    string ip = 4;
-    map<string, string> labels = 5;
-    string state = 6;
-    string project = 7;
-    string last_sync_time = 8;
-    string self_link = 9;
-}
-
-message K8sService {
-    string cluster = 1;
-    string namespace = 2;
-    string name = 3;
-    message Ingress {
-        string hostname = 1;
-        string IP = 2;
-        repeated string ports = 3;
-    }
-    repeated Ingress ingresses = 4;
-    map<string, string> labels = 8;
-    string type = 9;
-    string project = 10;
-    string last_sync_time = 11;
-    string self_link = 12;
-}
-
-// Specifies the type of load balancer (e.g., Application, Network, Classic, Global)
+  // Specifies the type of load balancer (e.g., Application, Network, Classic, Global)
 enum LoadBalancerType {
     ALB = 0;
     NLB = 1;
@@ -495,22 +426,39 @@ message NetworkInterface {
     string account_id = 23;
     string last_sync_time = 24;
     string self_link = 25;
+
     google.protobuf.Timestamp created_at = 26;
     google.protobuf.Timestamp updated_at = 27;
 }
- // Specifies the type of key pair (e.g., RSA, ED25519)
- enum KeyPairType {
-    RSA = 0;
-    ED25519 = 1;
-    OTHER = 2; // For future extensibility or unknown types
+
+message VPNConcentrator {
+    string id = 1;
+    string name = 2;
+    string provider = 3;
+    string account_id = 4;
+    string region = 5;
+
+    string state = 6;
+    string type = 7;
+    string vpc_id = 8;
+    int64 asn = 9;
+    string project = 10;
+    string last_sync_time = 11;
+    string self_link = 12;
+    map<string, string> labels = 13;
+
+    google.protobuf.Timestamp created_at = 14;
+    google.protobuf.Timestamp updated_at = 15;
 }
+ // Specifies the type of key pair (e.g., RSA, ED25519)
+
 
 message KeyPair {
     string id = 1;
     string name = 2;
     
    
-    KeyPairType key_pair_type = 3;
+    string key_pair_type = 3;
 
     string public_key = 4;
     string private_key_fingerprint = 5; // Only store fingerprint for security
@@ -529,3 +477,6 @@ message KeyPair {
     google.protobuf.Timestamp created_at = 14;
     google.protobuf.Timestamp updated_at = 15;
 }
+
+
+

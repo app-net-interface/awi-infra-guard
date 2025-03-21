@@ -405,3 +405,37 @@ func (client *boltClient) ListNetworkInterfaces() ([]*types.NetworkInterface, er
 func (client *boltClient) DeleteNetworkInterface(id string) error {
 	return delete_(client, id, networkInterfaceTable)
 }
+
+// KeyPair
+func (client *boltClient) PutKeyPair(kp *types.KeyPair) error {
+    return update(client, kp, kp.DbId(), keyPairTable)
+}
+
+func (client *boltClient) GetKeyPair(id string) (*types.KeyPair, error) {
+    return get[types.KeyPair](client, id, keyPairTable)
+}
+
+func (client *boltClient) ListKeyPairs() ([]*types.KeyPair, error) {
+    return list[types.KeyPair](client, keyPairTable)
+}
+
+func (client *boltClient) DeleteKeyPair(id string) error {
+    return delete_(client, id, keyPairTable)
+}
+
+// VPNConcentrator
+func (client *boltClient) PutVPNConcentrator(vpnc *types.VPNConcentrator) error {
+    return update(client, vpnc, vpnc.DbId(), vpnConcentratorTable)
+}
+
+func (client *boltClient) GetVPNConcentrator(id string) (*types.VPNConcentrator, error) {
+    return get[types.VPNConcentrator](client, id, vpnConcentratorTable)
+}
+
+func (client *boltClient) ListVPNConcentrators() ([]*types.VPNConcentrator, error) {
+    return list[types.VPNConcentrator](client, vpnConcentratorTable)
+}
+
+func (client *boltClient) DeleteVPNConcentrator(id string) error {
+    return delete_(client, id, vpnConcentratorTable)
+}

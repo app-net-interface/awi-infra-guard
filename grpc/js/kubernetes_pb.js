@@ -21,8 +21,8 @@ var global =
     (function () { return this; }).call(null) ||
     Function('return this')();
 
-var types_pb = require('./types_pb.js');
-goog.object.extend(proto, types_pb);
+var types_k8s_pb = require('./types_k8s_pb.js');
+goog.object.extend(proto, types_k8s_pb);
 goog.exportSymbol('proto.infra.ListClustersRequest', null, global);
 goog.exportSymbol('proto.infra.ListClustersResponse', null, global);
 goog.exportSymbol('proto.infra.ListNamespacesRequest', null, global);
@@ -535,7 +535,7 @@ proto.infra.ListNamespacesResponse.prototype.toObject = function(opt_includeInst
 proto.infra.ListNamespacesResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     namespacesList: jspb.Message.toObjectList(msg.getNamespacesList(),
-    types_pb.Namespace.toObject, includeInstance),
+    types_k8s_pb.Namespace.toObject, includeInstance),
     lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
@@ -574,8 +574,8 @@ proto.infra.ListNamespacesResponse.deserializeBinaryFromReader = function(msg, r
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new types_pb.Namespace;
-      reader.readMessage(value,types_pb.Namespace.deserializeBinaryFromReader);
+      var value = new types_k8s_pb.Namespace;
+      reader.readMessage(value,types_k8s_pb.Namespace.deserializeBinaryFromReader);
       msg.addNamespaces(value);
       break;
     case 2:
@@ -616,7 +616,7 @@ proto.infra.ListNamespacesResponse.serializeBinaryToWriter = function(message, w
     writer.writeRepeatedMessage(
       1,
       f,
-      types_pb.Namespace.serializeBinaryToWriter
+      types_k8s_pb.Namespace.serializeBinaryToWriter
     );
   }
   f = message.getLastSyncTime();
@@ -635,7 +635,7 @@ proto.infra.ListNamespacesResponse.serializeBinaryToWriter = function(message, w
  */
 proto.infra.ListNamespacesResponse.prototype.getNamespacesList = function() {
   return /** @type{!Array<!proto.infra.Namespace>} */ (
-    jspb.Message.getRepeatedWrapperField(this, types_pb.Namespace, 1));
+    jspb.Message.getRepeatedWrapperField(this, types_k8s_pb.Namespace, 1));
 };
 
 
@@ -889,7 +889,7 @@ proto.infra.ListNodesResponse.prototype.toObject = function(opt_includeInstance)
 proto.infra.ListNodesResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     nodesList: jspb.Message.toObjectList(msg.getNodesList(),
-    types_pb.Node.toObject, includeInstance),
+    types_k8s_pb.Node.toObject, includeInstance),
     lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
@@ -928,8 +928,8 @@ proto.infra.ListNodesResponse.deserializeBinaryFromReader = function(msg, reader
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new types_pb.Node;
-      reader.readMessage(value,types_pb.Node.deserializeBinaryFromReader);
+      var value = new types_k8s_pb.Node;
+      reader.readMessage(value,types_k8s_pb.Node.deserializeBinaryFromReader);
       msg.addNodes(value);
       break;
     case 2:
@@ -970,7 +970,7 @@ proto.infra.ListNodesResponse.serializeBinaryToWriter = function(message, writer
     writer.writeRepeatedMessage(
       1,
       f,
-      types_pb.Node.serializeBinaryToWriter
+      types_k8s_pb.Node.serializeBinaryToWriter
     );
   }
   f = message.getLastSyncTime();
@@ -989,7 +989,7 @@ proto.infra.ListNodesResponse.serializeBinaryToWriter = function(message, writer
  */
 proto.infra.ListNodesResponse.prototype.getNodesList = function() {
   return /** @type{!Array<!proto.infra.Node>} */ (
-    jspb.Message.getRepeatedWrapperField(this, types_pb.Node, 1));
+    jspb.Message.getRepeatedWrapperField(this, types_k8s_pb.Node, 1));
 };
 
 
@@ -1243,7 +1243,7 @@ proto.infra.ListPodsResponse.prototype.toObject = function(opt_includeInstance) 
 proto.infra.ListPodsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     podsList: jspb.Message.toObjectList(msg.getPodsList(),
-    types_pb.Pod.toObject, includeInstance),
+    types_k8s_pb.Pod.toObject, includeInstance),
     lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
@@ -1282,8 +1282,8 @@ proto.infra.ListPodsResponse.deserializeBinaryFromReader = function(msg, reader)
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new types_pb.Pod;
-      reader.readMessage(value,types_pb.Pod.deserializeBinaryFromReader);
+      var value = new types_k8s_pb.Pod;
+      reader.readMessage(value,types_k8s_pb.Pod.deserializeBinaryFromReader);
       msg.addPods(value);
       break;
     case 2:
@@ -1324,7 +1324,7 @@ proto.infra.ListPodsResponse.serializeBinaryToWriter = function(message, writer)
     writer.writeRepeatedMessage(
       1,
       f,
-      types_pb.Pod.serializeBinaryToWriter
+      types_k8s_pb.Pod.serializeBinaryToWriter
     );
   }
   f = message.getLastSyncTime();
@@ -1343,7 +1343,7 @@ proto.infra.ListPodsResponse.serializeBinaryToWriter = function(message, writer)
  */
 proto.infra.ListPodsResponse.prototype.getPodsList = function() {
   return /** @type{!Array<!proto.infra.Pod>} */ (
-    jspb.Message.getRepeatedWrapperField(this, types_pb.Pod, 1));
+    jspb.Message.getRepeatedWrapperField(this, types_k8s_pb.Pod, 1));
 };
 
 
@@ -1597,7 +1597,7 @@ proto.infra.ListServicesResponse.prototype.toObject = function(opt_includeInstan
 proto.infra.ListServicesResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     servicesList: jspb.Message.toObjectList(msg.getServicesList(),
-    types_pb.K8sService.toObject, includeInstance),
+    types_k8s_pb.K8sService.toObject, includeInstance),
     lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
@@ -1636,8 +1636,8 @@ proto.infra.ListServicesResponse.deserializeBinaryFromReader = function(msg, rea
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new types_pb.K8sService;
-      reader.readMessage(value,types_pb.K8sService.deserializeBinaryFromReader);
+      var value = new types_k8s_pb.K8sService;
+      reader.readMessage(value,types_k8s_pb.K8sService.deserializeBinaryFromReader);
       msg.addServices(value);
       break;
     case 2:
@@ -1678,7 +1678,7 @@ proto.infra.ListServicesResponse.serializeBinaryToWriter = function(message, wri
     writer.writeRepeatedMessage(
       1,
       f,
-      types_pb.K8sService.serializeBinaryToWriter
+      types_k8s_pb.K8sService.serializeBinaryToWriter
     );
   }
   f = message.getLastSyncTime();
@@ -1697,7 +1697,7 @@ proto.infra.ListServicesResponse.serializeBinaryToWriter = function(message, wri
  */
 proto.infra.ListServicesResponse.prototype.getServicesList = function() {
   return /** @type{!Array<!proto.infra.K8sService>} */ (
-    jspb.Message.getRepeatedWrapperField(this, types_pb.K8sService, 1));
+    jspb.Message.getRepeatedWrapperField(this, types_k8s_pb.K8sService, 1));
 };
 
 
@@ -1888,7 +1888,7 @@ proto.infra.ListClustersResponse.prototype.toObject = function(opt_includeInstan
 proto.infra.ListClustersResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
     clustersList: jspb.Message.toObjectList(msg.getClustersList(),
-    types_pb.Cluster.toObject, includeInstance),
+    types_k8s_pb.Cluster.toObject, includeInstance),
     lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
@@ -1927,8 +1927,8 @@ proto.infra.ListClustersResponse.deserializeBinaryFromReader = function(msg, rea
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new types_pb.Cluster;
-      reader.readMessage(value,types_pb.Cluster.deserializeBinaryFromReader);
+      var value = new types_k8s_pb.Cluster;
+      reader.readMessage(value,types_k8s_pb.Cluster.deserializeBinaryFromReader);
       msg.addClusters(value);
       break;
     case 2:
@@ -1969,7 +1969,7 @@ proto.infra.ListClustersResponse.serializeBinaryToWriter = function(message, wri
     writer.writeRepeatedMessage(
       1,
       f,
-      types_pb.Cluster.serializeBinaryToWriter
+      types_k8s_pb.Cluster.serializeBinaryToWriter
     );
   }
   f = message.getLastSyncTime();
@@ -1988,7 +1988,7 @@ proto.infra.ListClustersResponse.serializeBinaryToWriter = function(message, wri
  */
 proto.infra.ListClustersResponse.prototype.getClustersList = function() {
   return /** @type{!Array<!proto.infra.Cluster>} */ (
-    jspb.Message.getRepeatedWrapperField(this, types_pb.Cluster, 1));
+    jspb.Message.getRepeatedWrapperField(this, types_k8s_pb.Cluster, 1));
 };
 
 

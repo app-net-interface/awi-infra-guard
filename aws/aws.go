@@ -77,6 +77,8 @@ type regionResult struct {
 	rts       []types.RouteTable
 	lbs       []types.LB
 	nifs      []types.NetworkInterface
+	kps       []types.KeyPair
+	vpncs     []types.VPNConcentrator
 	err       error
 }
 

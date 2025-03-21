@@ -25,6 +25,8 @@ var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/time
 var google_protobuf_field_mask_pb = require('google-protobuf/google/protobuf/field_mask_pb.js')
 
 var types_pb = require('./types_pb.js')
+
+var types_k8s_pb = require('./types_k8s_pb.js')
 const proto = {};
 proto.infra = require('./cloud_pb.js');
 
@@ -1053,6 +1055,128 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listNetworkInterfaces =
       request,
       metadata || {},
       methodDescriptor_CloudProviderService_ListNetworkInterfaces);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListKeyPairsRequest,
+ *   !proto.infra.ListKeyPairsResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListKeyPairs = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListKeyPairs',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListKeyPairsRequest,
+  proto.infra.ListKeyPairsResponse,
+  /**
+   * @param {!proto.infra.ListKeyPairsRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListKeyPairsResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListKeyPairsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListKeyPairsResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListKeyPairsResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listKeyPairs =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListKeyPairs',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListKeyPairs,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListKeyPairsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListKeyPairsResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listKeyPairs =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListKeyPairs',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListKeyPairs);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListVPNConcentratorsRequest,
+ *   !proto.infra.ListVPNConcentratorsResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListVPNConcentrators = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListVPNConcentrators',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListVPNConcentratorsRequest,
+  proto.infra.ListVPNConcentratorsResponse,
+  /**
+   * @param {!proto.infra.ListVPNConcentratorsRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListVPNConcentratorsResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListVPNConcentratorsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListVPNConcentratorsResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListVPNConcentratorsResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listVPNConcentrators =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListVPNConcentrators',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListVPNConcentrators,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListVPNConcentratorsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListVPNConcentratorsResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listVPNConcentrators =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListVPNConcentrators',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListVPNConcentrators);
 };
 
 

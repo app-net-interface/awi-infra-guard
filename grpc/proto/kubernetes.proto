@@ -17,7 +17,7 @@
 
 syntax = "proto3";
 package infra;
-import "types.proto";
+import "types_k8s.proto";
 
 option go_package = "./;infrapb";
 

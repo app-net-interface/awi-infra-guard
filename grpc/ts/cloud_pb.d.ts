@@ -3,6 +3,7 @@ import * as jspb from 'google-protobuf'
 import * as google_protobuf_timestamp_pb from 'google-protobuf/google/protobuf/timestamp_pb';
 import * as google_protobuf_field_mask_pb from 'google-protobuf/google/protobuf/field_mask_pb';
 import * as types_pb from './types_pb';
+import * as types_k8s_pb from './types_k8s_pb';
 
 
 export class ListAccountsRequest extends jspb.Message {
@@ -1166,6 +1167,152 @@ export namespace ListNetworkInterfacesResponse {
   }
 }
 
+export class ListKeyPairsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListKeyPairsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListKeyPairsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListKeyPairsRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListKeyPairsRequest;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListKeyPairsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListKeyPairsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListKeyPairsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListKeyPairsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListKeyPairsRequest): ListKeyPairsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListKeyPairsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListKeyPairsRequest;
+  static deserializeBinaryFromReader(message: ListKeyPairsRequest, reader: jspb.BinaryReader): ListKeyPairsRequest;
+}
+
+export namespace ListKeyPairsRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    labelsMap: Array<[string, string]>,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
+  }
+}
+
+export class ListKeyPairsResponse extends jspb.Message {
+  getKeyPairsList(): Array<types_pb.KeyPair>;
+  setKeyPairsList(value: Array<types_pb.KeyPair>): ListKeyPairsResponse;
+  clearKeyPairsList(): ListKeyPairsResponse;
+  addKeyPairs(value?: types_pb.KeyPair, index?: number): types_pb.KeyPair;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListKeyPairsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListKeyPairsResponse;
+  hasErr(): boolean;
+  clearErr(): ListKeyPairsResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListKeyPairsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListKeyPairsResponse): ListKeyPairsResponse.AsObject;
+  static serializeBinaryToWriter(message: ListKeyPairsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListKeyPairsResponse;
+  static deserializeBinaryFromReader(message: ListKeyPairsResponse, reader: jspb.BinaryReader): ListKeyPairsResponse;
+}
+
+export namespace ListKeyPairsResponse {
+  export type AsObject = {
+    keyPairsList: Array<types_pb.KeyPair.AsObject>,
+    lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
+export class ListVPNConcentratorsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListVPNConcentratorsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListVPNConcentratorsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListVPNConcentratorsRequest;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListVPNConcentratorsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListVPNConcentratorsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListVPNConcentratorsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVPNConcentratorsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVPNConcentratorsRequest): ListVPNConcentratorsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListVPNConcentratorsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVPNConcentratorsRequest;
+  static deserializeBinaryFromReader(message: ListVPNConcentratorsRequest, reader: jspb.BinaryReader): ListVPNConcentratorsRequest;
+}
+
+export namespace ListVPNConcentratorsRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    labelsMap: Array<[string, string]>,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 5,
+  }
+}
+
+export class ListVPNConcentratorsResponse extends jspb.Message {
+  getVpnConcentratorsList(): Array<types_pb.VPNConcentrator>;
+  setVpnConcentratorsList(value: Array<types_pb.VPNConcentrator>): ListVPNConcentratorsResponse;
+  clearVpnConcentratorsList(): ListVPNConcentratorsResponse;
+  addVpnConcentrators(value?: types_pb.VPNConcentrator, index?: number): types_pb.VPNConcentrator;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListVPNConcentratorsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListVPNConcentratorsResponse;
+  hasErr(): boolean;
+  clearErr(): ListVPNConcentratorsResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVPNConcentratorsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVPNConcentratorsResponse): ListVPNConcentratorsResponse.AsObject;
+  static serializeBinaryToWriter(message: ListVPNConcentratorsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVPNConcentratorsResponse;
+  static deserializeBinaryFromReader(message: ListVPNConcentratorsResponse, reader: jspb.BinaryReader): ListVPNConcentratorsResponse;
+}
+
+export namespace ListVPNConcentratorsResponse {
+  export type AsObject = {
+    vpnConcentratorsList: Array<types_pb.VPNConcentrator.AsObject>,
+    lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
 export class GetVPCIDForCIDRRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetVPCIDForCIDRRequest;
@@ -1559,10 +1706,10 @@ export namespace ListCloudClustersRequest {
 }
 
 export class ListCloudClustersResponse extends jspb.Message {
-  getClustersList(): Array<types_pb.Cluster>;
-  setClustersList(value: Array<types_pb.Cluster>): ListCloudClustersResponse;
+  getClustersList(): Array<types_k8s_pb.Cluster>;
+  setClustersList(value: Array<types_k8s_pb.Cluster>): ListCloudClustersResponse;
   clearClustersList(): ListCloudClustersResponse;
-  addClusters(value?: types_pb.Cluster, index?: number): types_pb.Cluster;
+  addClusters(value?: types_k8s_pb.Cluster, index?: number): types_k8s_pb.Cluster;
 
   getLastSyncTime(): string;
   setLastSyncTime(value: string): ListCloudClustersResponse;
@@ -1582,7 +1729,7 @@ export class ListCloudClustersResponse extends jspb.Message {
 
 export namespace ListCloudClustersResponse {
   export type AsObject = {
-    clustersList: Array<types_pb.Cluster.AsObject>,
+    clustersList: Array<types_k8s_pb.Cluster.AsObject>,
     lastSyncTime: string,
     err?: types_pb.Error.AsObject,
   }
@@ -1916,10 +2063,10 @@ export class SearchResourcesResponse extends jspb.Message {
   clearPublicIpsList(): SearchResourcesResponse;
   addPublicIps(value?: types_pb.PublicIP, index?: number): types_pb.PublicIP;
 
-  getClustersList(): Array<types_pb.Cluster>;
-  setClustersList(value: Array<types_pb.Cluster>): SearchResourcesResponse;
+  getClustersList(): Array<types_k8s_pb.Cluster>;
+  setClustersList(value: Array<types_k8s_pb.Cluster>): SearchResourcesResponse;
   clearClustersList(): SearchResourcesResponse;
-  addClusters(value?: types_pb.Cluster, index?: number): types_pb.Cluster;
+  addClusters(value?: types_k8s_pb.Cluster, index?: number): types_k8s_pb.Cluster;
 
   getTotalResults(): number;
   setTotalResults(value: number): SearchResourcesResponse;
@@ -1951,7 +2098,7 @@ export namespace SearchResourcesResponse {
     igwsList: Array<types_pb.IGW.AsObject>,
     vpcEndpointsList: Array<types_pb.VPCEndpoint.AsObject>,
     publicIpsList: Array<types_pb.PublicIP.AsObject>,
-    clustersList: Array<types_pb.Cluster.AsObject>,
+    clustersList: Array<types_k8s_pb.Cluster.AsObject>,
     totalResults: number,
     totalPages: number,
     currentPage: number,

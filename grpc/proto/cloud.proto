@@ -21,6 +21,7 @@ package infra;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 import "types.proto";
+import "types_k8s.proto";
 
 option go_package = "./;infrapb";
 
@@ -53,6 +54,8 @@ service CloudProviderService {
     rpc ListPublicIPs (ListPublicIPsRequest) returns (ListPublicIPsResponse) {}
     rpc ListLBs (ListLBsRequest) returns (ListLBsResponse) {}
     rpc ListNetworkInterfaces (ListNetworkInterfacesRequest) returns (ListNetworkInterfacesResponse) {}
+    rpc ListKeyPairs (ListKeyPairsRequest) returns (ListKeyPairsResponse) {}
+    rpc ListVPNConcentrators (ListVPNConcentratorsRequest) returns (ListVPNConcentratorsResponse) {}
 
 
 
@@ -309,6 +312,35 @@ message ListNetworkInterfacesRequest {
 
 message ListNetworkInterfacesResponse {
     repeated NetworkInterface network_interfaces = 1;
+    string last_sync_time = 2;
+    Error err = 3;
+}
+
+message ListKeyPairsRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    string vpc_id = 4;
+    map<string, string> labels = 5;
+    optional Credentials creds = 6;
+}
+
+message ListKeyPairsResponse {
+    repeated KeyPair key_pairs = 1;
+    string last_sync_time = 2;
+    Error err = 3;
+}
+
+message ListVPNConcentratorsRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    map<string, string> labels = 4;
+    optional Credentials creds = 5;
+}
+
+message ListVPNConcentratorsResponse {
+    repeated VPNConcentrator vpn_concentrators = 1;
     string last_sync_time = 2;
     Error err = 3;
 }   
