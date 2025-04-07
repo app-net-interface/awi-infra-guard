@@ -8,6 +8,7 @@ Currently supported providers:
 
 - AWS
 - Google Cloud Platform (GCP).
+- Azure
 
 ## Kubernetes support
 
