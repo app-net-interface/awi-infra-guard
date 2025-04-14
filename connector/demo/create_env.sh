@@ -15,33 +15,61 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-if [ "$#" -ne 4 ]; then
+printhelp() {
     echo "This script combines all other scripts to create"
-    echo "quickly an environment with VMs on AWS and GCP."
-    echo "It uses us-west-1 on AWS and us-east4 on GCP"
+    echo "quickly an environment with VMs on AWS, GCP and"
+    echo "Azure."
+    echo "It uses us-west-1 on AWS and us-east4 on GCP and"
+    echo "westus2 on azure"
     echo ""
-    echo "Usage: $0 OWNER GCP_RES_NAME AWS_RES_NAME AZURE_RES_NAME"
+    echo "The script will build only these machines that"
+    echo "are specified with flags."
     echo ""
-    echo "OWNER - a name of the owner creating virtual"
+    echo "Usage: $0 FLAGS"
+    echo ""
+    echo "--owner - a name of the owner creating virtual"
     echo "  machines. Each Virtual-Machine needs to be"
     echo "  tagged with the name of a person creating"
     echo "  machines."
-    echo "GCP_RES_NAME - unique identifier that will be added"
+    echo "--gcp - unique identifier that will be added"
     echo "  to each GCP resource created by this script"
-    echo "AWS_RES_NAME - unique identifier that will be added"
+    echo "--aws - unique identifier that will be added"
     echo "  to each AWS resource created by this script"
-    echo "AZURE_RES_NAME - unique identifier that will be added"
+    echo "--azure - unique identifier that will be added"
     echo "  to each Azure resource created by this script"
     echo ""
     echo "Example:"
-    echo "$0 ml-training ml-data az-test"
+    echo "$0 --gcp ml-training --aws ml-data --owner iosetek"
+    exit 1
+}
+
+SCRIPT_VM_OWNER=""
+SCRIPT_GCP_RES_ID=""
+SCRIPT_AWS_RES_ID=""
+SCRIPT_AZURE_RES_ID=""
+
+# Parse arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --aws) SCRIPT_AWS_RES_ID="$2"; shift ;;
+        --gcp) SCRIPT_GCP_RES_ID="$2"; shift ;;
+        --azure) SCRIPT_AZURE_RES_ID="$2"; shift ;;
+        --owner) SCRIPT_VM_OWNER="$2"; shift ;;
+        *) echo "Unknown parameter: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+if [ "$SCRIPT_VM_OWNER" == "" ]; then
+    echo "Missing owner argument"
     exit 1
 fi
 
-SCRIPT_VM_OWNER=$1
-SCRIPT_GCP_RES_ID=$2
-SCRIPT_AWS_RES_ID=$3
-SCRIPT_AZURE_RES_ID=$4
+if [ "$SCRIPT_AWS_RES_ID" == "" && "$SCRIPT_GCP_RES_ID" == "" && "$SCRIPT_AZURE_RES_ID" == "" ]; then
+    echo "Nothing to do. Specify at least one provider."
+    exit 1
+fi
+
 SCRIPT_PATH="$(dirname $0)"
 
 SCRIPT_GCP_REGION="us-east4"
