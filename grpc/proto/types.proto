@@ -115,6 +115,31 @@ message VPC {
     google.protobuf.Timestamp updated_at = 18;
 }
 
+message VPCIndex {
+    string vpc_id = 1;
+    repeated string instance_ids = 2;
+    repeated string acl_ids = 3;
+    repeated string security_group_ids = 4;
+    repeated string nat_gateway_ids = 5;
+    repeated string vpc_endpoint_ids = 6;
+    repeated string lb_ids = 7;
+    repeated string router_ids = 8;
+    repeated string igw_ids = 9;
+    repeated string subnet_ids = 10;
+    repeated string route_table_ids = 11;
+    repeated string network_interface_ids = 12;
+    repeated string key_pair_ids = 13;
+    repeated string vpn_concentrator_ids = 14;
+    repeated string public_ip_ids = 15;
+    repeated string cluster_ids = 16;
+    string last_sync_time = 17;
+    string provider = 18;
+    string account_id = 19;
+    string region = 20;
+    google.protobuf.Timestamp created_at = 21;
+    google.protobuf.Timestamp updated_at = 22;
+}
+
 message Instance {
     string provider = 1;
     string account_id = 2;
@@ -220,14 +245,16 @@ message RouteTable {
         string status = 3;
     }
     repeated Route routes = 7;
-    map<string, string> labels = 8;
-    string project = 9;
+    repeated string subnet_ids = 8;
+    repeated string gateway_ids = 9;
 
-    string last_sync_time = 10;
-    string self_link = 11;
+    map<string, string> labels = 10;
+    string project = 11;
+
+    string last_sync_time = 12;
+    string self_link = 13;
     google.protobuf.Timestamp created_at = 17;
     google.protobuf.Timestamp updated_at = 18;
-
 
 }
 
@@ -476,6 +503,25 @@ message KeyPair {
     string self_link = 13;
     google.protobuf.Timestamp created_at = 14;
     google.protobuf.Timestamp updated_at = 15;
+}
+
+// Node represents a resource in the VPC connectivity graph.
+message VpcGraphNode {
+    string id = 1; // Unique ID of the resource (e.g., instance ID, subnet ID)
+    string resource_type = 2; // Type of the resource (e.g., "Instance", "Subnet", "RouteTable")
+    string name = 3; // Display name of the resource
+    map<string, string> properties = 4; // Key-value pairs for essential display properties (e.g., "privateIP", "cidrBlock", "state")
+    string provider = 9; // e.g., AWS, Azure, GCP
+    string account_id = 10;
+}
+
+// Edge represents a connection or relationship between two nodes in the graph.
+message VpcGraphEdge {
+    string source_node_id = 1; // ID of the source node
+    string target_node_id = 2; // ID of the target node
+    string relationship_type = 3; // Describes the relationship (e.g., "CONTAINS", "ROUTES_TO", "ASSOCIATED_WITH")
+    string provider = 9; // e.g., AWS, Azure, GCP
+    string account_id = 10;
 }
 
 

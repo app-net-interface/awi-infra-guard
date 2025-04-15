@@ -33,6 +33,7 @@ service CloudProviderService {
     rpc ListRegions (ListRegionsRequest ) returns (ListRegionsResponse) {}
 
     rpc ListVPC (ListVPCRequest) returns (ListVPCResponse) {}
+    rpc GetVPCIndex (GetVPCIndexRequest) returns (GetVPCIndexResponse) {}
 
     rpc ListInstances (ListInstancesRequest) returns (ListInstancesResponse) {}
 
@@ -57,10 +58,13 @@ service CloudProviderService {
     rpc ListKeyPairs (ListKeyPairsRequest) returns (ListKeyPairsResponse) {}
     rpc ListVPNConcentrators (ListVPNConcentratorsRequest) returns (ListVPNConcentratorsResponse) {}
 
+    // New RPC for getting VPC connectivity graph
+    rpc GetVpcConnectivityGraph (GetVpcConnectivityGraphRequest) returns (GetVpcConnectivityGraphResponse) {}
 
+    // New RPCs for getting nodes and edges separately
+    rpc ListVpcGraphNodes (ListVpcGraphNodesRequest) returns (ListVpcGraphNodesResponse) {}
+    rpc ListVpcGraphEdges (ListVpcGraphEdgesRequest) returns (ListVpcGraphEdgesResponse) {}
 
-
-    
     //Add New List Cloud Resource RPCs above this
     rpc GetVPCIDForCIDR (GetVPCIDForCIDRRequest) returns (GetVPCIDForCIDRResponse) {}
 
@@ -77,6 +81,23 @@ service CloudProviderService {
     rpc Summary(SummaryRequest) returns (SummaryResponse);
 
     rpc SearchResources (SearchResourcesRequest) returns (SearchResourcesResponse) {}
+}
+
+// VPCIndex definitions updated per request
+
+message GetVPCIndexRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    // vpc_id is mandatory
+    string vpc_id = 4;
+    // Additional optional filter fields can be added as needed.
+}
+
+message GetVPCIndexResponse {
+    VPCIndex vpc_index = 1;
+    string last_sync_time = 17;
+    Error err = 18;
 }
 
 message ListAccountsRequest {
@@ -525,4 +546,60 @@ message SearchResourcesResponse {
     int32 total_pages = 14; // Total number of pages
     int32 current_page = 15; // Current page number
     // Add other resource types as needed
+}
+
+// Request message for GetVpcConnectivityGraph
+message GetVpcConnectivityGraphRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    // vpc_id is mandatory to define the scope of the graph
+    string vpc_id = 4;
+    // Optional: Specify starting points or specific resource types to focus the graph
+    // repeated string start_resource_ids = 5;
+    // repeated string include_resource_types = 6;
+    optional Credentials creds = 7;
+}
+
+// Response message for GetVpcConnectivityGraph
+message GetVpcConnectivityGraphResponse {
+    repeated VpcGraphNode nodes = 1;
+    repeated VpcGraphEdge edges = 2;
+    Error err = 3;
+}
+
+// Request message for ListVpcGraphNodes
+message ListVpcGraphNodesRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    // vpc_id is mandatory to define the scope
+    string vpc_id = 4;
+    // Optional filters can be added if needed (e.g., filter by resource type)
+    // repeated string include_resource_types = 5;
+    optional Credentials creds = 6;
+}
+
+// Response message for ListVpcGraphNodes
+message ListVpcGraphNodesResponse {
+    repeated VpcGraphNode nodes = 1;
+    Error err = 2;
+}
+
+// Request message for ListVpcGraphEdges
+message ListVpcGraphEdgesRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    // vpc_id is mandatory to define the scope
+    string vpc_id = 4;
+    // Optional filters can be added if needed (e.g., filter by relationship type)
+    // repeated string include_relationship_types = 5;
+    optional Credentials creds = 6;
+}
+
+// Response message for ListVpcGraphEdges
+message ListVpcGraphEdgesResponse {
+    repeated VpcGraphEdge edges = 1;
+    Error err = 2;
 }

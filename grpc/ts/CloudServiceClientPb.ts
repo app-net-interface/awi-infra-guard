@@ -168,6 +168,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListVPC);
   }
 
+  methodDescriptorGetVPCIndex = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/GetVPCIndex',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.GetVPCIndexRequest,
+    cloud_pb.GetVPCIndexResponse,
+    (request: cloud_pb.GetVPCIndexRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.GetVPCIndexResponse.deserializeBinary
+  );
+
+  getVPCIndex(
+    request: cloud_pb.GetVPCIndexRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.GetVPCIndexResponse>;
+
+  getVPCIndex(
+    request: cloud_pb.GetVPCIndexRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVPCIndexResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.GetVPCIndexResponse>;
+
+  getVPCIndex(
+    request: cloud_pb.GetVPCIndexRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVPCIndexResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/GetVPCIndex',
+        request,
+        metadata || {},
+        this.methodDescriptorGetVPCIndex,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/GetVPCIndex',
+    request,
+    metadata || {},
+    this.methodDescriptorGetVPCIndex);
+  }
+
   methodDescriptorListInstances = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/ListInstances',
     grpcWeb.MethodType.UNARY,
@@ -811,6 +854,135 @@ export class CloudProviderServiceClient {
     request,
     metadata || {},
     this.methodDescriptorListVPNConcentrators);
+  }
+
+  methodDescriptorGetVpcConnectivityGraph = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/GetVpcConnectivityGraph',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.GetVpcConnectivityGraphRequest,
+    cloud_pb.GetVpcConnectivityGraphResponse,
+    (request: cloud_pb.GetVpcConnectivityGraphRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.GetVpcConnectivityGraphResponse.deserializeBinary
+  );
+
+  getVpcConnectivityGraph(
+    request: cloud_pb.GetVpcConnectivityGraphRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.GetVpcConnectivityGraphResponse>;
+
+  getVpcConnectivityGraph(
+    request: cloud_pb.GetVpcConnectivityGraphRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVpcConnectivityGraphResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.GetVpcConnectivityGraphResponse>;
+
+  getVpcConnectivityGraph(
+    request: cloud_pb.GetVpcConnectivityGraphRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVpcConnectivityGraphResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/GetVpcConnectivityGraph',
+        request,
+        metadata || {},
+        this.methodDescriptorGetVpcConnectivityGraph,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/GetVpcConnectivityGraph',
+    request,
+    metadata || {},
+    this.methodDescriptorGetVpcConnectivityGraph);
+  }
+
+  methodDescriptorListVpcGraphNodes = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListVpcGraphNodes',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListVpcGraphNodesRequest,
+    cloud_pb.ListVpcGraphNodesResponse,
+    (request: cloud_pb.ListVpcGraphNodesRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListVpcGraphNodesResponse.deserializeBinary
+  );
+
+  listVpcGraphNodes(
+    request: cloud_pb.ListVpcGraphNodesRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListVpcGraphNodesResponse>;
+
+  listVpcGraphNodes(
+    request: cloud_pb.ListVpcGraphNodesRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVpcGraphNodesResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListVpcGraphNodesResponse>;
+
+  listVpcGraphNodes(
+    request: cloud_pb.ListVpcGraphNodesRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVpcGraphNodesResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListVpcGraphNodes',
+        request,
+        metadata || {},
+        this.methodDescriptorListVpcGraphNodes,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListVpcGraphNodes',
+    request,
+    metadata || {},
+    this.methodDescriptorListVpcGraphNodes);
+  }
+
+  methodDescriptorListVpcGraphEdges = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListVpcGraphEdges',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListVpcGraphEdgesRequest,
+    cloud_pb.ListVpcGraphEdgesResponse,
+    (request: cloud_pb.ListVpcGraphEdgesRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListVpcGraphEdgesResponse.deserializeBinary
+  );
+
+  listVpcGraphEdges(
+    request: cloud_pb.ListVpcGraphEdgesRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListVpcGraphEdgesResponse>;
+
+  listVpcGraphEdges(
+    request: cloud_pb.ListVpcGraphEdgesRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVpcGraphEdgesResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListVpcGraphEdgesResponse>;
+
+  listVpcGraphEdges(
+    request: cloud_pb.ListVpcGraphEdgesRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVpcGraphEdgesResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListVpcGraphEdges',
+        request,
+        metadata || {},
+        this.methodDescriptorListVpcGraphEdges,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListVpcGraphEdges',
+    request,
+    metadata || {},
+    this.methodDescriptorListVpcGraphEdges);
   }
 
   methodDescriptorGetVPCIDForCIDR = new grpcWeb.MethodDescriptor(

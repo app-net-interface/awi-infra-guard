@@ -6,6 +6,66 @@ import * as types_pb from './types_pb';
 import * as types_k8s_pb from './types_k8s_pb';
 
 
+export class GetVPCIndexRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): GetVPCIndexRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): GetVPCIndexRequest;
+
+  getRegion(): string;
+  setRegion(value: string): GetVPCIndexRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): GetVPCIndexRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVPCIndexRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVPCIndexRequest): GetVPCIndexRequest.AsObject;
+  static serializeBinaryToWriter(message: GetVPCIndexRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVPCIndexRequest;
+  static deserializeBinaryFromReader(message: GetVPCIndexRequest, reader: jspb.BinaryReader): GetVPCIndexRequest;
+}
+
+export namespace GetVPCIndexRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+  }
+}
+
+export class GetVPCIndexResponse extends jspb.Message {
+  getVpcIndex(): types_pb.VPCIndex | undefined;
+  setVpcIndex(value?: types_pb.VPCIndex): GetVPCIndexResponse;
+  hasVpcIndex(): boolean;
+  clearVpcIndex(): GetVPCIndexResponse;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): GetVPCIndexResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetVPCIndexResponse;
+  hasErr(): boolean;
+  clearErr(): GetVPCIndexResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVPCIndexResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVPCIndexResponse): GetVPCIndexResponse.AsObject;
+  static serializeBinaryToWriter(message: GetVPCIndexResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVPCIndexResponse;
+  static deserializeBinaryFromReader(message: GetVPCIndexResponse, reader: jspb.BinaryReader): GetVPCIndexResponse;
+}
+
+export namespace GetVPCIndexResponse {
+  export type AsObject = {
+    vpcIndex?: types_pb.VPCIndex.AsObject,
+    lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
 export class ListAccountsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListAccountsRequest;
@@ -2102,6 +2162,213 @@ export namespace SearchResourcesResponse {
     totalResults: number,
     totalPages: number,
     currentPage: number,
+  }
+}
+
+export class GetVpcConnectivityGraphRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): GetVpcConnectivityGraphRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): GetVpcConnectivityGraphRequest;
+
+  getRegion(): string;
+  setRegion(value: string): GetVpcConnectivityGraphRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): GetVpcConnectivityGraphRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetVpcConnectivityGraphRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetVpcConnectivityGraphRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVpcConnectivityGraphRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVpcConnectivityGraphRequest): GetVpcConnectivityGraphRequest.AsObject;
+  static serializeBinaryToWriter(message: GetVpcConnectivityGraphRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVpcConnectivityGraphRequest;
+  static deserializeBinaryFromReader(message: GetVpcConnectivityGraphRequest, reader: jspb.BinaryReader): GetVpcConnectivityGraphRequest;
+}
+
+export namespace GetVpcConnectivityGraphRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 7,
+  }
+}
+
+export class GetVpcConnectivityGraphResponse extends jspb.Message {
+  getNodesList(): Array<types_pb.VpcGraphNode>;
+  setNodesList(value: Array<types_pb.VpcGraphNode>): GetVpcConnectivityGraphResponse;
+  clearNodesList(): GetVpcConnectivityGraphResponse;
+  addNodes(value?: types_pb.VpcGraphNode, index?: number): types_pb.VpcGraphNode;
+
+  getEdgesList(): Array<types_pb.VpcGraphEdge>;
+  setEdgesList(value: Array<types_pb.VpcGraphEdge>): GetVpcConnectivityGraphResponse;
+  clearEdgesList(): GetVpcConnectivityGraphResponse;
+  addEdges(value?: types_pb.VpcGraphEdge, index?: number): types_pb.VpcGraphEdge;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetVpcConnectivityGraphResponse;
+  hasErr(): boolean;
+  clearErr(): GetVpcConnectivityGraphResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVpcConnectivityGraphResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVpcConnectivityGraphResponse): GetVpcConnectivityGraphResponse.AsObject;
+  static serializeBinaryToWriter(message: GetVpcConnectivityGraphResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVpcConnectivityGraphResponse;
+  static deserializeBinaryFromReader(message: GetVpcConnectivityGraphResponse, reader: jspb.BinaryReader): GetVpcConnectivityGraphResponse;
+}
+
+export namespace GetVpcConnectivityGraphResponse {
+  export type AsObject = {
+    nodesList: Array<types_pb.VpcGraphNode.AsObject>,
+    edgesList: Array<types_pb.VpcGraphEdge.AsObject>,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
+export class ListVpcGraphNodesRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListVpcGraphNodesRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListVpcGraphNodesRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListVpcGraphNodesRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListVpcGraphNodesRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListVpcGraphNodesRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListVpcGraphNodesRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVpcGraphNodesRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVpcGraphNodesRequest): ListVpcGraphNodesRequest.AsObject;
+  static serializeBinaryToWriter(message: ListVpcGraphNodesRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVpcGraphNodesRequest;
+  static deserializeBinaryFromReader(message: ListVpcGraphNodesRequest, reader: jspb.BinaryReader): ListVpcGraphNodesRequest;
+}
+
+export namespace ListVpcGraphNodesRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
+  }
+}
+
+export class ListVpcGraphNodesResponse extends jspb.Message {
+  getNodesList(): Array<types_pb.VpcGraphNode>;
+  setNodesList(value: Array<types_pb.VpcGraphNode>): ListVpcGraphNodesResponse;
+  clearNodesList(): ListVpcGraphNodesResponse;
+  addNodes(value?: types_pb.VpcGraphNode, index?: number): types_pb.VpcGraphNode;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListVpcGraphNodesResponse;
+  hasErr(): boolean;
+  clearErr(): ListVpcGraphNodesResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVpcGraphNodesResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVpcGraphNodesResponse): ListVpcGraphNodesResponse.AsObject;
+  static serializeBinaryToWriter(message: ListVpcGraphNodesResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVpcGraphNodesResponse;
+  static deserializeBinaryFromReader(message: ListVpcGraphNodesResponse, reader: jspb.BinaryReader): ListVpcGraphNodesResponse;
+}
+
+export namespace ListVpcGraphNodesResponse {
+  export type AsObject = {
+    nodesList: Array<types_pb.VpcGraphNode.AsObject>,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
+export class ListVpcGraphEdgesRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListVpcGraphEdgesRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListVpcGraphEdgesRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListVpcGraphEdgesRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListVpcGraphEdgesRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListVpcGraphEdgesRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListVpcGraphEdgesRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVpcGraphEdgesRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVpcGraphEdgesRequest): ListVpcGraphEdgesRequest.AsObject;
+  static serializeBinaryToWriter(message: ListVpcGraphEdgesRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVpcGraphEdgesRequest;
+  static deserializeBinaryFromReader(message: ListVpcGraphEdgesRequest, reader: jspb.BinaryReader): ListVpcGraphEdgesRequest;
+}
+
+export namespace ListVpcGraphEdgesRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 6,
+  }
+}
+
+export class ListVpcGraphEdgesResponse extends jspb.Message {
+  getEdgesList(): Array<types_pb.VpcGraphEdge>;
+  setEdgesList(value: Array<types_pb.VpcGraphEdge>): ListVpcGraphEdgesResponse;
+  clearEdgesList(): ListVpcGraphEdgesResponse;
+  addEdges(value?: types_pb.VpcGraphEdge, index?: number): types_pb.VpcGraphEdge;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListVpcGraphEdgesResponse;
+  hasErr(): boolean;
+  clearErr(): ListVpcGraphEdgesResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVpcGraphEdgesResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVpcGraphEdgesResponse): ListVpcGraphEdgesResponse.AsObject;
+  static serializeBinaryToWriter(message: ListVpcGraphEdgesResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVpcGraphEdgesResponse;
+  static deserializeBinaryFromReader(message: ListVpcGraphEdgesResponse, reader: jspb.BinaryReader): ListVpcGraphEdgesResponse;
+}
+
+export namespace ListVpcGraphEdgesResponse {
+  export type AsObject = {
+    edgesList: Array<types_pb.VpcGraphEdge.AsObject>,
+    err?: types_pb.Error.AsObject,
   }
 }
 

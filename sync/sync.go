@@ -21,7 +21,6 @@ import (
 	"context"
 	"reflect"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/config"
@@ -50,6 +49,7 @@ type Syncer struct {
 	strategy provider.Strategy
 }
 
+/*
 func (s *Syncer) ParallelSync(ctx context.Context, done chan<- struct{}) {
 	defer func() {
 		done <- struct{}{}
@@ -224,6 +224,7 @@ func (s *Syncer) ParallelSync(ctx context.Context, done chan<- struct{}) {
 	s.logger.Infof("*****************K8S Sync Start*****************")
 	s.logger.Infof("*****************K8S Sync End*****************")
 }
+*/
 
 func (s *Syncer) Sync(ctx context.Context, done chan<- struct{}) {
 	defer func() {
@@ -308,12 +309,18 @@ func (s *Syncer) Sync(ctx context.Context, done chan<- struct{}) {
 
 	s.syncK8SSsNodes(ctx)
 
+	// Sync VPC Index
+	if allResource || s.sc.HasCloudResource("vpcIndex") {
+		s.syncVPCIndex(ctx)
+	}
+
 	s.logger.Errorf("*****************K8S Sync End*****************")
 }
 
 func (s *Syncer) SyncPeriodically(ctx context.Context) {
 	s.logger.Infof("Starting periodical sync of cloud resources every %s seconds", s.sc.SyncWaitTime.String())
 	done := make(chan struct{}, 1)
+	// First sync
 	s.Sync(ctx, done)
 	ticker := time.NewTicker(s.sc.SyncWaitTime)
 	for {
@@ -322,6 +329,7 @@ func (s *Syncer) SyncPeriodically(ctx context.Context) {
 			go func() {
 				select {
 				case <-done:
+					// periodic afterwards
 					s.Sync(ctx, done)
 				default:
 					s.logger.Errorf("Previous sync operation is still running, skipping this sync")
@@ -346,6 +354,12 @@ func (s *Syncer) syncVPC(ctx context.Context) {
 	genericCloudSync[*types.VPC](s, types.VPCType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPC, error) {
 		return cloudProvider.ListVPC(ctx, &infrapb.ListVPCRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListVPCs, s.dbClient.PutVPC, s.dbClient.DeleteVPC)
+}
+
+func (s *Syncer) syncVPCIndex(ctx context.Context) {
+	if err := s.dbClient.SyncVPCIndexes(); err != nil {
+		s.logger.Errorf("Sync error: failed to finalize VPC indexes: %v", err)
+	}
 }
 
 func (s *Syncer) syncInstances(ctx context.Context) {

@@ -25,8 +25,8 @@ port: 50052
 useLocalDB: true
 
 # Logging Level: Possible options are PANIC, FATAL, ERROR, INFO, WARN, DEBUG, TRACE
-logLevel: DEBUG
-#logLevel: INFO
+#logLevel: DEBUG
+logLevel: INFO
 #logLevel: ERROR
 
 providers:
@@ -66,24 +66,25 @@ syncConfig:
       - lb
       - networkInterface
       - keypair
-    kubernetes:
-      - clusters
-      - nodes
-      - pods
-      - services
-      - deployments
-      - replicaSets
-      - statefulSets
-      - daemonSets
-      - jobs
-      - cronJobs
-      - namespaces
-      - configMaps
-      - secrets
-      - serviceAccounts
-      - roles
-      - roleBindings
-      - clusterRoles
-      - clusterRoleBindings
-      - networkPolicies
-      - podSecurityPolicies
+      - vpcIndex
+#    kubernetes:
+#      - clusters
+#      - nodes
+#      - pods
+#      - services
+#      - deployments
+#      - replicaSets
+#      - statefulSets
+#      - daemonSets
+#      - jobs
+#      - cronJobs
+#      - namespaces
+#      - configMaps
+#      - secrets
+#      - serviceAccounts
+#      - roles
+#      - roleBindings
+#      - clusterRoles
+#      - clusterRoleBindings
+#      - networkPolicies
+#      - podSecurityPolicies

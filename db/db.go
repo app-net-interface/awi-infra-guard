@@ -21,6 +21,7 @@ import "github.com/app-net-interface/awi-infra-guard/types"
 
 const (
 	vpcTable               = "vpcs"
+	vpcIndexTable          = "vpc_index"
 	regionTable            = "regions"
 	instanceTable          = "instances"
 	subnetTable            = "subnets"
@@ -40,14 +41,15 @@ const (
 	publicIPTable          = "publicIPs"
 	lbTable                = "lbs"
 	networkInterfaceTable  = "network_interfaces"
-	syncTimeTable = "sync_time"
-	keyPairTable = "keyPairs"
-	vpnConcentratorTable = "vpnConcentrators"
+	syncTimeTable          = "sync_time"
+	keyPairTable           = "keyPairs"
+	vpnConcentratorTable   = "vpnConcentrators"
 )
 
 // Add bolt db table to this list; or it will cause a panic
 var tableNames = []string{
 	vpcTable,
+	vpcIndexTable,
 	regionTable,
 	instanceTable,
 	subnetTable,
@@ -215,4 +217,13 @@ type Client interface {
 	PutVPNConcentrator(*types.VPNConcentrator) error
 	GetVPNConcentrator(string) (*types.VPNConcentrator, error)
 	DeleteVPNConcentrator(string) error
+
+	// VPNConcentrator
+	ListVPCIndex() ([]*types.VPCIndex, error)
+	PutVPCIndex(*types.VPCIndex) error
+	GetVPCIndex(string) (*types.VPCIndex, error)
+	DeleteVPCIndex(string) error
+
+	// Add SyncVPCIndexes to the interface.
+	SyncVPCIndexes() error
 }

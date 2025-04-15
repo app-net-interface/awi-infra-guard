@@ -189,8 +189,10 @@ func Run() {
 		strategyWithDB := db.NewStrategyWithDB(dbClient, providerStrategy, logger)
 		usedStrategy = strategyWithDB
 
-		syncer := sync.NewSyncer(logger, dbClient, providerStrategy, &c.SyncConfig)
-		go syncer.SyncPeriodically(ctx)
+		if c.SyncConfig.Enabled {
+			syncer := sync.NewSyncer(logger, dbClient, providerStrategy, &c.SyncConfig)
+			go syncer.SyncPeriodically(ctx)
+		}
 	}
 
 	s := &Server{
@@ -263,15 +265,15 @@ func (s *Server) ListRegions(ctx context.Context, in *infrapb.ListRegionsRequest
 }
 
 func (s *Server) ListVPC(ctx context.Context, in *infrapb.ListVPCRequest) (*infrapb.ListVPCResponse, error) {
-	var errorMessage string
 	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
 	if err != nil {
 		return nil, err
 	}
 	vpcs, err := cloudProvider.ListVPC(ctx, in)
 	if err != nil {
-		errorMessage = err.Error()
+		return nil, err
 	}
+
 	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.VPCType))
 	if e != nil {
 		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.VPCType, cloudProvider.GetName())
@@ -279,12 +281,100 @@ func (s *Server) ListVPC(ctx context.Context, in *infrapb.ListVPCRequest) (*infr
 	return &infrapb.ListVPCResponse{
 		LastSyncTime: syncTime.Time,
 		Vpcs:         typesVpcsToGrpc(vpcs),
-		Err: &infrapb.Error{
-			Code:         100,
-			ErrorMessage: errorMessage,
-			Serverity:    "Severe",
-		},
 	}, err
+}
+
+func (s *Server) GetVPCIndex(ctx context.Context, in *infrapb.GetVPCIndexRequest) (*infrapb.GetVPCIndexResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, err
+	}
+	vpcIndex, err := cloudProvider.GetVPCIndex(ctx, in)
+	if err != nil {
+		fmt.Printf("Failed to get VPC index: %v", err)
+		return nil, err
+	}
+	if vpcIndex == nil {
+		fmt.Printf("VPCIndex is nil \n")
+		return nil, fmt.Errorf("vpc index not found")
+	}
+	s.logger.Infof("VPC Index: %v", vpcIndex.VpcId)
+
+	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.VPCIndexType))
+	if e != nil {
+		s.logger.Errorf("Failed to get sync time for %s, provider %s", types.VPCType, cloudProvider.GetName())
+	}
+	return &infrapb.GetVPCIndexResponse{
+		LastSyncTime: syncTime.Time,
+		VpcIndex:     typesVPCIndexToGrpc(*vpcIndex),
+	}, err
+}
+
+func (s *Server) ListVpcGraphNodes(ctx context.Context, in *infrapb.ListVpcGraphNodesRequest) (*infrapb.ListVpcGraphNodesResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		s.logger.Errorf("Failed to get provider %s: %v", in.Provider, err)
+		return &infrapb.ListVpcGraphNodesResponse{Err: &infrapb.Error{ErrorMessage: err.Error()}}, err
+	}
+
+	nodes, err := cloudProvider.ListVpcGraphNodes(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failed to list VPC graph nodes for VPC %s: %v", in.VpcId, err)
+		return &infrapb.ListVpcGraphNodesResponse{Err: &infrapb.Error{ErrorMessage: err.Error()}}, err
+	}
+
+	// Note: SyncTime is not directly applicable here as nodes are derived data.
+	// If needed, could return the sync time of the underlying VPCIndex.
+
+	return &infrapb.ListVpcGraphNodesResponse{
+		Nodes: typesVpcGraphNodesToGrpc(nodes),
+	}, nil
+}
+
+func (s *Server) ListVpcGraphEdges(ctx context.Context, in *infrapb.ListVpcGraphEdgesRequest) (*infrapb.ListVpcGraphEdgesResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		s.logger.Errorf("Failed to get provider %s: %v", in.Provider, err)
+		return &infrapb.ListVpcGraphEdgesResponse{Err: &infrapb.Error{ErrorMessage: err.Error()}}, err
+	}
+
+	edges, err := cloudProvider.ListVpcGraphEdges(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failed to list VPC graph edges for VPC %s: %v", in.VpcId, err)
+		return &infrapb.ListVpcGraphEdgesResponse{Err: &infrapb.Error{ErrorMessage: err.Error()}}, err
+	}
+
+	// Note: SyncTime is not directly applicable here as edges are derived data.
+
+	return &infrapb.ListVpcGraphEdgesResponse{
+		Edges: typesVpcGraphEdgesToGrpc(edges),
+	}, nil
+}
+
+func (s *Server) GetVpcConnectivityGraph(ctx context.Context, in *infrapb.GetVpcConnectivityGraphRequest) (*infrapb.GetVpcConnectivityGraphResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		s.logger.Errorf("Failed to get provider %s: %v", in.Provider, err)
+		return &infrapb.GetVpcConnectivityGraphResponse{Err: &infrapb.Error{ErrorMessage: err.Error()}}, err
+	}
+
+	// Call the provider strategy's method which returns types structs
+	nodes, edges, err := cloudProvider.GetVpcConnectivityGraph(ctx, in)
+	if err != nil {
+		s.logger.Errorf("Failed to get VPC connectivity graph for VPC %s: %v", in.VpcId, err)
+		return &infrapb.GetVpcConnectivityGraphResponse{
+			Err: &infrapb.Error{ErrorMessage: err.Error()},
+		}, err
+	}
+
+	// Translate nodes and edges to gRPC types here
+	grpcNodes := typesVpcGraphNodesToGrpc(nodes)
+	grpcEdges := typesVpcGraphEdgesToGrpc(edges)
+
+	return &infrapb.GetVpcConnectivityGraphResponse{
+		Nodes: grpcNodes,
+		Edges: grpcEdges,
+	}, nil
 }
 
 func (s *Server) ListInstances(ctx context.Context, in *infrapb.ListInstancesRequest) (*infrapb.ListInstancesResponse, error) {

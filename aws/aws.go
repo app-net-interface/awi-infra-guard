@@ -615,6 +615,31 @@ func (c *Client) getVPCWithTag(ctx context.Context, account, region, key, value 
 	return &vpcs.Vpcs[0], nil
 }
 
+func (c *Client) GetVPCIndex(ctx context.Context, vpcIndex *infrapb.GetVPCIndexRequest) (*types.VPCIndex, error) {
+	// This should ideally fetch from a cache or precomputed index if not using the DB strategy.
+	// For now, returning nil as the DB strategy handles the primary logic.
+	return nil, fmt.Errorf("GetVPCIndex not directly implemented in AWS client; use DB strategy")
+}
+
+// Add placeholder implementation for ListVpcGraphNodes
+func (c *Client) ListVpcGraphNodes(ctx context.Context, params *infrapb.ListVpcGraphNodesRequest) ([]types.VpcGraphNode, error) {
+	// This logic is handled by the DB strategy, which builds nodes from existing DB data.
+	// The real provider doesn't need a direct implementation unless bypassing the DB.
+	return nil, fmt.Errorf("ListVpcGraphNodes not implemented directly in AWS client; use DB strategy")
+}
+
+func (c *Client) ListVpcGraphEdges(ctx context.Context, params *infrapb.ListVpcGraphEdgesRequest) ([]types.VpcGraphEdge, error) {
+	// This logic is handled by the DB strategy, which builds edges from existing DB data.
+	// The real provider doesn't need a direct implementation unless bypassing the DB.
+	return nil, fmt.Errorf("ListVpcGraphEdges not implemented directly in AWS client; use DB strategy")
+}
+
+// Update placeholder implementation for GetVpcConnectivityGraph
+func (c *Client) GetVpcConnectivityGraph(ctx context.Context, params *infrapb.GetVpcConnectivityGraphRequest) ([]types.VpcGraphNode, []types.VpcGraphEdge, error) {
+	// This logic is handled by the DB strategy.
+	return nil, nil, fmt.Errorf("GetVpcConnectivityGraph not implemented directly in AWS client; use DB strategy")
+}
+
 func mapToTagSpecfication(m map[string]string, resourceType awstypes.ResourceType) awstypes.TagSpecification {
 	tagsSpec := awstypes.TagSpecification{
 		ResourceType: resourceType,

@@ -141,23 +141,24 @@ func (c *Client) ConvertVPC(ctx context.Context, projectID string, network *comp
 		// Fetch attached subnetworks and their CIDRs.
 		subnets, err := c.getSubnetsForNetwork(ctx, projectID, networkName)
 		if err != nil {
-			fmt.Printf("Error retrieving subnets: %v", err)
+			c.logger.Warnf("Error retrieving subnets: %v", err)
 		}
 
 		if len(subnets) == 0 {
-			fmt.Printf("No subnets found for network %s\n", networkName)
+			c.logger.Infof("No subnets found for network %s\n", networkName)
 		}
 
-		fmt.Printf("Subnets attached to network %s:\n", networkName)
+		//fmt.Printf("Subnets attached to network %s:\n", networkName)
 		for _, subnet := range subnets {
 			// Extract the region from the subnet's Region URL (e.g., .../regions/us-central1).
 			regionParts := strings.Split(subnet.Region, "/")
 			region := regionParts[len(regionParts)-1]
-			fmt.Printf("Subnet: %s, Region: %s, CIDR: %s\n", subnet.Name, region, subnet.IpCidrRange)
+			c.logger.Debugf("Subnet: %s, Region: %s, CIDR: %s\n", subnet.Name, region, subnet.IpCidrRange)
 			// Append the IpCidrRange to ipv4CIDR.
 			if ipv4CIDR == "" {
 				ipv4CIDR = subnet.IpCidrRange
 			} else {
+				//GCP doesn't have default CIDR ,but allows multiple CIDR ranges for a network, so we concatenate them.
 				ipv4CIDR = ipv4CIDR + "," + subnet.IpCidrRange
 			}
 		}
@@ -212,6 +213,7 @@ func (c *Client) getSubnetsForNetwork(ctx context.Context, projectID, networkNam
 
 	return subnets, nil
 }
+
 func (c *Client) GetTags(ctx context.Context, projectId string, networkName string) map[string]string {
 	tags := make(map[string]string)
 	client, err := resourcemanager.NewTagBindingsRESTClient(ctx)
@@ -226,7 +228,7 @@ func (c *Client) GetTags(ctx context.Context, projectId string, networkName stri
 	req := &resourcemanagerpb.ListTagBindingsRequest{
 		Parent: parent,
 	}
-	c.logger.Infof("Reqest = %+v", req)
+	c.logger.Debugf("Request = %+v", req)
 	it := client.ListTagBindings(ctx, req)
 	for {
 		resp, err := it.Next()

@@ -71,8 +71,12 @@ func (client *boltClient) DropDB() error {
 	})
 }
 
+// Updated PutVPC to remove UpdateVPCIndex call.
 func (client *boltClient) PutVPC(vpc *types.VPC) error {
-	return update(client, vpc, vpc.DbId(), vpcTable)
+	if err := update(client, vpc, vpc.DbId(), vpcTable); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *boltClient) GetVPC(id string) (*types.VPC, error) {
@@ -104,8 +108,12 @@ func (client *boltClient) DeleteRegion(id string) error {
 }
 
 // Instance
+// Updated PutInstance to remove UpdateVPCIndex call.
 func (client *boltClient) PutInstance(instance *types.Instance) error {
-	return update(client, instance, instance.DbId(), instanceTable)
+	if err := update(client, instance, instance.DbId(), instanceTable); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *boltClient) GetInstance(id string) (*types.Instance, error) {
@@ -156,7 +164,10 @@ func (client *boltClient) DeleteRouteTable(id string) error {
 
 // NAT Gateway
 func (client *boltClient) PutNATGateway(ng *types.NATGateway) error {
-	return update(client, ng, ng.DbId(), ngTable)
+	if err := update(client, ng, ng.DbId(), ngTable); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *boltClient) GetNATGateway(id string) (*types.NATGateway, error) {
@@ -207,7 +218,10 @@ func (client *boltClient) DeleteIGW(id string) error {
 
 // VPCEndpoint
 func (client *boltClient) PutVPCEndpoint(vpce *types.VPCEndpoint) error {
-	return update(client, vpce, vpce.DbId(), vpcEndpointTable)
+	if err := update(client, vpce, vpce.DbId(), vpcEndpointTable); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *boltClient) GetVPCEndpoint(id string) (*types.VPCEndpoint, error) {
@@ -224,7 +238,10 @@ func (client *boltClient) DeleteVPCEndpoint(id string) error {
 
 // SecurityGroup
 func (client *boltClient) PutSecurityGroup(securityGroup *types.SecurityGroup) error {
-	return update(client, securityGroup, securityGroup.DbId(), securityGroupTable)
+	if err := update(client, securityGroup, securityGroup.DbId(), securityGroupTable); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *boltClient) GetSecurityGroup(id string) (*types.SecurityGroup, error) {
@@ -241,7 +258,10 @@ func (client *boltClient) DeleteSecurityGroup(id string) error {
 
 // ACL
 func (client *boltClient) PutACL(acl *types.ACL) error {
-	return update(client, acl, acl.DbId(), aclTable)
+	if err := update(client, acl, acl.DbId(), aclTable); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *boltClient) GetACL(id string) (*types.ACL, error) {
@@ -374,7 +394,10 @@ func (client *boltClient) DeleteSyncTime(id string) error {
 
 // LB
 func (client *boltClient) PutLB(lb *types.LB) error {
-	return update(client, lb, lb.DbId(), lbTable)
+	if err := update(client, lb, lb.DbId(), lbTable); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (client *boltClient) GetLB(id string) (*types.LB, error) {
@@ -408,34 +431,34 @@ func (client *boltClient) DeleteNetworkInterface(id string) error {
 
 // KeyPair
 func (client *boltClient) PutKeyPair(kp *types.KeyPair) error {
-    return update(client, kp, kp.DbId(), keyPairTable)
+	return update(client, kp, kp.DbId(), keyPairTable)
 }
 
 func (client *boltClient) GetKeyPair(id string) (*types.KeyPair, error) {
-    return get[types.KeyPair](client, id, keyPairTable)
+	return get[types.KeyPair](client, id, keyPairTable)
 }
 
 func (client *boltClient) ListKeyPairs() ([]*types.KeyPair, error) {
-    return list[types.KeyPair](client, keyPairTable)
+	return list[types.KeyPair](client, keyPairTable)
 }
 
 func (client *boltClient) DeleteKeyPair(id string) error {
-    return delete_(client, id, keyPairTable)
+	return delete_(client, id, keyPairTable)
 }
 
 // VPNConcentrator
 func (client *boltClient) PutVPNConcentrator(vpnc *types.VPNConcentrator) error {
-    return update(client, vpnc, vpnc.DbId(), vpnConcentratorTable)
+	return update(client, vpnc, vpnc.DbId(), vpnConcentratorTable)
 }
 
 func (client *boltClient) GetVPNConcentrator(id string) (*types.VPNConcentrator, error) {
-    return get[types.VPNConcentrator](client, id, vpnConcentratorTable)
+	return get[types.VPNConcentrator](client, id, vpnConcentratorTable)
 }
 
 func (client *boltClient) ListVPNConcentrators() ([]*types.VPNConcentrator, error) {
-    return list[types.VPNConcentrator](client, vpnConcentratorTable)
+	return list[types.VPNConcentrator](client, vpnConcentratorTable)
 }
 
 func (client *boltClient) DeleteVPNConcentrator(id string) error {
-    return delete_(client, id, vpnConcentratorTable)
+	return delete_(client, id, vpnConcentratorTable)
 }

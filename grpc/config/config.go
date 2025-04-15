@@ -48,10 +48,10 @@ type Config struct {
 	SyncConfig          SyncConfig `mapstructure:"syncConfig"`
 }
 
-// Method to check if a specific cloud resource is present
+// Method to check if a specific cloud resource is present in config; so that it can synced
 func (sc *SyncConfig) HasCloudResource(resource string) bool {
 	for _, res := range sc.Resources.Cloud {
-		if strings.ToLower(res) == resource {
+		if strings.EqualFold(res, resource) {
 			return true
 		}
 	}

@@ -100,6 +100,31 @@ func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEn
 	return nil, nil
 }
 
+func (c *Client) GetVPCIndex(ctx context.Context, vpcIndex *infrapb.GetVPCIndexRequest) (*types.VPCIndex, error) {
+	// This logic is handled by the DB strategy.
+	return nil, fmt.Errorf("GetVPCIndex not implemented directly in Azure client; use DB strategy")
+}
+
+// Add placeholder implementation for ListVpcGraphNodes
+func (c *Client) ListVpcGraphNodes(ctx context.Context, params *infrapb.ListVpcGraphNodesRequest) ([]types.VpcGraphNode, error) {
+	// This logic is handled by the DB strategy, which builds nodes from existing DB data.
+	// The real provider doesn't need a direct implementation unless bypassing the DB.
+	return nil, fmt.Errorf("ListVpcGraphNodes not implemented directly in Azure client; use DB strategy")
+}
+
+// Add placeholder implementation for ListVpcGraphEdges
+func (c *Client) ListVpcGraphEdges(ctx context.Context, params *infrapb.ListVpcGraphEdgesRequest) ([]types.VpcGraphEdge, error) {
+	// This logic is handled by the DB strategy, which builds edges from existing DB data.
+	// The real provider doesn't need a direct implementation unless bypassing the DB.
+	return nil, fmt.Errorf("ListVpcGraphEdges not implemented directly in Azure client; use DB strategy")
+}
+
+// Update placeholder implementation for GetVpcConnectivityGraph
+func (c *Client) GetVpcConnectivityGraph(ctx context.Context, params *infrapb.GetVpcConnectivityGraphRequest) ([]types.VpcGraphNode, []types.VpcGraphEdge, error) {
+	// This logic is handled by the DB strategy.
+	return nil, nil, fmt.Errorf("GetVpcConnectivityGraph not implemented directly in Azure client; use DB strategy")
+}
+
 /*
 func getSubscriptionToken(ctx context.Context, subscriptionID string, credential *auth.DefaultAzureCredential) (string, error) {
     // Create a subscription-specific credential using azidentity

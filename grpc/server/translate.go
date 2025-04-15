@@ -286,6 +286,11 @@ func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
 				Status:      r.Status,
 			})
 		}
+		subnetIds := make([]string, 0, len(rt.SubnetIds))
+		subnetIds = append(subnetIds, rt.SubnetIds...)
+		gatewayIds := make([]string, 0, len(rt.GatewayIds))
+		gatewayIds = append(gatewayIds, rt.GatewayIds...)
+
 		out = append(out, &infrapb.RouteTable{
 			Provider:     rt.Provider,
 			Id:           rt.ID,
@@ -295,6 +300,8 @@ func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
 			AccountId:    rt.AccountID,
 			Labels:       rt.Labels,
 			Routes:       routes,
+			SubnetIds:    subnetIds,
+			GatewayIds:   gatewayIds,
 			LastSyncTime: rt.LastSyncTime,
 			SelfLink:     rt.SelfLink,
 		})
@@ -419,23 +426,76 @@ func typesKeyPairsToGrpc(in []types.KeyPair) []*infrapb.KeyPair {
 }
 
 func typesVPNConcentratorsToGrpc(in []types.VPNConcentrator) []*infrapb.VPNConcentrator {
-    out := make([]*infrapb.VPNConcentrator, 0, len(in))
-    for _, vpnc := range in {
-        out = append(out, &infrapb.VPNConcentrator{
-            Id:           vpnc.ID,
-            Name:         vpnc.Name,
-            Provider:     vpnc.Provider,
-            AccountId:    vpnc.AccountID,
-            VpcId:        vpnc.VpcID,
-            Region:       vpnc.Region,
-            State:        vpnc.State,
-            Type:         vpnc.Type,
-            Asn:          vpnc.ASN,
-            Labels:       vpnc.Labels,
-            CreatedAt:    timestamppb.New(vpnc.CreatedAt),
-            LastSyncTime: vpnc.LastSyncTime,
-            SelfLink:     vpnc.SelfLink,
-        })
-    }
-    return out
+	out := make([]*infrapb.VPNConcentrator, 0, len(in))
+	for _, vpnc := range in {
+		out = append(out, &infrapb.VPNConcentrator{
+			Id:           vpnc.ID,
+			Name:         vpnc.Name,
+			Provider:     vpnc.Provider,
+			AccountId:    vpnc.AccountID,
+			VpcId:        vpnc.VpcID,
+			Region:       vpnc.Region,
+			State:        vpnc.State,
+			Type:         vpnc.Type,
+			Asn:          vpnc.ASN,
+			Labels:       vpnc.Labels,
+			CreatedAt:    timestamppb.New(vpnc.CreatedAt),
+			LastSyncTime: vpnc.LastSyncTime,
+			SelfLink:     vpnc.SelfLink,
+		})
+	}
+	return out
+}
+
+func typesVPCIndexToGrpc(in types.VPCIndex) *infrapb.VPCIndex {
+	return &infrapb.VPCIndex{
+		VpcId:               in.VpcId,
+		InstanceIds:         in.InstanceIds,
+		SubnetIds:           in.SubnetIds,
+		AclIds:              in.AclIds,
+		SecurityGroupIds:    in.SecurityGroupIds,
+		RouteTableIds:       in.RouteTableIds,
+		LbIds:               in.LbIds,
+		IgwIds:              in.IgwIds,
+		NatGatewayIds:       in.NatGatewayIds,
+		NetworkInterfaceIds: in.NetworkInterfaceIds,
+		KeyPairIds:          in.KeyPairIds,
+		PublicIpIds:         in.PublicIpIds,
+		VpcEndpointIds:      in.VpcEndpointIds,
+		VpnConcentratorIds:  in.VpnConcentratorIds,
+		RouterIds:           in.RouterIds,
+	}
+}
+
+func typesVpcGraphNodesToGrpc(in []types.VpcGraphNode) []*infrapb.VpcGraphNode {
+	out := make([]*infrapb.VpcGraphNode, 0, len(in))
+	for _, node := range in {
+		if node.Properties == nil {
+			// Ensure properties map is not nil for gRPC message
+			node.Properties = make(map[string]string)
+		}
+		out = append(out, &infrapb.VpcGraphNode{
+			Id:           node.ID,
+			ResourceType: node.ResourceType,
+			Name:         node.Name,
+			Properties:   node.Properties,
+			Provider:     node.Provider,
+			AccountId:    node.AccountId,
+		})
+	}
+	return out
+}
+
+func typesVpcGraphEdgesToGrpc(in []types.VpcGraphEdge) []*infrapb.VpcGraphEdge {
+	out := make([]*infrapb.VpcGraphEdge, 0, len(in))
+	for _, edge := range in {
+		out = append(out, &infrapb.VpcGraphEdge{
+			SourceNodeId:     edge.SourceNodeID,
+			TargetNodeId:     edge.TargetNodeID,
+			RelationshipType: edge.RelationshipType,
+			Provider:         edge.Provider,
+			AccountId:        edge.AccountId,
+		})
+	}
+	return out
 }

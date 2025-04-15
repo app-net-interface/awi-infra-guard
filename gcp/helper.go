@@ -18,6 +18,7 @@
 package gcp
 
 import (
+	"bytes"
 	"net"
 	"slices"
 	"strings"
@@ -45,4 +46,24 @@ func ContainsAny(slice1, slice2 []string) bool {
 		}
 	}
 	return false
+}
+
+// netsOverlap returns true if two IP networks overlap in any way.
+func netsOverlap(a, b *net.IPNet) bool {
+	aStart, aEnd := ipNetRange(a)
+	bStart, bEnd := ipNetRange(b)
+	// Overlap if aStart <= bEnd and bStart <= aEnd
+	return bytes.Compare(aStart, bEnd) <= 0 && bytes.Compare(bStart, aEnd) <= 0
+}
+
+// ipNetRange returns the start and end IP of the given IP network.
+func ipNetRange(ipnet *net.IPNet) (net.IP, net.IP) {
+	start := ipnet.IP.Mask(ipnet.Mask)
+	end := make(net.IP, len(start))
+	copy(end, start)
+	// Invert the mask to set host bits, then OR with start for the broadcast IP.
+	for i := 0; i < len(start); i++ {
+		end[i] = start[i] | ^ipnet.Mask[i]
+	}
+	return start, end
 }

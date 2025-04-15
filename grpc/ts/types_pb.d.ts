@@ -423,6 +423,142 @@ export namespace VPC {
   }
 }
 
+export class VPCIndex extends jspb.Message {
+  getVpcId(): string;
+  setVpcId(value: string): VPCIndex;
+
+  getInstanceIdsList(): Array<string>;
+  setInstanceIdsList(value: Array<string>): VPCIndex;
+  clearInstanceIdsList(): VPCIndex;
+  addInstanceIds(value: string, index?: number): VPCIndex;
+
+  getAclIdsList(): Array<string>;
+  setAclIdsList(value: Array<string>): VPCIndex;
+  clearAclIdsList(): VPCIndex;
+  addAclIds(value: string, index?: number): VPCIndex;
+
+  getSecurityGroupIdsList(): Array<string>;
+  setSecurityGroupIdsList(value: Array<string>): VPCIndex;
+  clearSecurityGroupIdsList(): VPCIndex;
+  addSecurityGroupIds(value: string, index?: number): VPCIndex;
+
+  getNatGatewayIdsList(): Array<string>;
+  setNatGatewayIdsList(value: Array<string>): VPCIndex;
+  clearNatGatewayIdsList(): VPCIndex;
+  addNatGatewayIds(value: string, index?: number): VPCIndex;
+
+  getVpcEndpointIdsList(): Array<string>;
+  setVpcEndpointIdsList(value: Array<string>): VPCIndex;
+  clearVpcEndpointIdsList(): VPCIndex;
+  addVpcEndpointIds(value: string, index?: number): VPCIndex;
+
+  getLbIdsList(): Array<string>;
+  setLbIdsList(value: Array<string>): VPCIndex;
+  clearLbIdsList(): VPCIndex;
+  addLbIds(value: string, index?: number): VPCIndex;
+
+  getRouterIdsList(): Array<string>;
+  setRouterIdsList(value: Array<string>): VPCIndex;
+  clearRouterIdsList(): VPCIndex;
+  addRouterIds(value: string, index?: number): VPCIndex;
+
+  getIgwIdsList(): Array<string>;
+  setIgwIdsList(value: Array<string>): VPCIndex;
+  clearIgwIdsList(): VPCIndex;
+  addIgwIds(value: string, index?: number): VPCIndex;
+
+  getSubnetIdsList(): Array<string>;
+  setSubnetIdsList(value: Array<string>): VPCIndex;
+  clearSubnetIdsList(): VPCIndex;
+  addSubnetIds(value: string, index?: number): VPCIndex;
+
+  getRouteTableIdsList(): Array<string>;
+  setRouteTableIdsList(value: Array<string>): VPCIndex;
+  clearRouteTableIdsList(): VPCIndex;
+  addRouteTableIds(value: string, index?: number): VPCIndex;
+
+  getNetworkInterfaceIdsList(): Array<string>;
+  setNetworkInterfaceIdsList(value: Array<string>): VPCIndex;
+  clearNetworkInterfaceIdsList(): VPCIndex;
+  addNetworkInterfaceIds(value: string, index?: number): VPCIndex;
+
+  getKeyPairIdsList(): Array<string>;
+  setKeyPairIdsList(value: Array<string>): VPCIndex;
+  clearKeyPairIdsList(): VPCIndex;
+  addKeyPairIds(value: string, index?: number): VPCIndex;
+
+  getVpnConcentratorIdsList(): Array<string>;
+  setVpnConcentratorIdsList(value: Array<string>): VPCIndex;
+  clearVpnConcentratorIdsList(): VPCIndex;
+  addVpnConcentratorIds(value: string, index?: number): VPCIndex;
+
+  getPublicIpIdsList(): Array<string>;
+  setPublicIpIdsList(value: Array<string>): VPCIndex;
+  clearPublicIpIdsList(): VPCIndex;
+  addPublicIpIds(value: string, index?: number): VPCIndex;
+
+  getClusterIdsList(): Array<string>;
+  setClusterIdsList(value: Array<string>): VPCIndex;
+  clearClusterIdsList(): VPCIndex;
+  addClusterIds(value: string, index?: number): VPCIndex;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): VPCIndex;
+
+  getProvider(): string;
+  setProvider(value: string): VPCIndex;
+
+  getAccountId(): string;
+  setAccountId(value: string): VPCIndex;
+
+  getRegion(): string;
+  setRegion(value: string): VPCIndex;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): VPCIndex;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): VPCIndex;
+
+  getUpdatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setUpdatedAt(value?: google_protobuf_timestamp_pb.Timestamp): VPCIndex;
+  hasUpdatedAt(): boolean;
+  clearUpdatedAt(): VPCIndex;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VPCIndex.AsObject;
+  static toObject(includeInstance: boolean, msg: VPCIndex): VPCIndex.AsObject;
+  static serializeBinaryToWriter(message: VPCIndex, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VPCIndex;
+  static deserializeBinaryFromReader(message: VPCIndex, reader: jspb.BinaryReader): VPCIndex;
+}
+
+export namespace VPCIndex {
+  export type AsObject = {
+    vpcId: string,
+    instanceIdsList: Array<string>,
+    aclIdsList: Array<string>,
+    securityGroupIdsList: Array<string>,
+    natGatewayIdsList: Array<string>,
+    vpcEndpointIdsList: Array<string>,
+    lbIdsList: Array<string>,
+    routerIdsList: Array<string>,
+    igwIdsList: Array<string>,
+    subnetIdsList: Array<string>,
+    routeTableIdsList: Array<string>,
+    networkInterfaceIdsList: Array<string>,
+    keyPairIdsList: Array<string>,
+    vpnConcentratorIdsList: Array<string>,
+    publicIpIdsList: Array<string>,
+    clusterIdsList: Array<string>,
+    lastSyncTime: string,
+    provider: string,
+    accountId: string,
+    region: string,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+}
+
 export class Instance extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): Instance;
@@ -853,6 +989,16 @@ export class RouteTable extends jspb.Message {
   clearRoutesList(): RouteTable;
   addRoutes(value?: RouteTable.Route, index?: number): RouteTable.Route;
 
+  getSubnetIdsList(): Array<string>;
+  setSubnetIdsList(value: Array<string>): RouteTable;
+  clearSubnetIdsList(): RouteTable;
+  addSubnetIds(value: string, index?: number): RouteTable;
+
+  getGatewayIdsList(): Array<string>;
+  setGatewayIdsList(value: Array<string>): RouteTable;
+  clearGatewayIdsList(): RouteTable;
+  addGatewayIds(value: string, index?: number): RouteTable;
+
   getLabelsMap(): jspb.Map<string, string>;
   clearLabelsMap(): RouteTable;
 
@@ -892,6 +1038,8 @@ export namespace RouteTable {
     region: string,
     accountId: string,
     routesList: Array<RouteTable.Route.AsObject>,
+    subnetIdsList: Array<string>,
+    gatewayIdsList: Array<string>,
     labelsMap: Array<[string, string]>,
     project: string,
     lastSyncTime: string,
@@ -1827,6 +1975,78 @@ export namespace KeyPair {
     selfLink: string,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+}
+
+export class VpcGraphNode extends jspb.Message {
+  getId(): string;
+  setId(value: string): VpcGraphNode;
+
+  getResourceType(): string;
+  setResourceType(value: string): VpcGraphNode;
+
+  getName(): string;
+  setName(value: string): VpcGraphNode;
+
+  getPropertiesMap(): jspb.Map<string, string>;
+  clearPropertiesMap(): VpcGraphNode;
+
+  getProvider(): string;
+  setProvider(value: string): VpcGraphNode;
+
+  getAccountId(): string;
+  setAccountId(value: string): VpcGraphNode;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcGraphNode.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcGraphNode): VpcGraphNode.AsObject;
+  static serializeBinaryToWriter(message: VpcGraphNode, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcGraphNode;
+  static deserializeBinaryFromReader(message: VpcGraphNode, reader: jspb.BinaryReader): VpcGraphNode;
+}
+
+export namespace VpcGraphNode {
+  export type AsObject = {
+    id: string,
+    resourceType: string,
+    name: string,
+    propertiesMap: Array<[string, string]>,
+    provider: string,
+    accountId: string,
+  }
+}
+
+export class VpcGraphEdge extends jspb.Message {
+  getSourceNodeId(): string;
+  setSourceNodeId(value: string): VpcGraphEdge;
+
+  getTargetNodeId(): string;
+  setTargetNodeId(value: string): VpcGraphEdge;
+
+  getRelationshipType(): string;
+  setRelationshipType(value: string): VpcGraphEdge;
+
+  getProvider(): string;
+  setProvider(value: string): VpcGraphEdge;
+
+  getAccountId(): string;
+  setAccountId(value: string): VpcGraphEdge;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcGraphEdge.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcGraphEdge): VpcGraphEdge.AsObject;
+  static serializeBinaryToWriter(message: VpcGraphEdge, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcGraphEdge;
+  static deserializeBinaryFromReader(message: VpcGraphEdge, reader: jspb.BinaryReader): VpcGraphEdge;
+}
+
+export namespace VpcGraphEdge {
+  export type AsObject = {
+    sourceNodeId: string,
+    targetNodeId: string,
+    relationshipType: string,
+    provider: string,
+    accountId: string,
   }
 }
 

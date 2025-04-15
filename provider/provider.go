@@ -67,6 +67,13 @@ type CloudProvider interface {
 	ListNetworkInterfaces(ctx context.Context, input *infrapb.ListNetworkInterfacesRequest) ([]types.NetworkInterface, error)
 	ListKeyPairs(ctx context.Context, input *infrapb.ListKeyPairsRequest) ([]types.KeyPair, error)
 	ListVPNConcentrators(ctx context.Context, input *infrapb.ListVPNConcentratorsRequest) ([]types.VPNConcentrator, error)
+	GetVPCIndex(ctx context.Context, input *infrapb.GetVPCIndexRequest) (*types.VPCIndex, error)
+	// Add the new method signature for ListVpcGraphNodes
+	ListVpcGraphNodes(ctx context.Context, input *infrapb.ListVpcGraphNodesRequest) ([]types.VpcGraphNode, error)
+	// Add the new method signature for ListVpcGraphEdges
+	ListVpcGraphEdges(ctx context.Context, input *infrapb.ListVpcGraphEdgesRequest) ([]types.VpcGraphEdge, error)
+	// Add the new method signature for GetVpcConnectivityGraph
+	GetVpcConnectivityGraph(ctx context.Context, input *infrapb.GetVpcConnectivityGraphRequest) ([]types.VpcGraphNode, []types.VpcGraphEdge, error)
 	// GetSubnet returns single subnet based on it's ID
 	GetSubnet(ctx context.Context, input *infrapb.GetSubnetRequest) (types.Subnet, error)
 	// GetVPCIDForCIDR returns ID of VPC which have subnet with given CIDR.

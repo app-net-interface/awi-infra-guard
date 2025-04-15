@@ -45,6 +45,7 @@ const (
 	RouterType           = "Router"
 	IGWType              = "IGW"
 	VPCEndpointType      = "VPCEndpoint"
+	VPCIndexType         = "VPCIndex"
 	PublicIPType         = "PublicIP"
 	ClusterType          = "Cluster"
 	PodsType             = "Pod"
@@ -306,6 +307,8 @@ type RouteTable struct {
 	Labels       map[string]string
 	AccountID    string
 	Routes       []Route
+	SubnetIds    []string
+	GatewayIds   []string
 	SelfLink     string
 	LastSyncTime string
 }
@@ -677,4 +680,77 @@ func (v *VPNConcentrator) GetProvider() string {
 	return v.Provider
 }
 
+type VPCIndex struct {
+	VpcId               string                 `json:"vpc_id,omitempty"`
+	InstanceIds         []string               `json:"instance_ids,omitempty"`
+	AclIds              []string               `json:"acl_ids,omitempty"`
+	SecurityGroupIds    []string               `json:"security_group_ids,omitempty"`
+	NatGatewayIds       []string               `json:"nat_gateway_ids,omitempty"`
+	VpcEndpointIds      []string               `json:"vpc_endpoint_ids,omitempty"`
+	LbIds               []string               `json:"lb_ids,omitempty"`
+	RouterIds           []string               `json:"router_ids,omitempty"`
+	IgwIds              []string               `json:"igw_ids,omitempty"`
+	SubnetIds           []string               `json:"subnet_ids,omitempty"`
+	RouteTableIds       []string               `json:"route_table_ids,omitempty"`
+	NetworkInterfaceIds []string               `json:"network_interface_ids,omitempty"`
+	KeyPairIds          []string               `json:"key_pair_ids,omitempty"`
+	VpnConcentratorIds  []string               `json:"vpn_concentrator_ids,omitempty"`
+	PublicIpIds         []string               `json:"public_ip_ids,omitempty"`
+	ClusterIds          []string               `json:"cluster_ids,omitempty"`
+	LastSyncTime        string                 `json:"last_sync_time,omitempty"`
+	Provider            string                 `json:"provider,omitempty"`
+	AccountId           string                 `json:"account_id,omitempty"`
+	Region              string                 `json:"region,omitempty"`
+	CreatedAt           *timestamppb.Timestamp `json:"created_at,omitempty"`
+	UpdatedAt           *timestamppb.Timestamp `json:"updated_at,omitempty"`
+}
+
+func (v *VPCIndex) DbId() string {
+	return CloudID(v.Provider, v.VpcId)
+}
+
+func (v *VPCIndex) SetSyncTime(time string) {
+	v.LastSyncTime = time
+}
+
+func (v *VPCIndex) GetProvider() string {
+	return v.Provider
+}
+
 /* End resource types */
+
+// VpcGraphNode represents a resource in the VPC connectivity graph.
+type VpcGraphNode struct {
+	ID           string            `json:"id,omitempty"`            // Unique ID of the resource (e.g., instance ID, subnet ID)
+	ResourceType string            `json:"resource_type,omitempty"` // Type of the resource (e.g., "Instance", "Subnet", "RouteTable")
+	Name         string            `json:"name,omitempty"`          // Display name of the resource
+	Properties   map[string]string `json:"properties,omitempty"`    // Key-value pairs for essential display properties (e.g., "privateIP", "cidrBlock", "state")
+	Provider     string            `json:"provider,omitempty"`
+	AccountId    string            `json:"account_id,omitempty"`
+	Region       string            `json:"region,omitempty"`
+}
+
+// DbId returns a unique identifier for the VpcGraphNode, combining provider and resource ID.
+// Note: VpcGraphNode itself might not be stored directly in a DB this way,
+// but this follows the pattern if needed.
+func (v *VpcGraphNode) DbId() string {
+	// Use the node's own ID field, not VpcId
+	return CloudID(v.Provider, v.ID)
+}
+
+// GetProvider returns the provider for the VpcGraphNode.
+func (v *VpcGraphNode) GetProvider() string {
+	return v.Provider
+}
+
+// VpcGraphEdge represents a connection or relationship between two nodes in the graph.
+type VpcGraphEdge struct {
+	SourceNodeID     string `json:"source_node_id,omitempty"`    // ID of the source node
+	TargetNodeID     string `json:"target_node_id,omitempty"`    // ID of the target node
+	RelationshipType string `json:"relationship_type,omitempty"` // Describes the relationship (e.g., "CONTAINS", "ROUTES_TO", "ASSOCIATED_WITH")
+	Provider         string `json:"provider,omitempty"`
+	AccountId        string `json:"account_id,omitempty"`
+	Region           string `json:"region,omitempty"`
+}
+
+// Add any helper methods for VpcGraphNode or VpcGraphEdge if needed below

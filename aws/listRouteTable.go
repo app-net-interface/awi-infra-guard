@@ -102,7 +102,6 @@ func convertRouteTables(defaultRegion, region string, awsRts []awsTypes.RouteTab
 			} else if r.DestinationIpv6CidrBlock != nil {
 				destination = convertString(r.DestinationIpv6CidrBlock)
 			}
-
 			target := ""
 			if r.CarrierGatewayId != nil {
 				target = convertString(r.CarrierGatewayId)
@@ -133,18 +132,32 @@ func convertRouteTables(defaultRegion, region string, awsRts []awsTypes.RouteTab
 				Status:      string(r.State),
 				Target:      target,
 			})
+
 		}
+		subnetIds := make([]string, 0, len(rt.Associations))
+		gatewayIds := make([]string, 0, len(rt.Associations))
+
+		for _, association := range rt.Associations {
+			//fmt.Printf("RT %s - Associated subnet [%d] = %s \n", *rt.RouteTableId, i, convertString(association.SubnetId))
+			//fmt.Printf("RT %s - Associated gateway [%d] = %s \n", *rt.RouteTableId, i, convertString(association.GatewayId))
+			subnetIds = append(subnetIds, convertString(association.SubnetId))
+			gatewayIds = append(gatewayIds, convertString(association.GatewayId))
+		}
+
 		out = append(out, types.RouteTable{
-			Name:      convertString(getTagName(rt.Tags)),
-			ID:        convertString(rt.RouteTableId),
-			Provider:  providerName,
-			VpcID:     convertString(rt.VpcId),
-			Region:    region,
-			AccountID: *rt.OwnerId,
-			Labels:    convertTags(rt.Tags),
-			Routes:    routes,
-			SelfLink:  rtLink,
+			Name:       convertString(getTagName(rt.Tags)),
+			ID:         convertString(rt.RouteTableId),
+			Provider:   providerName,
+			VpcID:      convertString(rt.VpcId),
+			Region:     region,
+			AccountID:  *rt.OwnerId,
+			Labels:     convertTags(rt.Tags),
+			Routes:     routes,
+			SubnetIds:  subnetIds,
+			GatewayIds: gatewayIds,
+			SelfLink:   rtLink,
 		})
 	}
+
 	return out
 }

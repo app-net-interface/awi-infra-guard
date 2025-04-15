@@ -2,7 +2,7 @@
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
+// You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 // http:www.apache.org/licenses/LICENSE-2.0
@@ -47,6 +47,7 @@ func NewStrategyWithDB(dbClient Client, providerStrategy provider.Strategy, logg
 		strategy.cloudProviders[strings.ToLower(p.GetName())] = &providerWithDB{
 			realProvider: p,
 			dbClient:     dbClient,
+			logger:       logger,
 		}
 	}
 	k8sProvider, _ := providerStrategy.GetKubernetesProvider()
@@ -85,6 +86,7 @@ func (s *StrategyWithDB) RefreshState(ctx context.Context) error {
 type providerWithDB struct {
 	realProvider provider.CloudProvider
 	dbClient     Client
+	logger       *logrus.Logger
 }
 
 func (p *providerWithDB) GetName() string {
@@ -105,9 +107,6 @@ func (p *providerWithDB) ListRegions(ctx context.Context, params *infrapb.ListRe
 		if strings.ToLower(region.Provider) != strings.ToLower(p.realProvider.GetName()) {
 			continue
 		}
-		//if params.GetAccountId() != "" && params.GetAccountId() != vpc.AccountID {
-		//	continue
-		//}
 		providersRegions = append(providersRegions, *region)
 	}
 	return providersRegions, nil
@@ -145,6 +144,30 @@ func (p *providerWithDB) ListVPC(ctx context.Context, params *infrapb.ListVPCReq
 
 	}
 	return providersVPCs, nil
+}
+
+func (p *providerWithDB) GetVPCIndex(ctx context.Context, params *infrapb.GetVPCIndexRequest) (*types.VPCIndex, error) {
+	dbVPCIndex, err := p.dbClient.GetVPCIndex(types.CloudID(p.realProvider.GetName(), params.VpcId))
+	if err != nil {
+		fmt.Printf("Error getting VPC index: %v", err)
+		return nil, err
+	}
+	return dbVPCIndex, nil
+}
+
+func (p *providerWithDB) ListVPCIndex(ctx context.Context, params *infrapb.GetVPCIndexRequest) ([]types.VPCIndex, error) {
+	dbVPCIndexes, err := p.dbClient.ListVPCIndex()
+	if err != nil {
+		return nil, err
+	}
+	var providersVPCIndexes []types.VPCIndex
+	for _, vpcIndex := range dbVPCIndexes {
+		if !strings.EqualFold(vpcIndex.Provider, p.realProvider.GetName()) {
+			continue
+		}
+		providersVPCIndexes = append(providersVPCIndexes, *vpcIndex)
+	}
+	return providersVPCIndexes, nil
 }
 
 func (p *providerWithDB) ListInstances(ctx context.Context, params *infrapb.ListInstancesRequest) ([]types.Instance, error) {
@@ -271,14 +294,7 @@ func (p *providerWithDB) ListSecurityGroups(ctx context.Context, params *infrapb
 		if params.GetAccountId() != "" && params.GetAccountId() != securityGroup.AccountID {
 			continue
 		}
-		/* if params.GetRegion() != "global" {
-			if params.GetRegion() != "" && params.GetRegion() != securityGroup.Region {
-				fmt.Printf("Security group regions don't match %s  --- %s \n", params.GetRegion(), securityGroup.Region)
-				continue
-			}
-		} */
 		if params.GetVpcId() != "" && params.GetVpcId() != securityGroup.VpcID {
-			//fmt.Printf("VPC don't match %s  --- %s \n", params.GetVpcId(), securityGroup.VpcID)
 			continue
 		}
 
@@ -327,11 +343,6 @@ func (p *providerWithDB) ListNATGateways(ctx context.Context, params *infrapb.Li
 		if params.GetAccountId() != "" && params.GetAccountId() != natGateway.AccountID {
 			continue
 		}
-		//if params.GetRegion() != "global" {
-		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
-		//		continue
-		//	}
-		//}
 		if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
 			continue
 		}
@@ -353,14 +364,6 @@ func (p *providerWithDB) ListRouters(ctx context.Context, params *infrapb.ListRo
 		if params.GetAccountId() != "" && params.GetAccountId() != router.AccountID {
 			continue
 		}
-		//if params.GetRegion() != "global" {
-		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
-		//		continue
-		//	}
-		//}
-		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
-		//	continue
-		//}
 		providerRouters = append(providerRouters, *router)
 	}
 	return providerRouters, nil
@@ -379,14 +382,6 @@ func (p *providerWithDB) ListInternetGateways(ctx context.Context, params *infra
 		if params.GetAccountId() != "" && params.GetAccountId() != igw.AccountID {
 			continue
 		}
-		//if params.GetRegion() != "global" {
-		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
-		//		continue
-		//	}
-		//}
-		//if params.GetVpcId() != "" && params.GetVpcId() != igw.AttachedVpcId {
-		//	continue
-		//}
 		providerIGWs = append(providerIGWs, *igw)
 	}
 	return providerIGWs, nil
@@ -405,14 +400,6 @@ func (p *providerWithDB) ListVPCEndpoints(ctx context.Context, params *infrapb.L
 		if params.GetAccountId() != "" && params.GetAccountId() != vpce.AccountID {
 			continue
 		}
-		//if params.GetRegion() != "global" {
-		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
-		//		continue
-		//	}
-		//}
-		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
-		//	continue
-		//}
 		providerVpces = append(providerVpces, *vpce)
 	}
 	return providerVpces, nil
@@ -431,14 +418,6 @@ func (p *providerWithDB) ListPublicIPs(ctx context.Context, params *infrapb.List
 		if params.GetAccountId() != "" && params.GetAccountId() != publicIP.AccountID {
 			continue
 		}
-		//if params.GetRegion() != "global" {
-		//	if params.GetRegion() != "" && params.GetRegion() != natGateway.Region {
-		//		continue
-		//	}
-		//}
-		//if params.GetVpcId() != "" && params.GetVpcId() != natGateway.VpcId {
-		//	continue
-		//}
 		providerPublicIPs = append(providerPublicIPs, *publicIP)
 	}
 	return providerPublicIPs, nil
@@ -474,8 +453,6 @@ func (p *providerWithDB) ListLBs(ctx context.Context, params *infrapb.ListLBsReq
 	return providersLBs, nil
 }
 
-// ... existing imports and code ...
-
 func (p *providerWithDB) ListNetworkInterfaces(ctx context.Context, params *infrapb.ListNetworkInterfacesRequest) ([]types.NetworkInterface, error) {
 	dbNetworkInterfaces, err := p.dbClient.ListNetworkInterfaces()
 	if err != nil {
@@ -503,6 +480,7 @@ func (p *providerWithDB) ListNetworkInterfaces(ctx context.Context, params *infr
 	}
 	return providersNetworkInterfaces, nil
 }
+
 func (p *providerWithDB) ListKeyPairs(ctx context.Context, params *infrapb.ListKeyPairsRequest) ([]types.KeyPair, error) {
 	dbKeyPairs, err := p.dbClient.ListKeyPairs()
 	if err != nil {
@@ -527,8 +505,6 @@ func (p *providerWithDB) ListKeyPairs(ctx context.Context, params *infrapb.ListK
 	}
 	return providersKeyPairs, nil
 }
-
-// ... rest of the file ...
 
 func (p *providerWithDB) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest) (types.Subnet, error) {
 	dbSubnet, err := p.dbClient.GetSubnet(types.CloudID(p.realProvider.GetName(), params.GetId()))
@@ -827,23 +803,377 @@ func (p *KubernetesProviderWithDB) GetSyncTime(id string) (types.SyncTime, error
 }
 
 func (p *providerWithDB) ListVPNConcentrators(ctx context.Context, params *infrapb.ListVPNConcentratorsRequest) ([]types.VPNConcentrator, error) {
-    dbVPNConcentrators, err := p.dbClient.ListVPNConcentrators()
-    if err != nil {
-        return nil, err
-    }
-    var providerVPNConcentrators []types.VPNConcentrator
-    for _, vpnc := range dbVPNConcentrators {
-        if strings.ToLower(vpnc.Provider) != strings.ToLower(p.realProvider.GetName()) {
-            continue
-        }
-        if params.GetAccountId() != "" && params.GetAccountId() != vpnc.AccountID {
-            continue
-        }
-        if params.GetRegion() != "" && params.GetRegion() != vpnc.Region {
-            continue
-        }
+	dbVPNConcentrators, err := p.dbClient.ListVPNConcentrators()
+	if err != nil {
+		return nil, err
+	}
+	var providerVPNConcentrators []types.VPNConcentrator
+	for _, vpnc := range dbVPNConcentrators {
+		if strings.ToLower(vpnc.Provider) != strings.ToLower(p.realProvider.GetName()) {
+			continue
+		}
+		if params.GetAccountId() != "" && params.GetAccountId() != vpnc.AccountID {
+			continue
+		}
+		if params.GetRegion() != "" && params.GetRegion() != vpnc.Region {
+			continue
+		}
 
-        providerVPNConcentrators = append(providerVPNConcentrators, *vpnc)
-    }
-    return providerVPNConcentrators, nil
+		providerVPNConcentrators = append(providerVPNConcentrators, *vpnc)
+	}
+	return providerVPNConcentrators, nil
+}
+
+func (p *providerWithDB) ListVpcGraphNodes(ctx context.Context, params *infrapb.ListVpcGraphNodesRequest) ([]types.VpcGraphNode, error) {
+	vpcIndexKey := types.CloudID(p.realProvider.GetName(), params.GetVpcId())
+	vpcIndex, err := p.dbClient.GetVPCIndex(vpcIndexKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get VPC index for %s: %w", vpcIndexKey, err)
+	}
+	if vpcIndex == nil {
+		return nil, fmt.Errorf("VPC index not found for %s", vpcIndexKey)
+	}
+
+	var nodes []types.VpcGraphNode
+	providerName := p.realProvider.GetName()
+	logger := p.logger
+
+	createNode := func(id, resourceType, name string, properties map[string]string) types.VpcGraphNode {
+		if properties == nil {
+			properties = make(map[string]string)
+		}
+		return types.VpcGraphNode{
+			ID:           id,
+			ResourceType: resourceType,
+			Name:         name,
+			Properties:   properties,
+			Provider:     providerName,
+			AccountId:    vpcIndex.AccountId,
+			Region:       vpcIndex.Region,
+		}
+	}
+
+	for _, id := range vpcIndex.InstanceIds {
+		res, err := p.dbClient.GetInstance(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"privateIP": res.PrivateIP, "publicIP": res.PublicIP, "state": res.State, "type": res.Type}
+			nodes = append(nodes, createNode(res.ID, types.InstanceType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get instance %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.SubnetIds {
+		res, err := p.dbClient.GetSubnet(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"cidrBlock": res.CidrBlock, "zone": res.Zone}
+			nodes = append(nodes, createNode(res.SubnetId, types.SubnetType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get subnet %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.RouteTableIds {
+		res, err := p.dbClient.GetRouteTable(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			nodes = append(nodes, createNode(res.ID, types.RouteTableType, res.Name, nil))
+		} else {
+			logger.Warnf("Failed to get route table %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.NatGatewayIds {
+		res, err := p.dbClient.GetNATGateway(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"publicIP": res.PublicIp, "privateIP": res.PrivateIp, "state": res.State}
+			nodes = append(nodes, createNode(res.ID, types.NATGatewayType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get NAT gateway %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.IgwIds {
+		res, err := p.dbClient.GetIGW(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"state": res.State}
+			nodes = append(nodes, createNode(res.ID, types.IGWType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get internet gateway %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.SecurityGroupIds {
+		res, err := p.dbClient.GetSecurityGroup(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			nodes = append(nodes, createNode(res.ID, types.SecurityGroupType, res.Name, nil))
+		} else {
+			logger.Warnf("Failed to get security group %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.AclIds {
+		res, err := p.dbClient.GetACL(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			nodes = append(nodes, createNode(res.ID, types.ACLType, res.Name, nil))
+		} else {
+			logger.Warnf("Failed to get ACL %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.LbIds {
+		res, err := p.dbClient.GetLB(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"dnsName": res.DNSName, "type": res.Type, "scheme": res.Scheme}
+			nodes = append(nodes, createNode(res.ID, types.LBType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get LB %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.VpcEndpointIds {
+		res, err := p.dbClient.GetVPCEndpoint(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"serviceName": res.ServiceName, "type": res.Type, "state": res.State}
+			nodes = append(nodes, createNode(res.ID, types.VPCEndpointType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get VPC Endpoint %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.RouterIds {
+		res, err := p.dbClient.GetRouter(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"asn": fmt.Sprintf("%d", res.ASN), "state": res.State}
+			nodes = append(nodes, createNode(res.ID, types.RouterType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get Router %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.NetworkInterfaceIds {
+		res, err := p.dbClient.GetNetworkInterface(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"macAddress": res.MacAddress, "status": res.Status, "publicIP": res.PublicIP}
+			nodes = append(nodes, createNode(res.ID, types.NetworkInterfaceType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get Network Interface %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.VpnConcentratorIds {
+		res, err := p.dbClient.GetVPNConcentrator(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"asn": fmt.Sprintf("%d", res.ASN), "state": res.State, "type": res.Type}
+			nodes = append(nodes, createNode(res.ID, types.VPNConcentratorType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get VPN Concentrator %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.PublicIpIds {
+		res, err := p.dbClient.GetPublicIP(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{"publicIP": res.PublicIP, "instanceId": res.InstanceId, "type": res.Type}
+			nodes = append(nodes, createNode(res.ID, types.PublicIPType, res.ID, props))
+		} else {
+			logger.Warnf("Failed to get Public IP %s for graph node: %v", id, err)
+		}
+	}
+	for _, id := range vpcIndex.ClusterIds {
+		res, err := p.dbClient.GetCluster(types.CloudID(providerName, id))
+		if err == nil && res != nil {
+			props := map[string]string{} // Add properties like ARN if available in res
+			nodes = append(nodes, createNode(res.Name, types.ClusterType, res.Name, props))
+		} else {
+			logger.Warnf("Failed to get Cluster %s for graph node: %v", id, err)
+		}
+	}
+
+	return nodes, nil
+}
+
+func (p *providerWithDB) ListVpcGraphEdges(ctx context.Context, params *infrapb.ListVpcGraphEdgesRequest) ([]types.VpcGraphEdge, error) {
+	vpcIndexKey := types.CloudID(p.realProvider.GetName(), params.GetVpcId())
+	vpcIndex, err := p.dbClient.GetVPCIndex(vpcIndexKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get VPC index for %s: %w", vpcIndexKey, err)
+	}
+	if vpcIndex == nil {
+		return nil, fmt.Errorf("VPC index not found for %s", vpcIndexKey)
+	}
+
+	var edges []types.VpcGraphEdge
+	providerName := p.realProvider.GetName()
+	logger := p.logger
+
+	createEdge := func(sourceID, targetID, relationshipType string) types.VpcGraphEdge {
+		return types.VpcGraphEdge{
+			SourceNodeID:     sourceID,
+			TargetNodeID:     targetID,
+			RelationshipType: relationshipType,
+			Provider:         providerName,
+			AccountId:        vpcIndex.AccountId,
+			Region:           vpcIndex.Region,
+		}
+	}
+
+	for _, subnetId := range vpcIndex.SubnetIds {
+		edges = append(edges, createEdge(vpcIndex.VpcId, subnetId, "CONTAINS"))
+	}
+
+	for _, subnetId := range vpcIndex.SubnetIds {
+		subnet, err := p.dbClient.GetSubnet(types.CloudID(providerName, subnetId))
+		if err != nil || subnet == nil {
+			logger.Warnf("Failed to get subnet %s for edge generation: %v", subnetId, err)
+			continue
+		}
+	}
+
+	for _, rtId := range vpcIndex.RouteTableIds {
+		rt, err := p.dbClient.GetRouteTable(types.CloudID(providerName, rtId))
+		if err != nil || rt == nil {
+			logger.Warnf("Failed to get route table %s for edge generation: %v", rtId, err)
+			continue
+		}
+		for _, subnetId := range rt.SubnetIds {
+			if contains(vpcIndex.SubnetIds, subnetId) {
+				edges = append(edges, createEdge(rtId, subnetId, "ASSOCIATED_WITH"))
+			}
+		}
+		for _, route := range rt.Routes {
+			targetId := route.Target
+			if contains(vpcIndex.IgwIds, targetId) ||
+				contains(vpcIndex.NatGatewayIds, targetId) ||
+				contains(vpcIndex.InstanceIds, targetId) ||
+				contains(vpcIndex.VpcEndpointIds, targetId) ||
+				contains(vpcIndex.NetworkInterfaceIds, targetId) {
+				edges = append(edges, createEdge(rtId, targetId, "ROUTES_TO"))
+			}
+		}
+	}
+
+	for _, instanceId := range vpcIndex.InstanceIds {
+		instance, err := p.dbClient.GetInstance(types.CloudID(providerName, instanceId))
+		if err != nil || instance == nil {
+			logger.Warnf("Failed to get instance %s for edge generation: %v", instanceId, err)
+			continue
+		}
+		if contains(vpcIndex.SubnetIds, instance.SubnetID) {
+			edges = append(edges, createEdge(instanceId, instance.SubnetID, "LOCATED_IN"))
+		}
+		for _, sgId := range instance.SecurityGroupIDs {
+			if contains(vpcIndex.SecurityGroupIds, sgId) {
+				edges = append(edges, createEdge(instanceId, sgId, "USES_SECURITY_GROUP"))
+			}
+		}
+		for _, niId := range instance.InterfaceIDs {
+			if contains(vpcIndex.NetworkInterfaceIds, niId) {
+				edges = append(edges, createEdge(instanceId, niId, "HAS_INTERFACE"))
+			}
+		}
+	}
+
+	for _, niId := range vpcIndex.NetworkInterfaceIds {
+		ni, err := p.dbClient.GetNetworkInterface(types.CloudID(providerName, niId))
+		if err != nil || ni == nil {
+			logger.Warnf("Failed to get network interface %s for edge generation: %v", niId, err)
+			continue
+		}
+		if contains(vpcIndex.SubnetIds, ni.SubnetID) {
+			edges = append(edges, createEdge(niId, ni.SubnetID, "LOCATED_IN"))
+		}
+		for _, sgId := range ni.SecurityGroupIDs {
+			if contains(vpcIndex.SecurityGroupIds, sgId) {
+				edges = append(edges, createEdge(niId, sgId, "USES_SECURITY_GROUP"))
+			}
+		}
+	}
+
+	for _, natId := range vpcIndex.NatGatewayIds {
+		nat, err := p.dbClient.GetNATGateway(types.CloudID(providerName, natId))
+		if err != nil || nat == nil {
+			logger.Warnf("Failed to get NAT gateway %s for edge generation: %v", natId, err)
+			continue
+		}
+		if contains(vpcIndex.SubnetIds, nat.SubnetId) {
+			edges = append(edges, createEdge(natId, nat.SubnetId, "LOCATED_IN"))
+		}
+	}
+
+	for _, igwId := range vpcIndex.IgwIds {
+		igw, err := p.dbClient.GetIGW(types.CloudID(providerName, igwId))
+		if err != nil || igw == nil {
+			logger.Warnf("Failed to get IGW %s for edge generation: %v", igwId, err)
+			continue
+		}
+		if igw.AttachedVpcId == vpcIndex.VpcId {
+			edges = append(edges, createEdge(igwId, vpcIndex.VpcId, "ATTACHED_TO"))
+		}
+	}
+
+	for _, vpceId := range vpcIndex.VpcEndpointIds {
+		vpce, err := p.dbClient.GetVPCEndpoint(types.CloudID(providerName, vpceId))
+		if err != nil || vpce == nil {
+			logger.Warnf("Failed to get VPC Endpoint %s for edge generation: %v", vpceId, err)
+			continue
+		}
+		if vpce.VPCId == vpcIndex.VpcId {
+			edges = append(edges, createEdge(vpceId, vpcIndex.VpcId, "LOCATED_IN"))
+		}
+	}
+
+	for _, lbId := range vpcIndex.LbIds {
+		lb, err := p.dbClient.GetLB(types.CloudID(providerName, lbId))
+		if err != nil || lb == nil {
+			logger.Warnf("Failed to get LB %s for edge generation: %v", lbId, err)
+			continue
+		}
+		for _, instanceId := range lb.InstanceIDs {
+			if contains(vpcIndex.InstanceIds, instanceId) {
+				edges = append(edges, createEdge(lbId, instanceId, "LOAD_BALANCES_TO"))
+			}
+		}
+	}
+
+	for _, aclId := range vpcIndex.AclIds {
+		acl, err := p.dbClient.GetACL(types.CloudID(providerName, aclId))
+		if err != nil || acl == nil {
+			logger.Warnf("Failed to get ACL %s for edge generation: %v", aclId, err)
+			continue
+		}
+		for _, subnetId := range acl.Subnets {
+			if contains(vpcIndex.SubnetIds, subnetId) {
+				edges = append(edges, createEdge(aclId, subnetId, "ASSOCIATED_WITH"))
+			}
+		}
+	}
+
+	return edges, nil
+}
+
+func (p *providerWithDB) GetVpcConnectivityGraph(ctx context.Context, params *infrapb.GetVpcConnectivityGraphRequest) ([]types.VpcGraphNode, []types.VpcGraphEdge, error) {
+	nodesReq := &infrapb.ListVpcGraphNodesRequest{
+		Provider:  params.Provider,
+		AccountId: params.AccountId,
+		Region:    params.Region,
+		VpcId:     params.VpcId,
+		Creds:     params.Creds,
+	}
+	nodes, err := p.ListVpcGraphNodes(ctx, nodesReq)
+	if err != nil {
+		p.logger.Errorf("Failed to list VPC graph nodes for graph request (VPC %s): %v", params.VpcId, err)
+		return nil, nil, fmt.Errorf("failed to get nodes: %w", err)
+	}
+
+	edgesReq := &infrapb.ListVpcGraphEdgesRequest{
+		Provider:  params.Provider,
+		AccountId: params.AccountId,
+		Region:    params.Region,
+		VpcId:     params.VpcId,
+		Creds:     params.Creds,
+	}
+	edges, err := p.ListVpcGraphEdges(ctx, edgesReq)
+	if err != nil {
+		p.logger.Errorf("Failed to list VPC graph edges for graph request (VPC %s): %v", params.VpcId, err)
+		return nil, nil, fmt.Errorf("failed to get edges: %w", err)
+	}
+
+	return nodes, edges, nil
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
