@@ -152,7 +152,7 @@ func (c *Client) getLBsForRegion(ctx context.Context, regionName string, filters
 }
 
 func (c *Client) applyFilters(lbs []types.LB, _filters_ []awsTypes.Filter) []types.LB {
-	
+
 	return lbs
 }
 
@@ -189,22 +189,32 @@ func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.L
 		c.logger.Errorf("Error getting listeners for load balancer %s: %v", aws.ToString(lb.LoadBalancerArn), err)
 	}
 
+	// Extract Subnet IDs from AvailabilityZones
+	var subnetIDs []string
+	for _, az := range lb.AvailabilityZones {
+		if az.SubnetId != nil {
+			subnetIDs = append(subnetIDs, *az.SubnetId)
+		}
+	}
+
 	return types.LB{
-		ID:            aws.ToString(lb.LoadBalancerArn),
-		Provider:      c.GetName(),
-		Name:          aws.ToString(lb.LoadBalancerName),
-		Scheme:        string(lb.Scheme),
-		DNSName:       aws.ToString(lb.DNSName),
-		Type:          lbType,
-		IPAddressType: ipAddressType,
-		IPAddresses:   ips,
-		Listeners:     listeners,
-		//State:         string(lb.State.Code),
+		ID:               aws.ToString(lb.LoadBalancerArn),
+		Provider:         c.GetName(),
+		Name:             aws.ToString(lb.LoadBalancerName),
+		Scheme:           string(lb.Scheme),
+		DNSName:          aws.ToString(lb.DNSName),
+		Type:             lbType,
+		IPAddressType:    ipAddressType,
+		IPAddresses:      ips,
+		Listeners:        listeners,
+		SecurityGroupIDs: lb.SecurityGroups,
+		SubnetIDs:        subnetIDs, // Populated subnet IDs
+		//State:         string(lb.State.Code), // State might be useful too
 		VPCID:     aws.ToString(lb.VpcId),
 		AccountID: c.accountID,
 		Region:    regionName,
 		CreatedAt: aws.ToTime(lb.CreatedTime),
-		Labels:    c.getTagsV2(lb, regionName),
+		Labels:    c.getTagsV2(lb, regionName), // Ensure getTagsV2 works correctly
 		SelfLink:  fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#LoadBalancers:search=%s", regionName, regionName, aws.ToString(lb.LoadBalancerName)),
 	}
 }
@@ -264,11 +274,11 @@ func (c *Client) convertClassicELBToLoadBalancer(lb elbTypes.LoadBalancerDescrip
 		c.logger.Errorf("Error resolving load balancer DNS: %v", err)
 	}
 	return types.LB{
-		ID:            aws.ToString(lb.LoadBalancerName),
+		ID:            aws.ToString(lb.LoadBalancerName), // Use Name as ID for Classic
 		Name:          aws.ToString(lb.LoadBalancerName),
 		DNSName:       aws.ToString(lb.DNSName),
 		Provider:      c.GetName(),
-		IPAddressType: "ipv4",
+		IPAddressType: "ipv4", // Classic ELBs are typically IPv4
 		Type:          "Classic",
 		Scheme:        aws.ToString(lb.Scheme),
 		VPCID:         aws.ToString(lb.VPCId),
@@ -278,12 +288,12 @@ func (c *Client) convertClassicELBToLoadBalancer(lb elbTypes.LoadBalancerDescrip
 		SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#LoadBalancerDetails:loadBalancerId=%s", regionName, regionName, aws.ToString(lb.LoadBalancerName)),
 		InstanceIDs:   instanceIDs,
 		IPAddresses:   ips,
-		Zone:          getZone(lb),
-		Labels:        c.getTagsV1(lb, regionName),
+		Zone:          getZone(lb),                 // getZone extracts from AvailabilityZones
+		SubnetIDs:     lb.Subnets,                  // Assign directly for Classic ELB
+		Labels:        c.getTagsV1(lb, regionName), // Ensure getTagsV1 works correctly
 		Listeners:     convertListeners(lb.ListenerDescriptions),
 	}
 }
-
 
 func getIPsV1(lb elbTypes.LoadBalancerDescription) ([]string, error) {
 	if lb.DNSName != nil {

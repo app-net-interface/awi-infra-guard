@@ -89,18 +89,31 @@ func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 func typesSubnetsToGrpc(in []types.Subnet) []*infrapb.Subnet {
 	out := make([]*infrapb.Subnet, 0, len(in))
 	for _, subnet := range in {
+		var createdAtPb *timestamppb.Timestamp
+		if subnet.CreatedAt != nil {
+			createdAtPb = timestamppb.New(*subnet.CreatedAt)
+		}
+		var updatedAtPb *timestamppb.Timestamp
+		if subnet.UpdatedAt != nil {
+			updatedAtPb = timestamppb.New(*subnet.UpdatedAt)
+		}
+
 		out = append(out, &infrapb.Subnet{
-			Id:           subnet.SubnetId,
-			Name:         subnet.Name,
-			CidrBlock:    subnet.CidrBlock,
-			VpcId:        subnet.VpcId,
-			Zone:         subnet.Zone,
-			Region:       subnet.Region,
-			Labels:       subnet.Labels,
-			Provider:     subnet.Provider,
-			AccountId:    subnet.AccountID,
-			LastSyncTime: subnet.LastSyncTime,
-			SelfLink:     subnet.SelfLink,
+			Id:            subnet.SubnetId,
+			Name:          subnet.Name,
+			CidrBlock:     subnet.CidrBlock,
+			VpcId:         subnet.VpcId,
+			Zone:          subnet.Zone,
+			Region:        subnet.Region,
+			Labels:        subnet.Labels,
+			Provider:      subnet.Provider,
+			AccountId:     subnet.AccountID,
+			LastSyncTime:  subnet.LastSyncTime,
+			SelfLink:      subnet.SelfLink,
+			RouteTableIds: subnet.RouteTableIds,
+			AclIds:        subnet.NetworkAclIds,
+			CreatedAt:     createdAtPb,
+			UpdatedAt:     updatedAtPb,
 		})
 	}
 	return out
@@ -169,25 +182,31 @@ func typesIGWsToGrpc(in []types.IGW) []*infrapb.IGW {
 	}
 	return out
 }
+
 func typesVPCEndpointsToGrpc(in []types.VPCEndpoint) []*infrapb.VPCEndpoint {
 	out := make([]*infrapb.VPCEndpoint, 0, len(in))
 	for _, vpce := range in {
+		var createdAt *timestamppb.Timestamp
+		if vpce.CreatedAt != nil {
+			createdAt = timestamppb.New(*vpce.CreatedAt)
+		}
 		out = append(out, &infrapb.VPCEndpoint{
-			Id:            vpce.ID,
-			Name:          vpce.Name,
-			VpcId:         vpce.VPCId,
-			Provider:      vpce.Provider,
-			Region:        vpce.Region,
-			State:         vpce.State,
-			Labels:        vpce.Labels,
-			AccountId:     vpce.AccountID,
-			RouteTableIds: vpce.RouteTableIds,
-			SubnetIds:     vpce.SubnetIds,
-			ServiceName:   vpce.ServiceName,
-			Type:          vpce.Type,
-			CreatedAt:     timestamppb.New(*vpce.CreatedAt),
-			LastSyncTime:  vpce.LastSyncTime,
-			SelfLink:      vpce.SelfLink,
+			Id:               vpce.ID,
+			Name:             vpce.Name,
+			VpcId:            vpce.VPCId,
+			Provider:         vpce.Provider,
+			Region:           vpce.Region,
+			State:            vpce.State,
+			Labels:           vpce.Labels,
+			AccountId:        vpce.AccountID,
+			RouteTableIds:    vpce.RouteTableIds,
+			SubnetIds:        vpce.SubnetIds,
+			SecurityGroupIds: vpce.SecurityGroupIDs,
+			ServiceName:      vpce.ServiceName,
+			Type:             vpce.Type,
+			CreatedAt:        createdAt,
+			LastSyncTime:     vpce.LastSyncTime,
+			SelfLink:         vpce.SelfLink,
 		})
 	}
 	return out
@@ -286,10 +305,7 @@ func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
 				Status:      r.Status,
 			})
 		}
-		subnetIds := make([]string, 0, len(rt.SubnetIds))
-		subnetIds = append(subnetIds, rt.SubnetIds...)
-		gatewayIds := make([]string, 0, len(rt.GatewayIds))
-		gatewayIds = append(gatewayIds, rt.GatewayIds...)
+		fmt.Printf("DEBUG: RouteTable Subnets %v\n", rt.SubnetIds)
 
 		out = append(out, &infrapb.RouteTable{
 			Provider:     rt.Provider,
@@ -300,31 +316,47 @@ func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
 			AccountId:    rt.AccountID,
 			Labels:       rt.Labels,
 			Routes:       routes,
-			SubnetIds:    subnetIds,
-			GatewayIds:   gatewayIds,
+			SubnetIds:    rt.SubnetIds,
+			IgwIds:       rt.IGWIds,
+			NgwIds:       rt.NGWIds,
+			TgwIds:       rt.TGWIds,
 			LastSyncTime: rt.LastSyncTime,
 			SelfLink:     rt.SelfLink,
 		})
 	}
+	fmt.Printf("DEBUG: RouteTable %v\n", out)
 	return out
 }
 
 func typesPublicIPsToGrpc(in []types.PublicIP) []*infrapb.PublicIP {
 	out := make([]*infrapb.PublicIP, 0, len(in))
 	for _, publicIP := range in {
-
+		var createdAt *timestamppb.Timestamp
+		if publicIP.CreatedAt != nil {
+			createdAt = timestamppb.New(*publicIP.CreatedAt)
+		}
+		var updatedAt *timestamppb.Timestamp
+		if publicIP.UpdatedAt != nil {
+			updatedAt = timestamppb.New(*publicIP.UpdatedAt)
+		}
 		out = append(out, &infrapb.PublicIP{
-			Provider:   publicIP.Provider,
-			Id:         publicIP.ID,
-			VpcId:      publicIP.VPCID,
-			Region:     publicIP.Region,
-			PublicIp:   publicIP.PublicIP,
-			InstanceId: publicIP.InstanceId,
-			PrivateIp:  publicIP.PrivateIP,
-			AccountId:  publicIP.AccountID,
-			Type:       publicIP.Type,
-			Labels:     publicIP.Labels,
-			SelfLink:   publicIP.SelfLink,
+			Provider:           publicIP.Provider,
+			Id:                 publicIP.ID,
+			VpcId:              publicIP.VPCId,
+			Region:             publicIP.Region,
+			PublicIp:           publicIP.PublicIP,
+			InstanceId:         publicIP.InstanceId,
+			PrivateIp:          publicIP.PrivateIP,
+			AccountId:          publicIP.AccountID,
+			Type:               publicIP.Type,
+			Labels:             publicIP.Labels,
+			SelfLink:           publicIP.SelfLink,
+			Byoip:              publicIP.Byoip,
+			Project:            publicIP.Project,
+			CreatedAt:          createdAt,
+			UpdatedAt:          updatedAt,
+			LastSyncTime:       publicIP.LastSyncTime,
+			NetworkInterfaceId: publicIP.NetworkInterfaceId,
 		})
 	}
 	return out
@@ -350,6 +382,8 @@ func typesLBToGrpc(in []types.LB) []*infrapb.LB {
 			Scheme:                 lb.Scheme,
 			Region:                 lb.Region,
 			InstanceIds:            lb.InstanceIDs,
+			SubnetIds:              lb.SubnetIDs,
+			SecurityGroupIds:       lb.SecurityGroupIDs,
 			TargetGroupIds:         lb.TargetGroupIDs,
 			CrossZoneLoadBalancing: lb.CrossZoneLoadBalancing,
 			AccessLogsEnabled:      lb.AccessLogsEnabled,
@@ -395,6 +429,7 @@ func typesNetworkInterfacesToGrpc(in []types.NetworkInterface) []*infrapb.Networ
 			//InterfaceType:      ni.InterfaceType,
 			LastSyncTime: ni.LastSyncTime,
 			SubnetId:     ni.SubnetID,
+			InterfaceType: ni.InterfaceType,
 			//AvailabilityZone:   ni.AvailabilityZone,
 			Region:           ni.Region,
 			PrivateIps:       ni.PrivateIPs,
@@ -499,3 +534,37 @@ func typesVpcGraphEdgesToGrpc(in []types.VpcGraphEdge) []*infrapb.VpcGraphEdge {
 	}
 	return out
 }
+
+
+func typesInstanceNodesToGrpc(in []types.InstanceGraphNode) []*infrapb.InstanceGraphNode {
+    out := make([]*infrapb.InstanceGraphNode, 0, len(in))
+    for _, node := range in {
+        out = append(out, &infrapb.InstanceGraphNode{
+            Id:           node.ID,
+            ResourceType: node.ResourceType,
+            Name:         node.Name,
+            Properties:   node.Properties,
+            Provider:     node.Provider,
+            AccountId:    node.AccountID,
+            Region:       node.Region,
+        })
+    }
+    return out
+}
+
+func typesInstanceEdgesToGrpc(in []types.InstanceGraphEdge) []*infrapb.InstanceGraphEdge {
+    out := make([]*infrapb.InstanceGraphEdge, 0, len(in))
+    for _, edge := range in {
+        out = append(out, &infrapb.InstanceGraphEdge{
+            SourceNodeId:     edge.SourceNodeID,
+            TargetNodeId:     edge.TargetNodeID,
+            RelationshipType: edge.RelationshipType,
+            Provider:         edge.Provider,
+            AccountId:        edge.AccountID,
+            Region:           edge.Region,
+        })
+    }
+    return out
+}
+
+

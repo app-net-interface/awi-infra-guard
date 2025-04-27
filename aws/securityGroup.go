@@ -52,14 +52,25 @@ func (c *Client) AddInboundAllowRuleByLabelsMatch(ctx context.Context, account, 
 func (c *Client) AddInboundAllowRuleBySubnetMatch(ctx context.Context, account, region,
 	vpcID string, securityGroupName string, subnetCidrs []string, cidrsToAllow []string,
 	protocolsAndPorts types.ProtocolsAndPorts) (securityGroupId string, instances []types.Instance, subnets []types.Subnet, err error) {
-	allInstances, allSubnets, err := c.getInstancesForPrefixes(ctx, account, region, subnetCidrs, vpcID)
+
+	client, err := c.getEC2Client(ctx, account, region)
+	if err != nil {
+		return "", nil, nil, fmt.Errorf("failed to get EC2 client for subnet conversion: %w", err)
+	}
+
+	allInstances, allSubnetsAws, err := c.getInstancesForPrefixes(ctx, account, region, subnetCidrs, vpcID)
 	if err != nil {
 		return "", nil, nil, err
 	}
 	securityGroupId, instances, err = c.updateSecurityGroupsForInstances(ctx, account, region,
 		vpcID, securityGroupName, cidrsToAllow,
 		protocolsAndPorts, allInstances)
-	return securityGroupId, instances, convertSubnets(c.defaultAccountID, c.defaultRegion, account, region, allSubnets), err
+	if err != nil {
+		return securityGroupId, instances, nil, err
+	}
+
+	subnets = c.convertSubnets(ctx, client, c.defaultAccountID, c.defaultRegion, account, region, allSubnetsAws)
+	return securityGroupId, instances, subnets, nil
 }
 
 func (c *Client) AddInboundAllowRuleByInstanceIPMatch(ctx context.Context, account, region,
@@ -505,6 +516,7 @@ func (c *Client) RefreshInboundAllowRule(ctx context.Context,
 	destinationPrefixes []string,
 	destinationVPCId string,
 	protocolsAndPorts types.ProtocolsAndPorts) (instances []types.Instance, subnets []types.Subnet, err error) {
+
 	client, err := c.getEC2Client(ctx, account, region)
 	if err != nil {
 		return nil, nil, err
@@ -522,12 +534,8 @@ func (c *Client) RefreshInboundAllowRule(ctx context.Context,
 
 	// updating new destination instances with ACL security group
 	var destInstances []awsec2types.Reservation
-	var destSubnets []awsec2types.Subnet
+	var destSubnetsAws []awsec2types.Subnet
 	if len(destinationLabels) > 0 {
-		destInstances, err = c.getInstancesForLabels(ctx, account, region, destinationLabels, destinationVPCId)
-		if err != nil {
-			return nil, nil, err
-		}
 		subnetWithVPCID := make(map[string]struct{})
 		for _, instance := range destInstances {
 			for _, i := range instance.Instances {
@@ -548,11 +556,11 @@ func (c *Client) RefreshInboundAllowRule(ctx context.Context,
 			subnets = append(subnets, subnet)
 		}
 	} else if len(destinationPrefixes) > 0 {
-		destInstances, destSubnets, err = c.getInstancesForPrefixes(ctx, account, region, destinationPrefixes, destinationVPCId)
+		destInstances, destSubnetsAws, err = c.getInstancesForPrefixes(ctx, account, region, destinationPrefixes, destinationVPCId)
 		if err != nil {
 			return nil, nil, err
 		}
-		subnets = convertSubnets(c.defaultAccountID, c.defaultRegion, account, region, destSubnets)
+		subnets = c.convertSubnets(ctx, client, c.defaultAccountID, c.defaultRegion, account, region, destSubnetsAws)
 	} else {
 		return nil, nil, nil
 	}
@@ -589,7 +597,7 @@ func (c *Client) RefreshInboundAllowRule(ctx context.Context,
 		}
 	}
 
-	return
+	return instances, subnets, nil
 }
 
 func (c *Client) getInstancesForLabels(ctx context.Context, account, region string, labels map[string]string, vpcID string) ([]awsec2types.Reservation, error) {

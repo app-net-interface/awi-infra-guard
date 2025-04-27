@@ -61,6 +61,11 @@ service CloudProviderService {
     // New RPC for getting VPC connectivity graph
     rpc GetVpcConnectivityGraph (GetVpcConnectivityGraphRequest) returns (GetVpcConnectivityGraphResponse) {}
 
+  // Retrieves the connectivity graph focused on a specific instance
+  rpc GetInstanceConnectivityGraph(GetInstanceConnectivityGraphRequest) returns (GetInstanceConnectivityGraphResponse);
+
+  // Retrieves the full connectivity graph for a VPC
+
     // New RPCs for getting nodes and edges separately
     rpc ListVpcGraphNodes (ListVpcGraphNodesRequest) returns (ListVpcGraphNodesResponse) {}
     rpc ListVpcGraphEdges (ListVpcGraphEdgesRequest) returns (ListVpcGraphEdgesResponse) {}
@@ -567,6 +572,22 @@ message GetVpcConnectivityGraphResponse {
     repeated VpcGraphEdge edges = 2;
     Error err = 3;
 }
+
+// Request message for getting the connectivity graph of a specific instance
+message GetInstanceConnectivityGraphRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    string instance_id = 4; // ID of the instance to get the graph for
+    optional Credentials creds = 5;
+  }
+  
+  // Response message containing the nodes and edges for the instance graph
+  message GetInstanceConnectivityGraphResponse {
+    repeated InstanceGraphNode nodes = 1;
+    repeated InstanceGraphEdge edges = 2;
+  }
+  
 
 // Request message for ListVpcGraphNodes
 message ListVpcGraphNodesRequest {

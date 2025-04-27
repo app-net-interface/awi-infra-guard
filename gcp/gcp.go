@@ -185,3 +185,11 @@ func (c *Client) GetVpcConnectivityGraph(ctx context.Context, params *infrapb.Ge
 	// This logic is handled by the DB strategy.
 	return nil, nil, fmt.Errorf("GetVpcConnectivityGraph not implemented directly in GCP client; use DB strategy")
 }
+
+// GetInstanceConnectivityGraph is a placeholder implementation.
+func (c *Client) GetInstanceConnectivityGraph(ctx context.Context, params *infrapb.GetInstanceConnectivityGraphRequest) ([]types.InstanceGraphNode, []types.InstanceGraphEdge, error) {
+	c.logger.Infof("GetInstanceConnectivityGraph called for GCP instance %s (Not Implemented)", params.InstanceId)
+	// TODO: Implement logic to fetch instance, network, subnetwork, routes, firewalls
+	// and build the nodes and edges specific to GCP resources.
+	return nil, nil, fmt.Errorf("GetInstanceConnectivityGraph not implemented for GCP provider")
+}

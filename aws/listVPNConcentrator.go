@@ -18,6 +18,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
@@ -116,6 +117,7 @@ func convertVPNConcentrator(vpnGateway awstypes.VpnGateway, account, region stri
 	if len(vpnGateway.VpcAttachments) > 0 {
 		vpnc.VpcID = *vpnGateway.VpcAttachments[0].VpcId
 	}
+	fmt.Printf("VPN Concentrator: %v\n", vpnc)
 
 	return vpnc
 }

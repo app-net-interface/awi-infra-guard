@@ -137,6 +137,21 @@ func convertNetworkInterfaces(defaultAccount, defaultRegion, account, region str
 			publicDNSName = aws.ToString(ni.Association.PublicDnsName)
 		}
 
+		// Determine Interface Type (primary/secondary/unattached)
+		interfaceType := "unattached" // Default if not attached
+		if ni.Attachment != nil {
+			if ni.Attachment.DeviceIndex != nil {
+				if aws.ToInt32(ni.Attachment.DeviceIndex) == 0 {
+					interfaceType = "primary"
+				} else {
+					interfaceType = "secondary"
+				}
+			} else {
+				// If attached but DeviceIndex is somehow nil, treat as secondary? Or "unknown"?
+				interfaceType = "secondary" // Assuming non-primary if index is missing but attached
+			}
+		}
+
 		networkInterface := types.NetworkInterface{
 			ID:               aws.ToString(ni.NetworkInterfaceId),
 			Name:             aws.ToString(name),
@@ -155,7 +170,7 @@ func convertNetworkInterfaces(defaultAccount, defaultRegion, account, region str
 			Description:      aws.ToString(ni.Description),
 			Labels:           getTags(ni.TagSet),
 			Status:           string(ni.Status),
-			InterfaceType:    string(ni.InterfaceType),
+			InterfaceType:    interfaceType, // Assign the determined type here
 		}
 		networkInterfaces = append(networkInterfaces, networkInterface)
 	}

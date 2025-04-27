@@ -125,6 +125,15 @@ func (c *Client) GetVpcConnectivityGraph(ctx context.Context, params *infrapb.Ge
 	return nil, nil, fmt.Errorf("GetVpcConnectivityGraph not implemented directly in Azure client; use DB strategy")
 }
 
+// GetInstanceConnectivityGraph is a placeholder implementation.
+func (c *Client) GetInstanceConnectivityGraph(ctx context.Context, params *infrapb.GetInstanceConnectivityGraphRequest) ([]types.InstanceGraphNode, []types.InstanceGraphEdge, error) {
+	c.logger.Infof("GetInstanceConnectivityGraph called for Azure VM %s (Not Implemented)", params.InstanceId)
+	// TODO: Implement logic to fetch VM, NIC, Subnet, Route Table, NSGs
+	// and build the nodes and edges specific to Azure resources.
+	// Note: Azure instance ID might need parsing to get resource group/name.
+	return nil, nil, fmt.Errorf("GetInstanceConnectivityGraph not implemented for Azure provider")
+}
+
 /*
 func getSubscriptionToken(ctx context.Context, subscriptionID string, credential *auth.DefaultAzureCredential) (string, error) {
     // Create a subscription-specific credential using azidentity

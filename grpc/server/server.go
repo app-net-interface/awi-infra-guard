@@ -701,6 +701,7 @@ func (s *Server) ListVPNConcentrators(ctx context.Context, in *infrapb.ListVPNCo
 	vpncs, err := cloudProvider.ListVPNConcentrators(ctx, in)
 	if err != nil {
 		errorMessage = err.Error()
+		s.logger.Errorf("VPN Concentrator Error message %s, provider %s", errorMessage, cloudProvider.GetName())
 	}
 	syncTime, e := cloudProvider.GetSyncTime(types.SyncTimeKey(cloudProvider.GetName(), types.VPNConcentratorType))
 	if e != nil {

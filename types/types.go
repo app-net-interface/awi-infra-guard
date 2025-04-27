@@ -234,21 +234,26 @@ func (v *Instance) GetProvider() string {
 }
 
 type PublicIP struct {
-	ID           string
-	Region       string
-	VPCID        string
-	PublicIP     string
-	InstanceId   string
-	Provider     string
-	AccountID    string
-	Type         string //Elastic(Static) or Dynamic
-	PrivateIP    string
-	Labels       map[string]string
-	SelfLink     string
-	LastSyncTime string
+	ID                 string            `json:"id,omitempty"`
+	Type               string            `json:"type,omitempty"`
+	Provider           string            `json:"provider,omitempty"`
+	AccountID          string            `json:"account_id,omitempty"`
+	VPCId              string            `json:"vpc_id,omitempty"` //
+	Region             string            `json:"region,omitempty"`
+	PublicIP           string            `json:"public_ip,omitempty"`
+	InstanceId         string            `json:"instance_id,omitempty"`
+	PrivateIP          string            `json:"private_ip,omitempty"`
+	Byoip              string            `json:"byoip,omitempty"`
+	Project            string            `json:"project,omitempty"`
+	SelfLink           string            `json:"self_link,omitempty"`
+	Labels             map[string]string `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt          *time.Time        `json:"created_at,omitempty"`
+	UpdatedAt          *time.Time        `json:"updated_at,omitempty"`
+	LastSyncTime       string            `json:"last_sync_time,omitempty"`
+	NetworkInterfaceId string            `json:"network_interface_id,omitempty"` // Added field
 }
 
-func (v PublicIP) DbId() string {
+func (v *PublicIP) DbId() string {
 	return CloudID(v.Provider, v.ID)
 }
 
@@ -261,18 +266,21 @@ func (v *PublicIP) GetProvider() string {
 }
 
 type Subnet struct {
-	Name         string
-	SubnetId     string
-	CidrBlock    string
-	VpcId        string
-	Zone         string
-	Labels       map[string]string
-	Region       string
-	Provider     string
-	AccountID    string
-	SelfLink     string
-	LastSyncTime string
-	RouteTableID []string
+	Name          string
+	SubnetId      string
+	CidrBlock     string
+	VpcId         string
+	Zone          string
+	Labels        map[string]string
+	Region        string
+	Provider      string
+	AccountID     string
+	SelfLink      string
+	RouteTableIds []string
+	NetworkAclIds []string
+	CreatedAt     *time.Time `json:"created_at,omitempty"`
+	UpdatedAt     *time.Time `json:"updated_at,omitempty"`
+	LastSyncTime  string     `json:"last_sync_time,omitempty"`
 }
 
 func (v *Subnet) DbId() string {
@@ -308,9 +316,14 @@ type RouteTable struct {
 	AccountID    string
 	Routes       []Route
 	SubnetIds    []string
-	GatewayIds   []string
+	IGWIds       []string
+	VGWIds       []string
+	NGWIds       []string
+	TGWIds       []string
 	SelfLink     string
-	LastSyncTime string
+	CreatedAt    *time.Time `json:"created_at,omitempty"`
+	UpdatedAt    *time.Time `json:"updated_at,omitempty"`
+	LastSyncTime string     `json:"last_sync_time,omitempty"`
 }
 
 func (v *RouteTable) DbId() string {
@@ -430,22 +443,23 @@ func (v *IGW) GetProvider() string {
 }
 
 type VPCEndpoint struct {
-	ID            string            `json:"id,omitempty"`
-	Name          string            `json:"name,omitempty"`
-	Provider      string            `json:"provider,omitempty"`
-	AccountID     string            `json:"account_id,omitempty"`
-	VPCId         string            `json:"vpc_id,omitempty"` //
-	Region        string            `json:"region,omitempty"` // VPC Region
-	State         string            `json:"state,omitempty"`
-	RouteTableIds string            `json:"route_table_ids,omitempty"`
-	SubnetIds     string            `json:"subnet_ids,omitempty"`
-	ServiceName   string            `json:"service_name,omitempty"`
-	Type          string            `json:"type,omitempty"`
-	Labels        map[string]string `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	CreatedAt     *time.Time        `json:"created_at,omitempty"`
-	UpdatedAt     *time.Time        `json:"updated_at,omitempty"`
-	SelfLink      string
-	LastSyncTime  string `json:"last_sync_time,omitempty"`
+	ID               string            `json:"id,omitempty"`
+	Name             string            `json:"name,omitempty"`
+	Provider         string            `json:"provider,omitempty"`
+	AccountID        string            `json:"account_id,omitempty"`
+	VPCId            string            `json:"vpc_id,omitempty"` //
+	Region           string            `json:"region,omitempty"` // VPC Region
+	State            string            `json:"state,omitempty"`
+	RouteTableIds    []string          `json:"route_table_ids,omitempty"`    // Changed from string to []string
+	SubnetIds        []string          `json:"subnet_ids,omitempty"`         // Changed from string to []string
+	SecurityGroupIDs []string          `json:"security_group_ids,omitempty"` // Added field
+	ServiceName      string            `json:"service_name,omitempty"`
+	Type             string            `json:"type,omitempty"`
+	Labels           map[string]string `json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	CreatedAt        *time.Time        `json:"created_at,omitempty"`
+	UpdatedAt        *time.Time        `json:"updated_at,omitempty"`
+	SelfLink         string
+	LastSyncTime     string `json:"last_sync_time,omitempty"`
 }
 
 func (v *VPCEndpoint) DbId() string {
@@ -560,6 +574,8 @@ type LB struct {
 	Scheme                 string
 	VPCID                  string
 	InstanceIDs            []string
+	SubnetIDs              []string
+	SecurityGroupIDs       []string
 	TargetGroupIDs         []string
 	Listeners              []LBListener
 	CrossZoneLoadBalancing bool
@@ -609,6 +625,7 @@ type NetworkInterface struct {
 	PublicDNSName    string
 	Description      string
 	Status           string
+	SelfLink         string
 	InterfaceType    string
 	LastSyncTime     string
 }
@@ -750,6 +767,27 @@ type VpcGraphEdge struct {
 	RelationshipType string `json:"relationship_type,omitempty"` // Describes the relationship (e.g., "CONTAINS", "ROUTES_TO", "ASSOCIATED_WITH")
 	Provider         string `json:"provider,omitempty"`
 	AccountId        string `json:"account_id,omitempty"`
+	Region           string `json:"region,omitempty"`
+}
+
+// InstanceGraphNode represents a resource in the Instance connectivity graph.
+type InstanceGraphNode struct {
+	ID           string            `json:"id,omitempty"`           // Unique ID of the resource
+	ResourceType string            `json:"resource_type,omitempty"` // Type of the resource
+	Name         string            `json:"name,omitempty"`         // Display name
+	Properties   map[string]string `json:"properties,omitempty"`   // Key-value pairs for display
+	Provider     string            `json:"provider,omitempty"`
+	AccountID    string            `json:"account_id,omitempty"`
+	Region       string            `json:"region,omitempty"`
+}
+
+// InstanceGraphEdge represents a connection in the Instance connectivity graph.
+type InstanceGraphEdge struct {
+	SourceNodeID     string `json:"source_node_id,omitempty"`
+	TargetNodeID     string `json:"target_node_id,omitempty"`
+	RelationshipType string `json:"relationship_type,omitempty"`
+	Provider         string `json:"provider,omitempty"`
+	AccountID        string `json:"account_id,omitempty"`
 	Region           string `json:"region,omitempty"`
 }
 

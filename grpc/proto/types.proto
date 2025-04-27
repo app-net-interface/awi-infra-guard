@@ -2,7 +2,7 @@
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
+// You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 // http:www.apache.org/licenses/LICENSE-2.0
@@ -175,7 +175,9 @@ message Subnet {
     string provider = 10;
     string account_id = 11;
     string last_sync_time = 12;
-    string self_link = 13;  
+    string self_link = 13; 
+    repeated string route_table_ids = 14; // Added: ID of the associated route table 
+    repeated string acl_ids = 15; // Added: ID of the associated ACL
     google.protobuf.Timestamp created_at = 17;
     google.protobuf.Timestamp updated_at = 18;
 }
@@ -246,15 +248,20 @@ message RouteTable {
     }
     repeated Route routes = 7;
     repeated string subnet_ids = 8;
-    repeated string gateway_ids = 9;
+    repeated string igw_ids = 9;
+    repeated string vgw_ids = 10;
+    repeated string ngw_ids = 11;
+    repeated string tgw_ids = 12;
+    repeated string instance_ids = 13;
+    repeated string network_interface_ids = 14;
 
-    map<string, string> labels = 10;
-    string project = 11;
+    map<string, string> labels = 15;
+    string project = 16;
 
-    string last_sync_time = 12;
-    string self_link = 13;
-    google.protobuf.Timestamp created_at = 17;
-    google.protobuf.Timestamp updated_at = 18;
+    string last_sync_time = 17;
+    string self_link = 18;
+    google.protobuf.Timestamp created_at = 19;
+    google.protobuf.Timestamp updated_at = 20;
 
 }
 
@@ -323,20 +330,21 @@ message Router {
     string name = 2;
     string provider = 3;
     string account_id = 4;
-    string vpc_id = 5; // 
+    string vpc_id = 5; //
     string region = 6; // VPC Region
     string state = 7;
-    string type = 8;
+    string type = 8; // e.g., Interface, Gateway
     string project = 9;
 
     string service_name = 10;
-    string route_table_ids = 11; //comma separated subnet ids
-    string subnet_ids = 12; //comma separated route table ids
+    repeated string route_table_ids = 11; // List of associated route table IDs (Gateway endpoints)
+    repeated string subnet_ids = 12; // List of associated subnet IDs (Interface endpoints)
     map<string, string> labels = 13;
     google.protobuf.Timestamp created_at = 14;
     google.protobuf.Timestamp updated_at = 15;
     string last_sync_time = 16;
     string self_link = 17;
+    repeated string security_group_ids = 18; // List of associated security group IDs (Interface endpoints)
   }
 
   message PublicIP {
@@ -356,7 +364,10 @@ message Router {
     google.protobuf.Timestamp created_at = 13;
     google.protobuf.Timestamp updated_at = 14;
     string last_sync_time = 15;
-    string self_link = 16;
+    string network_interface_id = 16; // Added: ID of the associated network interface
+    repeated string security_group_ids = 17; // Added: List of associated security group IDs
+    repeated string subnet_ids = 18; // Added: List of associated subnet IDs
+    string self_link = 19;
   }
 
   // Specifies the type of load balancer (e.g., Application, Network, Classic, Global)
@@ -376,29 +387,31 @@ message LB {
     string vpc_id = 5;
     string dns_name = 6;  
     repeated string instance_ids = 7;
-    repeated string target_group_ids = 8;
+    repeated string subnet_ids = 8;
+    repeated string security_group_ids =9;
+    repeated string target_group_ids = 10;
     message Listener {
         string listener_id = 1;
         string protocol = 2;
         int32 port = 3;
         string target_group_id = 4;
     }
-    repeated Listener listeners = 9;
-    bool cross_zone_load_balancing = 10;
-    bool access_logs_enabled = 11;
-    string logging_bucket = 12;
-    repeated string ip_addresses = 13;
-    string ip_address_type = 14;
-    string region = 15;
-    string zone = 16;
-    map<string, string> labels = 17;
-    string project = 18;
-    string provider = 19;
-    string account_id = 20;
-    string last_sync_time = 21;
-    string self_link = 22;
-    google.protobuf.Timestamp created_at = 23;
-    google.protobuf.Timestamp updated_at = 24;
+    repeated Listener listeners = 11;
+    bool cross_zone_load_balancing = 12;
+    bool access_logs_enabled = 13;
+    string logging_bucket = 14;
+    repeated string ip_addresses = 15;
+    string ip_address_type = 16;
+    string region = 17;
+    string zone = 18;
+    map<string, string> labels = 19;
+    string project = 20;
+    string provider = 21;
+    string account_id = 22;
+    string last_sync_time = 23;
+    string self_link = 24;
+    google.protobuf.Timestamp created_at = 25;
+    google.protobuf.Timestamp updated_at = 26;
 }
 
 message NetworkInterface {
@@ -453,9 +466,10 @@ message NetworkInterface {
     string account_id = 23;
     string last_sync_time = 24;
     string self_link = 25;
+    string interface_type = 26; // e.g., "eth0", "eth1"
 
-    google.protobuf.Timestamp created_at = 26;
-    google.protobuf.Timestamp updated_at = 27;
+    google.protobuf.Timestamp created_at = 27;
+    google.protobuf.Timestamp updated_at = 28;
 }
 
 message VPNConcentrator {
@@ -513,16 +527,43 @@ message VpcGraphNode {
     map<string, string> properties = 4; // Key-value pairs for essential display properties (e.g., "privateIP", "cidrBlock", "state")
     string provider = 9; // e.g., AWS, Azure, GCP
     string account_id = 10;
+    string region = 11; // Added Region
 }
 
-// Edge represents a connection or relationship between two nodes in the graph.
+// Edge represents a connection or relationship between two nodes in the VPC graph.
 message VpcGraphEdge {
     string source_node_id = 1; // ID of the source node
     string target_node_id = 2; // ID of the target node
     string relationship_type = 3; // Describes the relationship (e.g., "CONTAINS", "ROUTES_TO", "ASSOCIATED_WITH")
     string provider = 9; // e.g., AWS, Azure, GCP
     string account_id = 10;
+    string region = 11; // Added Region
 }
+
+// Node represents a resource in the Instance connectivity graph.
+// (Can be identical to VpcGraphNode initially)
+message InstanceGraphNode {
+    string id = 1; // Unique ID of the resource (e.g., instance ID, subnet ID)
+    string resource_type = 2; // Type of the resource (e.g., "Instance", "Subnet", "RouteTable")
+    string name = 3; // Display name of the resource
+    map<string, string> properties = 4; // Key-value pairs for essential display properties (e.g., "privateIP", "cidrBlock", "state")
+    string provider = 9; // e.g., AWS, Azure, GCP
+    string account_id = 10;
+    string region = 11; // Added Region
+}
+
+// Edge represents a connection or relationship between two nodes in the Instance graph.
+// (Can be identical to VpcGraphEdge initially)
+message InstanceGraphEdge {
+    string source_node_id = 1; // ID of the source node
+    string target_node_id = 2; // ID of the target node
+    string relationship_type = 3; // Describes the relationship (e.g., "CONTAINS", "ROUTES_TO", "ASSOCIATED_WITH")
+    string provider = 9; // e.g., AWS, Azure, GCP
+    string account_id = 10;
+    string region = 11; // Added Region
+}
+
+
 
 
 

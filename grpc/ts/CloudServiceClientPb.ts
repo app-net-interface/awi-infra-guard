@@ -899,6 +899,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorGetVpcConnectivityGraph);
   }
 
+  methodDescriptorGetInstanceConnectivityGraph = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/GetInstanceConnectivityGraph',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.GetInstanceConnectivityGraphRequest,
+    cloud_pb.GetInstanceConnectivityGraphResponse,
+    (request: cloud_pb.GetInstanceConnectivityGraphRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.GetInstanceConnectivityGraphResponse.deserializeBinary
+  );
+
+  getInstanceConnectivityGraph(
+    request: cloud_pb.GetInstanceConnectivityGraphRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.GetInstanceConnectivityGraphResponse>;
+
+  getInstanceConnectivityGraph(
+    request: cloud_pb.GetInstanceConnectivityGraphRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetInstanceConnectivityGraphResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.GetInstanceConnectivityGraphResponse>;
+
+  getInstanceConnectivityGraph(
+    request: cloud_pb.GetInstanceConnectivityGraphRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetInstanceConnectivityGraphResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/GetInstanceConnectivityGraph',
+        request,
+        metadata || {},
+        this.methodDescriptorGetInstanceConnectivityGraph,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/GetInstanceConnectivityGraph',
+    request,
+    metadata || {},
+    this.methodDescriptorGetInstanceConnectivityGraph);
+  }
+
   methodDescriptorListVpcGraphNodes = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/ListVpcGraphNodes',
     grpcWeb.MethodType.UNARY,

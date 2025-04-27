@@ -1305,6 +1305,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.getVpcConnectivityGraph 
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.GetInstanceConnectivityGraphRequest,
+ *   !proto.infra.GetInstanceConnectivityGraphResponse>}
+ */
+const methodDescriptor_CloudProviderService_GetInstanceConnectivityGraph = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/GetInstanceConnectivityGraph',
+  grpc.web.MethodType.UNARY,
+  proto.infra.GetInstanceConnectivityGraphRequest,
+  proto.infra.GetInstanceConnectivityGraphResponse,
+  /**
+   * @param {!proto.infra.GetInstanceConnectivityGraphRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.GetInstanceConnectivityGraphResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.GetInstanceConnectivityGraphRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.GetInstanceConnectivityGraphResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.GetInstanceConnectivityGraphResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.getInstanceConnectivityGraph =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/GetInstanceConnectivityGraph',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_GetInstanceConnectivityGraph,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.GetInstanceConnectivityGraphRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.GetInstanceConnectivityGraphResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.getInstanceConnectivityGraph =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/GetInstanceConnectivityGraph',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_GetInstanceConnectivityGraph);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.ListVpcGraphNodesRequest,
  *   !proto.infra.ListVpcGraphNodesResponse>}
  */

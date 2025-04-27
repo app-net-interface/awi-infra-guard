@@ -36,36 +36,37 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	CloudProviderService_ListAccounts_FullMethodName            = "/infra.CloudProviderService/ListAccounts"
-	CloudProviderService_ListRegions_FullMethodName             = "/infra.CloudProviderService/ListRegions"
-	CloudProviderService_ListVPC_FullMethodName                 = "/infra.CloudProviderService/ListVPC"
-	CloudProviderService_GetVPCIndex_FullMethodName             = "/infra.CloudProviderService/GetVPCIndex"
-	CloudProviderService_ListInstances_FullMethodName           = "/infra.CloudProviderService/ListInstances"
-	CloudProviderService_GetSubnet_FullMethodName               = "/infra.CloudProviderService/GetSubnet"
-	CloudProviderService_ListSubnets_FullMethodName             = "/infra.CloudProviderService/ListSubnets"
-	CloudProviderService_ListACLs_FullMethodName                = "/infra.CloudProviderService/ListACLs"
-	CloudProviderService_ListSecurityGroups_FullMethodName      = "/infra.CloudProviderService/ListSecurityGroups"
-	CloudProviderService_ListRouteTables_FullMethodName         = "/infra.CloudProviderService/ListRouteTables"
-	CloudProviderService_ListNATGateways_FullMethodName         = "/infra.CloudProviderService/ListNATGateways"
-	CloudProviderService_ListRouters_FullMethodName             = "/infra.CloudProviderService/ListRouters"
-	CloudProviderService_ListInternetGateways_FullMethodName    = "/infra.CloudProviderService/ListInternetGateways"
-	CloudProviderService_ListVPCEndpoints_FullMethodName        = "/infra.CloudProviderService/ListVPCEndpoints"
-	CloudProviderService_ListPublicIPs_FullMethodName           = "/infra.CloudProviderService/ListPublicIPs"
-	CloudProviderService_ListLBs_FullMethodName                 = "/infra.CloudProviderService/ListLBs"
-	CloudProviderService_ListNetworkInterfaces_FullMethodName   = "/infra.CloudProviderService/ListNetworkInterfaces"
-	CloudProviderService_ListKeyPairs_FullMethodName            = "/infra.CloudProviderService/ListKeyPairs"
-	CloudProviderService_ListVPNConcentrators_FullMethodName    = "/infra.CloudProviderService/ListVPNConcentrators"
-	CloudProviderService_GetVpcConnectivityGraph_FullMethodName = "/infra.CloudProviderService/GetVpcConnectivityGraph"
-	CloudProviderService_ListVpcGraphNodes_FullMethodName       = "/infra.CloudProviderService/ListVpcGraphNodes"
-	CloudProviderService_ListVpcGraphEdges_FullMethodName       = "/infra.CloudProviderService/ListVpcGraphEdges"
-	CloudProviderService_GetVPCIDForCIDR_FullMethodName         = "/infra.CloudProviderService/GetVPCIDForCIDR"
-	CloudProviderService_GetCIDRsForLabels_FullMethodName       = "/infra.CloudProviderService/GetCIDRsForLabels"
-	CloudProviderService_GetIPsForLabels_FullMethodName         = "/infra.CloudProviderService/GetIPsForLabels"
-	CloudProviderService_GetInstancesForLabels_FullMethodName   = "/infra.CloudProviderService/GetInstancesForLabels"
-	CloudProviderService_GetVPCIDWithTag_FullMethodName         = "/infra.CloudProviderService/GetVPCIDWithTag"
-	CloudProviderService_ListCloudClusters_FullMethodName       = "/infra.CloudProviderService/ListCloudClusters"
-	CloudProviderService_Summary_FullMethodName                 = "/infra.CloudProviderService/Summary"
-	CloudProviderService_SearchResources_FullMethodName         = "/infra.CloudProviderService/SearchResources"
+	CloudProviderService_ListAccounts_FullMethodName                 = "/infra.CloudProviderService/ListAccounts"
+	CloudProviderService_ListRegions_FullMethodName                  = "/infra.CloudProviderService/ListRegions"
+	CloudProviderService_ListVPC_FullMethodName                      = "/infra.CloudProviderService/ListVPC"
+	CloudProviderService_GetVPCIndex_FullMethodName                  = "/infra.CloudProviderService/GetVPCIndex"
+	CloudProviderService_ListInstances_FullMethodName                = "/infra.CloudProviderService/ListInstances"
+	CloudProviderService_GetSubnet_FullMethodName                    = "/infra.CloudProviderService/GetSubnet"
+	CloudProviderService_ListSubnets_FullMethodName                  = "/infra.CloudProviderService/ListSubnets"
+	CloudProviderService_ListACLs_FullMethodName                     = "/infra.CloudProviderService/ListACLs"
+	CloudProviderService_ListSecurityGroups_FullMethodName           = "/infra.CloudProviderService/ListSecurityGroups"
+	CloudProviderService_ListRouteTables_FullMethodName              = "/infra.CloudProviderService/ListRouteTables"
+	CloudProviderService_ListNATGateways_FullMethodName              = "/infra.CloudProviderService/ListNATGateways"
+	CloudProviderService_ListRouters_FullMethodName                  = "/infra.CloudProviderService/ListRouters"
+	CloudProviderService_ListInternetGateways_FullMethodName         = "/infra.CloudProviderService/ListInternetGateways"
+	CloudProviderService_ListVPCEndpoints_FullMethodName             = "/infra.CloudProviderService/ListVPCEndpoints"
+	CloudProviderService_ListPublicIPs_FullMethodName                = "/infra.CloudProviderService/ListPublicIPs"
+	CloudProviderService_ListLBs_FullMethodName                      = "/infra.CloudProviderService/ListLBs"
+	CloudProviderService_ListNetworkInterfaces_FullMethodName        = "/infra.CloudProviderService/ListNetworkInterfaces"
+	CloudProviderService_ListKeyPairs_FullMethodName                 = "/infra.CloudProviderService/ListKeyPairs"
+	CloudProviderService_ListVPNConcentrators_FullMethodName         = "/infra.CloudProviderService/ListVPNConcentrators"
+	CloudProviderService_GetVpcConnectivityGraph_FullMethodName      = "/infra.CloudProviderService/GetVpcConnectivityGraph"
+	CloudProviderService_GetInstanceConnectivityGraph_FullMethodName = "/infra.CloudProviderService/GetInstanceConnectivityGraph"
+	CloudProviderService_ListVpcGraphNodes_FullMethodName            = "/infra.CloudProviderService/ListVpcGraphNodes"
+	CloudProviderService_ListVpcGraphEdges_FullMethodName            = "/infra.CloudProviderService/ListVpcGraphEdges"
+	CloudProviderService_GetVPCIDForCIDR_FullMethodName              = "/infra.CloudProviderService/GetVPCIDForCIDR"
+	CloudProviderService_GetCIDRsForLabels_FullMethodName            = "/infra.CloudProviderService/GetCIDRsForLabels"
+	CloudProviderService_GetIPsForLabels_FullMethodName              = "/infra.CloudProviderService/GetIPsForLabels"
+	CloudProviderService_GetInstancesForLabels_FullMethodName        = "/infra.CloudProviderService/GetInstancesForLabels"
+	CloudProviderService_GetVPCIDWithTag_FullMethodName              = "/infra.CloudProviderService/GetVPCIDWithTag"
+	CloudProviderService_ListCloudClusters_FullMethodName            = "/infra.CloudProviderService/ListCloudClusters"
+	CloudProviderService_Summary_FullMethodName                      = "/infra.CloudProviderService/Summary"
+	CloudProviderService_SearchResources_FullMethodName              = "/infra.CloudProviderService/SearchResources"
 )
 
 // CloudProviderServiceClient is the client API for CloudProviderService service.
@@ -95,6 +96,8 @@ type CloudProviderServiceClient interface {
 	ListVPNConcentrators(ctx context.Context, in *ListVPNConcentratorsRequest, opts ...grpc.CallOption) (*ListVPNConcentratorsResponse, error)
 	// New RPC for getting VPC connectivity graph
 	GetVpcConnectivityGraph(ctx context.Context, in *GetVpcConnectivityGraphRequest, opts ...grpc.CallOption) (*GetVpcConnectivityGraphResponse, error)
+	// Retrieves the connectivity graph focused on a specific instance
+	GetInstanceConnectivityGraph(ctx context.Context, in *GetInstanceConnectivityGraphRequest, opts ...grpc.CallOption) (*GetInstanceConnectivityGraphResponse, error)
 	// New RPCs for getting nodes and edges separately
 	ListVpcGraphNodes(ctx context.Context, in *ListVpcGraphNodesRequest, opts ...grpc.CallOption) (*ListVpcGraphNodesResponse, error)
 	ListVpcGraphEdges(ctx context.Context, in *ListVpcGraphEdgesRequest, opts ...grpc.CallOption) (*ListVpcGraphEdgesResponse, error)
@@ -317,6 +320,16 @@ func (c *cloudProviderServiceClient) GetVpcConnectivityGraph(ctx context.Context
 	return out, nil
 }
 
+func (c *cloudProviderServiceClient) GetInstanceConnectivityGraph(ctx context.Context, in *GetInstanceConnectivityGraphRequest, opts ...grpc.CallOption) (*GetInstanceConnectivityGraphResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetInstanceConnectivityGraphResponse)
+	err := c.cc.Invoke(ctx, CloudProviderService_GetInstanceConnectivityGraph_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cloudProviderServiceClient) ListVpcGraphNodes(ctx context.Context, in *ListVpcGraphNodesRequest, opts ...grpc.CallOption) (*ListVpcGraphNodesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListVpcGraphNodesResponse)
@@ -444,6 +457,8 @@ type CloudProviderServiceServer interface {
 	ListVPNConcentrators(context.Context, *ListVPNConcentratorsRequest) (*ListVPNConcentratorsResponse, error)
 	// New RPC for getting VPC connectivity graph
 	GetVpcConnectivityGraph(context.Context, *GetVpcConnectivityGraphRequest) (*GetVpcConnectivityGraphResponse, error)
+	// Retrieves the connectivity graph focused on a specific instance
+	GetInstanceConnectivityGraph(context.Context, *GetInstanceConnectivityGraphRequest) (*GetInstanceConnectivityGraphResponse, error)
 	// New RPCs for getting nodes and edges separately
 	ListVpcGraphNodes(context.Context, *ListVpcGraphNodesRequest) (*ListVpcGraphNodesResponse, error)
 	ListVpcGraphEdges(context.Context, *ListVpcGraphEdgesRequest) (*ListVpcGraphEdgesResponse, error)
@@ -522,6 +537,9 @@ func (UnimplementedCloudProviderServiceServer) ListVPNConcentrators(context.Cont
 }
 func (UnimplementedCloudProviderServiceServer) GetVpcConnectivityGraph(context.Context, *GetVpcConnectivityGraphRequest) (*GetVpcConnectivityGraphResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVpcConnectivityGraph not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) GetInstanceConnectivityGraph(context.Context, *GetInstanceConnectivityGraphRequest) (*GetInstanceConnectivityGraphResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInstanceConnectivityGraph not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) ListVpcGraphNodes(context.Context, *ListVpcGraphNodesRequest) (*ListVpcGraphNodesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVpcGraphNodes not implemented")
@@ -926,6 +944,24 @@ func _CloudProviderService_GetVpcConnectivityGraph_Handler(srv interface{}, ctx 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudProviderService_GetInstanceConnectivityGraph_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInstanceConnectivityGraphRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).GetInstanceConnectivityGraph(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudProviderService_GetInstanceConnectivityGraph_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).GetInstanceConnectivityGraph(ctx, req.(*GetInstanceConnectivityGraphRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CloudProviderService_ListVpcGraphNodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListVpcGraphNodesRequest)
 	if err := dec(in); err != nil {
@@ -1192,6 +1228,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVpcConnectivityGraph",
 			Handler:    _CloudProviderService_GetVpcConnectivityGraph_Handler,
+		},
+		{
+			MethodName: "GetInstanceConnectivityGraph",
+			Handler:    _CloudProviderService_GetInstanceConnectivityGraph_Handler,
 		},
 		{
 			MethodName: "ListVpcGraphNodes",

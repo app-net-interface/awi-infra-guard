@@ -32,12 +32,12 @@ logLevel: INFO
 providers:
   - name: aws
     type: cloud
-  - name: azure
-    type: cloud
-  - name: gcp
-    type: cloud
-
-#Support for K8S
+#  - name: azure
+#    type: cloud
+#  - name: gcp
+#    type: cloud
+#
+##Support for K8S
 kubernetesSupported: true
 
 # Cloud resource synchronization configuration
@@ -51,6 +51,7 @@ syncConfig:
     cloud:
       - region
       - vpc
+      - routeTable
       - instance
       - subnet
       - securitygroup
@@ -59,7 +60,7 @@ syncConfig:
       - natGateway
       - internetGateway
       - vpcEndpoint
-      - vpnConnection
+      - vpnConcentrator
       - publicIP
       - acl
       - apiGateway

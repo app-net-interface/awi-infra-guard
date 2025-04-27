@@ -2238,6 +2238,73 @@ export namespace GetVpcConnectivityGraphResponse {
   }
 }
 
+export class GetInstanceConnectivityGraphRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): GetInstanceConnectivityGraphRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): GetInstanceConnectivityGraphRequest;
+
+  getRegion(): string;
+  setRegion(value: string): GetInstanceConnectivityGraphRequest;
+
+  getInstanceId(): string;
+  setInstanceId(value: string): GetInstanceConnectivityGraphRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetInstanceConnectivityGraphRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetInstanceConnectivityGraphRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetInstanceConnectivityGraphRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetInstanceConnectivityGraphRequest): GetInstanceConnectivityGraphRequest.AsObject;
+  static serializeBinaryToWriter(message: GetInstanceConnectivityGraphRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetInstanceConnectivityGraphRequest;
+  static deserializeBinaryFromReader(message: GetInstanceConnectivityGraphRequest, reader: jspb.BinaryReader): GetInstanceConnectivityGraphRequest;
+}
+
+export namespace GetInstanceConnectivityGraphRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    instanceId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 5,
+  }
+}
+
+export class GetInstanceConnectivityGraphResponse extends jspb.Message {
+  getNodesList(): Array<types_pb.InstanceGraphNode>;
+  setNodesList(value: Array<types_pb.InstanceGraphNode>): GetInstanceConnectivityGraphResponse;
+  clearNodesList(): GetInstanceConnectivityGraphResponse;
+  addNodes(value?: types_pb.InstanceGraphNode, index?: number): types_pb.InstanceGraphNode;
+
+  getEdgesList(): Array<types_pb.InstanceGraphEdge>;
+  setEdgesList(value: Array<types_pb.InstanceGraphEdge>): GetInstanceConnectivityGraphResponse;
+  clearEdgesList(): GetInstanceConnectivityGraphResponse;
+  addEdges(value?: types_pb.InstanceGraphEdge, index?: number): types_pb.InstanceGraphEdge;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetInstanceConnectivityGraphResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetInstanceConnectivityGraphResponse): GetInstanceConnectivityGraphResponse.AsObject;
+  static serializeBinaryToWriter(message: GetInstanceConnectivityGraphResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetInstanceConnectivityGraphResponse;
+  static deserializeBinaryFromReader(message: GetInstanceConnectivityGraphResponse, reader: jspb.BinaryReader): GetInstanceConnectivityGraphResponse;
+}
+
+export namespace GetInstanceConnectivityGraphResponse {
+  export type AsObject = {
+    nodesList: Array<types_pb.InstanceGraphNode.AsObject>,
+    edgesList: Array<types_pb.InstanceGraphEdge.AsObject>,
+  }
+}
+
 export class ListVpcGraphNodesRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListVpcGraphNodesRequest;

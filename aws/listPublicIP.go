@@ -39,8 +39,8 @@ func (c *Client) ListPublicIPs(ctx context.Context, params *infrapb.ListPublicIP
 		accountId = c.defaultAccountID
 	}
 
-	builder := newFilterBuilder()
-	filters := builder.build()
+	//builder := newFilterBuilder()
+	//filters := builder.build()
 
 	c.logger.Infof("*******Requesting Public IP for account id %s ****", accountId)
 	if params.GetRegion() == "" || params.GetRegion() == "all" {
@@ -60,7 +60,7 @@ func (c *Client) ListPublicIPs(ctx context.Context, params *infrapb.ListPublicIP
 			wg.Add(1)
 			go func(regionName string) {
 				defer wg.Done()
-				pips, err := c.getPublicIPForRegion(ctx, regionName, filters)
+				pips, err := c.getPublicIPForRegion(ctx, regionName)
 				resultChannel <- regionResult{
 					region: regionName,
 					pips:   pips,
@@ -89,130 +89,172 @@ func (c *Client) ListPublicIPs(ctx context.Context, params *infrapb.ListPublicIP
 		}
 		return allPublicIPs, nil
 	}
-	return c.getPublicIPForRegion(ctx, params.Region, filters)
+	return c.getPublicIPForRegion(ctx, params.Region)
 }
 
-func (c *Client) getPublicIPForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.PublicIP, error) {
+func (c *Client) getPublicIPForRegion(ctx context.Context, regionName string) ([]types.PublicIP, error) {
 	client, err := c.getEC2Client(ctx, c.accountID, regionName)
 	if err != nil {
 		return nil, err
 	}
-	// Call DescribeVpcs operation
-	resp, err := client.DescribeAddresses(ctx, &ec2.DescribeAddressesInput{
-		Filters: filters,
-	})
+	// Call DescribeAddresses - Do not pass instance filters here
+	resp, err := client.DescribeAddresses(ctx, &ec2.DescribeAddressesInput{})
 	if err != nil {
-		return nil, fmt.Errorf("could not get AWS public IPs: %v", err)
+		// Log the specific error
+		c.logger.Errorf("DescribeAddresses failed for region %s: %v", regionName, err)
+		return nil, fmt.Errorf("could not get AWS public IPs for region %s: %w", regionName, err)
 	}
+
+	// Call getInstances - decide if ANY filters are needed here. For now, call without filters.
 	builder := newFilterBuilder()
-	builder.filters = filters
-	reservations, err := c.getInstances(ctx, c.accountID, regionName, builder)
+	// If specific instance filters ARE needed (e.g., only running), add them here:
+	// builder.add("instance-state-name", "running")
+	reservations, err := c.getInstances(ctx, c.accountID, regionName, builder) // Pass builder directly
 	if err != nil {
-		c.logger.Warnf("Failed to get instances %s", err)
+		// Log warning but continue, as we might still process EIPs without instance correlation
+		c.logger.Warnf("Failed to get instances in region %s: %v. VPCId might be missing for some EIPs.", regionName, err)
+		reservations = []awstypes.Reservation{} // Ensure reservations is an empty slice, not nil
 	}
 	return c.convertPublicIPs(c.accountID, regionName, resp.Addresses, reservations)
 }
 
 func (c *Client) convertPublicIPs(account, region string, addresses []awstypes.Address, reservations []awstypes.Reservation) ([]types.PublicIP, error) {
 
-	staticIPs := make([]types.PublicIP, 0, len(addresses))
-	var instancePublicIPs []types.PublicIP
-	var allPublicIPs []types.PublicIP
-	for _, address := range addresses {
+	allPublicIPsMap := make(map[string]types.PublicIP) // Use PublicIP address as key
 
-		staticIPs = append(staticIPs, types.PublicIP{
-			ID:         aws.ToString(address.AllocationId),
-			Region:     region,
-			InstanceId: aws.ToString(address.InstanceId),
-			PublicIP:   aws.ToString(address.PublicIp),
-			Provider:   providerName,
-			AccountID:  c.accountID,
-			Type:       "static",
-			Labels:     convertTags(address.Tags),
-			PrivateIP:  aws.ToString(address.PrivateIpAddress),
-			SelfLink:   fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#ElasticIpDetails:AllocationId=%s", region, region, aws.ToString(address.AllocationId)),
-		})
-	}
+	// 1. Process instance data to get VPCId/InstanceId/PrivateIP associated with ANY public IPs found
+	instanceDetailsByPublicIP := make(map[string]struct {
+		VPCId      string
+		InstanceId string
+		PrivateIP  string // Store the private IP associated with the specific ENI having the public IP
+	})
 
 	for _, reservation := range reservations {
-		if len(reservation.Instances) == 0 {
-			continue
-		}
-		inst := reservation.Instances[0]
-		publicIP := aws.ToString(inst.PublicIpAddress)
+		for _, inst := range reservation.Instances {
+			instanceID := aws.ToString(inst.InstanceId)
+			vpcId := ""
+			if inst.VpcId != nil {
+				vpcId = *inst.VpcId
+			}
 
-		var vpcId string
-		if inst.VpcId != nil {
-			vpcId = *inst.VpcId
-		}
+			// Iterate through Network Interfaces attached to the instance
+			for _, eni := range inst.NetworkInterfaces {
+				var publicIP, privateIP string
 
-		if publicIP != "" {
-			instancePublicIPs = append(instancePublicIPs, types.PublicIP{
-				ID:         "0",
-				VPCID:      vpcId,
-				Region:     region,
-				InstanceId: aws.ToString(inst.InstanceId),
-				PublicIP:   publicIP,
-				PrivateIP:  aws.ToString(inst.PrivateIpAddress),
-				Provider:   providerName,
-				AccountID:  account,
-				Type:       "ephimeral",
-			})
-		}
-	}
-	allPublicIPs = mergePublicIPs(staticIPs, instancePublicIPs)
+				// Check for associated public IP on this ENI
+				if eni.Association != nil && eni.Association.PublicIp != nil {
+					publicIP = aws.ToString(eni.Association.PublicIp)
+				}
 
-	/*
-		for _, staticIP := range staticIPs {
-			fmt.Printf("******* Elastic ip %v VPC %s Region %s Instance %s Account %s ****** \n", staticIP.PublicIP, staticIP.VPCID, staticIP.Region, staticIP.InstanceId, staticIP.AccountID)
-		}
-		for _, instancePublicIP := range instancePublicIPs {
-			fmt.Printf("******* Instance Public IP %v Region %s VPC %s Instance %s Account %s ****** \n", instancePublicIP.PublicIP, instancePublicIP.VPCID, instancePublicIP.Region, instancePublicIP.InstanceId, instancePublicIP.AccountID)
-		}
+				// If no public IP on association, check the main PublicIpAddress field (primary ENI case)
+				if publicIP == "" && aws.ToString(inst.PublicIpAddress) != "" {
+					if eni.Attachment != nil && aws.ToInt32(eni.Attachment.DeviceIndex) == 0 {
+						publicIP = aws.ToString(inst.PublicIpAddress)
+					}
+				}
 
+				if publicIP == "" {
+					continue // No public IP found for this specific ENI
+				}
 
-		for _, publicIP := range allPublicIPs {
-			fmt.Printf("******* After Merge Public IP %v VPC %s Region %s Instance %s Account %s ****** \n", publicIP.PublicIP, publicIP.VPCID, publicIP.Region, publicIP.InstanceId, publicIP.AccountID)
-		}
-	*/
+				// Find the primary private IP for this specific ENI
+				if len(eni.PrivateIpAddresses) > 0 {
+					for _, privAddr := range eni.PrivateIpAddresses {
+						if aws.ToBool(privAddr.Primary) {
+							privateIP = aws.ToString(privAddr.PrivateIpAddress)
+							break // Found primary private IP for this ENI
+						}
+					}
+					// Fallback if no primary is marked (shouldn't happen often)
+					if privateIP == "" {
+						privateIP = aws.ToString(eni.PrivateIpAddresses[0].PrivateIpAddress)
+					}
+				}
 
-	return allPublicIPs, nil
-}
-
-// Merge static(elastic) and dynamic(instance) public IPs
-func mergePublicIPs(elasticIPs []types.PublicIP, instanceIPs []types.PublicIP) []types.PublicIP {
-	// Create a map to keep track of unique items in slice1 by Name
-	itemMap := make(map[string]types.PublicIP)
-
-	// Populate the map with items from slice1
-	for _, item := range elasticIPs {
-		itemMap[item.PublicIP] = item
-	}
-
-	// Process items in slice2
-	var remainingSlice []types.PublicIP
-	for _, instanceIP := range instanceIPs {
-		if existing, found := itemMap[instanceIP.PublicIP]; found {
-			// If duplicate is found, update the entry
-			//fmt.Printf("*****Found matching entry for %s: --%s--%s \n", existing.PublicIP, existing.VPCID, instanceIP.VPCID)
-			existing.VPCID = instanceIP.VPCID
-			existing.Region = instanceIP.Region
-			existing.PrivateIP = instanceIP.PrivateIP
-			itemMap[instanceIP.PublicIP] = existing
-
-		} else {
-			remainingSlice = append(remainingSlice, instanceIP)
+				// Store details keyed by the public IP found on this ENI
+				if _, exists := instanceDetailsByPublicIP[publicIP]; !exists {
+					instanceDetailsByPublicIP[publicIP] = struct {
+						VPCId      string
+						InstanceId string
+						PrivateIP  string
+					}{
+						VPCId:      vpcId,
+						InstanceId: instanceID,
+						PrivateIP:  privateIP,
+					}
+				}
+			}
 		}
 	}
 
-	// Convert the map back to a slice for slice1
-	elasticIPs = []types.PublicIP{}
-	for _, item := range itemMap {
-		//fmt.Printf("Account Id = %s Public IP = %s VPC ID = %s \n", item.AccountID, item.PublicIP, item.VPCID)
-		elasticIPs = append(elasticIPs, item)
+	// 2. Process Elastic IPs (addresses)
+	for _, address := range addresses {
+		publicIP := aws.ToString(address.PublicIp)
+		if publicIP == "" {
+			continue // Skip invalid EIP entries
+		}
+
+		instanceID := aws.ToString(address.InstanceId) // Instance associated with EIP from DescribeAddresses
+		vpcID := ""                                    // Default VPC ID is empty
+		privateIP := aws.ToString(address.PrivateIpAddress) // Private IP from EIP association info
+		ipType := "static" // Assume static (Elastic IP)
+
+		// Check if this EIP's public IP was found on an instance's ENI
+		if details, found := instanceDetailsByPublicIP[publicIP]; found {
+			vpcID = details.VPCId
+			if details.PrivateIP != "" {
+				privateIP = details.PrivateIP
+			}
+
+			// Sanity check InstanceId (EIP association vs Instance data)
+			if instanceID != "" && details.InstanceId != "" && instanceID != details.InstanceId {
+				c.logger.Warnf("Mismatch: EIP %s associated with instance %s (from DescribeAddresses), but instance details map shows instance %s for region %s", publicIP, instanceID, details.InstanceId, region)
+				instanceID = details.InstanceId
+			} else if instanceID == "" && details.InstanceId != "" {
+				instanceID = details.InstanceId
+			}
+		} else if instanceID != "" {
+			c.logger.Warnf("Elastic IP %s associated with instance %s (per DescribeAddresses), but instance details not found or public IP not detected on instance's ENIs in DescribeInstances result for region %s. VPCId will be missing.", publicIP, instanceID, region)
+		}
+
+		allPublicIPsMap[publicIP] = types.PublicIP{
+			ID:                 aws.ToString(address.AllocationId),
+			Region:             region,
+			InstanceId:         instanceID,
+			PublicIP:           publicIP,
+			Provider:           providerName,
+			AccountID:          account,
+			Type:               ipType,
+			Labels:             convertTags(address.Tags),
+			PrivateIP:          privateIP,
+			VPCId:              vpcID,
+			NetworkInterfaceId: aws.ToString(address.NetworkInterfaceId),
+		}
 	}
 
-	// Append all remaining unique entries of slice2 to slice1
-	elasticIPs = append(elasticIPs, remainingSlice...)
-	return elasticIPs
+	// 3. Add any remaining ephemeral IPs (found on instances but not matching any EIP)
+	for publicIP, details := range instanceDetailsByPublicIP {
+		if _, exists := allPublicIPsMap[publicIP]; !exists {
+			allPublicIPsMap[publicIP] = types.PublicIP{
+				ID:                 details.InstanceId + "_" + publicIP,
+				VPCId:              details.VPCId,
+				Region:             region,
+				InstanceId:         details.InstanceId,
+				PublicIP:           publicIP,
+				PrivateIP:          details.PrivateIP,
+				Provider:           providerName,
+				AccountID:          account,
+				Type:               "ephemeral",
+				NetworkInterfaceId: "",
+			}
+		}
+	}
+
+	// 4. Convert map back to slice
+	finalPublicIPs := make([]types.PublicIP, 0, len(allPublicIPsMap))
+	for _, pip := range allPublicIPsMap {
+		finalPublicIPs = append(finalPublicIPs, pip)
+	}
+
+	return finalPublicIPs, nil
 }

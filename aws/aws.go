@@ -640,6 +640,14 @@ func (c *Client) GetVpcConnectivityGraph(ctx context.Context, params *infrapb.Ge
 	return nil, nil, fmt.Errorf("GetVpcConnectivityGraph not implemented directly in AWS client; use DB strategy")
 }
 
+// GetInstanceConnectivityGraph is a placeholder implementation.
+func (c *Client) GetInstanceConnectivityGraph(ctx context.Context, params *infrapb.GetInstanceConnectivityGraphRequest) ([]types.InstanceGraphNode, []types.InstanceGraphEdge, error) {
+	c.logger.Infof("GetInstanceConnectivityGraph called for AWS instance %s (Not Implemented)", params.InstanceId)
+	// TODO: Implement logic to fetch instance, subnet, route table, gateways, SGs
+	// and build the nodes and edges specific to AWS resources.
+	return nil, nil, fmt.Errorf("GetInstanceConnectivityGraph not implemented for AWS provider")
+}
+
 func mapToTagSpecfication(m map[string]string, resourceType awstypes.ResourceType) awstypes.TagSpecification {
 	tagsSpec := awstypes.TagSpecification{
 		ResourceType: resourceType,

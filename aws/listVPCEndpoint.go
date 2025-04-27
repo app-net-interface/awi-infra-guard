@@ -20,7 +20,6 @@ package aws
 import (
 	"context"
 	"fmt"
-	"strings"
 	"sync"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
@@ -104,7 +103,7 @@ func (c *Client) getVPCEsForRegion(ctx context.Context, regionName string, filte
 			return nil, err
 		}
 		for _, vep := range page.VpcEndpoints {
-			var name, state, vepType, serviceName, subnetIds, routeTableIds string
+			var name, state, vepType, serviceName string
 			labels := make(map[string]string)
 
 			switch vep.VpcEndpointType {
@@ -128,25 +127,30 @@ func (c *Client) getVPCEsForRegion(ctx context.Context, regionName string, filte
 			}
 			state = string(vep.State)
 
-			//var subnetIds, routeTableIds []string
-			subnetIds = strings.Join(vep.SubnetIds, ",")
-			routeTableIds = strings.Join(vep.RouteTableIds, ",")
+			 // Extract Security Group IDs
+			var securityGroupIDs []string
+			for _, group := range vep.Groups {
+				if group.GroupId != nil {
+					securityGroupIDs = append(securityGroupIDs, *group.GroupId)
+				}
+			}
 
 			veps = append(veps, types.VPCEndpoint{
-				ID:            *vep.VpcEndpointId,
-				Provider:      c.GetName(),
-				AccountID:     *vep.OwnerId,
-				Name:          name,
-				VPCId:         *vep.VpcId,
-				Region:        regionName,
-				State:         state,
-				Labels:        labels,
-				Type:          vepType,
-				ServiceName:   serviceName,
-				SubnetIds:     subnetIds,
-				RouteTableIds: routeTableIds,
-				CreatedAt:     vep.CreationTimestamp,
-				SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#EndpointDetails:vpcEndpointId=%s", regionName, regionName, *vep.VpcEndpointId),
+				ID:               *vep.VpcEndpointId,
+				Provider:         c.GetName(),
+				AccountID:        *vep.OwnerId,
+				Name:             name,
+				VPCId:            *vep.VpcId,
+				Region:           regionName,
+				State:            state,
+				Labels:           labels,
+				Type:             vepType,
+				ServiceName:      serviceName,
+				SubnetIds:        vep.SubnetIds,      // Assign the slice directly
+				RouteTableIds:    vep.RouteTableIds,    // Assign the slice directly
+				SecurityGroupIDs: securityGroupIDs,   // Assign the extracted slice
+				CreatedAt:        vep.CreationTimestamp,
+				SelfLink:         fmt.Sprintf("https://%s.console.aws.amazon.com/vpcconsole/home?region=%s#EndpointDetails:vpcEndpointId=%s", regionName, regionName, *vep.VpcEndpointId),
 			})
 		}
 	}
