@@ -390,22 +390,43 @@ func (c *Client) getEKSClient(_ context.Context, account, region string) (*eks.C
 	return client.eksClient, nil
 }
 
-func (c *Client) getAllRegions(ctx context.Context) ([]awstypes.Region, error) {
-	var client *ec2.Client
-	var err error
-	if c.creds != nil && c.creds.GetRoleBasedAuth() != nil && c.creds.GetRoleBasedAuth().GetAwsRole().RoleArn != "" {
-		client, err = c.getEC2ClientFromRole(ctx, "")
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		client = c.defaultAWSClient.ec2Client
-	}
-	allRegions, err := client.DescribeRegions(ctx, &ec2.DescribeRegionsInput{})
+// getAllRegions retrieves all enabled regions for the AWS account.
+// It accepts operationalAccountID to ensure it uses the correct context for client creation
+// and returns the AWS SDK's region type.
+func (c *Client) getAllRegions(ctx context.Context, operationalAccountID string) ([]awstypes.Region, error) {
+	c.logger.Debugf("[AccountID: %s] getAllRegions called.", operationalAccountID)
+
+	// Get an EC2 client configured for the operationalAccountID.
+	// DescribeRegions is a global call, but getEC2Client needs a region.
+	// Using c.defaultRegion is fine here.
+	// c.getEC2Client must use the operationalAccountID.
+	ec2ClientService, err := c.getEC2Client(ctx, operationalAccountID, c.defaultRegion)
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getAllRegions: Failed to get EC2 client: %v", operationalAccountID, err)
+		return nil, fmt.Errorf("failed to get EC2 client for account %s: %w", operationalAccountID, err)
+	}
+
+	c.logger.Debugf("[AccountID: %s] getAllRegions: Calling DescribeRegions API.", operationalAccountID)
+	output, err := ec2ClientService.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
+		AllRegions: aws.Bool(false), // Typically, you want only opt-in regions
+	})
+	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getAllRegions: DescribeRegions API call failed: %v", operationalAccountID, err)
 		return nil, err
 	}
-	return allRegions.Regions, nil
+
+	// Filter for enabled regions before returning, still returning []awstypes.Region
+	var enabledSdkRegions []awstypes.Region
+	for _, sdkRegion := range output.Regions {
+		if sdkRegion.OptInStatus != nil && *sdkRegion.OptInStatus != "opt-in-not-required" && *sdkRegion.OptInStatus != "opted-in" {
+			c.logger.Debugf("[AccountID: %s] getAllRegions: Skipping region '%s' due to OptInStatus: '%s'", operationalAccountID, aws.ToString(sdkRegion.RegionName), *sdkRegion.OptInStatus)
+			continue
+		}
+		enabledSdkRegions = append(enabledSdkRegions, sdkRegion)
+	}
+
+	c.logger.Infof("[AccountID: %s] getAllRegions: Found %d enabled SDK regions.", operationalAccountID, len(enabledSdkRegions))
+	return enabledSdkRegions, nil
 }
 
 func (c *Client) GetVPCIDForCIDR(ctx context.Context, params *infrapb.GetVPCIDForCIDRRequest) (string, error) {
@@ -570,6 +591,7 @@ func (c *Client) getSubnets(ctx context.Context, account, region string, builder
 	if err != nil {
 		return nil, err
 	}
+
 	input := &ec2.DescribeSubnetsInput{
 		Filters: builder.build(),
 	}

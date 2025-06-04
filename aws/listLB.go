@@ -25,7 +25,7 @@ import (
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types" // Assuming this is for EC2 filters, not directly used for LB listing here
 	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	elbTypes "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
 	elbv2 "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
@@ -33,15 +33,34 @@ import (
 )
 
 func (c *Client) ListLBs(ctx context.Context, input *infrapb.ListLBsRequest) ([]types.LB, error) {
-	c.creds = input.Creds
-	c.accountID = input.AccountId
-
-	builder := newFilterBuilder()
-	builder.withVPC(input.GetVpcId())
-	for k, v := range input.GetLabels() {
-		builder.withTag(k, v)
+	if c.accountID != "" && input.AccountId != "" && c.accountID != input.AccountId {
+		panic(fmt.Sprintf("ListLBs called with different AccountID: %s, expected: %s", input.AccountId, c.accountID))
 	}
-	filters := builder.build()
+
+	operationalAccountID := input.GetAccountId()
+	if operationalAccountID == "" && c.accountID != "" {
+		c.logger.Infof("[AccountID: %s] ListLBs: input.AccountId is empty, using client's default/initial accountID: %s", c.accountID, c.accountID)
+		operationalAccountID = c.accountID
+	}
+	if operationalAccountID == "" {
+		c.logger.Errorf("ListLBs: operationalAccountID is empty and c.accountID is also empty. Cannot proceed.")
+		return nil, fmt.Errorf("account ID is required but was not provided and no default is set")
+	}
+	c.logger.Debugf("[AccountID: %s] ListLBs called with VPC ID: %s, Region: %s", operationalAccountID, input.GetVpcId(), input.GetRegion())
+
+	// REMOVED: c.creds = input.Creds
+	// REMOVED: c.accountID = input.AccountId
+
+	// Note: AWS Load Balancers (ALB/NLB/Classic) are not directly filtered by EC2-style filters (awsTypes.Filter)
+	// in their Describe API calls. Filtering is typically done post-fetch based on attributes like VPC ID or tags.
+	// The `filters` variable created by `newFilterBuilder` might not be directly usable with ELB/ELBv2 Describe calls.
+	// We will keep it for now in case `applyFilters` uses it, but be aware of this.
+	builder := newFilterBuilder()
+	builder.withVPC(input.GetVpcId()) // This will be used in applyFilters if implemented for VPC
+	for k, v := range input.GetLabels() {
+		builder.withTag(k, v) // This will be used in applyFilters if implemented for Tags
+	}
+	filtersForApply := builder.build() // Renamed to clarify its use
 
 	if input.GetRegion() == "" || input.GetRegion() == "all" {
 		var (
@@ -51,112 +70,182 @@ func (c *Client) ListLBs(ctx context.Context, input *infrapb.ListLBsRequest) ([]
 			resultChannel = make(chan regionResult)
 		)
 
-		regions, err := c.getAllRegions(ctx)
+		// Pass operationalAccountID to getAllRegions
+		regions, err := c.getAllRegions(ctx, operationalAccountID)
 		if err != nil {
-			c.logger.Errorf("Unable to describe regions, %v", err)
+			c.logger.Errorf("[AccountID: %s] ListLBs: Unable to describe regions, %v", operationalAccountID, err)
 			return nil, err
 		}
-
-		for _, region := range regions {
+		c.logger.Debugf("[AccountID: %s] ListLBs: Iterating %d regions.", operationalAccountID, len(regions))
+		for _, region := range regions { // region is awstypes.Region (from EC2 DescribeRegions)
 			wg.Add(1)
-			go func(regionName string) {
+			// Pass operationalAccountID to the goroutine
+			go func(regionName string, accID string) {
 				defer wg.Done()
-				regLBs, err := c.getLBsForRegion(ctx, regionName, filters)
+				c.logger.Debugf("[AccountID: %s] ListLBs: Goroutine for region %s started.", accID, regionName)
+				// Pass accID (operationalAccountID) to getLBsForRegion
+				// Pass filtersForApply for post-fetch filtering
+				regLBs, err := c.getLBsForRegion(ctx, regionName, accID, filtersForApply)
 				resultChannel <- regionResult{
 					region: regionName,
 					lbs:    regLBs,
 					err:    err,
 				}
-			}(*region.RegionName)
+			}(*region.RegionName, operationalAccountID)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
+			c.logger.Debugf("[AccountID: %s] ListLBs: All region goroutines finished, resultChannel closed.", operationalAccountID)
 		}()
 
 		for result := range resultChannel {
 			if result.err != nil {
-				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				c.logger.Infof("[AccountID: %s] ListLBs: Error in region %s: %v", operationalAccountID, result.region, result.err)
 				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
 			} else {
 				allLBs = append(allLBs, result.lbs...)
 			}
 		}
 
-		c.logger.Infof("In account %s Found %d LBs across %d regions", c.accountID, len(allLBs), len(regions))
+		c.logger.Infof("[AccountID: %s] ListLBs: Found %d LBs across %d regions", operationalAccountID, len(allLBs), len(regions))
 
 		if len(allErrors) > 0 {
 			return allLBs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
-		PrintResources(allLBs, "types.LB")
+		//PrintResources(allLBs, "types.LB")
 
 		return allLBs, nil
 	}
-
-	return c.getLBsForRegion(ctx, input.Region, filters)
+	c.logger.Debugf("[AccountID: %s] ListLBs: Processing specific region: %s", operationalAccountID, input.Region)
+	// Pass operationalAccountID to getLBsForRegion
+	return c.getLBsForRegion(ctx, input.Region, operationalAccountID, filtersForApply)
 }
 
-func (c *Client) getLBsForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter) ([]types.LB, error) {
+// getLBsForRegion now accepts operationalAccountID and filtersForApply
+func (c *Client) getLBsForRegion(ctx context.Context, regionName string, operationalAccountID string, filtersForApply []awsTypes.Filter) ([]types.LB, error) {
+	c.logger.Debugf("[AccountID: %s] getLBsForRegion: Region %s", operationalAccountID, regionName)
 	var lbs []types.LB
 
-	// Get ELBv2 Load Balancers (ALB, NLB)
-	elbv2Client, err := c.getELBv2Client(ctx, c.accountID, regionName)
+	// Get ELBv2 Load Balancers (ALB, NLB, GWLB)
+	// Use operationalAccountID for getting the ELBv2 client
+	elbv2Client, err := c.getELBv2Client(ctx, operationalAccountID, regionName)
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getLBsForRegion: Failed to get ELBv2 client for region %s: %v", operationalAccountID, regionName, err)
 		return nil, err
 	}
-	if elbv2Client == nil {
-		return nil, fmt.Errorf("ELBv2 client is nil")
-	}
-
-	elbv2Paginator := elbv2.NewDescribeLoadBalancersPaginator(elbv2Client, &elbv2.DescribeLoadBalancersInput{})
-	if elbv2Paginator == nil {
-		return nil, fmt.Errorf("failed to create DescribeLoadBalancersPaginator")
-	}
-	for elbv2Paginator.HasMorePages() {
-
-		page, err := elbv2Paginator.NextPage(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("error describing ELBv2 load balancers: %v", err)
+	// It's possible for a client to be nil if the service is not supported or enabled, handle gracefully.
+	if elbv2Client != nil {
+		elbv2Paginator := elbv2.NewDescribeLoadBalancersPaginator(elbv2Client, &elbv2.DescribeLoadBalancersInput{})
+		for elbv2Paginator.HasMorePages() {
+			page, err := elbv2Paginator.NextPage(ctx)
+			if err != nil {
+				c.logger.Errorf("[AccountID: %s] getLBsForRegion: DescribeLoadBalancers (ELBv2) NextPage failed for region %s: %v", operationalAccountID, regionName, err)
+				return nil, fmt.Errorf("error describing ELBv2 load balancers in region %s for account %s: %v", regionName, operationalAccountID, err)
+			}
+			for _, lb := range page.LoadBalancers {
+				// Pass operationalAccountID to converter
+				lbs = append(lbs, c.convertELBv2ToLoadBalancer(ctx, lb, regionName, operationalAccountID))
+			}
 		}
-
-		for _, lb := range page.LoadBalancers {
-			lbs = append(lbs, c.convertELBv2ToLoadBalancer(ctx, lb, regionName))
-		}
+	} else {
+		c.logger.Warnf("[AccountID: %s] getLBsForRegion: ELBv2 client is nil for region %s. Skipping ELBv2 LBs.", operationalAccountID, regionName)
 	}
 
 	// Get Classic ELB Load Balancers
-	elbClient, err := c.getELBClient(ctx, c.accountID, regionName)
+	// Use operationalAccountID for getting the ELB client
+	elbClient, err := c.getELBClient(ctx, operationalAccountID, regionName)
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getLBsForRegion: Failed to get ELB client for region %s: %v", operationalAccountID, regionName, err)
 		return nil, err
 	}
-
-	elbInput := &elb.DescribeLoadBalancersInput{}
-	elbPaginator := elb.NewDescribeLoadBalancersPaginator(elbClient, elbInput)
-
-	for elbPaginator.HasMorePages() {
-		page, err := elbPaginator.NextPage(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("error describing classic ELB load balancers: %v", err)
+	if elbClient != nil {
+		elbInput := &elb.DescribeLoadBalancersInput{}
+		elbPaginator := elb.NewDescribeLoadBalancersPaginator(elbClient, elbInput)
+		for elbPaginator.HasMorePages() {
+			page, err := elbPaginator.NextPage(ctx)
+			if err != nil {
+				c.logger.Errorf("[AccountID: %s] getLBsForRegion: DescribeLoadBalancers (Classic ELB) NextPage failed for region %s: %v", operationalAccountID, regionName, err)
+				return nil, fmt.Errorf("error describing classic ELB load balancers in region %s for account %s: %v", regionName, operationalAccountID, err)
+			}
+			for _, lb := range page.LoadBalancerDescriptions {
+				// Pass operationalAccountID to converter
+				lbs = append(lbs, c.convertClassicELBToLoadBalancer(ctx, lb, regionName, operationalAccountID))
+			}
 		}
-
-		for _, lb := range page.LoadBalancerDescriptions {
-			lbs = append(lbs, c.convertClassicELBToLoadBalancer(lb, regionName))
-		}
+	} else {
+		c.logger.Warnf("[AccountID: %s] getLBsForRegion: Classic ELB client is nil for region %s. Skipping Classic LBs.", operationalAccountID, regionName)
 	}
 
-	// Apply filters
-	filteredLBs := c.applyFilters(lbs, filters)
-
+	// Apply filters (post-fetch)
+	// The filtersForApply are EC2-style filters. applyFilters needs to interpret them for LB properties.
+	filteredLBs := c.applyFilters(lbs, filtersForApply, operationalAccountID)
+	c.logger.Debugf("[AccountID: %s] getLBsForRegion: Region %s, found %d LBs, filtered to %d LBs.", operationalAccountID, regionName, len(lbs), len(filteredLBs))
 	return filteredLBs, nil
 }
 
-func (c *Client) applyFilters(lbs []types.LB, _filters_ []awsTypes.Filter) []types.LB {
+// applyFilters now accepts operationalAccountID for logging
+func (c *Client) applyFilters(lbs []types.LB, ec2Filters []awsTypes.Filter, operationalAccountID string) []types.LB {
+	if len(ec2Filters) == 0 {
+		return lbs // No filters to apply
+	}
+	c.logger.Debugf("[AccountID: %s] applyFilters: Applying %d EC2-style filters to %d LBs.", operationalAccountID, len(ec2Filters), len(lbs))
 
-	return lbs
+	var filteredLBs []types.LB
+	for _, lb := range lbs {
+		matchesAll := true
+		for _, filter := range ec2Filters {
+			filterName := aws.ToString(filter.Name)
+			filterValues := make(map[string]bool)
+			for _, val := range filter.Values {
+				filterValues[val] = true
+			}
+
+			match := false
+			switch filterName {
+			case "vpc-id":
+				if _, ok := filterValues[lb.VPCID]; ok {
+					match = true
+				}
+			// Add cases for tag filters, e.g., "tag:YourTagName"
+			// Example for a specific tag:
+			// case "tag:Name":
+			// 	if lbName, ok := lb.Labels["Name"]; ok {
+			// 		if _, filterOk := filterValues[lbName]; filterOk {
+			// 			match = true
+			// 		}
+			// 	}
+			// More generic tag handling:
+			default:
+				if len(filterName) > 4 && filterName[:4] == "tag:" {
+					tagName := filterName[4:]
+					if lbTagValue, ok := lb.Labels[tagName]; ok {
+						if _, filterOk := filterValues[lbTagValue]; filterOk {
+							match = true
+						}
+					}
+				} else {
+					// If the filter isn't recognized for LBs, consider it a non-match or log a warning.
+					// For now, we'll assume if a filter isn't explicitly handled, it doesn't match.
+					c.logger.Warnf("[AccountID: %s] applyFilters: Unhandled filter name '%s' for LBs.", operationalAccountID, filterName)
+				}
+			}
+			if !match {
+				matchesAll = false
+				break
+			}
+		}
+		if matchesAll {
+			filteredLBs = append(filteredLBs, lb)
+		}
+	}
+	c.logger.Debugf("[AccountID: %s] applyFilters: Filtered %d LBs down to %d.", operationalAccountID, len(lbs), len(filteredLBs))
+	return filteredLBs
 }
 
-func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.LoadBalancer, regionName string) types.LB {
+// convertELBv2ToLoadBalancer now accepts operationalAccountID
+func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.LoadBalancer, regionName string, operationalAccountID string) types.LB {
 	var lbType string
 	var ipAddressType string
 	switch lb.Type {
@@ -167,35 +256,41 @@ func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.L
 	case elbv2types.LoadBalancerTypeEnumGateway:
 		lbType = "GWLB"
 	default:
-		lbType = "Unknown"
+		lbType = string(lb.Type) // Use the raw string if unknown
+		c.logger.Warnf("[AccountID: %s] convertELBv2ToLoadBalancer: Unknown ELBv2 type '%s' for LB %s", operationalAccountID, lb.Type, aws.ToString(lb.LoadBalancerArn))
 	}
 	switch lb.IpAddressType {
 	case elbv2types.IpAddressTypeIpv4:
 		ipAddressType = "ipv4"
 	case elbv2types.IpAddressTypeDualstack:
 		ipAddressType = "dualstack"
-	case elbv2types.IpAddressTypeDualstackWithoutPublicIpv4:
-		ipAddressType = "ipv6"
+	// case elbv2types.IpAddressTypeDualstackWithoutPublicIpv4: // This constant might not exist in all SDK versions or is specific
+	// 	ipAddressType = "ipv6" // Or "dualstack-without-public-ipv4"
 	default:
-		ipAddressType = "unknown"
+		ipAddressType = string(lb.IpAddressType) // Use the raw string if unknown
+		c.logger.Warnf("[AccountID: %s] convertELBv2ToLoadBalancer: Unknown IPAddressType '%s' for LB %s", operationalAccountID, lb.IpAddressType, aws.ToString(lb.LoadBalancerArn))
+
 	}
 	ips, err := getIPsV2(lb)
 	if err != nil {
-		c.logger.Errorf("Error resolving load balancer DNS: %v", err)
+		c.logger.Errorf("[AccountID: %s] convertELBv2ToLoadBalancer: Error resolving load balancer DNS for %s: %v", operationalAccountID, aws.ToString(lb.DNSName), err)
 	}
 
-	listeners, err := c.getListenersV2(ctx, aws.ToString(lb.LoadBalancerArn), regionName)
+	// Pass operationalAccountID to getListenersV2
+	listeners, err := c.getListenersV2(ctx, aws.ToString(lb.LoadBalancerArn), regionName, operationalAccountID)
 	if err != nil {
-		c.logger.Errorf("Error getting listeners for load balancer %s: %v", aws.ToString(lb.LoadBalancerArn), err)
+		c.logger.Errorf("[AccountID: %s] convertELBv2ToLoadBalancer: Error getting listeners for load balancer %s: %v", operationalAccountID, aws.ToString(lb.LoadBalancerArn), err)
 	}
 
-	// Extract Subnet IDs from AvailabilityZones
 	var subnetIDs []string
 	for _, az := range lb.AvailabilityZones {
 		if az.SubnetId != nil {
 			subnetIDs = append(subnetIDs, *az.SubnetId)
 		}
 	}
+
+	// Pass operationalAccountID to getTagsV2
+	tags := c.getTagsV2(ctx, lb, regionName, operationalAccountID)
 
 	return types.LB{
 		ID:               aws.ToString(lb.LoadBalancerArn),
@@ -208,21 +303,28 @@ func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.L
 		IPAddresses:      ips,
 		Listeners:        listeners,
 		SecurityGroupIDs: lb.SecurityGroups,
-		SubnetIDs:        subnetIDs, // Populated subnet IDs
-		//State:         string(lb.State.Code), // State might be useful too
-		VPCID:     aws.ToString(lb.VpcId),
-		AccountID: c.accountID,
-		Region:    regionName,
-		CreatedAt: aws.ToTime(lb.CreatedTime),
-		Labels:    c.getTagsV2(lb, regionName), // Ensure getTagsV2 works correctly
-		SelfLink:  fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#LoadBalancers:search=%s", regionName, regionName, aws.ToString(lb.LoadBalancerName)),
+		SubnetIDs:        subnetIDs,
+		//State:            string(lb.State.Code),
+		VPCID:            aws.ToString(lb.VpcId),
+		AccountID:        operationalAccountID, // Use operationalAccountID
+		Region:           regionName,
+		CreatedAt:        aws.ToTime(lb.CreatedTime),
+		Labels:           tags,
+		SelfLink:         fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#LoadBalancers:search=%s", regionName, regionName, aws.ToString(lb.LoadBalancerName)),
 	}
 }
 
-func (c *Client) getListenersV2(ctx context.Context, loadBalancerArn, regionName string) ([]types.LBListener, error) {
-	elbv2Client, err := c.getELBv2Client(ctx, c.accountID, regionName)
+// getListenersV2 now accepts operationalAccountID
+func (c *Client) getListenersV2(ctx context.Context, loadBalancerArn, regionName, operationalAccountID string) ([]types.LBListener, error) {
+	// Use operationalAccountID for getting the ELBv2 client
+	elbv2Client, err := c.getELBv2Client(ctx, operationalAccountID, regionName)
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getListenersV2: Failed to get ELBv2 client for region %s: %v", operationalAccountID, regionName, err)
 		return nil, err
+	}
+	if elbv2Client == nil {
+		c.logger.Warnf("[AccountID: %s] getListenersV2: ELBv2 client is nil for region %s. Cannot get listeners.", operationalAccountID, regionName)
+		return nil, fmt.Errorf("ELBv2 client is nil for region %s, account %s", regionName, operationalAccountID)
 	}
 
 	input := &elbv2.DescribeListenersInput{
@@ -235,6 +337,7 @@ func (c *Client) getListenersV2(ctx context.Context, loadBalancerArn, regionName
 	for paginator.HasMorePages() {
 		output, err := paginator.NextPage(ctx)
 		if err != nil {
+			c.logger.Errorf("[AccountID: %s] getListenersV2: DescribeListeners NextPage failed for LB ARN %s, region %s: %v", operationalAccountID, loadBalancerArn, regionName, err)
 			return nil, err
 		}
 
@@ -251,7 +354,7 @@ func (c *Client) getListenersV2(ctx context.Context, loadBalancerArn, regionName
 			})
 		}
 	}
-
+	c.logger.Debugf("[AccountID: %s] getListenersV2: Found %d listeners for LB ARN %s in region %s.", operationalAccountID, len(listeners), loadBalancerArn, regionName)
 	return listeners, nil
 }
 
@@ -264,75 +367,88 @@ func getDefaultTargetGroupArn(listener elbv2types.Listener) string {
 	return ""
 }
 
-func (c *Client) convertClassicELBToLoadBalancer(lb elbTypes.LoadBalancerDescription, regionName string) types.LB {
+// convertClassicELBToLoadBalancer now accepts operationalAccountID
+func (c *Client) convertClassicELBToLoadBalancer(ctx context.Context, lb elbTypes.LoadBalancerDescription, regionName string, operationalAccountID string) types.LB {
 	var instanceIDs []string
 	for _, instance := range lb.Instances {
 		instanceIDs = append(instanceIDs, *instance.InstanceId)
 	}
 	ips, err := getIPsV1(lb)
 	if err != nil {
-		c.logger.Errorf("Error resolving load balancer DNS: %v", err)
+		c.logger.Errorf("[AccountID: %s] convertClassicELBToLoadBalancer: Error resolving load balancer DNS for %s: %v", operationalAccountID, aws.ToString(lb.DNSName), err)
 	}
+
+	// Pass operationalAccountID to getTagsV1
+	tags := c.getTagsV1(ctx, lb, regionName, operationalAccountID)
+
 	return types.LB{
-		ID:            aws.ToString(lb.LoadBalancerName), // Use Name as ID for Classic
+		ID:            aws.ToString(lb.LoadBalancerName),
 		Name:          aws.ToString(lb.LoadBalancerName),
 		DNSName:       aws.ToString(lb.DNSName),
 		Provider:      c.GetName(),
-		IPAddressType: "ipv4", // Classic ELBs are typically IPv4
+		IPAddressType: "ipv4",
 		Type:          "Classic",
 		Scheme:        aws.ToString(lb.Scheme),
 		VPCID:         aws.ToString(lb.VPCId),
-		AccountID:     c.accountID,
+		AccountID:     operationalAccountID, // Use operationalAccountID
 		Region:        regionName,
 		CreatedAt:     aws.ToTime(lb.CreatedTime),
 		SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#LoadBalancerDetails:loadBalancerId=%s", regionName, regionName, aws.ToString(lb.LoadBalancerName)),
 		InstanceIDs:   instanceIDs,
 		IPAddresses:   ips,
-		Zone:          getZone(lb),                 // getZone extracts from AvailabilityZones
-		SubnetIDs:     lb.Subnets,                  // Assign directly for Classic ELB
-		Labels:        c.getTagsV1(lb, regionName), // Ensure getTagsV1 works correctly
+		Zone:          getZone(lb),
+		SubnetIDs:     lb.Subnets,
+		Labels:        tags,
 		Listeners:     convertListeners(lb.ListenerDescriptions),
 	}
 }
 
 func getIPsV1(lb elbTypes.LoadBalancerDescription) ([]string, error) {
-	if lb.DNSName != nil {
+	if lb.DNSName != nil && *lb.DNSName != "" {
 		return getIPsFromDNS(*lb.DNSName)
-	} else {
-		return nil, fmt.Errorf("DNSName is nil")
 	}
+	// If DNSName is nil or empty, there are no IPs to resolve via DNS.
+	// Classic LBs might not always have IPs directly, they rely on DNS.
+	return nil, nil // Return nil, nil if no DNS name to resolve
 }
 
 func getIPsV2(lb elbv2types.LoadBalancer) ([]string, error) {
-	if lb.DNSName != nil {
+	if lb.DNSName != nil && *lb.DNSName != "" {
 		return getIPsFromDNS(*lb.DNSName)
-	} else {
-		return nil, fmt.Errorf("DNSName is nil")
 	}
+	// For NLBs, IPs might be available in lb.AvailabilityZones[].LoadBalancerAddresses
+	// However, getIPsFromDNS is a generic approach. If direct IPs are needed for NLBs,
+	// this function would need more specific logic for elbv2types.LoadBalancer.
+	return nil, nil // Return nil, nil if no DNS name to resolve
 }
 
 func getZone(lb elbTypes.LoadBalancerDescription) string {
 	if len(lb.AvailabilityZones) > 0 {
-		return lb.AvailabilityZones[0]
+		return lb.AvailabilityZones[0] // Classic ELBs can span multiple AZs, this just picks the first.
 	}
 	return ""
 }
 
-func (c *Client) getTagsV2(lb elbv2types.LoadBalancer, regionName string) map[string]string {
-	// Classic ELBs don't include tags in the DescribeLoadBalancers call
-	// We need to make a separate DescribeTags API call to get this information
-	input := &elbv2.DescribeTagsInput{
-		ResourceArns: []string{aws.ToString(lb.LoadBalancerName)},
-	}
-
-	elbv2Client, err := c.getELBv2Client(context.TODO(), c.accountID, regionName)
+// getTagsV2 now accepts context and operationalAccountID
+func (c *Client) getTagsV2(ctx context.Context, lb elbv2types.LoadBalancer, regionName string, operationalAccountID string) map[string]string {
+	// Use operationalAccountID for getting the ELBv2 client
+	elbv2Client, err := c.getELBv2Client(ctx, operationalAccountID, regionName)
 	if err != nil {
-		c.logger.Errorf("Error getting ELBv2 client: %v", err)
+		c.logger.Errorf("[AccountID: %s] getTagsV2: Error getting ELBv2 client for region %s: %v", operationalAccountID, regionName, err)
 		return nil
 	}
-	result, err := elbv2Client.DescribeTags(context.TODO(), input)
+	if elbv2Client == nil {
+		c.logger.Warnf("[AccountID: %s] getTagsV2: ELBv2 client is nil for region %s. Cannot get tags.", operationalAccountID, regionName)
+		return nil
+	}
+
+	input := &elbv2.DescribeTagsInput{
+		ResourceArns: []string{aws.ToString(lb.LoadBalancerArn)}, // Corrected to use LoadBalancerArn
+	}
+
+	result, err := elbv2Client.DescribeTags(ctx, input) // Pass ctx
 	if err != nil {
-		// Handle error, perhaps log it
+		c.logger.Errorf("[AccountID: %s] getTagsV2: DescribeTags failed for LB ARN %s, region %s: %v", operationalAccountID, aws.ToString(lb.LoadBalancerArn), regionName, err)
 		return nil
 	}
 
@@ -342,25 +458,30 @@ func (c *Client) getTagsV2(lb elbv2types.LoadBalancer, regionName string) map[st
 			tags[aws.ToString(tag.Key)] = aws.ToString(tag.Value)
 		}
 	}
-
+	c.logger.Debugf("[AccountID: %s] getTagsV2: Found %d tags for LB ARN %s in region %s.", operationalAccountID, len(tags), aws.ToString(lb.LoadBalancerArn), regionName)
 	return tags
 }
 
-func (c *Client) getTagsV1(lb elbTypes.LoadBalancerDescription, regionName string) map[string]string {
-	// Classic ELBs don't include tags in the DescribeLoadBalancers call
-	// We need to make a separate DescribeTags API call to get this information
+// getTagsV1 now accepts context and operationalAccountID
+func (c *Client) getTagsV1(ctx context.Context, lb elbTypes.LoadBalancerDescription, regionName string, operationalAccountID string) map[string]string {
+	// Use operationalAccountID for getting the ELB client
+	elbClient, err := c.getELBClient(ctx, operationalAccountID, regionName)
+	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getTagsV1: Error getting ELB client for region %s: %v", operationalAccountID, regionName, err)
+		return nil
+	}
+	if elbClient == nil {
+		c.logger.Warnf("[AccountID: %s] getTagsV1: Classic ELB client is nil for region %s. Cannot get tags.", operationalAccountID, regionName)
+		return nil
+	}
+
 	input := &elb.DescribeTagsInput{
 		LoadBalancerNames: []string{aws.ToString(lb.LoadBalancerName)},
 	}
 
-	elbClient, err := c.getELBClient(context.TODO(), c.accountID, regionName)
+	result, err := elbClient.DescribeTags(ctx, input) // Pass ctx
 	if err != nil {
-		c.logger.Errorf("Error getting ELB client: %v", err)
-		return nil
-	}
-	result, err := elbClient.DescribeTags(context.TODO(), input)
-	if err != nil {
-		// Handle error, perhaps log it
+		c.logger.Errorf("[AccountID: %s] getTagsV1: DescribeTags failed for LB Name %s, region %s: %v", operationalAccountID, aws.ToString(lb.LoadBalancerName), regionName, err)
 		return nil
 	}
 
@@ -370,15 +491,20 @@ func (c *Client) getTagsV1(lb elbTypes.LoadBalancerDescription, regionName strin
 			tags[aws.ToString(tag.Key)] = aws.ToString(tag.Value)
 		}
 	}
-
+	c.logger.Debugf("[AccountID: %s] getTagsV1: Found %d tags for LB Name %s in region %s.", operationalAccountID, len(tags), aws.ToString(lb.LoadBalancerName), regionName)
 	return tags
 }
 
 func convertListeners(listeners []elbTypes.ListenerDescription) []types.LBListener {
 	var result []types.LBListener
 	for _, l := range listeners {
+		if l.Listener == nil { // Add nil check for safety
+			continue
+		}
 		result = append(result, types.LBListener{
-			ListenerID: "",
+			// ListenerID is not directly available for Classic ELB listeners in the same way as ELBv2.
+			// It's identified by protocol and port.
+			ListenerID: fmt.Sprintf("%s:%d", aws.ToString(l.Listener.Protocol), l.Listener.LoadBalancerPort),
 			Protocol:   aws.ToString(l.Listener.Protocol),
 			Port:       l.Listener.LoadBalancerPort,
 			// Classic ELBs don't have TargetGroups
@@ -386,3 +512,13 @@ func convertListeners(listeners []elbTypes.ListenerDescription) []types.LBListen
 	}
 	return result
 }
+
+// getIPsFromDNS (utility function, assuming it exists elsewhere or you want to define it)
+// For demonstration, a placeholder:
+// func getIPsFromDNS(dnsName string) ([]string, error) {
+// 	ips, err := net.LookupHost(dnsName)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return ips, nil
+// }

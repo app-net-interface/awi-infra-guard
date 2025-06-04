@@ -31,20 +31,60 @@ import (
 )
 
 func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([]types.VPC, error) {
-	if params == nil {
-		params = &infrapb.ListVPCRequest{}
-	} else {
-		c.logger.Infof("Listing VPC for account %s and region %s", params.AccountId, params.Region)
-		c.creds = params.Creds
-		c.accountID = params.AccountId
+	// The panic below will compare the incoming params.AccountId against the
+	// c.accountID that the client was initialized with or its last sticky state.
+	// If the design intends for one client to handle multiple accounts sequentially
+	// by changing c.accountID, this panic will fire.
+	// For true parallelism without race conditions, c.accountID should not be modified per call.
+	// We will proceed by NOT modifying c.accountID in this function.
+	if c.accountID != "" && params.AccountId != "" && c.accountID != params.AccountId {
+		// This panic condition might need re-evaluation based on whether c.accountID
+		// is a "default" or "sticky operational" ID. For a stateless operational model,
+		// this panic might be too strict if c.accountID is just a default.
+		// However, given the previous logs, it was firing because c.accountID was stale
+		// from a PREVIOUS operation. By not setting c.accountID here, we avoid that specific race.
+		//c.logger.Warnf("ListVPC called with AccountID: %s, while client's c.accountID is: %s. Proceeding with params.AccountId.", params.AccountId, c.accountID)
+		panic(fmt.Sprintf("ListVPC called with different AccountID: %s, expected: %s", params.AccountId, c.accountID))
 	}
+
+	operationalAccountID := params.GetAccountId()
+	if operationalAccountID == "" && c.accountID != "" {
+		// If no accountId in params, consider using the client's default/initial accountID.
+		// This depends on desired behavior if params.AccountId is empty.
+		c.logger.Infof("ListVPC: params.AccountId is empty, using client's default/initial accountID: %s", c.accountID)
+		operationalAccountID = c.accountID
+	}
+	if operationalAccountID == "" {
+		c.logger.Errorf("ListVPC: operationalAccountID is empty and c.accountID is also empty. Cannot proceed.")
+		return nil, fmt.Errorf("account ID is required but was not provided and no default is set")
+	}
+
+	c.logger.Debugf("[AccountID: %s] ListVPC called with Region: '%s', Labels: %v. HasCreds: %t",
+		operationalAccountID, params.GetRegion(), params.GetLabels(), params.GetCreds() != nil)
+
+	// REMOVED: originalAccountID := c.accountID
+	// REMOVED: originalCreds := c.creds (user said to ignore creds for this fix)
+
+	if params == nil { // Should ideally not happen if operationalAccountID is derived from params.
+		c.logger.Warnf("[AccountID: %s] ListVPC called with nil params, this path might be problematic.", operationalAccountID)
+		params = &infrapb.ListVPCRequest{} // This will result in empty region, labels etc.
+	}
+	// REMOVED: Lines that set c.creds and c.accountID
+	// else {
+	// c.logger.Infof("[AccountID: %s] Listing VPC for region %s.", operationalAccountID, params.Region)
+	// c.creds = params.Creds // Not changing c.creds based on user feedback for this fix
+	// c.accountID = params.AccountId // DO NOT DO THIS - source of race condition
+	// }
+
 	builder := newFilterBuilder()
 	for k, v := range params.Labels {
 		builder.withTag(k, v)
 	}
 	filters := builder.build()
+	c.logger.Debugf("[AccountID: %s] ListVPC: Applied filters: %v", operationalAccountID, filters)
 
 	if params.Region == "" || params.Region == "all" {
+		c.logger.Infof("[AccountID: %s] ListVPC: Iterating all regions.", operationalAccountID)
 		var (
 			wg            sync.WaitGroup
 			allVPCs       []types.VPC
@@ -52,63 +92,107 @@ func (c *Client) ListVPC(ctx context.Context, params *infrapb.ListVPCRequest) ([
 			resultChannel = make(chan regionResult)
 		)
 
-		regions, err := c.getAllRegions(ctx)
+		c.logger.Debugf("[AccountID: %s] ListVPC: Calling c.getAllRegions.", operationalAccountID)
+		regions, err := c.getAllRegions(ctx, operationalAccountID) // Pass operationalAccountID
 		if err != nil {
-			c.logger.Errorf("Unable to describe regions, %v", err)
+			c.logger.Errorf("[AccountID: %s] ListVPC: Unable to describe regions, %v", operationalAccountID, err)
 			return nil, err
 		}
+		c.logger.Infof("[AccountID: %s] ListVPC: Found %d regions to process.", operationalAccountID, len(regions))
 
 		for _, region := range regions {
 			wg.Add(1)
-			go func(regionName string) {
+			// Pass operationalAccountID (derived from params.AccountId) to the goroutine.
+			// Do not use c.accountID here as it's shared and racy.
+			// operationalCreds := params.GetCreds() // If creds were to be passed
+
+			go func(regionName string, accountIDForOperation string /*, credsForOperation *infrapb.Credentials*/) {
 				defer wg.Done()
+				c.logger.Debugf("[AccountID: %s] ListVPC goroutine started for Region: '%s'.", accountIDForOperation, regionName)
+
 				var vpcs []types.VPC
 				var err error
-				vpcs, err = c.getVPCsForRegion(ctx, regionName, filters)
+				// Pass accountIDForOperation to getVPCsForRegion
+				vpcs, err = c.getVPCsForRegion(ctx, regionName, filters, accountIDForOperation /*, credsForOperation */)
+
+				c.logger.Debugf("[AccountID: %s] ListVPC goroutine for Region: '%s': getVPCsForRegion returned. Error: %v, VPCs found: %d.", accountIDForOperation, regionName, err, len(vpcs))
 				resultChannel <- regionResult{
-					region: *region.RegionName,
+					region: regionName,
 					vpcs:   vpcs,
 					err:    err,
 				}
-			}(*region.RegionName)
+			}(*region.RegionName, operationalAccountID /*, operationalCreds */)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
+			c.logger.Debugf("[AccountID: %s] ListVPC: All region goroutines finished, resultChannel closed.", operationalAccountID)
 		}()
+
+		processedRegions := 0
 		for result := range resultChannel {
+			processedRegions++
+			c.logger.Debugf("[AccountID: %s] ListVPC: Received result for region '%s'. Error: %v, VPCs: %d", operationalAccountID, result.region, result.err, len(result.vpcs))
 			if result.err != nil {
-				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				c.logger.Infof("[AccountID: %s] ListVPC: Error in region %s: %v", operationalAccountID, result.region, result.err)
 				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
 			} else {
 				allVPCs = append(allVPCs, result.vpcs...)
 			}
 		}
+		c.logger.Debugf("[AccountID: %s] ListVPC: Finished collecting results from %d regions.", operationalAccountID, processedRegions)
 
 		if len(allErrors) > 0 {
+			c.logger.Errorf("[AccountID: %s] ListVPC: Errors occurred in %d regions: %v", operationalAccountID, len(allErrors), allErrors)
+			// REMOVED: c.accountID = originalAccountID
+			// REMOVED: c.creds = originalCreds
 			return allVPCs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
-		c.logger.Infof("In account %s Found %d VPCs across %d regions", c.accountID, len(allVPCs), len(regions))
+		c.logger.Infof("[AccountID: %s] ListVPC: Found %d VPCs across %d regions successfully.", operationalAccountID, len(allVPCs), len(regions))
+		// REMOVED: c.accountID = originalAccountID
+		// REMOVED: c.creds = originalCreds
 		return allVPCs, nil
 	}
-	return c.getVPCsForRegion(ctx, params.Region, filters)
-}
 
-func (c *Client) getVPCsForRegion(ctx context.Context, region string, filters []awstypes.Filter) ([]types.VPC, error) {
-	c.logger.Debugf("Retreiving VPCs for account[%s] and region[%s]", c.accountID, region)
-	client, err := c.getEC2Client(ctx, c.accountID, region)
+	c.logger.Infof("[AccountID: %s] ListVPC: Processing specific region: '%s'.", operationalAccountID, params.Region)
+	// Pass operationalAccountID to getVPCsForRegion
+	vpcs, err := c.getVPCsForRegion(ctx, params.Region, filters, operationalAccountID /*, params.GetCreds() */)
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] ListVPC, Region: '%s': Error from getVPCsForRegion: %v", operationalAccountID, params.Region, err)
+		// REMOVED: c.accountID = originalAccountID
+		// REMOVED: c.creds = originalCreds
 		return nil, err
 	}
-	// Call DescribeVpcs operation
+	c.logger.Infof("[AccountID: %s] ListVPC, Region: '%s': Found %d VPCs.", operationalAccountID, params.Region, len(vpcs))
+	// REMOVED: c.accountID = originalAccountID
+	// REMOVED: c.creds = originalCreds
+	return vpcs, nil
+}
+
+func (c *Client) getVPCsForRegion(ctx context.Context, region string, filters []awstypes.Filter, operationalAccountID string /*, operationalCreds *infrapb.Credentials */) ([]types.VPC, error) {
+	// Use the passed-in operationalAccountID
+	c.logger.Debugf("[AccountID: %s] getVPCsForRegion started for Region: '%s'. Filters: %v", operationalAccountID, region, filters)
+
+	// Pass operationalAccountID to getEC2Client.
+	// getEC2Client must be updated to accept operationalAccountID and use it
+	// instead of relying on c.accountID. It should also take operationalCreds if needed.
+	client, err := c.getEC2Client(ctx, operationalAccountID, region /*, operationalCreds */)
+	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getVPCsForRegion, Region: '%s': Failed to get EC2 client: %v", operationalAccountID, region, err)
+		return nil, err
+	}
+	c.logger.Debugf("[AccountID: %s] getVPCsForRegion, Region: '%s': Successfully obtained EC2 client.", operationalAccountID, region)
+
+	c.logger.Debugf("[AccountID: %s] getVPCsForRegion, Region: '%s': Calling DescribeVpcs API.", operationalAccountID, region)
 	resp, err := client.DescribeVpcs(ctx, &ec2.DescribeVpcsInput{
 		Filters: filters,
 	})
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getVPCsForRegion, Region: '%s': DescribeVpcs API call failed: %v", operationalAccountID, region, err)
 		return nil, err
 	}
-	c.logger.Debugf("In account %s Found %d VPCs in region %s", c.accountID, len(resp.Vpcs), region)
+	c.logger.Infof("[AccountID: %s] getVPCsForRegion, Region: '%s': DescribeVpcs API successful. Found %d VPCs.", operationalAccountID, region, len(resp.Vpcs))
 	return convertVPCs(resp.Vpcs, c.defaultRegion, region), nil
 }
 

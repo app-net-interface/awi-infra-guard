@@ -35,13 +35,27 @@ func (c *Client) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest
 	if params.GetVpcId() == "" || params.GetId() == "" {
 		return types.Subnet{}, fmt.Errorf("both vpcID and ID must be provided for GetSubnet function")
 	}
+
+	operationalAccountID := params.GetAccountId()
+	if operationalAccountID == "" && c.accountID != "" {
+		c.logger.Infof("[AccountID: %s] GetSubnet: params.AccountId is empty, using client's default/initial accountID: %s", c.accountID, c.accountID)
+		operationalAccountID = c.accountID
+	}
+	if operationalAccountID == "" {
+		c.logger.Errorf("GetSubnet: operationalAccountID is empty and c.accountID is also empty. Cannot proceed.")
+		return types.Subnet{}, fmt.Errorf("account ID is required but was not provided and no default is set")
+	}
+	c.logger.Debugf("[AccountID: %s] GetSubnet called for Subnet ID %s in VPC %s, Region %s", operationalAccountID, params.GetId(), params.GetVpcId(), params.GetRegion())
+
+
 	builder := newFilterBuilder()
 	builder.withVPC(params.GetVpcId())
 	builder.withSubnet(params.GetId())
 	input := &ec2.DescribeSubnetsInput{
 		Filters: builder.build(),
 	}
-	client, err := c.getEC2Client(ctx, params.GetAccountId(), params.GetRegion())
+	// Pass operationalAccountID to getEC2Client
+	client, err := c.getEC2Client(ctx, operationalAccountID, params.GetRegion())
 	if err != nil {
 		return types.Subnet{}, err
 	}
@@ -49,7 +63,8 @@ func (c *Client) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest
 	if err != nil {
 		return types.Subnet{}, fmt.Errorf("could not get AWS subnets: %v", err)
 	}
-	subnets := c.convertSubnets(ctx, client, c.defaultAccountID, c.defaultRegion, params.GetAccountId(), params.GetRegion(), out.Subnets)
+	// Pass operationalAccountID as the 'account' parameter to convertSubnets
+	subnets := c.convertSubnets(ctx, client, c.defaultAccountID, c.defaultRegion, operationalAccountID, params.GetRegion(), out.Subnets)
 	if len(subnets) == 0 {
 		return types.Subnet{}, fmt.Errorf("couldn't find subnet with ID %s", params.GetId())
 	}
@@ -60,9 +75,23 @@ func (c *Client) GetSubnet(ctx context.Context, params *infrapb.GetSubnetRequest
 }
 
 func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsRequest) ([]types.Subnet, error) {
-	c.logger.Infof("List Subnets")
-	c.creds = params.Creds
-	c.accountID = params.AccountId
+	if c.accountID != "" && params.AccountId != "" && c.accountID != params.AccountId {
+		panic(fmt.Sprintf("ListSubnets called with different AccountID: %s, expected: %s", params.AccountId, c.accountID))
+	}
+	operationalAccountID := params.GetAccountId()
+	if operationalAccountID == "" && c.accountID != "" {
+		c.logger.Infof("[AccountID: %s] ListSubnets: params.AccountId is empty, using client's default/initial accountID: %s", c.accountID, c.accountID)
+		operationalAccountID = c.accountID
+	}
+	if operationalAccountID == "" {
+		c.logger.Errorf("ListSubnets: operationalAccountID is empty and c.accountID is also empty. Cannot proceed.")
+		return nil, fmt.Errorf("account ID is required but was not provided and no default is set")
+	}
+	c.logger.Infof("[AccountID: %s] ListSubnets called for VPC %s, Region %s", operationalAccountID, params.GetVpcId(), params.GetRegion())
+
+	// REMOVED: c.creds = params.Creds
+	// REMOVED: c.accountID = params.AccountId
+
 	builder := newFilterBuilder()
 	builder.withVPC(params.GetVpcId())
 	for k, v := range params.GetLabels() {
@@ -78,56 +107,66 @@ func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsReq
 
 	if params.GetRegion() == "" || params.GetRegion() == "all" {
 		var (
-			wg         sync.WaitGroup
-			allSubnets []types.Subnet
-			allErrors  []error
-
+			wg            sync.WaitGroup
+			allSubnets    []types.Subnet
+			allErrors     []error
 			resultChannel = make(chan regionResult)
 		)
 
-		regions, err := c.getAllRegions(ctx)
+		// Pass operationalAccountID to getAllRegions
+		regions, err := c.getAllRegions(ctx, operationalAccountID)
 		if err != nil {
-			c.logger.Errorf("Unable to describe regions, %v", err)
+			c.logger.Errorf("[AccountID: %s] ListSubnets: Unable to describe regions, %v", operationalAccountID, err)
 			return nil, err
 		}
+		c.logger.Debugf("[AccountID: %s] ListSubnets: Iterating %d regions.", operationalAccountID, len(regions))
 
 		for _, region := range regions {
 			wg.Add(1)
-			go func(regionName string) {
+			// Pass operationalAccountID to the goroutine
+			go func(regionName string, accID string) {
 				defer wg.Done()
-				subnets, err := c.getSubnetsForRegion(ctx, *region.RegionName, filters)
+				c.logger.Debugf("[AccountID: %s] ListSubnets: Goroutine for region %s started.", accID, regionName)
+				// Pass accID (operationalAccountID) to getSubnetsForRegion
+				subnets, err := c.getSubnetsForRegion(ctx, regionName, filters, accID)
 				resultChannel <- regionResult{
-					region:  *region.RegionName,
+					region:  regionName,
 					subnets: subnets,
 					err:     err,
 				}
-			}(*region.RegionName)
+			}(*region.RegionName, operationalAccountID)
 		}
-		c.logger.Infof("In account %s Found %d subnets across %d regions", c.accountID, len(allSubnets), len(regions))
+
 		go func() {
 			wg.Wait()
 			close(resultChannel)
+			c.logger.Debugf("[AccountID: %s] ListSubnets: All region goroutines finished, resultChannel closed.", operationalAccountID)
 		}()
 
 		for result := range resultChannel {
 			if result.err != nil {
-				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				c.logger.Infof("[AccountID: %s] ListSubnets: Error in region %s: %v", operationalAccountID, result.region, result.err)
 				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
 			} else {
 				allSubnets = append(allSubnets, result.subnets...)
 			}
 		}
+		c.logger.Infof("[AccountID: %s] Found %d subnets across %d regions", operationalAccountID, len(allSubnets), len(regions))
 
 		if len(allErrors) > 0 {
 			return allSubnets, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
 		return allSubnets, nil
 	}
-	return c.getSubnetsForRegion(ctx, params.Region, filters)
+	// Pass operationalAccountID to getSubnetsForRegion
+	return c.getSubnetsForRegion(ctx, params.Region, filters, operationalAccountID)
 }
 
-func (c *Client) getSubnetsForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.Subnet, error) {
-	client, err := c.getEC2Client(ctx, c.accountID, regionName)
+// getSubnetsForRegion now accepts operationalAccountID
+func (c *Client) getSubnetsForRegion(ctx context.Context, regionName string, filters []awstypes.Filter, operationalAccountID string) ([]types.Subnet, error) {
+	c.logger.Debugf("[AccountID: %s] getSubnetsForRegion: Region %s", operationalAccountID, regionName)
+	// Use operationalAccountID for getting the EC2 client
+	client, err := c.getEC2Client(ctx, operationalAccountID, regionName)
 	if err != nil {
 		return nil, err
 	}
@@ -140,18 +179,23 @@ func (c *Client) getSubnetsForRegion(ctx context.Context, regionName string, fil
 	}
 	// Pass client and ctx to convertSubnets
 	// Make convertSubnets a method of Client to access logger
-	return c.convertSubnets(ctx, client, c.defaultAccountID, c.defaultRegion, c.accountID, regionName, resp.Subnets), nil
+	// Pass operationalAccountID as the 'account' parameter to convertSubnets
+	return c.convertSubnets(ctx, client, c.defaultAccountID, c.defaultRegion, operationalAccountID, regionName, resp.Subnets), nil
 }
 
 // Note: Changed to a method on *Client to access logger easily.
 // Added ctx and client parameters.
+// The 'account' parameter is the operationalAccountID.
 func (c *Client) convertSubnets(ctx context.Context, client *ec2.Client, defaultAccount, defaultRegion, account, region string, subnets []awstypes.Subnet) []types.Subnet {
 	if region == "" {
 		region = defaultRegion
 	}
+	// The 'account' parameter is the operationalAccountID.
+	// If it's empty (should not happen if logic above is correct), fallback to defaultAccount.
 	if account == "" {
 		account = defaultAccount
 	}
+	c.logger.Debugf("[AccountID: %s] convertSubnets: Converting subnets for region %s.", account, region)
 
 	result := make([]types.Subnet, 0, len(subnets))
 	for _, subnet := range subnets {
@@ -161,14 +205,14 @@ func (c *Client) convertSubnets(ctx context.Context, client *ec2.Client, default
 		// Find the associated route table ID
 		routeTableId, errRT := findAssociatedRouteTableID(ctx, client, subnetId, vpcId)
 		if errRT != nil {
-			c.logger.Warnf("Could not determine route table for subnet %s: %v", subnetId, errRT)
+			c.logger.Warnf("[AccountID: %s] Could not determine route table for subnet %s: %v", account, subnetId, errRT)
 			routeTableId = "" // Set to empty if lookup failed
 		}
 
 		// Find the associated network ACL ID
 		networkAclId, errAcl := findAssociatedNetworkAclID(ctx, client, subnetId, vpcId)
 		if errAcl != nil {
-			c.logger.Warnf("Could not determine network ACL for subnet %s: %v", subnetId, errAcl)
+			c.logger.Warnf("[AccountID: %s] Could not determine network ACL for subnet %s: %v", account, subnetId, errAcl)
 			networkAclId = "" // Set to empty if lookup failed
 		}
 
@@ -185,14 +229,14 @@ func (c *Client) convertSubnets(ctx context.Context, client *ec2.Client, default
 		}
 
 		result = append(result, types.Subnet{
-			Zone:          convertString(subnet.AvailabilityZone),
+			Zone:          aws.ToString(subnet.AvailabilityZone), // Replaced convertString
 			SubnetId:      subnetId,
-			Name:          convertString(getTagName(subnet.Tags)),
+			Name:          aws.ToString(getTagName(subnet.Tags)), // Replaced convertString
 			VpcId:         vpcId,
-			CidrBlock:     convertString(subnet.CidrBlock),
+			CidrBlock:     aws.ToString(subnet.CidrBlock), // Replaced convertString
 			Labels:        convertTags(subnet.Tags),
 			Region:        region,
-			AccountID:     aws.ToString(subnet.OwnerId), // Use OwnerId for AccountID
+			AccountID:     aws.ToString(subnet.OwnerId), // Use OwnerId for AccountID of the resource itself
 			Provider:      providerName,
 			SelfLink:      subnetLink,
 			RouteTableIds: rtIds,  // Populate the slice

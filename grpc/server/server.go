@@ -23,6 +23,9 @@ import (
 	"fmt"
 	"io/fs"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -159,12 +162,13 @@ func Run() {
 	logger.Formatter = &logrus.TextFormatter{
 		FullTimestamp:   true,
 		TimestampFormat: "2006-01-02 15:04:05",
+		ForceColors:     true,
 	}
 
 	c := parseConfig(logger)
 	fmt.Printf("Provider Config: %+v\n", c.Providers)
 
-	providerStrategy, err := provider.NewRealProviderStrategy(ctx, logger, c.Providers, c.KubernetesSupported)
+	providerStrategy, err := provider.NewRealProviderStrategy(logger, c.Providers,c.KubernetesSupported)
 
 	if err != nil {
 		logger.Warnf("Initialized with error %v", err)
@@ -186,11 +190,11 @@ func Run() {
 			}
 		}(dbClient)
 
-		strategyWithDB := db.NewStrategyWithDB(dbClient, providerStrategy, logger)
-		usedStrategy = strategyWithDB
+		db.NewStrategyWithDB(dbClient, providerStrategy, logger, c.KubernetesSupported)
+		//usedStrategy = strategyWithDB
 
 		if c.SyncConfig.Enabled {
-			syncer := sync.NewSyncer(logger, dbClient, providerStrategy, &c.SyncConfig)
+			syncer := sync.NewSyncer(logger, dbClient, providerStrategy, &c)
 			go syncer.SyncPeriodically(ctx)
 		}
 	}
@@ -214,11 +218,42 @@ func Run() {
 	infrapb.RegisterAccessControlServiceServer(grpcServer, s)
 	infrapb.RegisterKubernetesServiceServer(grpcServer, s)
 
-	go s.refreshClusters(ctx, time.Second*60)
 	logger.Infof("server listening at %v", lis.Addr())
 	if err := grpcServer.Serve(lis); err != nil {
 		logger.Fatalf("failed to serve: %v", err)
 	}
+	if c.KubernetesSupported {
+		go s.refreshClusters(ctx, time.Second*60)
+	}
+
+	// Graceful shutdown handling
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		logger.Info("Application started. Press Ctrl+C to exit.")
+	}()
+
+	<-stop // Wait for interrupt signal
+
+	logger.Info("Shutting down server...")
+
+	// Stop the provider strategy's periodic reconciler
+	//if providerStrategy != nil {
+	//	logger.Info("Stopping provider strategy reconciler...")
+	//	providerStrategy.StopPeriodicReconciliation() // Call the new stop method
+	//}
+
+	// Stop the gRPC server gracefully (example)
+	// if grpcServer != nil {
+	// 	logger.Info("Stopping gRPC server...")
+	// 	grpcServer.GracefulStop()
+	// }
+
+	// If syncer was started with a cancellable context, cancel it.
+	// cancelMainCtx() // Already handled by defer if Run function exits
+
+	logger.Info("Server gracefully stopped.")
 }
 
 func (s *Server) refreshClusters(ctx context.Context, interval time.Duration) {

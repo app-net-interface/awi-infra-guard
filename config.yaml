@@ -25,8 +25,8 @@ port: 50052
 useLocalDB: true
 
 # Logging Level: Possible options are PANIC, FATAL, ERROR, INFO, WARN, DEBUG, TRACE
-#logLevel: DEBUG
-logLevel: INFO
+logLevel: DEBUG
+#logLevel: INFO
 #logLevel: ERROR
 
 providers:
@@ -36,15 +36,15 @@ providers:
 #    type: cloud
 #  - name: gcp
 #    type: cloud
-#
+
 ##Support for K8S
-kubernetesSupported: true
+kubernetesSupported: false
 
 # Cloud resource synchronization configuration
 syncConfig:
   # how often sync resources from the cloud, if useLocalDB is true
   enabled: true
-  syncWaitTime: "1500s" 
+  syncWaitTime: "120s" 
   # Name of BoltDB database file
   dbFileName: "infra.db"
   resources: 

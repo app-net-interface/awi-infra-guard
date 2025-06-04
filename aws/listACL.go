@@ -13,9 +13,23 @@ import (
 )
 
 func (c *Client) ListACLs(ctx context.Context, params *infrapb.ListACLsRequest) ([]types.ACL, error) {
+	if c.accountID != "" && params.AccountId != "" && c.accountID != params.AccountId {
+		panic(fmt.Sprintf("ListACLs called with different AccountID: %s, expected: %s", params.AccountId, c.accountID))
+	}
 
-	c.creds = params.Creds
-	c.accountID = params.AccountId
+	operationalAccountID := params.GetAccountId()
+	if operationalAccountID == "" && c.accountID != "" {
+		c.logger.Infof("[AccountID: %s] ListACLs: params.AccountId is empty, using client's default/initial accountID: %s", c.accountID, c.accountID)
+		operationalAccountID = c.accountID
+	}
+	if operationalAccountID == "" {
+		c.logger.Errorf("ListACLs: operationalAccountID is empty and c.accountID is also empty. Cannot proceed.")
+		return nil, fmt.Errorf("account ID is required but was not provided and no default is set")
+	}
+	c.logger.Debugf("[AccountID: %s] ListACLs called with VPC ID: %s, Region: %s", operationalAccountID, params.GetVpcId(), params.GetRegion())
+
+	// REMOVED: c.creds = params.Creds
+	// REMOVED: c.accountID = params.AccountId
 
 	builder := newFilterBuilder()
 	builder.withVPC(params.GetVpcId())
@@ -29,58 +43,73 @@ func (c *Client) ListACLs(ctx context.Context, params *infrapb.ListACLsRequest) 
 			allErrors     []error
 			resultChannel = make(chan regionResult)
 		)
-		regions, err := c.getAllRegions(ctx)
+		// Pass operationalAccountID to getAllRegions
+		regions, err := c.getAllRegions(ctx, operationalAccountID)
 		if err != nil {
-			c.logger.Errorf("Unable to describe regions, %v", err)
+			c.logger.Errorf("[AccountID: %s] ListACLs: Unable to describe regions, %v", operationalAccountID, err)
 			return nil, err
 		}
-		for _, region := range regions {
+		c.logger.Debugf("[AccountID: %s] ListACLs: Iterating %d regions.", operationalAccountID, len(regions))
+		for _, region := range regions { // region is awstypes.Region
 			wg.Add(1)
-			go func(regionName string) {
+			// Pass operationalAccountID to the goroutine
+			go func(regionName string, accID string) {
 				defer wg.Done()
-				acls, err := c.getACLsForRegion(ctx, regionName, filters)
+				c.logger.Debugf("[AccountID: %s] ListACLs: Goroutine for region %s started.", accID, regionName)
+				// Pass accID (operationalAccountID) to getACLsForRegion
+				acls, err := c.getACLsForRegion(ctx, regionName, filters, accID)
 				resultChannel <- regionResult{
 					region: regionName,
 					acls:   acls,
 					err:    err,
 				}
-			}(*region.RegionName)
+			}(*region.RegionName, operationalAccountID)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
+			c.logger.Debugf("[AccountID: %s] ListACLs: All region goroutines finished, resultChannel closed.", operationalAccountID)
 		}()
 
 		for result := range resultChannel {
 			if result.err != nil {
-				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				c.logger.Infof("[AccountID: %s] ListACLs: Error in region %s: %v", operationalAccountID, result.region, result.err)
 				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
 			} else {
 				allACLs = append(allACLs, result.acls...)
 			}
 		}
-		c.logger.Infof("In account %s Found %d ACLs across %d regions", c.accountID, len(allACLs), len(regions))
+		c.logger.Infof("[AccountID: %s] ListACLs: Found %d ACLs across %d regions", operationalAccountID, len(allACLs), len(regions))
 		if len(allErrors) > 0 {
 			return allACLs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
 		return allACLs, nil
 	}
-	return c.getACLsForRegion(ctx, params.Region, filters)
+	c.logger.Debugf("[AccountID: %s] ListACLs: Processing specific region: %s", operationalAccountID, params.Region)
+	// Pass operationalAccountID to getACLsForRegion
+	return c.getACLsForRegion(ctx, params.Region, filters, operationalAccountID)
 }
 
-func (c *Client) getACLsForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter) ([]types.ACL, error) {
-	client, err := c.getEC2Client(ctx, c.accountID, regionName)
+// getACLsForRegion now accepts operationalAccountID
+func (c *Client) getACLsForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter, operationalAccountID string) ([]types.ACL, error) {
+	c.logger.Debugf("[AccountID: %s] getACLsForRegion: Region %s", operationalAccountID, regionName)
+	// Use operationalAccountID for getting the EC2 client
+	client, err := c.getEC2Client(ctx, operationalAccountID, regionName)
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getACLsForRegion: Failed to get EC2 client for region %s: %v", operationalAccountID, regionName, err)
 		return nil, err
 	}
-	// Call DescribeVpcs operation
+	// Call DescribeNetworkAcls operation
 	resp, err := client.DescribeNetworkAcls(ctx, &ec2.DescribeNetworkAclsInput{
 		Filters: filters,
 	})
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getACLsForRegion: DescribeNetworkAcls failed for region %s: %v", operationalAccountID, regionName, err)
 		return nil, err
 	}
+	// convertACLs itself uses OwnerId from the resource for AccountID in types.ACL.
+	// No need to pass operationalAccountID to convertACLs if it's deriving from resource.
 	return convertACLs(c.defaultRegion, regionName, resp.NetworkAcls), nil
 }
 
@@ -117,10 +146,15 @@ func convertACLs(defaultRegion, region string, awsACLs []awsTypes.NetworkAcl) []
 			}
 			if r.PortRange != nil {
 				if r.PortRange.From != nil {
-					rule.PortRange = fmt.Sprintf("%d", r.PortRange.From)
+					rule.PortRange = fmt.Sprintf("%d", *r.PortRange.From) // Dereference pointer
 				}
 				if r.PortRange.To != nil {
-					rule.PortRange += fmt.Sprintf("- %d", r.PortRange.To)
+					// Ensure "From" was present before appending "-"
+					if r.PortRange.From != nil {
+						rule.PortRange += fmt.Sprintf("-%d", *r.PortRange.To) // Dereference pointer
+					} else {
+						rule.PortRange = fmt.Sprintf("%d", *r.PortRange.To) // Dereference pointer
+					}
 				}
 			}
 
@@ -147,7 +181,7 @@ func convertACLs(defaultRegion, region string, awsACLs []awsTypes.NetworkAcl) []
 			Provider:  providerName,
 			VpcID:     convertString(acl.VpcId),
 			Region:    region,
-			AccountID: *acl.OwnerId,
+			AccountID: aws.ToString(acl.OwnerId), // Uses OwnerId from the resource
 			Labels:    convertTags(acl.Tags),
 			Rules:     rules,
 			SelfLink:  aclLink,
@@ -155,3 +189,4 @@ func convertACLs(defaultRegion, region string, awsACLs []awsTypes.NetworkAcl) []
 	}
 	return out
 }
+

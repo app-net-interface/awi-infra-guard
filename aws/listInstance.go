@@ -31,10 +31,20 @@ import (
 )
 
 func (c *Client) ListInstances(ctx context.Context, params *infrapb.ListInstancesRequest) ([]types.Instance, error) {
-	c.logger.Debugf("Listing instances for account %s, vpc %s and region %s ", params.AccountId, params.VpcId, params.Region)
+	if c.accountID != "" && params.AccountId != "" && c.accountID != params.AccountId {
+		panic(fmt.Sprintf("ListInstances called with different AccountID: %s, expected: %s", params.AccountId, c.accountID))
+	}
 
-	c.creds = params.Creds
-	c.accountID = params.AccountId
+	operationalAccountID := params.GetAccountId()
+	if operationalAccountID == "" && c.accountID != "" {
+		c.logger.Infof("[AccountID: %s] ListInstances: params.AccountId is empty, using client's default/initial accountID: %s", c.accountID, c.accountID)
+		operationalAccountID = c.accountID
+	}
+	if operationalAccountID == "" {
+		c.logger.Errorf("ListInstances: operationalAccountID is empty and c.accountID is also empty. Cannot proceed.")
+		return nil, fmt.Errorf("account ID is required but was not provided and no default is set")
+	}
+	c.logger.Debugf("[AccountID: %s] ListInstances called for vpc %s and region %s ", operationalAccountID, params.VpcId, params.Region)
 
 	builder := newFilterBuilder()
 	builder.withVPC(params.GetVpcId())
@@ -50,107 +60,122 @@ func (c *Client) ListInstances(ctx context.Context, params *infrapb.ListInstance
 			allErrors     []error
 			resultChannel = make(chan regionResult)
 		)
-		regions, err := c.getAllRegions(ctx)
+		// Pass operationalAccountID to getAllRegions
+		regions, err := c.getAllRegions(ctx, operationalAccountID)
 		if err != nil {
-			c.logger.Errorf("Unable to describe regions, %v", err)
+			c.logger.Errorf("[AccountID: %s] ListInstances: Unable to describe regions, %v", operationalAccountID, err)
 			return nil, err
 		}
-		for _, region := range regions {
+		c.logger.Debugf("[AccountID: %s] ListInstances: Iterating %d regions.", operationalAccountID, len(regions))
+		for _, region := range regions { // region is awstypes.Region
 			wg.Add(1)
-			go func(regionName string) {
+			// Pass operationalAccountID to the goroutine
+			go func(regionName string, accID string) {
 				defer wg.Done()
-				instances, err := c.getInstancesForRegion(ctx, regionName, filters)
+				c.logger.Debugf("[AccountID: %s] ListInstances: Goroutine for region %s started.", accID, regionName)
+				// Pass accID (operationalAccountID) to getInstancesForRegion
+				instances, err := c.getInstancesForRegion(ctx, regionName, filters, accID)
 				resultChannel <- regionResult{
 					region:    regionName,
 					instances: instances,
 					err:       err,
 				}
-			}(*region.RegionName)
+			}(*region.RegionName, operationalAccountID)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
+			c.logger.Debugf("[AccountID: %s] ListInstances: All region goroutines finished, resultChannel closed.", operationalAccountID)
 		}()
 
 		for result := range resultChannel {
 			if result.err != nil {
-				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				c.logger.Infof("[AccountID: %s] ListInstances: Error in region %s: %v", operationalAccountID, result.region, result.err)
 				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
 			} else {
 				allInstances = append(allInstances, result.instances...)
 			}
 		}
-		c.logger.Infof("In account %s Found %d instances across %d regions", c.accountID, len(allInstances), len(regions))
+		c.logger.Infof("[AccountID: %s] ListInstances: Found %d instances across %d regions", operationalAccountID, len(allInstances), len(regions))
 
 		if len(allErrors) > 0 {
 			return allInstances, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
 		return allInstances, nil
 	}
-	return c.getInstancesForRegion(ctx, params.Region, filters)
+	c.logger.Debugf("[AccountID: %s] ListInstances: Processing specific region: %s", operationalAccountID, params.Region)
+	// Pass operationalAccountID to getInstancesForRegion
+	return c.getInstancesForRegion(ctx, params.Region, filters, operationalAccountID)
 }
 
-func (c *Client) getInstancesForRegion(ctx context.Context, regionName string, filters []awstypes.Filter) ([]types.Instance, error) {
-	client, err := c.getEC2Client(ctx, c.accountID, regionName)
+// getInstancesForRegion now accepts operationalAccountID
+func (c *Client) getInstancesForRegion(ctx context.Context, regionName string, filters []awstypes.Filter, operationalAccountID string) ([]types.Instance, error) {
+	c.logger.Debugf("[AccountID: %s] getInstancesForRegion: Region %s", operationalAccountID, regionName)
+	// Use operationalAccountID for getting the EC2 client
+	client, err := c.getEC2Client(ctx, operationalAccountID, regionName)
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getInstancesForRegion: Failed to get EC2 client for region %s: %v", operationalAccountID, regionName, err)
 		return nil, err
 	}
-	// Call DescribeVpcs operation
+	// Call DescribeInstances operation
 	resp, err := client.DescribeInstances(ctx, &ec2.DescribeInstancesInput{
 		Filters: filters,
 	})
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getInstancesForRegion: DescribeInstances failed for region %s: %v", operationalAccountID, regionName, err)
 		return nil, err
 	}
-	return convertInstances(c.defaultAccountID, c.defaultRegion, c.accountID, regionName, resp.Reservations), nil
+	// Pass operationalAccountID as the 'account' parameter to convertInstances
+	return convertInstances(c.defaultAccountID, c.defaultRegion, operationalAccountID, regionName, resp.Reservations), nil
 }
 
+// convertInstances's 'account' parameter will now be the operationalAccountID
 func convertInstances(defaultAccount, defaultRegion, account, region string, reservations []awstypes.Reservation) []types.Instance {
 	if region == "" {
 		region = defaultRegion
 	}
+	// The 'account' parameter is now the operationalAccountID passed from getInstancesForRegion.
+	// If it's empty, it falls back to defaultAccount, but ideally, operationalAccountID should always be set.
 	if account == "" {
 		account = defaultAccount
 	}
-	instances := make([]types.Instance, 0, len(reservations))
+	instances := make([]types.Instance, 0) // Initialize to avoid nil if no reservations/instances
 	for _, reservation := range reservations {
-		if len(reservation.Instances) == 0 {
-			continue
-		}
-		inst := reservation.Instances[0]
-		name := getTagName(inst.Tags)
-		instanceLink := fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#InstanceDetails:instanceId=%s", region, region, aws.ToString(inst.InstanceId))
+		for _, inst := range reservation.Instances { // Iterate over all instances in a reservation
+			name := getTagName(inst.Tags)
+			instanceLink := fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#InstanceDetails:instanceId=%s", region, region, aws.ToString(inst.InstanceId))
 
-		secGroups := make([]string, len(inst.SecurityGroups))
-		for i, group := range inst.SecurityGroups {
-			secGroups[i] = *group.GroupId
-		}
+			secGroups := make([]string, len(inst.SecurityGroups))
+			for i, group := range inst.SecurityGroups {
+				secGroups[i] = aws.ToString(group.GroupId)
+			}
 
-		networkInterfaces := make([]string, len(inst.NetworkInterfaces))
-		for j, iface := range inst.NetworkInterfaces {
-			networkInterfaces[j] = *iface.NetworkInterfaceId
-		}
+			networkInterfaces := make([]string, len(inst.NetworkInterfaces))
+			for j, iface := range inst.NetworkInterfaces {
+				networkInterfaces[j] = aws.ToString(iface.NetworkInterfaceId)
+			}
 
-		instance := types.Instance{
-			ID:               aws.ToString(inst.InstanceId),
-			Name:             aws.ToString(name),
-			PrivateIP:        aws.ToString(inst.PrivateIpAddress),
-			PublicIP:         aws.ToString(inst.PublicIpAddress),
-			SubnetID:         aws.ToString(inst.SubnetId),
-			VPCID:            aws.ToString(inst.VpcId),
-			Type:             aws.ToString((*string)(&inst.InstanceType)),
-			Labels:           convertTags(inst.Tags),
-			State:            convertState(inst.State),
-			Region:           region,
-			Zone:             aws.ToString(inst.Placement.AvailabilityZone),
-			AccountID:        account,
-			Provider:         providerName,
-			SelfLink:         instanceLink,
-			SecurityGroupIDs: secGroups,
-			InterfaceIDs:     networkInterfaces,
+			instance := types.Instance{
+				ID:               aws.ToString(inst.InstanceId),
+				Name:             aws.ToString(name), // name is already *string or nil
+				PrivateIP:        aws.ToString(inst.PrivateIpAddress),
+				PublicIP:         aws.ToString(inst.PublicIpAddress),
+				SubnetID:         aws.ToString(inst.SubnetId),
+				VPCID:            aws.ToString(inst.VpcId),
+				Type:             string(inst.InstanceType), // Corrected: InstanceType is not a pointer
+				Labels:           convertTags(inst.Tags),
+				State:            convertState(inst.State),
+				Region:           region,
+				Zone:             aws.ToString(inst.Placement.AvailabilityZone),
+				AccountID:        account, // This is now the operationalAccountID
+				Provider:         providerName,
+				SelfLink:         instanceLink,
+				SecurityGroupIDs: secGroups,
+				InterfaceIDs:     networkInterfaces,
+			}
+			instances = append(instances, instance)
 		}
-		instances = append(instances, instance)
 	}
 	return instances
 }
@@ -158,7 +183,9 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 func convertTags(tags []awstypes.Tag) map[string]string {
 	labels := make(map[string]string, len(tags))
 	for _, t := range tags {
-		labels[convertString(t.Key)] = convertString(t.Value)
+		// Assuming convertString handles nil pointers gracefully, similar to aws.ToString
+		// If convertString is not defined or doesn't, use aws.ToString
+		labels[aws.ToString(t.Key)] = aws.ToString(t.Value)
 	}
 	return labels
 }
@@ -170,10 +197,10 @@ func convertState(state *awstypes.InstanceState) string {
 	return string(state.Name)
 }
 
-func getTagName(tags []awstypes.Tag) *string {
+func getTagName(tags []awstypes.Tag) *string { // Returns *string or nil
 	for _, tag := range tags {
-		if *tag.Key == "Name" {
-			return tag.Value
+		if aws.ToString(tag.Key) == "Name" { // Use aws.ToString for safety with *string
+			return tag.Value // tag.Value is *string
 		}
 	}
 	return nil
@@ -182,7 +209,21 @@ func getTagName(tags []awstypes.Tag) *string {
 func convertClusterTags(tags map[string]*string) map[string]string {
 	m := make(map[string]string, len(tags))
 	for k, v := range tags {
-		m[k] = convertString(v)
+		// Assuming convertString handles nil pointers gracefully, similar to aws.ToString
+		// If convertString is not defined or doesn't, use aws.ToString
+		m[k] = aws.ToString(v)
 	}
 	return m
 }
+
+// If convertString is a helper you have, ensure it's robust.
+// Otherwise, using aws.ToString is generally safer for AWS SDK types.
+// For example:
+/*
+func convertString(s *string) string {
+    if s == nil {
+        return ""
+    }
+    return *s
+}
+*/

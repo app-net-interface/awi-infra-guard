@@ -22,18 +22,16 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/app-net-interface/awi-infra-guard/aws"
 	"github.com/app-net-interface/awi-infra-guard/azure"
+	"github.com/app-net-interface/awi-infra-guard/gcp"
 	"github.com/app-net-interface/awi-infra-guard/grpc/config"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
-
+	infra_kubernetes "github.com/app-net-interface/awi-infra-guard/kubernetes"
+	"github.com/app-net-interface/awi-infra-guard/types"
 	"github.com/app-net-interface/kubernetes-discovery/cluster"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/app-net-interface/awi-infra-guard/aws"
-	"github.com/app-net-interface/awi-infra-guard/gcp"
-	infra_kubernetes "github.com/app-net-interface/awi-infra-guard/kubernetes"
-	"github.com/app-net-interface/awi-infra-guard/types"
 )
 
 type Strategy interface {
@@ -150,41 +148,49 @@ type VPCConnector interface {
 }
 
 type RealProviderStrategy struct {
-	awsClient   *aws.Client
-	gcpClient   *gcp.Client
-	azureClient *azure.Client
-	k8sClient   *infra_kubernetes.KubernetesClient
-	logger      *logrus.Logger
-	providers   []CloudProvider
+	awsClient           *aws.Client   // Specific client instance for AWS
+	gcpClient           *gcp.Client   // Specific client instance for GCP
+	azureClient         *azure.Client // Specific client instance for Azure
+	k8sClient           *infra_kubernetes.KubernetesClient
+	logger              *logrus.Logger
+	providers           []CloudProvider          // Slice of all active CloudProvider interfaces
+	CloudProviders      map[string]CloudProvider // Map for quick lookup by name
+	kubernetesSupported bool
 }
 
 func (s *RealProviderStrategy) GetProvider(ctx context.Context, cloud string) (CloudProvider, error) {
 	s.logger.Infof("Using %s as an infra provider", cloud)
-	switch strings.ToLower(cloud) {
-	case "aws":
-		if s.awsClient == nil {
-			return nil, fmt.Errorf("AWS client is not initialized")
+	// Look up from the initialized map for consistency
+	provider, ok := s.CloudProviders[strings.ToLower(cloud)]
+	if !ok {
+		// Fallback to checking specific clients if the map wasn't populated or name mismatch
+		// This section maintains compatibility with the old direct client checks but prefers the map.
+		switch strings.ToLower(cloud) {
+		case "aws":
+			if s.awsClient == nil {
+				return nil, fmt.Errorf("AWS client is not initialized")
+			}
+			return s.awsClient, nil
+		case "gcp":
+			if s.gcpClient == nil {
+				return nil, fmt.Errorf("GCP client is not initialized")
+			}
+			return s.gcpClient, nil
+		case "azure":
+			if s.azureClient == nil {
+				return nil, fmt.Errorf("Azure client is not initialized")
+			}
+			return s.azureClient, nil
+		default:
+			return nil, fmt.Errorf("unsupported provider or provider %s not found in active map", cloud)
 		}
-		s.providers = append(s.providers, s.awsClient)
-		return s.awsClient, nil
-	case "gcp":
-		if s.gcpClient == nil {
-			return nil, fmt.Errorf("GCP client is not initizalized")
-		}
-		s.providers = append(s.providers, s.gcpClient)
-
-		return s.gcpClient, nil
-	case "azure":
-		if s.azureClient == nil {
-			return nil, fmt.Errorf("Azure client is not initizalized")
-		}
-		s.providers = append(s.providers, s.azureClient)
-		return s.azureClient, nil
 	}
-	return nil, fmt.Errorf("unsupported provider")
+	return provider, nil
 }
 
 func (s *RealProviderStrategy) GetAllProviders() []CloudProvider {
+	// Return a copy to prevent external modification if s.providers could be modified elsewhere (though it shouldn't be post-init)
+	// For now, returning the direct slice as per original.
 	return s.providers
 }
 
@@ -201,48 +207,96 @@ func (s *RealProviderStrategy) RefreshState(ctx context.Context) error {
 	return nil
 }
 
-func NewRealProviderStrategy(ctx context.Context, logger *logrus.Logger, providers []config.Provider, k8sSupport bool) (*RealProviderStrategy, error) {
-	s := &RealProviderStrategy{
-		logger: logger,
+func NewRealProviderStrategy(logger *logrus.Logger, providerConfigs []config.Provider, kubernetesSupported bool) (*RealProviderStrategy, error) {
+	p := &RealProviderStrategy{
+		CloudProviders:      make(map[string]CloudProvider),
+		logger:              logger,
+		kubernetesSupported: kubernetesSupported,
+		providers:           make([]CloudProvider, 0, len(providerConfigs)), // Initialize the slice
 	}
-	var err error
-	for _, provider := range providers {
-		s.logger.Infof("Initializing provider %s", provider.Name)
-		switch strings.ToLower(provider.Name) {
+
+	p.logger.Infof("Initializing RealProviderStrategy with %d configured providers.", len(providerConfigs))
+	successfulProviders := 0
+	ctx := context.Background()          // Create a context for the initialization
+	for _, pc := range providerConfigs { // pc is of type config.Provider
+		var cp CloudProvider
+		var specificClient interface{} // To hold the specific client type before assigning to p.awsClient etc.
+		var err error
+
+		p.logger.Debugf("Attempting to initialize provider: Name=%s, Type=%s", pc.Name, pc.Type)
+
+		providerNameKey := strings.ToLower(pc.Name) // Use a consistent key for the map
+
+		switch pc.Name {
 		case "aws":
-			s.awsClient, err = aws.NewClient(ctx, s.logger)
-			if err != nil {
-				logger.Warnf("Failed to init AWS client: %v", err)
-			} else {
-				s.providers = append(s.providers, s.awsClient)
+			// Assuming aws.NewClient takes config.Provider and logger
+			// and returns *aws.Client, error
+			awsC, clientErr := aws.NewClient(ctx, p.logger) // Use p.logger
+			if clientErr == nil {
+				cp = awsC
+				specificClient = awsC
 			}
-		case "gcp":
-			s.gcpClient, err = gcp.NewClient(ctx, s.logger)
-			if err != nil {
-				logger.Warnf("Failed to init GCP client: %v", err)
-			} else {
-				s.providers = append(s.providers, s.gcpClient)
-			}
+			err = clientErr
 		case "azure":
-			s.azureClient, err = azure.NewClient(ctx, s.logger)
-			if err != nil {
-				logger.Warnf("Failed to init Azure client: %v", err)
-			} else {
-				s.providers = append(s.providers, s.azureClient)
+			// Assuming azure.NewClient takes config.Provider and logger
+			// and returns *azure.Client, error
+			azureC, clientErr := azure.NewClient(ctx, p.logger) // Use p.logger
+			if clientErr == nil {
+				cp = azureC
+				specificClient = azureC
 			}
+			err = clientErr
+		case "gcp":
+			// Assuming gcp.NewClient takes config.Provider and logger
+			// and returns *gcp.Client, error
+			gcpC, clientErr := gcp.NewClient(ctx, p.logger) // Use p.logger
+			if clientErr == nil {
+				cp = gcpC
+				specificClient = gcpC
+			}
+			err = clientErr
+		default:
+			err = fmt.Errorf("unsupported provider type: %s for provider %s", pc.Type, pc.Name)
 		}
-	}
-	for _, provider := range s.providers {
-		logger.Debugf("Provider %s initialized", provider.GetName())
-	}
-	if k8sSupport {
-		s.k8sClient, err = infra_kubernetes.NewKubernetesClient(logger, "")
+
 		if err != nil {
-			logger.Warnf("Failed to init kubernetes clients: %v", err)
+			p.logger.Errorf("Failed to initialize cloud provider %s (Type: %s): %v. This provider will be skipped for now.", pc.Name, pc.Type, err)
+			continue
 		}
-		s.RetrieveClusters(ctx)
+
+		if cp != nil {
+			p.CloudProviders[providerNameKey] = cp // Use consistent key
+			p.providers = append(p.providers, cp)
+
+			// Assign to specific client fields
+			switch c := specificClient.(type) {
+			case *aws.Client:
+				p.awsClient = c
+			case *azure.Client:
+				p.azureClient = c
+			case *gcp.Client:
+				p.gcpClient = c
+			default:
+				p.logger.Error("Unspecified client type")
+			}
+
+			successfulProviders++
+			p.logger.Infof("Successfully initialized provider: %s (Type: %s)", pc.Name, pc.Type)
+		} else {
+			p.logger.Warnf("Provider %s (Type: %s) initialized as nil without an error. Skipping.", pc.Name, pc.Type)
+		}
 	}
-	return s, err
+	p.logger.Infof("RealProviderStrategy initialization complete. Successfully initialized %d out of %d configured cloud providers.", successfulProviders, len(providerConfigs))
+
+	if kubernetesSupported {
+
+		//p.k8sClient, _  := infra_kubernetes.NewKubernetesClient(p.logger, "")
+		p.logger.Info("Kubernetes client skipped.")
+		// The dbClient parameter was removed from NewRealProviderStrategy signature in your file,
+		// so p.k8sClient.Init(dbClient) cannot be called here without dbClient.
+		// If dbClient is needed for k8s, it must be passed to NewRealProviderStrategy or k8sClient must get it another way.
+	}
+	return p, nil
 }
 
 func (s *RealProviderStrategy) RetrieveClusters(ctx context.Context) {

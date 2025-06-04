@@ -14,76 +14,95 @@ import (
 )
 
 func (c *Client) ListRouteTables(ctx context.Context, params *infrapb.ListRouteTablesRequest) ([]types.RouteTable, error) {
+    if c.accountID != "" && params.AccountId != "" && c.accountID != params.AccountId {
+        panic(fmt.Sprintf("ListRouteTables called with different AccountID: %s, expected: %s", params.AccountId, c.accountID))
+    }
+    operationalAccountID := params.GetAccountId()
+    if operationalAccountID == "" && c.accountID != "" {
+        c.logger.Infof("ListRouteTables: params.AccountId is empty, using client's default/initial accountID: %s", c.accountID)
+        operationalAccountID = c.accountID
+    }
+    if operationalAccountID == "" {
+        c.logger.Errorf("ListRouteTables: operationalAccountID is empty and c.accountID is also empty. Cannot proceed.")
+        return nil, fmt.Errorf("account ID is required but was not provided and no default is set")
+    }
+    c.logger.Debugf("[AccountID: %s] ListRouteTables called with VPC ID: %s, Region: %s", operationalAccountID, params.GetVpcId(), params.GetRegion())
 
-	c.creds = params.Creds
-	c.accountID = params.AccountId
+    // REMOVED: c.creds = params.Creds
+    // REMOVED: c.accountID = params.AccountId
 
-	builder := newFilterBuilder()
-	builder.withVPC(params.GetVpcId())
+    builder := newFilterBuilder()
+    builder.withVPC(params.GetVpcId())
 
-	filters := builder.build()
+    filters := builder.build()
 
-	if params.Region == "" || params.GetRegion() == "all" {
-		var (
-			wg             sync.WaitGroup
-			allRouteTables []types.RouteTable
-			allErrors      []error
-			resultChannel  = make(chan regionResult)
-		)
-		regions, err := c.getAllRegions(ctx)
-		if err != nil {
-			c.logger.Errorf("Unable to describe regions, %v", err)
-			return nil, err
-		}
-		for _, region := range regions {
-			wg.Add(1)
-			go func(regionName string) {
-				defer wg.Done()
-				rts, err := c.getRouteTablesForRegion(ctx, regionName, filters)
-				resultChannel <- regionResult{
-					region: regionName,
-					rts:    rts,
-					err:    err,
-				}
-			}(*region.RegionName)
-		}
+    if params.Region == "" || params.GetRegion() == "all" {
+        var (
+            wg             sync.WaitGroup
+            allRouteTables []types.RouteTable
+            allErrors      []error
+            resultChannel  = make(chan regionResult)
+        )
+        regions, err := c.getAllRegions(ctx, operationalAccountID) // Pass operationalAccountID
+        if err != nil {
+            c.logger.Errorf("[AccountID: %s] ListRouteTables: Unable to describe regions, %v", operationalAccountID, err)
+            return nil, err
+        }
+        c.logger.Debugf("[AccountID: %s] ListRouteTables: Iterating %d regions.", operationalAccountID, len(regions))
+        for _, region := range regions {
+            wg.Add(1)
+            go func(regionName string, accID string) { // Pass operationalAccountID
+                defer wg.Done()
+                c.logger.Debugf("[AccountID: %s] ListRouteTables: Goroutine for region %s started.", accID, regionName)
+                rts, err := c.getRouteTablesForRegion(ctx, regionName, filters, accID) // Pass operationalAccountID
+                resultChannel <- regionResult{
+                    region: regionName,
+                    rts:    rts,
+                    err:    err,
+                }
+            }(*region.RegionName, operationalAccountID)
+        }
 
-		go func() {
-			wg.Wait()
-			close(resultChannel)
-		}()
+        go func() {
+            wg.Wait()
+            close(resultChannel)
+        }()
 
-		for result := range resultChannel {
-			if result.err != nil {
-				c.logger.Infof("Error in region %s: %v", result.region, result.err)
-				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
-			} else {
-				allRouteTables = append(allRouteTables, result.rts...)
-			}
-		}
-		c.logger.Infof("In account %s Found %d route tables across %d regions", c.accountID, len(allRouteTables), len(regions))
+        for result := range resultChannel {
+            if result.err != nil {
+                c.logger.Infof("[AccountID: %s] ListRouteTables: Error in region %s: %v", operationalAccountID, result.region, result.err)
+                allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
+            } else {
+                allRouteTables = append(allRouteTables, result.rts...)
+            }
+        }
+        c.logger.Infof("[AccountID: %s] ListRouteTables: Found %d route tables across %d regions", operationalAccountID, len(allRouteTables), len(regions))
 
-		if len(allErrors) > 0 {
-			return allRouteTables, fmt.Errorf("errors occurred in some regions: %v", allErrors)
-		}
-		return allRouteTables, nil
-	}
-	return c.getRouteTablesForRegion(ctx, params.Region, filters)
+        if len(allErrors) > 0 {
+            return allRouteTables, fmt.Errorf("errors occurred in some regions: %v", allErrors)
+        }
+        return allRouteTables, nil
+    }
+    c.logger.Debugf("[AccountID: %s] ListRouteTables: Processing specific region: %s", operationalAccountID, params.Region)
+    return c.getRouteTablesForRegion(ctx, params.Region, filters, operationalAccountID) // Pass operationalAccountID
 }
 
-func (c *Client) getRouteTablesForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter) ([]types.RouteTable, error) {
-	client, err := c.getEC2Client(ctx, c.accountID, regionName)
-	if err != nil {
-		return nil, err
-	}
-	// Call DescribeVpcs operation
-	resp, err := client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{
-		Filters: filters,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return convertRouteTables(c.defaultRegion, regionName, resp.RouteTables), nil
+func (c *Client) getRouteTablesForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter, operationalAccountID string) ([]types.RouteTable, error) {
+    c.logger.Debugf("[AccountID: %s] getRouteTablesForRegion: Region %s", operationalAccountID, regionName)
+    client, err := c.getEC2Client(ctx, operationalAccountID, regionName) // Use operationalAccountID
+    if err != nil {
+        return nil, err
+    }
+    // Call DescribeVpcs operation
+    resp, err := client.DescribeRouteTables(ctx, &ec2.DescribeRouteTablesInput{
+        Filters: filters,
+    })
+    if err != nil {
+        c.logger.Errorf("[AccountID: %s] getRouteTablesForRegion: DescribeRouteTables failed for region %s: %v", operationalAccountID, regionName, err)
+        return nil, err
+    }
+    // convertRouteTables uses OwnerId from the resource itself for AccountID field.
+    return convertRouteTables(c.defaultRegion, regionName, resp.RouteTables), nil
 }
 
 func convertRouteTables(defaultRegion, region string, awsRts []awsTypes.RouteTable) []types.RouteTable {
@@ -238,3 +257,4 @@ func convertRouteTables(defaultRegion, region string, awsRts []awsTypes.RouteTab
 
 	return out
 }
+

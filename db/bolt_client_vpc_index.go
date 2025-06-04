@@ -33,7 +33,7 @@ func (client *boltClient) UpdateVPCIndex(provider, vpcID, resourceId, resourceTy
 		return nil // Not an error, just nothing to do
 	}
 
-	fmt.Printf("DEBUG: Updating VPCIndex for provider: %s VPCID: %s, ResourceID: %s, ResourceType: %s\n", provider, vpcID, resourceId, resourceType)
+	//fmt.Printf("DEBUG: Updating VPCIndex for provider: %s VPCID: %s, ResourceID: %s, ResourceType: %s\n", provider, vpcID, resourceId, resourceType)
 	key := provider + ":" + vpcID
 	vpcIndex, err := client.GetVPCIndex(key)
 
@@ -165,7 +165,8 @@ func (client *boltClient) SyncVPCIndexes() error {
 		}
 		processedVPCs[vpcKey] = true
 
-		fmt.Printf("DEBUG: Processing VPC Index for key: %s (Region: %s)\n", vpcKey, vpc.Region)
+		//fmt.Printf("DEBUG: 
+		// Processing VPC Index for key: %s (Region: %s)\n", vpcKey, vpc.Region)
 
 		// Initialize the index
 		index := &types.VPCIndex{
@@ -194,13 +195,13 @@ func (client *boltClient) SyncVPCIndexes() error {
 			if vpc.Region != "" {
 				// Use lowercase region for lookup (NO "aws:" prefix)
 				regionKey := strings.ToLower(vpc.Region)
-				fmt.Printf("DEBUG: VPC is AWS. Looking up region key '%s' in awsRoutersByRegion map\n", regionKey)
+				//fmt.Printf("DEBUG: VPC is AWS. Looking up region key '%s' in awsRoutersByRegion map\n", regionKey)
 				regionalRouterIDs := awsRoutersByRegion[regionKey] // THE LOOKUP (using just region)
 				if regionalRouterIDs != nil {
 					fmt.Printf("DEBUG: Injecting %d AWS Router IDs into index for %s\n", len(regionalRouterIDs), vpcKey)
 					index.RouterIds = regionalRouterIDs // THE ASSIGNMENT
 				} else {
-					fmt.Printf("DEBUG: No AWS routers found for region key '%s' (VPC %s)\n", regionKey, vpcKey)
+					//fmt.Printf("DEBUG: No AWS routers found for region key '%s' (VPC %s)\n", regionKey, vpcKey)
 					index.RouterIds = []string{} // Ensure empty slice
 				}
 			} else {
@@ -209,7 +210,7 @@ func (client *boltClient) SyncVPCIndexes() error {
 		}
 
 		// Save the initial index
-		fmt.Printf("DEBUG: Putting initial VPC Index for %s with RouterIDs: %v\n", vpcKey, index.RouterIds)
+		//fmt.Printf("DEBUG: Putting initial VPC Index for %s with RouterIDs: %v\n", vpcKey, index.RouterIds)
 		if err := client.PutVPCIndex(index); err != nil {
 			fmt.Printf("ERROR: Failed to put initial VPC Index for %s: %v\n", vpcKey, err)
 			// Consider returning the error if this failure is critical

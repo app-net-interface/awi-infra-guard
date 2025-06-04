@@ -29,18 +29,35 @@ import (
 	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
-func (c *Client) ListKeyPairs(ctx context.Context, input *infrapb.ListKeyPairsRequest) ([]types.KeyPair, error) {
-	c.creds = input.Creds
-	c.accountID = input.AccountId
+func (c *Client) ListKeyPairs(ctx context.Context, params *infrapb.ListKeyPairsRequest) ([]types.KeyPair, error) {
+	if c.accountID != "" && params.AccountId != "" && c.accountID != params.AccountId {
+		panic(fmt.Sprintf("ListKeyPairs called with different AccountID: %s, expected: %s", params.AccountId, c.accountID))
+	}
+
+	operationalAccountID := params.GetAccountId()
+	if operationalAccountID == "" && c.accountID != "" {
+		c.logger.Infof("[AccountID: %s] ListKeyPairs: params.AccountId is empty, using client's default/initial accountID: %s", c.accountID, c.accountID)
+		operationalAccountID = c.accountID
+	}
+	if operationalAccountID == "" {
+		c.logger.Errorf("ListKeyPairs: operationalAccountID is empty and c.accountID is also empty. Cannot proceed.")
+		return nil, fmt.Errorf("account ID is required but was not provided and no default is set")
+	}
+	c.logger.Debugf("[AccountID: %s] ListKeyPairs called with VPC ID: %s, Region: %s", operationalAccountID, params.GetVpcId(), params.GetRegion())
+
+	// REMOVED: c.creds = params.Creds
+	// REMOVED: c.accountID = params.AccountId
 
 	builder := newFilterBuilder()
-	builder.withVPC(input.GetVpcId())
-	for k, v := range input.GetLabels() {
-		builder.withTag(k, v)
+	// KeyPairs are not directly associated with VPCs in AWS EC2 in a filterable way.
+	// If VpcId is provided, it's likely for context or future use, but DescribeKeyPairs doesn't filter by VPC.
+	// builder.withVPC(params.GetVpcId()) // This filter won't apply to DescribeKeyPairs
+	for k, v := range params.GetLabels() {
+		builder.withTag(k, v) // KeyPairs can be filtered by tags
 	}
 	filters := builder.build()
 
-	if input.GetRegion() == "" || input.GetRegion() == "all" {
+	if params.GetRegion() == "" || params.GetRegion() == "all" {
 		var (
 			allKeyPairs   []types.KeyPair
 			allErrors     []error
@@ -48,92 +65,108 @@ func (c *Client) ListKeyPairs(ctx context.Context, input *infrapb.ListKeyPairsRe
 			resultChannel = make(chan regionResult)
 		)
 
-		regions, err := c.getAllRegions(ctx)
+		// Pass operationalAccountID to getAllRegions
+		regions, err := c.getAllRegions(ctx, operationalAccountID)
 		if err != nil {
-			c.logger.Errorf("Unable to describe regions, %v", err)
+			c.logger.Errorf("[AccountID: %s] ListKeyPairs: Unable to describe regions, %v", operationalAccountID, err)
 			return nil, err
 		}
-
-		for _, region := range regions {
+		c.logger.Debugf("[AccountID: %s] ListKeyPairs: Iterating %d regions.", operationalAccountID, len(regions))
+		for _, region := range regions { // region is awstypes.Region
 			wg.Add(1)
-			go func(regionName string) {
+			// Pass operationalAccountID to the goroutine
+			go func(regionName string, accID string) {
 				defer wg.Done()
-				regKeyPairs, err := c.getKeyPairsForRegion(ctx, regionName, filters)
+				c.logger.Debugf("[AccountID: %s] ListKeyPairs: Goroutine for region %s started.", accID, regionName)
+				// Pass accID (operationalAccountID) to getKeyPairsForRegion
+				regKeyPairs, err := c.getKeyPairsForRegion(ctx, regionName, filters, accID)
 				resultChannel <- regionResult{
 					region: regionName,
 					kps:    regKeyPairs,
 					err:    err,
 				}
-			}(*region.RegionName)
+			}(*region.RegionName, operationalAccountID)
 		}
 
 		go func() {
 			wg.Wait()
 			close(resultChannel)
+			c.logger.Debugf("[AccountID: %s] ListKeyPairs: All region goroutines finished, resultChannel closed.", operationalAccountID)
 		}()
 
 		for result := range resultChannel {
 			if result.err != nil {
-				c.logger.Infof("Error in region %s: %v", result.region, result.err)
+				c.logger.Infof("[AccountID: %s] ListKeyPairs: Error in region %s: %v", operationalAccountID, result.region, result.err)
 				allErrors = append(allErrors, fmt.Errorf("region %s: %v", result.region, result.err))
 			} else {
 				allKeyPairs = append(allKeyPairs, result.kps...)
 			}
 		}
 
-		c.logger.Infof("In account %s Found %d KeyPairs across %d regions", c.accountID, len(allKeyPairs), len(regions))
+		c.logger.Infof("[AccountID: %s] ListKeyPairs: Found %d KeyPairs across %d regions", operationalAccountID, len(allKeyPairs), len(regions))
 
 		if len(allErrors) > 0 {
 			return allKeyPairs, fmt.Errorf("errors occurred in some regions: %v", allErrors)
 		}
-		PrintResources(allKeyPairs, "types.KeyPair")
-
 		return allKeyPairs, nil
 	}
-
-	return c.getKeyPairsForRegion(ctx, input.Region, filters)
+	c.logger.Debugf("[AccountID: %s] ListKeyPairs: Processing specific region: %s", operationalAccountID, params.Region)
+	// Pass operationalAccountID to getKeyPairsForRegion
+	return c.getKeyPairsForRegion(ctx, params.Region, filters, operationalAccountID)
 }
 
-func (c *Client) getKeyPairsForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter) ([]types.KeyPair, error) {
-	ec2Client, err := c.getEC2Client(ctx, c.accountID, regionName)
+// getKeyPairsForRegion now accepts operationalAccountID
+func (c *Client) getKeyPairsForRegion(ctx context.Context, regionName string, filters []awsTypes.Filter, operationalAccountID string) ([]types.KeyPair, error) {
+	c.logger.Debugf("[AccountID: %s] getKeyPairsForRegion: Region %s", operationalAccountID, regionName)
+	// Use operationalAccountID for getting the EC2 client
+	ec2Client, err := c.getEC2Client(ctx, operationalAccountID, regionName)
 	if err != nil {
+		c.logger.Errorf("[AccountID: %s] getKeyPairsForRegion: Failed to get EC2 client for region %s: %v", operationalAccountID, regionName, err)
 		return nil, err
 	}
 
 	input := &ec2.DescribeKeyPairsInput{
 		Filters: filters,
+		// IncludePublicKey: aws.Bool(true), // Uncomment if you need the public key material
 	}
 
 	output, err := ec2Client.DescribeKeyPairs(ctx, input)
 	if err != nil {
-		return nil, fmt.Errorf("error describing key pairs: %v", err)
+		c.logger.Errorf("[AccountID: %s] getKeyPairsForRegion: DescribeKeyPairs failed for region %s: %v", operationalAccountID, regionName, err)
+		return nil, fmt.Errorf("error describing key pairs in region %s for account %s: %v", regionName, operationalAccountID, err)
 	}
-	labels := make(map[string]string)
 
-	keyPairs := make([]types.KeyPair, len(output.KeyPairs))
-	for i, kp := range output.KeyPairs {
+	keyPairs := make([]types.KeyPair, 0, len(output.KeyPairs)) // Initialize with 0 length, capacity len(output.KeyPairs)
+	for _, kp := range output.KeyPairs {
 		keyName := aws.ToString(kp.KeyName)
+		labels := make(map[string]string) // Initialize labels for each key pair
 		for _, tag := range kp.Tags {
-			if *tag.Key == "Name" || *tag.Key == "name" {
-				if kp.KeyName == nil && tag.Value != nil {
-					keyName = *tag.Value
-				}
-			}
-			labels[*tag.Key] = *tag.Value
+			// KeyName from tag is usually not how AWS works for KeyPairs, KeyName is a primary identifier.
+			// If a "Name" tag exists, it's just a tag.
+			labels[aws.ToString(tag.Key)] = aws.ToString(tag.Value)
 		}
-		
-		keyPairs[i] = types.KeyPair{
+		// If KeyName was empty but a "Name" tag exists, you might choose to use it.
+		// However, kp.KeyName should generally be populated.
+		if keyName == "" {
+			if nameTagVal, ok := labels["Name"]; ok {
+				keyName = nameTagVal
+			} else if nameTagVal, ok := labels["name"]; ok {
+				keyName = nameTagVal
+			}
+		}
+
+		keyPairs = append(keyPairs, types.KeyPair{
 			ID:          aws.ToString(kp.KeyPairId),
 			Name:        keyName,
 			Fingerprint: aws.ToString(kp.KeyFingerprint),
-			PublicKey:   aws.ToString(kp.PublicKey),
+			PublicKey:   aws.ToString(kp.PublicKey), // Only populated if IncludePublicKey was true in input
 			CreatedAt:   aws.ToTime(kp.CreateTime),
 			Labels:      labels,
 			Provider:    c.GetName(),
 			Region:      regionName,
-			AccountID:   c.accountID,
-			KeyPairType: string(kp.KeyType),
-		}
+			AccountID:   operationalAccountID, // Use operationalAccountID
+			KeyPairType: string(kp.KeyType),   // kp.KeyType is of type types.KeyType (e.g., "rsa", "ed25519")
+		})
 	}
 
 	return keyPairs, nil

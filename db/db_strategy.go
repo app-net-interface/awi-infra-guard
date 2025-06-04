@@ -37,7 +37,7 @@ type StrategyWithDB struct {
 	realStrategy       provider.Strategy
 }
 
-func NewStrategyWithDB(dbClient Client, providerStrategy provider.Strategy, logger *logrus.Logger) *StrategyWithDB {
+func NewStrategyWithDB(dbClient Client, providerStrategy provider.Strategy, logger *logrus.Logger, k8sSupport bool) *StrategyWithDB {
 	strategy := &StrategyWithDB{
 		cloudProviders: make(map[string]*providerWithDB),
 		realStrategy:   providerStrategy,
@@ -50,10 +50,12 @@ func NewStrategyWithDB(dbClient Client, providerStrategy provider.Strategy, logg
 			logger:       logger,
 		}
 	}
-	k8sProvider, _ := providerStrategy.GetKubernetesProvider()
-	strategy.kubernetesProvider = &KubernetesProviderWithDB{
-		realProvider: k8sProvider,
-		dbClient:     dbClient,
+	if k8sSupport {
+		k8sProvider, _ := providerStrategy.GetKubernetesProvider()
+		strategy.kubernetesProvider = &KubernetesProviderWithDB{
+			realProvider: k8sProvider,
+			dbClient:     dbClient,
+		}
 	}
 	return strategy
 }
