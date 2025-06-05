@@ -190,11 +190,11 @@ func Run() {
 			}
 		}(dbClient)
 
-		db.NewStrategyWithDB(dbClient, providerStrategy, logger, c.KubernetesSupported)
-		//usedStrategy = strategyWithDB
+		strategyWithDB := db.NewStrategyWithDB(dbClient, providerStrategy, logger, c.KubernetesSupported)
+		usedStrategy = strategyWithDB
 
 		if c.SyncConfig.Enabled {
-			syncer := sync.NewSyncer(logger, dbClient, providerStrategy, &c)
+			syncer := sync.NewSyncer(logger, dbClient, usedStrategy, &c)
 			go syncer.SyncPeriodically(ctx)
 		}
 	}
