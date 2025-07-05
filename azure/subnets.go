@@ -65,6 +65,14 @@ func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsReq
 					if subnet.Properties != nil && subnet.Properties.AddressPrefix != nil {
 						cidrBlock = *subnet.Properties.AddressPrefix
 					}
+					var routeTableIds []string
+					if subnet.Properties != nil && subnet.Properties.RouteTable != nil && subnet.Properties.RouteTable.ID != nil {
+						routeTableIds = append(routeTableIds, *subnet.Properties.RouteTable.ID)
+					}
+					var networkAclIds []string
+					if subnet.Properties != nil && subnet.Properties.NetworkSecurityGroup != nil && subnet.Properties.NetworkSecurityGroup.ID != nil {
+						networkAclIds = append(networkAclIds, *subnet.Properties.NetworkSecurityGroup.ID)
+					}
 					// Inherit tag from vnet
 					labels := make(map[string]string)
 					// Assuming you want to inherit VNet's tags for its subnets
@@ -74,15 +82,17 @@ func (c *Client) ListSubnets(ctx context.Context, params *infrapb.ListSubnetsReq
 						}
 					}
 					subnets = append(subnets, types.Subnet{
-						SubnetId:  *subnet.ID,
-						Name:      *subnet.Name,
-						CidrBlock: cidrBlock,
-						VpcId:     *vnet.ID,
-						Zone:      "unknown",
-						Region:    *vnet.Location,
-						Provider:  c.GetName(),
-						AccountID: params.AccountId,
-						Labels:    labels, // Update this as needed
+						SubnetId:      *subnet.ID,
+						Name:          *subnet.Name,
+						RouteTableIds: routeTableIds, // This will be a list of route table IDs
+						CidrBlock:     cidrBlock,
+						VpcId:         *vnet.ID,
+						Zone:          "unknown",
+						Region:        *vnet.Location,
+						Provider:      c.GetName(),
+						AccountID:     params.AccountId,
+						Labels:        labels, // Update this as needed
+						NetworkAclIds: networkAclIds,
 					})
 					c.logger.Tracef("Added subnet %+v", subnets[i])
 				}

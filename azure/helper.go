@@ -25,7 +25,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork"
-	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 )
 
@@ -119,49 +118,6 @@ func ListVNetSubnetAssociations(ctx context.Context, subscriptionID string, cred
 	return va, nil
 }
 
-func (c *Client) ListAllACLs(ctx context.Context, input *infrapb.ListACLsRequest) ([]types.ACL, error) {
-
-	var acls []types.ACL
-
-	// Creating an instance of the NSG client
-	nsgClient, err := armnetwork.NewSecurityGroupsClient(input.AccountId, c.cred, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create network security group client: %w", err)
-	}
-
-	// List all NSGs in the subscription
-	pager := nsgClient.NewListAllPager(nil)
-	for pager.More() {
-		result, err := pager.NextPage(ctx)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get the next page of network security groups: %w", err)
-		}
-
-		for _, nsg := range result.Value {
-			labels := make(map[string]string)
-			if nsg.Tags != nil {
-				for k, v := range nsg.Tags {
-					labels[k] = *v
-				}
-			}
-
-			// Mapping NSG details to types.ACL
-			acl := types.ACL{
-				Name:         *nsg.Name,
-				ID:           *nsg.ID,
-				Provider:     c.GetName(),
-				VpcID:        "Not Attached", // VNet association would need additional logic
-				Region:       *nsg.Location,
-				Labels:       labels,
-				AccountID:    input.AccountId,
-				Rules:        []types.ACLRule{}, // Rules extraction would need additional logic
-				LastSyncTime: "",                // Populate this with the current time or another relevant timestamp
-			}
-			acls = append(acls, acl)
-		}
-	}
-	return acls, nil
-}
 
 // Helper functions to parse IDs and convert tags
 func getResourceGroupName(resourceID string) string {

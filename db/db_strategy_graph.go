@@ -242,7 +242,9 @@ func (p *providerWithDB) ListVpcGraphNodes(ctx context.Context, params *infrapb.
 			addProp(props, "scheme", res.Scheme)
 			addProp(props, "vpcID", res.VPCID)
 			addProp(props, "ipAddressType", res.IPAddressType)
-			addPropSlice(props, "ipAddresses", res.IPAddresses)
+			addPropSlice(props, "publicIPAddresses", res.PublicIPs)
+			addPropSlice(props, "privateIPAddresses", res.PrivateIPs)
+			addProp(props, "state", res.State)
 			addPropSlice(props, "subnetIDs", res.SubnetIDs)
 			addPropSlice(props, "securityGroupIDs", res.SecurityGroupIDs)
 			nodes = append(nodes, createNode(res.ID, types.LBType, res.Name, props))
@@ -338,6 +340,42 @@ func (p *providerWithDB) ListVpcGraphNodes(ctx context.Context, params *infrapb.
 		}
 	}
 
+	// For Azure, create a fictitious Internet Gateway node if a route to the internet exists.
+	if strings.EqualFold(providerName, "azure") {
+		hasInternetRoute := false
+		for _, rtId := range vpcIndex.RouteTableIds {
+			if hasInternetRoute {
+				break
+			}
+			rt, err := p.dbClient.GetRouteTable(types.CloudID(providerName, rtId))
+			if err != nil || rt == nil {
+				continue
+			}
+			for _, route := range rt.Routes {
+				if strings.EqualFold(route.NextHopType, "Internet") {
+					hasInternetRoute = true
+					break
+				}
+			}
+		}
+
+		if hasInternetRoute {
+			igwId := "internet-" + vpcIndex.VpcId
+			// Create a more Azure-like resource ID for the fictitious IGW
+			if parts := strings.Split(vpcIndex.VpcId, "/"); len(parts) > 8 {
+				basePath := strings.Join(parts[0:7], "/")
+				vpcName := parts[8]
+				igwId = fmt.Sprintf("%s/internetGateways/%s-igw", basePath, vpcName)
+			}
+
+			props := make(map[string]string)
+			addProp(props, "attachedVpcId", vpcIndex.VpcId)
+			addProp(props, "state", "Available")
+			addProp(props, "note", "Represents a route to the public internet for Azure.")
+			nodes = append(nodes, createNode(igwId, types.IGWType, "Internet Gateway", props))
+		}
+	}
+
 	return nodes, nil
 }
 
@@ -382,18 +420,21 @@ func (p *providerWithDB) ListVpcGraphEdges(ctx context.Context, params *infrapb.
 		}
 
 		// Subnet -> RouteTable edges (Iterate through all associated Route Tables)
-		for _, rtId := range subnet.RouteTableIds {
-			if rtId == "" { // Skip empty IDs
-				continue
-			}
-			if contains(vpcIndex.RouteTableIds, rtId) {
-				edge := createEdge(subnetId, rtId, "USES_ROUTE_TABLE")
-				if edge.SourceNodeID != "" { // Check if edge creation was successful (non-empty IDs)
-					edges = append(edges, edge)
+		// For non-Azure providers, the association is from Subnet to RouteTable.
+		if !strings.EqualFold(providerName, "azure") {
+			for _, rtId := range subnet.RouteTableIds {
+				if rtId == "" { // Skip empty IDs
+					continue
 				}
-			} else {
-				// Log if an associated RT is not found in the index (might indicate partial data or explicit association outside VPC)
-				logger.Warnf("Subnet %s associated route table %s not found in VPC index", subnetId, rtId)
+				if contains(vpcIndex.RouteTableIds, rtId) {
+					edge := createEdge(subnetId, rtId, "USES_ROUTE_TABLE")
+					if edge.SourceNodeID != "" { // Check if edge creation was successful (non-empty IDs)
+						edges = append(edges, edge)
+					}
+				} else {
+					// Log if an associated RT is not found in the index (might indicate partial data or explicit association outside VPC)
+					logger.Warnf("Subnet %s associated route table %s not found in VPC index", subnetId, rtId)
+				}
 			}
 		}
 
@@ -422,17 +463,47 @@ func (p *providerWithDB) ListVpcGraphEdges(ctx context.Context, params *infrapb.
 			continue
 		}
 
+		// For Azure, the association is from RouteTable to Subnet.
+		if strings.EqualFold(providerName, "azure") {
+			for _, subnetId := range rt.SubnetIds {
+				if subnetId == "" {
+					continue
+				}
+				if contains(vpcIndex.SubnetIds, subnetId) {
+					// The edge direction is from Subnet to Route Table.
+					edge := createEdge(subnetId, rtId, "USES_ROUTE_TABLE")
+					if edge.SourceNodeID != "" {
+						edges = append(edges, edge)
+					}
+				} else {
+					logger.Warnf("Route table %s associated subnet %s not found in VPC index", rtId, subnetId)
+				}
+			}
+		}
+
 		// RouteTable -> Target (IGW, NAT, Instance, VPCE, NI, VGW)
 		for _, route := range rt.Routes {
 			targetId := route.Target
 			relationship := "ROUTES_TO"
+
+			// Handle Azure's implicit internet routing
+			if strings.EqualFold(providerName, "azure") && strings.EqualFold(route.NextHopType, "Internet") {
+				targetId = "internet-" + vpcIndex.VpcId // Use the fictitious IGW ID
+				if parts := strings.Split(vpcIndex.VpcId, "/"); len(parts) > 8 {
+					basePath := strings.Join(parts[0:7], "/")
+					vpcName := parts[8]
+					targetId = fmt.Sprintf("%s/internetGateways/%s-igw", basePath, vpcName)
+				}
+			}
+
 			if contains(vpcIndex.IgwIds, targetId) ||
 				contains(vpcIndex.NatGatewayIds, targetId) ||
 				contains(vpcIndex.InstanceIds, targetId) ||
 				contains(vpcIndex.VpcEndpointIds, targetId) ||
 				contains(vpcIndex.NetworkInterfaceIds, targetId) ||
 				contains(vpcIndex.VpnConcentratorIds, targetId) ||
-				contains(vpcIndex.RouterIds, targetId) {
+				contains(vpcIndex.RouterIds, targetId) ||
+				(strings.EqualFold(providerName, "azure") && strings.Contains(targetId, "/internetGateways/")) { // Match fictitious IGW
 				edge := createEdge(rtId, targetId, relationship)
 				if edge.SourceNodeID != "" {
 					edges = append(edges, edge)

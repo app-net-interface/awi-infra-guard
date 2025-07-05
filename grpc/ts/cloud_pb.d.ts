@@ -1373,6 +1373,87 @@ export namespace ListVPNConcentratorsResponse {
   }
 }
 
+export class ListVpcConnectionsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListVpcConnectionsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListVpcConnectionsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListVpcConnectionsRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListVpcConnectionsRequest;
+
+  getConnectionTypesList(): Array<types_pb.VpcConnectionType>;
+  setConnectionTypesList(value: Array<types_pb.VpcConnectionType>): ListVpcConnectionsRequest;
+  clearConnectionTypesList(): ListVpcConnectionsRequest;
+  addConnectionTypes(value: types_pb.VpcConnectionType, index?: number): ListVpcConnectionsRequest;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): ListVpcConnectionsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListVpcConnectionsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListVpcConnectionsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVpcConnectionsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVpcConnectionsRequest): ListVpcConnectionsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListVpcConnectionsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVpcConnectionsRequest;
+  static deserializeBinaryFromReader(message: ListVpcConnectionsRequest, reader: jspb.BinaryReader): ListVpcConnectionsRequest;
+}
+
+export namespace ListVpcConnectionsRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    connectionTypesList: Array<types_pb.VpcConnectionType>,
+    labelsMap: Array<[string, string]>,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 7,
+  }
+}
+
+export class ListVpcConnectionsResponse extends jspb.Message {
+  getVpcConnectionsList(): Array<types_pb.VpcConnection>;
+  setVpcConnectionsList(value: Array<types_pb.VpcConnection>): ListVpcConnectionsResponse;
+  clearVpcConnectionsList(): ListVpcConnectionsResponse;
+  addVpcConnections(value?: types_pb.VpcConnection, index?: number): types_pb.VpcConnection;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): ListVpcConnectionsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListVpcConnectionsResponse;
+  hasErr(): boolean;
+  clearErr(): ListVpcConnectionsResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListVpcConnectionsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListVpcConnectionsResponse): ListVpcConnectionsResponse.AsObject;
+  static serializeBinaryToWriter(message: ListVpcConnectionsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListVpcConnectionsResponse;
+  static deserializeBinaryFromReader(message: ListVpcConnectionsResponse, reader: jspb.BinaryReader): ListVpcConnectionsResponse;
+}
+
+export namespace ListVpcConnectionsResponse {
+  export type AsObject = {
+    vpcConnectionsList: Array<types_pb.VpcConnection.AsObject>,
+    lastSyncTime: string,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
 export class GetVPCIDForCIDRRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetVPCIDForCIDRRequest;

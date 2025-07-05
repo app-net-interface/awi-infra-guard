@@ -400,18 +400,20 @@ message LB {
     bool cross_zone_load_balancing = 12;
     bool access_logs_enabled = 13;
     string logging_bucket = 14;
-    repeated string ip_addresses = 15;
-    string ip_address_type = 16;
-    string region = 17;
-    string zone = 18;
-    map<string, string> labels = 19;
-    string project = 20;
-    string provider = 21;
-    string account_id = 22;
-    string last_sync_time = 23;
-    string self_link = 24;
-    google.protobuf.Timestamp created_at = 25;
-    google.protobuf.Timestamp updated_at = 26;
+    repeated string public_ip_addresses = 15;
+    repeated string private_ip_addresses = 16;
+    string state = 17; // e.g., "active", "provisioning", "failed"
+    string ip_address_type = 18;
+    string region = 19;
+    string zone = 20;
+    map<string, string> labels = 21;
+    string project = 22;
+    string provider = 23;
+    string account_id = 24;
+    string last_sync_time = 25;
+    string self_link = 26;
+    google.protobuf.Timestamp created_at = 27;
+    google.protobuf.Timestamp updated_at = 28;
 }
 
 message NetworkInterface {
@@ -519,6 +521,86 @@ message KeyPair {
     google.protobuf.Timestamp updated_at = 15;
 }
 
+// VpcConnectionType specifies the mechanism used to connect two VPCs.
+enum VpcConnectionType {
+    VPC_CONNECTION_TYPE_UNSPECIFIED = 0;
+    // Connection via a direct VPC peering link.
+    VPC_PEERING = 1;
+    // Connection via a centralized transit gateway.
+    TRANSIT_GATEWAY = 2;
+    // Connection via a VPC endpoint to a service in another VPC.
+    VPC_ENDPOINT = 3;
+    // A Transit VPC is a design pattern, not a single resource.
+    // It involves a VPC acting as a hub with routing instances.
+    // This type can be used to represent such logical connections
+    // discovered through route analysis.
+    TRANSIT_VPC = 4;
+}
+
+// Details for a VPC Peering connection.
+message VpcPeeringConnectionDetails {
+    // The parent VpcConnection message's vpc_id_1 and vpc_id_2 represent
+    // the requester and accepter VPCs, respectively.
+    string requester_vpc_owner_id = 1;
+    string accepter_vpc_owner_id = 2;
+    string requester_vpc_region = 3;
+    string accepter_vpc_region = 4;
+}
+
+// Details for a connection via a Transit Gateway.
+// This represents the logical link between two VPCs through a TGW.
+message TransitGatewayConnectionDetails {
+    string transit_gateway_id = 1;
+    // A TGW connects VPCs via attachments. This connection is logical,
+    // derived from routes in the TGW route table.
+    string transit_gateway_attachment_id_1 = 2; // Attachment for vpc_id_1
+    string transit_gateway_attachment_id_2 = 3; // Attachment for vpc_id_2
+    string transit_gateway_route_table_id = 4; // The route table enabling this connection.
+}
+
+// Details for a connection via a VPC Endpoint Service.
+// This is typically a unidirectional connection from a consumer VPC to a provider VPC.
+message VpcEndpointConnectionDetails {
+    string vpc_endpoint_id = 1; // In the consumer VPC (e.g., vpc_id_1)
+    string service_name = 2; // The endpoint service name
+    string service_id = 3; // The endpoint service ID in the provider VPC (e.g., vpc_id_2)
+}
+
+// Details for a connection via a Transit VPC pattern.
+message TransitVpcConnectionDetails {
+    string transit_vpc_id = 1; // The ID of the VPC acting as the hub.
+    string router_instance_id = 2; // The instance in the transit VPC doing the routing.
+}
+
+// Represents a connection between two VPCs.
+message VpcConnection {
+    string id = 1; // Unique ID for the connection, e.g., peering connection ID.
+    string name = 2;
+    string provider = 3;
+    string account_id = 4;
+    string region = 5; // Primary region of the connection resource.
+
+    // The two VPCs involved in the connection.
+    string vpc_id_1 = 6;
+    string vpc_id_2 = 7;
+
+    // The type of connection.
+    VpcConnectionType connection_type = 8;
+
+    // Details specific to the connection type.
+    oneof connection_details {
+        VpcPeeringConnectionDetails vpc_peering_details = 9;
+        TransitGatewayConnectionDetails transit_gateway_details = 10;
+        VpcEndpointConnectionDetails vpc_endpoint_details = 11;
+        TransitVpcConnectionDetails transit_vpc_details = 12;
+    }
+
+    string status = 13; // e.g., "active", "pending", "failed"
+    map<string, string> labels = 14;
+    google.protobuf.Timestamp created_at = 15;
+    string self_link = 16;
+    string last_sync_time = 17;
+}
 // Node represents a resource in the VPC connectivity graph.
 message VpcGraphNode {
     string id = 1; // Unique ID of the resource (e.g., instance ID, subnet ID)
@@ -562,8 +644,3 @@ message InstanceGraphEdge {
     string account_id = 10;
     string region = 11; // Added Region
 }
-
-
-
-
-

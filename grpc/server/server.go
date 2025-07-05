@@ -168,14 +168,14 @@ func Run() {
 	c := parseConfig(logger)
 	fmt.Printf("Provider Config: %+v\n", c.Providers)
 
-	providerStrategy, err := provider.NewRealProviderStrategy(logger, c.Providers,c.KubernetesSupported)
+	providerStrategy, err := provider.NewRealProviderStrategy(logger, c.Providers, c.KubernetesSupported)
 
 	if err != nil {
 		logger.Warnf("Initialized with error %v", err)
 	}
 
-	var usedStrategy provider.Strategy
-	usedStrategy = providerStrategy
+	var responseStrategy provider.Strategy
+	responseStrategy = providerStrategy
 	if c.UseLocalDB {
 		logger.Infof("Initializing local database")
 		dbClient := db.NewBoltClient()
@@ -191,17 +191,17 @@ func Run() {
 		}(dbClient)
 
 		strategyWithDB := db.NewStrategyWithDB(dbClient, providerStrategy, logger, c.KubernetesSupported)
-		usedStrategy = strategyWithDB
+		responseStrategy = strategyWithDB
 
 		if c.SyncConfig.Enabled {
-			syncer := sync.NewSyncer(logger, dbClient, usedStrategy, &c)
+			syncer := sync.NewSyncer(logger, dbClient, providerStrategy, &c)
 			go syncer.SyncPeriodically(ctx)
 		}
 	}
 
 	s := &Server{
 		logger:   logger,
-		strategy: usedStrategy,
+		strategy: responseStrategy,
 	}
 
 	lis, err := net.Listen("tcp", c.Hostname+":"+c.Port)

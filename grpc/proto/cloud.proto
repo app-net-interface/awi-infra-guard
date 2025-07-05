@@ -58,6 +58,9 @@ service CloudProviderService {
     rpc ListKeyPairs (ListKeyPairsRequest) returns (ListKeyPairsResponse) {}
     rpc ListVPNConcentrators (ListVPNConcentratorsRequest) returns (ListVPNConcentratorsResponse) {}
 
+    // New RPC for listing VPC to VPC connections
+    rpc ListVpcConnections (ListVpcConnectionsRequest) returns (ListVpcConnectionsResponse) {}
+
     // New RPC for getting VPC connectivity graph
     rpc GetVpcConnectivityGraph (GetVpcConnectivityGraphRequest) returns (GetVpcConnectivityGraphResponse) {}
 
@@ -369,7 +372,26 @@ message ListVPNConcentratorsResponse {
     repeated VPNConcentrator vpn_concentrators = 1;
     string last_sync_time = 2;
     Error err = 3;
-}   
+}
+
+// ListVpcConnections
+message ListVpcConnectionsRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    // Optional: filter by a specific VPC to see its connections.
+    string vpc_id = 4;
+    // Optional: filter by connection type.
+    repeated VpcConnectionType connection_types = 5;
+    map<string, string> labels = 6;
+    optional Credentials creds = 7;
+}
+
+message ListVpcConnectionsResponse {
+    repeated VpcConnection vpc_connections = 1;
+    string last_sync_time = 2;
+    Error err = 3;
+}
 
 // GetVPCIDForCIDR
 message GetVPCIDForCIDRRequest {

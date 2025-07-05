@@ -1615,10 +1615,18 @@ export class LB extends jspb.Message {
   getLoggingBucket(): string;
   setLoggingBucket(value: string): LB;
 
-  getIpAddressesList(): Array<string>;
-  setIpAddressesList(value: Array<string>): LB;
-  clearIpAddressesList(): LB;
-  addIpAddresses(value: string, index?: number): LB;
+  getPublicIpAddressesList(): Array<string>;
+  setPublicIpAddressesList(value: Array<string>): LB;
+  clearPublicIpAddressesList(): LB;
+  addPublicIpAddresses(value: string, index?: number): LB;
+
+  getPrivateIpAddressesList(): Array<string>;
+  setPrivateIpAddressesList(value: Array<string>): LB;
+  clearPrivateIpAddressesList(): LB;
+  addPrivateIpAddresses(value: string, index?: number): LB;
+
+  getState(): string;
+  setState(value: string): LB;
 
   getIpAddressType(): string;
   setIpAddressType(value: string): LB;
@@ -1681,7 +1689,9 @@ export namespace LB {
     crossZoneLoadBalancing: boolean,
     accessLogsEnabled: boolean,
     loggingBucket: string,
-    ipAddressesList: Array<string>,
+    publicIpAddressesList: Array<string>,
+    privateIpAddressesList: Array<string>,
+    state: string,
     ipAddressType: string,
     region: string,
     zone: string,
@@ -2062,6 +2072,216 @@ export namespace KeyPair {
   }
 }
 
+export class VpcPeeringConnectionDetails extends jspb.Message {
+  getRequesterVpcOwnerId(): string;
+  setRequesterVpcOwnerId(value: string): VpcPeeringConnectionDetails;
+
+  getAccepterVpcOwnerId(): string;
+  setAccepterVpcOwnerId(value: string): VpcPeeringConnectionDetails;
+
+  getRequesterVpcRegion(): string;
+  setRequesterVpcRegion(value: string): VpcPeeringConnectionDetails;
+
+  getAccepterVpcRegion(): string;
+  setAccepterVpcRegion(value: string): VpcPeeringConnectionDetails;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcPeeringConnectionDetails.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcPeeringConnectionDetails): VpcPeeringConnectionDetails.AsObject;
+  static serializeBinaryToWriter(message: VpcPeeringConnectionDetails, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcPeeringConnectionDetails;
+  static deserializeBinaryFromReader(message: VpcPeeringConnectionDetails, reader: jspb.BinaryReader): VpcPeeringConnectionDetails;
+}
+
+export namespace VpcPeeringConnectionDetails {
+  export type AsObject = {
+    requesterVpcOwnerId: string,
+    accepterVpcOwnerId: string,
+    requesterVpcRegion: string,
+    accepterVpcRegion: string,
+  }
+}
+
+export class TransitGatewayConnectionDetails extends jspb.Message {
+  getTransitGatewayId(): string;
+  setTransitGatewayId(value: string): TransitGatewayConnectionDetails;
+
+  getTransitGatewayAttachmentId1(): string;
+  setTransitGatewayAttachmentId1(value: string): TransitGatewayConnectionDetails;
+
+  getTransitGatewayAttachmentId2(): string;
+  setTransitGatewayAttachmentId2(value: string): TransitGatewayConnectionDetails;
+
+  getTransitGatewayRouteTableId(): string;
+  setTransitGatewayRouteTableId(value: string): TransitGatewayConnectionDetails;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): TransitGatewayConnectionDetails.AsObject;
+  static toObject(includeInstance: boolean, msg: TransitGatewayConnectionDetails): TransitGatewayConnectionDetails.AsObject;
+  static serializeBinaryToWriter(message: TransitGatewayConnectionDetails, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): TransitGatewayConnectionDetails;
+  static deserializeBinaryFromReader(message: TransitGatewayConnectionDetails, reader: jspb.BinaryReader): TransitGatewayConnectionDetails;
+}
+
+export namespace TransitGatewayConnectionDetails {
+  export type AsObject = {
+    transitGatewayId: string,
+    transitGatewayAttachmentId1: string,
+    transitGatewayAttachmentId2: string,
+    transitGatewayRouteTableId: string,
+  }
+}
+
+export class VpcEndpointConnectionDetails extends jspb.Message {
+  getVpcEndpointId(): string;
+  setVpcEndpointId(value: string): VpcEndpointConnectionDetails;
+
+  getServiceName(): string;
+  setServiceName(value: string): VpcEndpointConnectionDetails;
+
+  getServiceId(): string;
+  setServiceId(value: string): VpcEndpointConnectionDetails;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcEndpointConnectionDetails.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcEndpointConnectionDetails): VpcEndpointConnectionDetails.AsObject;
+  static serializeBinaryToWriter(message: VpcEndpointConnectionDetails, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcEndpointConnectionDetails;
+  static deserializeBinaryFromReader(message: VpcEndpointConnectionDetails, reader: jspb.BinaryReader): VpcEndpointConnectionDetails;
+}
+
+export namespace VpcEndpointConnectionDetails {
+  export type AsObject = {
+    vpcEndpointId: string,
+    serviceName: string,
+    serviceId: string,
+  }
+}
+
+export class TransitVpcConnectionDetails extends jspb.Message {
+  getTransitVpcId(): string;
+  setTransitVpcId(value: string): TransitVpcConnectionDetails;
+
+  getRouterInstanceId(): string;
+  setRouterInstanceId(value: string): TransitVpcConnectionDetails;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): TransitVpcConnectionDetails.AsObject;
+  static toObject(includeInstance: boolean, msg: TransitVpcConnectionDetails): TransitVpcConnectionDetails.AsObject;
+  static serializeBinaryToWriter(message: TransitVpcConnectionDetails, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): TransitVpcConnectionDetails;
+  static deserializeBinaryFromReader(message: TransitVpcConnectionDetails, reader: jspb.BinaryReader): TransitVpcConnectionDetails;
+}
+
+export namespace TransitVpcConnectionDetails {
+  export type AsObject = {
+    transitVpcId: string,
+    routerInstanceId: string,
+  }
+}
+
+export class VpcConnection extends jspb.Message {
+  getId(): string;
+  setId(value: string): VpcConnection;
+
+  getName(): string;
+  setName(value: string): VpcConnection;
+
+  getProvider(): string;
+  setProvider(value: string): VpcConnection;
+
+  getAccountId(): string;
+  setAccountId(value: string): VpcConnection;
+
+  getRegion(): string;
+  setRegion(value: string): VpcConnection;
+
+  getVpcId1(): string;
+  setVpcId1(value: string): VpcConnection;
+
+  getVpcId2(): string;
+  setVpcId2(value: string): VpcConnection;
+
+  getConnectionType(): VpcConnectionType;
+  setConnectionType(value: VpcConnectionType): VpcConnection;
+
+  getVpcPeeringDetails(): VpcPeeringConnectionDetails | undefined;
+  setVpcPeeringDetails(value?: VpcPeeringConnectionDetails): VpcConnection;
+  hasVpcPeeringDetails(): boolean;
+  clearVpcPeeringDetails(): VpcConnection;
+
+  getTransitGatewayDetails(): TransitGatewayConnectionDetails | undefined;
+  setTransitGatewayDetails(value?: TransitGatewayConnectionDetails): VpcConnection;
+  hasTransitGatewayDetails(): boolean;
+  clearTransitGatewayDetails(): VpcConnection;
+
+  getVpcEndpointDetails(): VpcEndpointConnectionDetails | undefined;
+  setVpcEndpointDetails(value?: VpcEndpointConnectionDetails): VpcConnection;
+  hasVpcEndpointDetails(): boolean;
+  clearVpcEndpointDetails(): VpcConnection;
+
+  getTransitVpcDetails(): TransitVpcConnectionDetails | undefined;
+  setTransitVpcDetails(value?: TransitVpcConnectionDetails): VpcConnection;
+  hasTransitVpcDetails(): boolean;
+  clearTransitVpcDetails(): VpcConnection;
+
+  getStatus(): string;
+  setStatus(value: string): VpcConnection;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): VpcConnection;
+
+  getCreatedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): VpcConnection;
+  hasCreatedAt(): boolean;
+  clearCreatedAt(): VpcConnection;
+
+  getSelfLink(): string;
+  setSelfLink(value: string): VpcConnection;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): VpcConnection;
+
+  getConnectionDetailsCase(): VpcConnection.ConnectionDetailsCase;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcConnection.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcConnection): VpcConnection.AsObject;
+  static serializeBinaryToWriter(message: VpcConnection, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcConnection;
+  static deserializeBinaryFromReader(message: VpcConnection, reader: jspb.BinaryReader): VpcConnection;
+}
+
+export namespace VpcConnection {
+  export type AsObject = {
+    id: string,
+    name: string,
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId1: string,
+    vpcId2: string,
+    connectionType: VpcConnectionType,
+    vpcPeeringDetails?: VpcPeeringConnectionDetails.AsObject,
+    transitGatewayDetails?: TransitGatewayConnectionDetails.AsObject,
+    vpcEndpointDetails?: VpcEndpointConnectionDetails.AsObject,
+    transitVpcDetails?: TransitVpcConnectionDetails.AsObject,
+    status: string,
+    labelsMap: Array<[string, string]>,
+    createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    selfLink: string,
+    lastSyncTime: string,
+  }
+
+  export enum ConnectionDetailsCase { 
+    CONNECTION_DETAILS_NOT_SET = 0,
+    VPC_PEERING_DETAILS = 9,
+    TRANSIT_GATEWAY_DETAILS = 10,
+    VPC_ENDPOINT_DETAILS = 11,
+    TRANSIT_VPC_DETAILS = 12,
+  }
+}
+
 export class VpcGraphNode extends jspb.Message {
   getId(): string;
   setId(value: string): VpcGraphNode;
@@ -2228,4 +2448,11 @@ export enum LoadBalancerType {
   ELB = 2,
   GLB = 3,
   UNKNOWN = 4,
+}
+export enum VpcConnectionType { 
+  VPC_CONNECTION_TYPE_UNSPECIFIED = 0,
+  VPC_PEERING = 1,
+  TRANSIT_GATEWAY = 2,
+  VPC_ENDPOINT = 3,
+  TRANSIT_VPC = 4,
 }

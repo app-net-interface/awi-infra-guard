@@ -388,7 +388,9 @@ func typesLBToGrpc(in []types.LB) []*infrapb.LB {
 			CrossZoneLoadBalancing: lb.CrossZoneLoadBalancing,
 			AccessLogsEnabled:      lb.AccessLogsEnabled,
 			LoggingBucket:          lb.LoggingBucket,
-			IpAddresses:            lb.IPAddresses,
+			PublicIpAddresses:      lb.PublicIPs,
+			PrivateIpAddresses:     lb.PrivateIPs,
+			State:                  lb.State,
 			IpAddressType:          lb.IPAddressType,
 			Zone:                   lb.Zone,
 			Labels:                 lb.Labels,
@@ -425,10 +427,9 @@ func typesNetworkInterfacesToGrpc(in []types.NetworkInterface) []*infrapb.Networ
 			MacAddress: ni.MacAddress,
 			DnsName:    ni.PublicDNSName,
 			//Pr: ni.PrivateDNSName,
-			Status: ni.Status,
-			//InterfaceType:      ni.InterfaceType,
-			LastSyncTime: ni.LastSyncTime,
-			SubnetId:     ni.SubnetID,
+			Status:        ni.Status,
+			LastSyncTime:  ni.LastSyncTime,
+			SubnetId:      ni.SubnetID,
 			InterfaceType: ni.InterfaceType,
 			//AvailabilityZone:   ni.AvailabilityZone,
 			Region:           ni.Region,
@@ -535,36 +536,33 @@ func typesVpcGraphEdgesToGrpc(in []types.VpcGraphEdge) []*infrapb.VpcGraphEdge {
 	return out
 }
 
-
 func typesInstanceNodesToGrpc(in []types.InstanceGraphNode) []*infrapb.InstanceGraphNode {
-    out := make([]*infrapb.InstanceGraphNode, 0, len(in))
-    for _, node := range in {
-        out = append(out, &infrapb.InstanceGraphNode{
-            Id:           node.ID,
-            ResourceType: node.ResourceType,
-            Name:         node.Name,
-            Properties:   node.Properties,
-            Provider:     node.Provider,
-            AccountId:    node.AccountID,
-            Region:       node.Region,
-        })
-    }
-    return out
+	out := make([]*infrapb.InstanceGraphNode, 0, len(in))
+	for _, node := range in {
+		out = append(out, &infrapb.InstanceGraphNode{
+			Id:           node.ID,
+			ResourceType: node.ResourceType,
+			Name:         node.Name,
+			Properties:   node.Properties,
+			Provider:     node.Provider,
+			AccountId:    node.AccountID,
+			Region:       node.Region,
+		})
+	}
+	return out
 }
 
 func typesInstanceEdgesToGrpc(in []types.InstanceGraphEdge) []*infrapb.InstanceGraphEdge {
-    out := make([]*infrapb.InstanceGraphEdge, 0, len(in))
-    for _, edge := range in {
-        out = append(out, &infrapb.InstanceGraphEdge{
-            SourceNodeId:     edge.SourceNodeID,
-            TargetNodeId:     edge.TargetNodeID,
-            RelationshipType: edge.RelationshipType,
-            Provider:         edge.Provider,
-            AccountId:        edge.AccountID,
-            Region:           edge.Region,
-        })
-    }
-    return out
+	out := make([]*infrapb.InstanceGraphEdge, 0, len(in))
+	for _, edge := range in {
+		out = append(out, &infrapb.InstanceGraphEdge{
+			SourceNodeId:     edge.SourceNodeID,
+			TargetNodeId:     edge.TargetNodeID,
+			RelationshipType: edge.RelationshipType,
+			Provider:         edge.Provider,
+			AccountId:        edge.AccountID,
+			Region:           edge.Region,
+		})
+	}
+	return out
 }
-
-

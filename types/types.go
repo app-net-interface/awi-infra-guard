@@ -581,7 +581,9 @@ type LB struct {
 	CrossZoneLoadBalancing bool
 	AccessLogsEnabled      bool
 	LoggingBucket          string
-	IPAddresses            []string
+	PublicIPs              []string
+	PrivateIPs             []string
+	State                  string
 	IPAddressType          string
 	Region                 string
 	Zone                   string
@@ -772,10 +774,10 @@ type VpcGraphEdge struct {
 
 // InstanceGraphNode represents a resource in the Instance connectivity graph.
 type InstanceGraphNode struct {
-	ID           string            `json:"id,omitempty"`           // Unique ID of the resource
+	ID           string            `json:"id,omitempty"`            // Unique ID of the resource
 	ResourceType string            `json:"resource_type,omitempty"` // Type of the resource
-	Name         string            `json:"name,omitempty"`         // Display name
-	Properties   map[string]string `json:"properties,omitempty"`   // Key-value pairs for display
+	Name         string            `json:"name,omitempty"`          // Display name
+	Properties   map[string]string `json:"properties,omitempty"`    // Key-value pairs for display
 	Provider     string            `json:"provider,omitempty"`
 	AccountID    string            `json:"account_id,omitempty"`
 	Region       string            `json:"region,omitempty"`

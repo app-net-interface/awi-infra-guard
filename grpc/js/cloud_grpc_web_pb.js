@@ -1244,6 +1244,67 @@ proto.infra.CloudProviderServicePromiseClient.prototype.listVPNConcentrators =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
+ *   !proto.infra.ListVpcConnectionsRequest,
+ *   !proto.infra.ListVpcConnectionsResponse>}
+ */
+const methodDescriptor_CloudProviderService_ListVpcConnections = new grpc.web.MethodDescriptor(
+  '/infra.CloudProviderService/ListVpcConnections',
+  grpc.web.MethodType.UNARY,
+  proto.infra.ListVpcConnectionsRequest,
+  proto.infra.ListVpcConnectionsResponse,
+  /**
+   * @param {!proto.infra.ListVpcConnectionsRequest} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.infra.ListVpcConnectionsResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.infra.ListVpcConnectionsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>} metadata User defined
+ *     call metadata
+ * @param {function(?grpc.web.RpcError, ?proto.infra.ListVpcConnectionsResponse)}
+ *     callback The callback function(error, response)
+ * @return {!grpc.web.ClientReadableStream<!proto.infra.ListVpcConnectionsResponse>|undefined}
+ *     The XHR Node Readable Stream
+ */
+proto.infra.CloudProviderServiceClient.prototype.listVpcConnections =
+    function(request, metadata, callback) {
+  return this.client_.rpcCall(this.hostname_ +
+      '/infra.CloudProviderService/ListVpcConnections',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListVpcConnections,
+      callback);
+};
+
+
+/**
+ * @param {!proto.infra.ListVpcConnectionsRequest} request The
+ *     request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!Promise<!proto.infra.ListVpcConnectionsResponse>}
+ *     Promise that resolves to the response
+ */
+proto.infra.CloudProviderServicePromiseClient.prototype.listVpcConnections =
+    function(request, metadata) {
+  return this.client_.unaryCall(this.hostname_ +
+      '/infra.CloudProviderService/ListVpcConnections',
+      request,
+      metadata || {},
+      methodDescriptor_CloudProviderService_ListVpcConnections);
+};
+
+
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
  *   !proto.infra.GetVpcConnectivityGraphRequest,
  *   !proto.infra.GetVpcConnectivityGraphResponse>}
  */

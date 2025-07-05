@@ -25,7 +25,6 @@ import (
 	//"github.com/boltdb/bolt"
 )
 
-// Updated UpdateVPCIndex to add debug logs at function entry and exit.
 func (client *boltClient) UpdateVPCIndex(provider, vpcID, resourceId, resourceType string) error {
 	// Add check for empty vpcID early
 	if vpcID == "" {
@@ -222,7 +221,6 @@ func (client *boltClient) SyncVPCIndexes() error {
 	// 4. For each other resource type... update the VPCIndex
 	fmt.Println("INFO: Starting resource ID addition to VPC indexes.") // Log start of updates
 
-	// *** ADD BACK INSTANCE PROCESSING ***
 	instances, err := client.ListInstances()
 	if err != nil {
 		return fmt.Errorf("failed listing instances for index sync: %w", err)

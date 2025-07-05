@@ -97,7 +97,7 @@ func (c *Client) ListRouteTables(ctx context.Context, params *infrapb.ListRouteT
 	for i, rt := range routeTables {
 		if association, ok := va.RtAssociations[rt.ID]; ok {
 			routeTables[i].VpcID = association.VNetID // Update with VNet ID
-			//routeTables[i].Subnets = association.SubnetIDs // Update with associated subnet IDs
+			routeTables[i].SubnetIds = association.SubnetIDs // Update with associated subnet IDs
 		}
 		// Note: Route tables without no subnet (VPC) association will simply not be updated.
 	}

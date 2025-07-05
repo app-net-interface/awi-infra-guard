@@ -20,11 +20,13 @@ package aws
 import (
 	"context"
 	"fmt"
+	"net" // Import the net package
 	"sync"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/types"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	awsTypes "github.com/aws/aws-sdk-go-v2/service/ec2/types" // Assuming this is for EC2 filters, not directly used for LB listing here
 	elb "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	elbTypes "github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing/types"
@@ -248,6 +250,8 @@ func (c *Client) applyFilters(lbs []types.LB, ec2Filters []awsTypes.Filter, oper
 func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.LoadBalancer, regionName string, operationalAccountID string) types.LB {
 	var lbType string
 	var ipAddressType string
+	var publicIPs, privateIPs []string
+
 	switch lb.Type {
 	case elbv2types.LoadBalancerTypeEnumApplication:
 		lbType = "ALB"
@@ -271,9 +275,60 @@ func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.L
 		c.logger.Warnf("[AccountID: %s] convertELBv2ToLoadBalancer: Unknown IPAddressType '%s' for LB %s", operationalAccountID, lb.IpAddressType, aws.ToString(lb.LoadBalancerArn))
 
 	}
-	ips, err := getIPsV2(lb)
+
+	// Get IPs for all ELBv2 load balancer types by resolving their DNS name.
+	// This is a reliable method for ALB, GWLB, and NLB.
+	resolvedIPs, err := getIPsV2(lb)
 	if err != nil {
 		c.logger.Errorf("[AccountID: %s] convertELBv2ToLoadBalancer: Error resolving load balancer DNS for %s: %v", operationalAccountID, aws.ToString(lb.DNSName), err)
+	}
+
+	// Classify the resolved IPs as public or private.
+	for _, ipStr := range resolvedIPs {
+		ip := net.ParseIP(ipStr)
+		if ip != nil && ip.IsPrivate() {
+			privateIPs = append(privateIPs, ipStr)
+		} else if ip != nil {
+			publicIPs = append(publicIPs, ipStr)
+		}
+	}
+
+	// For internet-facing NLBs, AWS might also provide static IPs directly.
+	// We can add them to ensure completeness, avoiding duplicates.
+	if lb.Type == elbv2types.LoadBalancerTypeEnumNetwork {
+		for _, az := range lb.AvailabilityZones {
+			for _, addr := range az.LoadBalancerAddresses {
+				if addr.PrivateIPv4Address != nil {
+					// Avoid duplicates
+					found := false
+					for _, existingIP := range privateIPs {
+						if existingIP == *addr.PrivateIPv4Address {
+							found = true
+							break
+						}
+					}
+					if !found {
+						privateIPs = append(privateIPs, *addr.PrivateIPv4Address)
+					}
+				}
+				if addr.AllocationId != nil {
+					publicIP, err := c.getPublicIPFromAllocationID(ctx, *addr.AllocationId, regionName, operationalAccountID)
+					if err == nil && publicIP != "" {
+						// Avoid duplicates
+						found := false
+						for _, existingIP := range publicIPs {
+							if existingIP == publicIP {
+								found = true
+								break
+							}
+						}
+						if !found {
+							publicIPs = append(publicIPs, publicIP)
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// Pass operationalAccountID to getListenersV2
@@ -292,6 +347,17 @@ func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.L
 	// Pass operationalAccountID to getTagsV2
 	tags := c.getTagsV2(ctx, lb, regionName, operationalAccountID)
 
+	var targetGroupARNs []string
+	for _, listener := range listeners {
+		if listener.TargetGroupID != "" {
+			targetGroupARNs = append(targetGroupARNs, listener.TargetGroupID)
+		}
+	}
+	instanceIDs, err := c.getInstanceIDsForTargetGroups(ctx, targetGroupARNs, regionName, operationalAccountID)
+	if err != nil {
+		c.logger.Errorf("[AccountID: %s] convertELBv2ToLoadBalancer: Error getting instance IDs for LB %s: %v", operationalAccountID, aws.ToString(lb.LoadBalancerArn), err)
+	}
+
 	return types.LB{
 		ID:               aws.ToString(lb.LoadBalancerArn),
 		Provider:         c.GetName(),
@@ -299,18 +365,20 @@ func (c *Client) convertELBv2ToLoadBalancer(ctx context.Context, lb elbv2types.L
 		Scheme:           string(lb.Scheme),
 		DNSName:          aws.ToString(lb.DNSName),
 		Type:             lbType,
+		PublicIPs:        publicIPs,
+		PrivateIPs:       privateIPs,
 		IPAddressType:    ipAddressType,
-		IPAddresses:      ips,
 		Listeners:        listeners,
 		SecurityGroupIDs: lb.SecurityGroups,
 		SubnetIDs:        subnetIDs,
+		InstanceIDs:      instanceIDs,
 		//State:            string(lb.State.Code),
-		VPCID:            aws.ToString(lb.VpcId),
-		AccountID:        operationalAccountID, // Use operationalAccountID
-		Region:           regionName,
-		CreatedAt:        aws.ToTime(lb.CreatedTime),
-		Labels:           tags,
-		SelfLink:         fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#LoadBalancers:search=%s", regionName, regionName, aws.ToString(lb.LoadBalancerName)),
+		VPCID:     aws.ToString(lb.VpcId),
+		AccountID: operationalAccountID, // Use operationalAccountID
+		Region:    regionName,
+		CreatedAt: aws.ToTime(lb.CreatedTime),
+		Labels:    tags,
+		SelfLink:  fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#LoadBalancers:search=%s", regionName, regionName, aws.ToString(lb.LoadBalancerName)),
 	}
 }
 
@@ -373,9 +441,19 @@ func (c *Client) convertClassicELBToLoadBalancer(ctx context.Context, lb elbType
 	for _, instance := range lb.Instances {
 		instanceIDs = append(instanceIDs, *instance.InstanceId)
 	}
-	ips, err := getIPsV1(lb)
+	resolvedIPs, err := getIPsV1(lb)
 	if err != nil {
 		c.logger.Errorf("[AccountID: %s] convertClassicELBToLoadBalancer: Error resolving load balancer DNS for %s: %v", operationalAccountID, aws.ToString(lb.DNSName), err)
+	}
+
+	var publicIPs, privateIPs []string
+	for _, ipStr := range resolvedIPs {
+		ip := net.ParseIP(ipStr)
+		if ip != nil && ip.IsPrivate() {
+			privateIPs = append(privateIPs, ipStr)
+		} else if ip != nil {
+			publicIPs = append(publicIPs, ipStr)
+		}
 	}
 
 	// Pass operationalAccountID to getTagsV1
@@ -389,13 +467,14 @@ func (c *Client) convertClassicELBToLoadBalancer(ctx context.Context, lb elbType
 		IPAddressType: "ipv4",
 		Type:          "Classic",
 		Scheme:        aws.ToString(lb.Scheme),
+		PublicIPs:     publicIPs,
+		PrivateIPs:    privateIPs,
 		VPCID:         aws.ToString(lb.VPCId),
 		AccountID:     operationalAccountID, // Use operationalAccountID
 		Region:        regionName,
 		CreatedAt:     aws.ToTime(lb.CreatedTime),
 		SelfLink:      fmt.Sprintf("https://%s.console.aws.amazon.com/ec2/home?region=%s#LoadBalancerDetails:loadBalancerId=%s", regionName, regionName, aws.ToString(lb.LoadBalancerName)),
 		InstanceIDs:   instanceIDs,
-		IPAddresses:   ips,
 		Zone:          getZone(lb),
 		SubnetIDs:     lb.Subnets,
 		Labels:        tags,
@@ -511,6 +590,142 @@ func convertListeners(listeners []elbTypes.ListenerDescription) []types.LBListen
 		})
 	}
 	return result
+}
+
+// getPublicIPFromAllocationID retrieves the public IP address for a given EIP Allocation ID.
+func (c *Client) getPublicIPFromAllocationID(ctx context.Context, allocationID, regionName, operationalAccountID string) (string, error) {
+	ec2Client, err := c.getEC2Client(ctx, operationalAccountID, regionName)
+	if err != nil {
+		return "", fmt.Errorf("failed to get EC2 client: %w", err)
+	}
+	if ec2Client == nil {
+		return "", fmt.Errorf("EC2 client is nil for region %s", regionName)
+	}
+
+	input := &ec2.DescribeAddressesInput{
+		AllocationIds: []string{allocationID},
+	}
+
+	result, err := ec2Client.DescribeAddresses(ctx, input)
+	if err != nil {
+		return "", err
+	}
+
+	if len(result.Addresses) > 0 && result.Addresses[0].PublicIp != nil {
+		return *result.Addresses[0].PublicIp, nil
+	}
+
+	return "", fmt.Errorf("no public IP found for allocation ID %s", allocationID)
+}
+
+func (c *Client) getInstanceIDsForTargetGroups(ctx context.Context, targetGroupARNs []string, regionName string, operationalAccountID string) ([]string, error) {
+	if len(targetGroupARNs) == 0 {
+		return nil, nil
+	}
+
+	elbv2Client, err := c.getELBv2Client(ctx, operationalAccountID, regionName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get ELBv2 client: %w", err)
+	}
+	if elbv2Client == nil {
+		return nil, fmt.Errorf("ELBv2 client is nil for region %s", regionName)
+	}
+
+	describeTGsInput := &elbv2.DescribeTargetGroupsInput{
+		TargetGroupArns: targetGroupARNs,
+	}
+	tgOutput, err := elbv2Client.DescribeTargetGroups(ctx, describeTGsInput)
+	if err != nil {
+		return nil, fmt.Errorf("failed to describe target groups: %w", err)
+	}
+
+	var instanceIDs []string
+	var ipTargets []string
+
+	for _, tg := range tgOutput.TargetGroups {
+		if tg.TargetGroupArn == nil {
+			continue
+		}
+		tgArn := *tg.TargetGroupArn
+
+		describeHealthInput := &elbv2.DescribeTargetHealthInput{
+			TargetGroupArn: &tgArn,
+		}
+		healthOutput, err := elbv2Client.DescribeTargetHealth(ctx, describeHealthInput)
+		if err != nil {
+			c.logger.Warnf("[AccountID: %s] could not describe target health for TG %s: %v", operationalAccountID, tgArn, err)
+			continue
+		}
+
+		for _, thd := range healthOutput.TargetHealthDescriptions {
+			if thd.Target == nil || thd.Target.Id == nil {
+				continue
+			}
+			c.logger.Debugf("[AccountID: %s] Target %s in TG %s has health status: %s", operationalAccountID, *thd.Target.Id, tgArn, thd.TargetHealth.State)
+
+			switch tg.TargetType {
+			case elbv2types.TargetTypeEnumInstance:
+				instanceIDs = append(instanceIDs, *thd.Target.Id)
+			case elbv2types.TargetTypeEnumIp:
+				ipTargets = append(ipTargets, *thd.Target.Id)
+			case elbv2types.TargetTypeEnumLambda, elbv2types.TargetTypeEnumAlb:
+				c.logger.Debugf("[AccountID: %s] Skipping non-instance target type %s for target %s in TG %s", operationalAccountID, tg.TargetType, *thd.Target.Id, tgArn)
+			}
+		}
+	}
+
+	if len(ipTargets) > 0 {
+		resolvedInstanceIDs, err := c.resolveIPsToInstanceIDs(ctx, ipTargets, regionName, operationalAccountID)
+		if err != nil {
+			c.logger.Errorf("[AccountID: %s] Failed to resolve some IP targets to instance IDs: %v", operationalAccountID, err)
+		}
+		instanceIDs = append(instanceIDs, resolvedInstanceIDs...)
+	}
+
+	// Return unique instance IDs
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, entry := range instanceIDs {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list, nil
+}
+
+func (c *Client) resolveIPsToInstanceIDs(ctx context.Context, ips []string, regionName string, operationalAccountID string) ([]string, error) {
+	ec2Client, err := c.getEC2Client(ctx, operationalAccountID, regionName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get EC2 client: %w", err)
+	}
+	if ec2Client == nil {
+		return nil, fmt.Errorf("EC2 client is nil for region %s", regionName)
+	}
+
+	input := &ec2.DescribeNetworkInterfacesInput{
+		Filters: []awsTypes.Filter{
+			{
+				Name:   aws.String("addresses.private-ip-address"),
+				Values: ips,
+			},
+		},
+	}
+
+	var instanceIDs []string
+	paginator := ec2.NewDescribeNetworkInterfacesPaginator(ec2Client, input)
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to describe network interfaces for IP resolution: %w", err)
+		}
+		for _, ni := range page.NetworkInterfaces {
+			if ni.Attachment != nil && ni.Attachment.InstanceId != nil {
+				instanceIDs = append(instanceIDs, *ni.Attachment.InstanceId)
+			}
+		}
+	}
+	return instanceIDs, nil
 }
 
 // getIPsFromDNS (utility function, assuming it exists elsewhere or you want to define it)

@@ -55,6 +55,7 @@ const (
 	CloudProviderService_ListNetworkInterfaces_FullMethodName        = "/infra.CloudProviderService/ListNetworkInterfaces"
 	CloudProviderService_ListKeyPairs_FullMethodName                 = "/infra.CloudProviderService/ListKeyPairs"
 	CloudProviderService_ListVPNConcentrators_FullMethodName         = "/infra.CloudProviderService/ListVPNConcentrators"
+	CloudProviderService_ListVpcConnections_FullMethodName           = "/infra.CloudProviderService/ListVpcConnections"
 	CloudProviderService_GetVpcConnectivityGraph_FullMethodName      = "/infra.CloudProviderService/GetVpcConnectivityGraph"
 	CloudProviderService_GetInstanceConnectivityGraph_FullMethodName = "/infra.CloudProviderService/GetInstanceConnectivityGraph"
 	CloudProviderService_ListVpcGraphNodes_FullMethodName            = "/infra.CloudProviderService/ListVpcGraphNodes"
@@ -94,6 +95,8 @@ type CloudProviderServiceClient interface {
 	ListNetworkInterfaces(ctx context.Context, in *ListNetworkInterfacesRequest, opts ...grpc.CallOption) (*ListNetworkInterfacesResponse, error)
 	ListKeyPairs(ctx context.Context, in *ListKeyPairsRequest, opts ...grpc.CallOption) (*ListKeyPairsResponse, error)
 	ListVPNConcentrators(ctx context.Context, in *ListVPNConcentratorsRequest, opts ...grpc.CallOption) (*ListVPNConcentratorsResponse, error)
+	// New RPC for listing VPC to VPC connections
+	ListVpcConnections(ctx context.Context, in *ListVpcConnectionsRequest, opts ...grpc.CallOption) (*ListVpcConnectionsResponse, error)
 	// New RPC for getting VPC connectivity graph
 	GetVpcConnectivityGraph(ctx context.Context, in *GetVpcConnectivityGraphRequest, opts ...grpc.CallOption) (*GetVpcConnectivityGraphResponse, error)
 	// Retrieves the connectivity graph focused on a specific instance
@@ -310,6 +313,16 @@ func (c *cloudProviderServiceClient) ListVPNConcentrators(ctx context.Context, i
 	return out, nil
 }
 
+func (c *cloudProviderServiceClient) ListVpcConnections(ctx context.Context, in *ListVpcConnectionsRequest, opts ...grpc.CallOption) (*ListVpcConnectionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListVpcConnectionsResponse)
+	err := c.cc.Invoke(ctx, CloudProviderService_ListVpcConnections_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cloudProviderServiceClient) GetVpcConnectivityGraph(ctx context.Context, in *GetVpcConnectivityGraphRequest, opts ...grpc.CallOption) (*GetVpcConnectivityGraphResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetVpcConnectivityGraphResponse)
@@ -455,6 +468,8 @@ type CloudProviderServiceServer interface {
 	ListNetworkInterfaces(context.Context, *ListNetworkInterfacesRequest) (*ListNetworkInterfacesResponse, error)
 	ListKeyPairs(context.Context, *ListKeyPairsRequest) (*ListKeyPairsResponse, error)
 	ListVPNConcentrators(context.Context, *ListVPNConcentratorsRequest) (*ListVPNConcentratorsResponse, error)
+	// New RPC for listing VPC to VPC connections
+	ListVpcConnections(context.Context, *ListVpcConnectionsRequest) (*ListVpcConnectionsResponse, error)
 	// New RPC for getting VPC connectivity graph
 	GetVpcConnectivityGraph(context.Context, *GetVpcConnectivityGraphRequest) (*GetVpcConnectivityGraphResponse, error)
 	// Retrieves the connectivity graph focused on a specific instance
@@ -534,6 +549,9 @@ func (UnimplementedCloudProviderServiceServer) ListKeyPairs(context.Context, *Li
 }
 func (UnimplementedCloudProviderServiceServer) ListVPNConcentrators(context.Context, *ListVPNConcentratorsRequest) (*ListVPNConcentratorsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVPNConcentrators not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) ListVpcConnections(context.Context, *ListVpcConnectionsRequest) (*ListVpcConnectionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListVpcConnections not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) GetVpcConnectivityGraph(context.Context, *GetVpcConnectivityGraphRequest) (*GetVpcConnectivityGraphResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVpcConnectivityGraph not implemented")
@@ -926,6 +944,24 @@ func _CloudProviderService_ListVPNConcentrators_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudProviderService_ListVpcConnections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListVpcConnectionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).ListVpcConnections(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudProviderService_ListVpcConnections_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).ListVpcConnections(ctx, req.(*ListVpcConnectionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CloudProviderService_GetVpcConnectivityGraph_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetVpcConnectivityGraphRequest)
 	if err := dec(in); err != nil {
@@ -1224,6 +1260,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListVPNConcentrators",
 			Handler:    _CloudProviderService_ListVPNConcentrators_Handler,
+		},
+		{
+			MethodName: "ListVpcConnections",
+			Handler:    _CloudProviderService_ListVpcConnections_Handler,
 		},
 		{
 			MethodName: "GetVpcConnectivityGraph",

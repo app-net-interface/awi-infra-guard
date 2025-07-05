@@ -856,6 +856,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListVPNConcentrators);
   }
 
+  methodDescriptorListVpcConnections = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListVpcConnections',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListVpcConnectionsRequest,
+    cloud_pb.ListVpcConnectionsResponse,
+    (request: cloud_pb.ListVpcConnectionsRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListVpcConnectionsResponse.deserializeBinary
+  );
+
+  listVpcConnections(
+    request: cloud_pb.ListVpcConnectionsRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListVpcConnectionsResponse>;
+
+  listVpcConnections(
+    request: cloud_pb.ListVpcConnectionsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVpcConnectionsResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListVpcConnectionsResponse>;
+
+  listVpcConnections(
+    request: cloud_pb.ListVpcConnectionsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListVpcConnectionsResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListVpcConnections',
+        request,
+        metadata || {},
+        this.methodDescriptorListVpcConnections,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListVpcConnections',
+    request,
+    metadata || {},
+    this.methodDescriptorListVpcConnections);
+  }
+
   methodDescriptorGetVpcConnectivityGraph = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/GetVpcConnectivityGraph',
     grpcWeb.MethodType.UNARY,
