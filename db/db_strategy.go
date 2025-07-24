@@ -95,6 +95,21 @@ func (p *providerWithDB) GetName() string {
 	return p.realProvider.GetName()
 }
 
+func (p *providerWithDB) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcConnectionsRequest) ([]types.VPCConnection, error) {
+	// Get from DB first
+	connections, err := p.dbClient.ListVpcConnections()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list VPC connections from db: %v", err)
+	}
+
+	// Convert pointer slice to value slice
+	result := make([]types.VPCConnection, len(connections))
+	for i, conn := range connections {
+		result[i] = *conn
+	}
+	return result, nil
+}
+
 func (p *providerWithDB) ListAccounts() []types.Account {
 	return p.realProvider.ListAccounts()
 }

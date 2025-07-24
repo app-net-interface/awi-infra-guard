@@ -62,6 +62,15 @@ func typesRegionsToGrpc(in []types.Region) []*infrapb.Region {
 func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 	out := make([]*infrapb.Instance, 0, len(in))
 	for _, instance := range in {
+		var createdAtPb *timestamppb.Timestamp
+		var updatedAtPb *timestamppb.Timestamp
+		if instance.CreatedAt != nil {
+			createdAtPb = timestamppb.New(*instance.CreatedAt)
+		}
+		if instance.UpdatedAt != nil {
+			// If UpdatedAt is set, we can use it as the last sync time
+			updatedAtPb = timestamppb.New(*instance.UpdatedAt)
+		}
 		out = append(out, &infrapb.Instance{
 			Id:               instance.ID,
 			Name:             instance.Name,
@@ -81,6 +90,8 @@ func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 			InterfaceIds:     instance.InterfaceIDs,
 			LastSyncTime:     instance.LastSyncTime,
 			SelfLink:         instance.SelfLink,
+			CreatedAt:        createdAtPb,
+			UpdatedAt:        updatedAtPb,
 		})
 	}
 	return out
@@ -563,6 +574,40 @@ func typesInstanceEdgesToGrpc(in []types.InstanceGraphEdge) []*infrapb.InstanceG
 			AccountId:        edge.AccountID,
 			Region:           edge.Region,
 		})
+	}
+	return out
+}
+
+func typesVpcConnectionsToGrpc(in []*types.VPCConnection) []*infrapb.VpcConnection {
+	out := make([]*infrapb.VpcConnection, 0, len(in))
+	for _, conn := range in {
+		grpcConn := &infrapb.VpcConnection{
+			Id:             conn.ID,
+			Name:           conn.Name,
+			Provider:       conn.Provider,
+			AccountId:      conn.Account,
+			Region:         conn.Region,
+			VpcId_1:        conn.FromVpcId,
+			Vpc_1AccountId: conn.FromVpcAccountId,
+			Vpc_1Region:    conn.FromVpcRegion,
+			VpcId_2:        conn.ToVpcId,
+			Vpc_2AccountId: conn.ToVpcAccountId,
+			Vpc_2Region:    conn.ToVpcRegion,
+			ConnectionType: infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_PEERING, // Default to peering
+			Status:         conn.Status,
+		}
+
+		if conn.ConnectionType == "transit_gateway" {
+			grpcConn.ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_TRANSIT_GATEWAY
+		} else if conn.ConnectionType == "peering" {
+			grpcConn.ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_PEERING // Default to peering
+		} else if conn.ConnectionType == "vpc_endpoint" {
+			grpcConn.ConnectionType = infrapb.VpcConnectionType_VPC_ENDPOINT
+		} else {
+			grpcConn.ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_UNSPECIFIED
+		}
+
+		out = append(out, grpcConn)
 	}
 	return out
 }

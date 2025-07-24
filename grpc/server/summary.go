@@ -23,226 +23,148 @@ import (
 	"strings"
 
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
-	"github.com/app-net-interface/awi-infra-guard/types"
+	"github.com/app-net-interface/awi-infra-guard/provider"
 )
 
 func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infrapb.SummaryResponse, error) {
-	var accounts []types.Account
-	var vpcs []types.VPC
-
-	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
-	if err != nil {
-		fmt.Printf("Error retreiving provider %s ", err.Error())
-		return nil, err
-	}
-	if in.AccountId == "" {
-		accounts = cloudProvider.ListAccounts()
-	}
-	if in.VpcId == "" {
-		vpcs, err = cloudProvider.ListVPC(ctx, &infrapb.ListVPCRequest{
-			Provider:  in.Provider,
-			AccountId: in.AccountId,
-			Region:    in.Region,
-		})
+	var providers []provider.CloudProvider
+	if in.Provider != "" && in.Provider != "all" {
+		provider, err := s.strategy.GetProvider(ctx, in.Provider)
 		if err != nil {
-			fmt.Printf("Error retreiving vpcs %s ", err.Error())
-			return nil, err
+			return nil, fmt.Errorf("error retrieving provider %s: %w", in.Provider, err)
 		}
+		providers = append(providers, provider)
+	} else {
+		// If no specific provider, get all available providers
+		providers = s.strategy.GetAllProviders()
 	}
-	subnets, err := cloudProvider.ListSubnets(ctx, &infrapb.ListSubnetsRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving subnets %s ", err.Error())
-		return nil, err
-	}
-	instances, err := cloudProvider.ListInstances(ctx, &infrapb.ListInstancesRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving instances %s ", err.Error())
-		return nil, err
-	}
+
+	// Initialize aggregate counters and summaries
+	totalAccounts := 0
+	totalVPCs := 0
+	totalSubnets := 0
+	totalInstances := 0
+	totalACLs := 0
+	totalSGs := 0
+	totalRouteTables := 0
+	totalNatGateways := 0
+	totalRouters := 0
+	totalIGWs := 0
+	totalVpcEndpoints := 0
+	totalPublicIPs := 0
+	totalClusters := 0
+	totalPods := 0
+	totalServices := 0
+	totalNamespaces := 0
+
 	vmStateSummary := make(map[string]int32)
-	for _, vm := range instances {
-		vmStateSummary[strings.ToLower(vm.State)] += 1
-	}
 	vmTypeSummary := make(map[string]int32)
-	for _, vm := range instances {
-		vmTypeSummary[strings.ToLower(vm.Type)] += 1
-	}
-	acls, err := cloudProvider.ListACLs(ctx, &infrapb.ListACLsRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving acls %s ", err.Error())
-		return nil, err
-	}
-	sgs, err := cloudProvider.ListSecurityGroups(ctx, &infrapb.ListSecurityGroupsRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving security groups %s ", err.Error())
-		return nil, err
-	}
-	routeTables, err := cloudProvider.ListRouteTables(ctx, &infrapb.ListRouteTablesRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving route tables %s ", err.Error())
-		return nil, err
-	}
-
-	natGateways, err := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving nat gateways %s ", err.Error())
-		return nil, err
-	}
-
-	igws, err := cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving internet gateways %s ", err.Error())
-		return nil, err
-	}
-
-	routers, err := cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving routers %s ", err.Error())
-		return nil, err
-	}
-
-	vpcEndpoints, err := cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving vpc endpoints %s ", err.Error())
-		return nil, err
-	}
-	publicIPs, err := cloudProvider.ListPublicIPs(ctx, &infrapb.ListPublicIPsRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving public ips %s ", err.Error())
-		return nil, err
-	}
-
-	// Kubernetes Resources
-
-	clusters, err := cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{
-		Provider:  in.Provider,
-		AccountId: in.AccountId,
-		Region:    in.Region,
-		VpcId:     in.VpcId,
-	})
-	if err != nil {
-		fmt.Printf("Error retreiving clusters %s ", err.Error())
-		//return nil, err
-	}
-	k8sProvider, err := s.strategy.GetKubernetesProvider()
-	if err != nil {
-		fmt.Printf("Error retreiving provider %s ", err.Error())
-		//return nil, err
-	}
-	var podsCount int
-	pods, err := k8sProvider.ListPods(ctx, "", nil)
-	if err != nil {
-		fmt.Printf("Error retreiving pods %s ", err.Error())
-		//return nil, err
-	}
 	podsStateSummary := make(map[string]int32)
-	for _, pod := range pods {
-		podsStateSummary[strings.ToLower(pod.State)] += 1
-		for _, cl := range clusters {
-			if pod.Cluster == cl.Name {
-				podsCount++
+
+	k8sProvider, _ := s.strategy.GetKubernetesProvider()
+
+	for _, cloudProvider := range providers {
+		providerName := cloudProvider.GetName()
+		var accountIDs []string
+		if in.AccountId != "" {
+			accountIDs = append(accountIDs, in.AccountId)
+		} else {
+			for _, acc := range cloudProvider.ListAccounts() {
+				accountIDs = append(accountIDs, acc.ID)
 			}
 		}
-	}
-	var servicesCount int
-	services, err := k8sProvider.ListServices(ctx, "", nil)
-	if err != nil {
-		fmt.Printf("Error retreiving services %s ", err.Error())
+		totalAccounts += len(accountIDs)
 
-		//return nil, err
-	}
-	for _, serv := range services {
-		for _, cl := range clusters {
-			if serv.Cluster == cl.Name {
-				servicesCount++
+		for _, accountID := range accountIDs {
+			vpcs, _ := cloudProvider.ListVPC(ctx, &infrapb.ListVPCRequest{Provider: providerName, AccountId: accountID, Region: in.Region})
+			totalVPCs += len(vpcs)
+
+			subnets, _ := cloudProvider.ListSubnets(ctx, &infrapb.ListSubnetsRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalSubnets += len(subnets)
+
+			instances, _ := cloudProvider.ListInstances(ctx, &infrapb.ListInstancesRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalInstances += len(instances)
+			for _, vm := range instances {
+				vmStateSummary[strings.ToLower(vm.State)]++
+				vmTypeSummary[strings.ToLower(vm.Type)]++
 			}
-		}
-	}
-	var namespacesCount int
-	namespaces, err := k8sProvider.ListNamespaces(ctx, "", nil)
-	if err != nil {
-		fmt.Printf("Error retreiving namespaces %s ", err.Error())
 
-		//return nil, err
-	}
-	for _, namespace := range namespaces {
-		for _, cl := range clusters {
-			if namespace.Cluster == cl.Name {
-				namespacesCount++
+			acls, _ := cloudProvider.ListACLs(ctx, &infrapb.ListACLsRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalACLs += len(acls)
+
+			sgs, _ := cloudProvider.ListSecurityGroups(ctx, &infrapb.ListSecurityGroupsRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalSGs += len(sgs)
+
+			routeTables, _ := cloudProvider.ListRouteTables(ctx, &infrapb.ListRouteTablesRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalRouteTables += len(routeTables)
+
+			natGateways, _ := cloudProvider.ListNATGateways(ctx, &infrapb.ListNATGatewaysRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalNatGateways += len(natGateways)
+
+			igws, _ := cloudProvider.ListInternetGateways(ctx, &infrapb.ListInternetGatewaysRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalIGWs += len(igws)
+
+			routers, _ := cloudProvider.ListRouters(ctx, &infrapb.ListRoutersRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalRouters += len(routers)
+
+			vpcEndpoints, _ := cloudProvider.ListVPCEndpoints(ctx, &infrapb.ListVPCEndpointsRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalVpcEndpoints += len(vpcEndpoints)
+
+			publicIPs, _ := cloudProvider.ListPublicIPs(ctx, &infrapb.ListPublicIPsRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalPublicIPs += len(publicIPs)
+
+			// Kubernetes Resources
+			clusters, _ := cloudProvider.ListClusters(ctx, &infrapb.ListCloudClustersRequest{Provider: providerName, AccountId: accountID, Region: in.Region, VpcId: in.VpcId})
+			totalClusters += len(clusters)
+
+			if k8sProvider != nil {
+				relevantClusters := make(map[string]struct{})
+				for _, c := range clusters {
+					relevantClusters[c.Name] = struct{}{}
+				}
+				if len(relevantClusters) > 0 {
+					pods, _ := k8sProvider.ListPods(ctx, "", nil)
+					for _, pod := range pods {
+						if _, ok := relevantClusters[pod.Cluster]; ok {
+							podsStateSummary[strings.ToLower(pod.State)]++
+							totalPods++
+						}
+					}
+					services, _ := k8sProvider.ListServices(ctx, "", nil)
+					for _, serv := range services {
+						if _, ok := relevantClusters[serv.Cluster]; ok {
+							totalServices++
+						}
+					}
+					namespaces, _ := k8sProvider.ListNamespaces(ctx, "", nil)
+					for _, namespace := range namespaces {
+						if _, ok := relevantClusters[namespace.Cluster]; ok {
+							totalNamespaces++
+						}
+					}
+				}
 			}
 		}
 	}
 
 	summary := &infrapb.SummaryResponse{
 		Count: &infrapb.Counters{
-			Accounts:       int32(len(accounts)),
-			Vpc:            int32(len(vpcs)),
-			Subnets:        int32(len(subnets)),
-			RouteTables:    int32(len(routeTables)),
-			Instances:      int32(len(instances)),
-			Acls:           int32(len(acls)),
-			SecurityGroups: int32(len(sgs)),
-			NatGateways:    int32(len(natGateways)),
-			Routers:        int32(len(routers)),
-			Igws:           int32(len(igws)),
-			VpcEndpoints:   int32(len(vpcEndpoints)),
-			PublicIps:      int32(len(publicIPs)),
-
-			//Kubernetes
-			Clusters:   int32(len(clusters)),
-			Pods:       int32(podsCount),
-			Services:   int32(servicesCount),
-			Namespaces: int32(namespacesCount),
+			Accounts:       int32(totalAccounts),
+			Vpc:            int32(totalVPCs),
+			Subnets:        int32(totalSubnets),
+			RouteTables:    int32(totalRouteTables),
+			Instances:      int32(totalInstances),
+			Acls:           int32(totalACLs),
+			SecurityGroups: int32(totalSGs),
+			NatGateways:    int32(totalNatGateways),
+			Routers:        int32(totalRouters),
+			Igws:           int32(totalIGWs),
+			VpcEndpoints:   int32(totalVpcEndpoints),
+			PublicIps:      int32(totalPublicIPs),
+			Clusters:       int32(totalClusters),
+			Pods:           int32(totalPods),
+			Services:       int32(totalServices),
+			Namespaces:     int32(totalNamespaces),
 		},
 		Statuses: &infrapb.StatusSummary{
 			VmStatus:  vmStateSummary,
@@ -250,7 +172,5 @@ func (s *Server) Summary(ctx context.Context, in *infrapb.SummaryRequest) (*infr
 			VmTypes:   vmTypeSummary,
 		},
 	}
-	fmt.Printf(" ************* Summary: %v\n *************", summary)
-
 	return summary, nil
 }

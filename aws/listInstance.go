@@ -173,6 +173,8 @@ func convertInstances(defaultAccount, defaultRegion, account, region string, res
 				SelfLink:         instanceLink,
 				SecurityGroupIDs: secGroups,
 				InterfaceIDs:     networkInterfaces,
+				CreatedAt:        inst.LaunchTime,
+				UpdatedAt:        inst.UsageOperationUpdateTime, // Assuming LaunchTime is the creation time; adjust if needed
 			}
 			instances = append(instances, instance)
 		}

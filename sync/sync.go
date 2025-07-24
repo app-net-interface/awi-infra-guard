@@ -213,6 +213,15 @@ func (s *Syncer) ParallelSync(ctx context.Context, done chan<- struct{}) {
 				s.logger.Debugf("Finished parallel sync for LBs")
 			}()
 		}
+		if allResourceCloud || s.sc.HasCloudResource("vpcconnection") {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				s.logger.Debugf("Starting parallel sync for VPC connections")
+				s.syncVpcConnections(ctx) // Pass the parent context
+				s.logger.Debugf("Finished parallel sync for VPC connections")
+			}()
+		}
 		if allResourceCloud || s.sc.HasCloudResource("networkinterface") {
 			wg.Add(1)
 			go func() {
@@ -546,6 +555,13 @@ func (s *Syncer) syncVPNConcentrators(ctx context.Context) {
 	genericCloudSync[*types.VPNConcentrator](ctx, s, types.VPNConcentratorType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPNConcentrator, error) {
 		return cloudProvider.ListVPNConcentrators(ctx, &infrapb.ListVPNConcentratorsRequest{AccountId: accountID})
 	}, s.logger, s.dbClient.ListVPNConcentrators, s.dbClient.PutVPNConcentrator, s.dbClient.DeleteVPNConcentrator)
+}
+
+// syncVpcConnections discovers and stores VPC connections from cloud providers
+func (s *Syncer) syncVpcConnections(ctx context.Context) {
+	genericCloudSync[*types.VPCConnection](ctx, s, types.VPCConnectionType, func(ctx context.Context, cloudProvider provider.CloudProvider, accountID string) ([]types.VPCConnection, error) {
+		return cloudProvider.ListVpcConnections(ctx, &infrapb.ListVpcConnectionsRequest{AccountId: accountID})
+	}, s.logger, s.dbClient.ListVpcConnections, s.dbClient.PutVpcConnection, s.dbClient.DeleteVpcConnection)
 }
 
 /* End sync cloud resources */

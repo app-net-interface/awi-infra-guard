@@ -44,6 +44,7 @@ const (
 	syncTimeTable          = "sync_time"
 	keyPairTable           = "keyPairs"
 	vpnConcentratorTable   = "vpnConcentrators"
+	vpcConnectionTable     = "vpcConnections"
 )
 
 // Add bolt db table to this list; or it will cause a panic
@@ -72,6 +73,7 @@ var tableNames = []string{
 	syncTimeTable,
 	keyPairTable,
 	vpnConcentratorTable,
+	vpcConnectionTable,
 }
 
 type DbObject interface {
@@ -226,4 +228,11 @@ type Client interface {
 
 	// Add SyncVPCIndexes to the interface.
 	SyncVPCIndexes() error
+
+	// VPC Connection
+	ListVpcConnections() ([]*types.VPCConnection, error)
+	PutVpcConnection(*types.VPCConnection) error
+	GetVpcConnection(string) (*types.VPCConnection, error)
+	DeleteVpcConnection(string) error
+	SyncVpcConnections() error
 }

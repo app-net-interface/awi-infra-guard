@@ -1383,16 +1383,10 @@ export class ListVpcConnectionsRequest extends jspb.Message {
   getRegion(): string;
   setRegion(value: string): ListVpcConnectionsRequest;
 
-  getVpcId(): string;
-  setVpcId(value: string): ListVpcConnectionsRequest;
-
-  getConnectionTypesList(): Array<types_pb.VpcConnectionType>;
-  setConnectionTypesList(value: Array<types_pb.VpcConnectionType>): ListVpcConnectionsRequest;
-  clearConnectionTypesList(): ListVpcConnectionsRequest;
-  addConnectionTypes(value: types_pb.VpcConnectionType, index?: number): ListVpcConnectionsRequest;
-
-  getLabelsMap(): jspb.Map<string, string>;
-  clearLabelsMap(): ListVpcConnectionsRequest;
+  getVpcIdsList(): Array<string>;
+  setVpcIdsList(value: Array<string>): ListVpcConnectionsRequest;
+  clearVpcIdsList(): ListVpcConnectionsRequest;
+  addVpcIds(value: string, index?: number): ListVpcConnectionsRequest;
 
   getCreds(): types_pb.Credentials | undefined;
   setCreds(value?: types_pb.Credentials): ListVpcConnectionsRequest;
@@ -1412,26 +1406,24 @@ export namespace ListVpcConnectionsRequest {
     provider: string,
     accountId: string,
     region: string,
-    vpcId: string,
-    connectionTypesList: Array<types_pb.VpcConnectionType>,
-    labelsMap: Array<[string, string]>,
+    vpcIdsList: Array<string>,
     creds?: types_pb.Credentials.AsObject,
   }
 
   export enum CredsCase { 
     _CREDS_NOT_SET = 0,
-    CREDS = 7,
+    CREDS = 5,
   }
 }
 
 export class ListVpcConnectionsResponse extends jspb.Message {
-  getVpcConnectionsList(): Array<types_pb.VpcConnection>;
-  setVpcConnectionsList(value: Array<types_pb.VpcConnection>): ListVpcConnectionsResponse;
-  clearVpcConnectionsList(): ListVpcConnectionsResponse;
-  addVpcConnections(value?: types_pb.VpcConnection, index?: number): types_pb.VpcConnection;
+  getConnectionsList(): Array<types_pb.VpcConnection>;
+  setConnectionsList(value: Array<types_pb.VpcConnection>): ListVpcConnectionsResponse;
+  clearConnectionsList(): ListVpcConnectionsResponse;
+  addConnections(value?: types_pb.VpcConnection, index?: number): types_pb.VpcConnection;
 
-  getLastSyncTime(): string;
-  setLastSyncTime(value: string): ListVpcConnectionsResponse;
+  getNextTokenMap(): jspb.Map<string, string>;
+  clearNextTokenMap(): ListVpcConnectionsResponse;
 
   getErr(): types_pb.Error | undefined;
   setErr(value?: types_pb.Error): ListVpcConnectionsResponse;
@@ -1448,8 +1440,8 @@ export class ListVpcConnectionsResponse extends jspb.Message {
 
 export namespace ListVpcConnectionsResponse {
   export type AsObject = {
-    vpcConnectionsList: Array<types_pb.VpcConnection.AsObject>,
-    lastSyncTime: string,
+    connectionsList: Array<types_pb.VpcConnection.AsObject>,
+    nextTokenMap: Array<[string, string]>,
     err?: types_pb.Error.AsObject,
   }
 }

@@ -56,6 +56,7 @@ const (
 	NetworkInterfaceType = "NetworkInterface"
 	KeyPairType          = "KeyPair"
 	VPNConcentratorType  = "VPNConcentrator"
+	VPCConnectionType    = "VPCConnection"
 )
 
 type Error struct {
@@ -219,6 +220,9 @@ type Instance struct {
 	InterfaceIDs     []string
 	LastSyncTime     string
 	SelfLink         string
+	Cost             float64    `json:"cost,omitempty"` // Added field for cost
+	CreatedAt        *time.Time `json:"created_at,omitempty"`
+	UpdatedAt        *time.Time `json:"updated_at,omitempty"`
 }
 
 func (v Instance) DbId() string {
@@ -339,12 +343,14 @@ func (v *RouteTable) GetProvider() string {
 }
 
 type Route struct {
-	Name        string
-	Destination string
-	Status      string
-	Target      string
-	NextHopType string
-	NextHopIP   string
+	Name                   string
+	Destination            string
+	Status                 string
+	Target                 string
+	NextHopType            string
+	NextHopIP              string
+	DestinationVpcID       string // VPC ID when this is a peering route
+	VpcPeeringConnectionID string // ID of VPC peering connection if this is a peering route
 }
 
 // CloudGateway represents a generic cloud gateway with various attributes.
@@ -365,6 +371,7 @@ type Router struct {
 	VPNType              string            `json:"vpn_type"`
 	SecurityGroupIDs     []string          `json:"security_group_ids"` // Security groups or ACLs IDs
 	Labels               map[string]string `json:"labels"`
+	VPCAttachments       []VPCAttachment   `json:"vpc_attachments"` // Attached VPCs (for transit gateways etc)
 	CreatedAt            time.Time         `json:"created_at"`
 	UpdatedAt            time.Time         `json:"updated_at"`
 	AdditionalProperties map[string]string `json:"additional_properties"`
@@ -671,6 +678,15 @@ func (k *KeyPair) GetProvider() string {
 	return k.Provider
 }
 
+type VPCAttachment struct {
+	VpcId     string            `json:"vpc_id"`
+	SubnetIds []string          `json:"subnet_ids"`
+	Status    string            `json:"status"`
+	CreatedAt time.Time         `json:"created_at"`
+	UpdatedAt time.Time         `json:"updated_at"`
+	Labels    map[string]string `json:"labels"`
+}
+
 type VPNConcentrator struct {
 	ID           string
 	Name         string
@@ -794,3 +810,37 @@ type InstanceGraphEdge struct {
 }
 
 // Add any helper methods for VpcGraphNode or VpcGraphEdge if needed below
+
+// VPCConnection represents a connection between two VPCs, potentially across different accounts
+type VPCConnection struct {
+	Provider         string
+	ID               string
+	Name             string
+	Account          string // Owner/primary account of the connection
+	Region           string // Primary region of the connection
+	FromVpcId        string
+	ToVpcId          string
+	FromVpcAccountId string // Account ID for the first VPC
+	ToVpcAccountId   string // Account ID for the second VPC
+	FromVpcRegion    string // Region for the first VPC
+	ToVpcRegion      string // Region for the second VPC
+	Status           string
+	ConnectionType   string // Type of connection (peering, transit_gateway, etc.)
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	Tags             map[string]string // Additional metadata tags
+	LastSyncTime     string            // Time of last sync operation
+}
+
+// VPCConnection helper methods to implement db.DbObject interface
+func (v *VPCConnection) GetProvider() string {
+	return v.Provider
+}
+
+func (v *VPCConnection) DbId() string {
+	return v.ID
+}
+
+func (v *VPCConnection) SetSyncTime(t string) {
+	// empty since VPC Connections don't need sync time
+}

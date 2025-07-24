@@ -49,6 +49,8 @@ type CloudProvider interface {
 	ListVPC(ctx context.Context, input *infrapb.ListVPCRequest) ([]types.VPC, error)
 	// ListInstances returns cloud instances based on provided filters, empty filter means no filtering by this parameter.
 	ListInstances(ctx context.Context, input *infrapb.ListInstancesRequest) ([]types.Instance, error)
+	// ListVpcConnections returns VPC connections based on provided filters
+	ListVpcConnections(ctx context.Context, input *infrapb.ListVpcConnectionsRequest) ([]types.VPCConnection, error)
 	// ListSubnets returns cloud instances based on provided filters, empty filter means no filtering by this parameter.
 	// Scope of subnet is regional in some clouds (e.g. GCP, Azure) and zonal in others (e.g. AWS), filtering is done by
 	// this scope.
@@ -289,9 +291,9 @@ func NewRealProviderStrategy(logger *logrus.Logger, providerConfigs []config.Pro
 	p.logger.Infof("RealProviderStrategy initialization complete. Successfully initialized %d out of %d configured cloud providers.", successfulProviders, len(providerConfigs))
 
 	if kubernetesSupported {
-
-		//p.k8sClient, _  := infra_kubernetes.NewKubernetesClient(p.logger, "")
-		p.logger.Info("Kubernetes client skipped.")
+		var err error
+		p.k8sClient, err = infra_kubernetes.NewKubernetesClient(p.logger, "")
+		return p, err
 		// The dbClient parameter was removed from NewRealProviderStrategy signature in your file,
 		// so p.k8sClient.Init(dbClient) cannot be called here without dbClient.
 		// If dbClient is needed for k8s, it must be passed to NewRealProviderStrategy or k8sClient must get it another way.

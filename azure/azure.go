@@ -1,4 +1,4 @@
-// Copyright (c) 2024 Cisco Systems, Inc. and its affiliates
+// Copyright (c) 2025 Cisco Systems, Inc. and its affiliates
 // All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,11 +95,6 @@ func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListI
 	return nil, nil
 }
 
-func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error) {
-
-	return nil, nil
-}
-
 func (c *Client) GetVPCIndex(ctx context.Context, vpcIndex *infrapb.GetVPCIndexRequest) (*types.VPCIndex, error) {
 	// This logic is handled by the DB strategy.
 	return nil, fmt.Errorf("GetVPCIndex not implemented directly in Azure client; use DB strategy")
@@ -134,74 +129,54 @@ func (c *Client) GetInstanceConnectivityGraph(ctx context.Context, params *infra
 	return nil, nil, fmt.Errorf("GetInstanceConnectivityGraph not implemented for Azure provider")
 }
 
-/*
-func getSubscriptionToken(ctx context.Context, subscriptionID string, credential *auth.DefaultAzureCredential) (string, error) {
-    // Create a subscription-specific credential using azidentity
-    subscriptionCredential, err := auth.NewSubscriptionCredential(credential, subscriptionID)
-    if err != nil {
-        return "", fmt.Errorf("failed to create subscription credential: %w", err)
-    }
+// ListVpcConnections implements provider.CloudProvider interface
+func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcConnectionsRequest) ([]types.VPCConnection, error) {
+	vpcConns := []types.VPCConnection{}
 
-    // Acquire a token for the subscription
-    token, err := subscriptionCredential.GetToken(ctx, "https://management.azure.com")
-    if err != nil {
-        return "", fmt.Errorf("failed to get token for subscription %s: %w", subscriptionID, err)
-    }
-
-    return token.AccessToken, nil
-}
-
-func getSubscriptionFactory (ctx context.Context) (subs []*armsubscriptions.Subscription, error) {
-
-	cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		log.Fatalf("failed to obtain a credential: %v", err)
+	if c.vnetClient == nil {
+		return nil, fmt.Errorf("vnet client not initialized")
 	}
-	ctx := context.Background()
-	clientFactory, err := armsubscriptions.NewClientFactory(cred, nil)
-	if err != nil {
-		log.Fatalf("failed to create client: %v", err)
-	}
-	pager := clientFactory.NewClient().NewListPager(nil)
+
+	// List all VNets
+	pager := (*c.vnetClient).NewListAllPager(nil)
 	for pager.More() {
-		page, err := pager.NextPage(ctx)
+		nextResult, err := pager.NextPage(ctx)
 		if err != nil {
-			log.Fatalf("failed to advance page: %v", err)
+			return nil, fmt.Errorf("failed to list VNets: %v", err)
 		}
-		for _, v := range page.Value {
-			// You could use page here. We use blank identifier for just demo purposes.
-			_ = v
+
+		for _, vnet := range nextResult.Value {
+			if vnet.Properties == nil || vnet.Properties.VirtualNetworkPeerings == nil {
+				continue
+			}
+
+			// Each VNet can have multiple peering connections
+			for _, peering := range vnet.Properties.VirtualNetworkPeerings {
+				if peering.Properties == nil || peering.Properties.RemoteVirtualNetwork == nil {
+					continue
+				}
+
+				vpcConn := types.VPCConnection{
+					Provider: providerName,
+					ID:       *peering.ID,
+					Name:     *peering.Name,
+					// We'll get subscription ID from the resource ID
+					Account:   "TODO", // Need to extract subscription from resource ID
+					Region:    *vnet.Location,
+					FromVpcId: *vnet.ID,
+					ToVpcId:   *peering.Properties.RemoteVirtualNetwork.ID,
+					// Need to parse subscription IDs from resource IDs
+					FromVpcAccountId: "TODO", // Need to extract from vnet.ID
+					ToVpcAccountId:   "TODO", // Need to extract from remoteVnet ID
+					FromVpcRegion:    *vnet.Location,
+					ToVpcRegion:      "TODO", // Need to get from remote VNet
+					Status:           string(*peering.Properties.PeeringState),
+				}
+
+				vpcConns = append(vpcConns, vpcConn)
+			}
 		}
 	}
+
+	return vpcConns, nil
 }
-
-func getToken(ctx context.Context) (map[string]string, error) {
-    cred, err := azidentity.NewDefaultAzureCredential(nil)
-	if err != nil {
-		fmt.Println("Failed to obtain a credential:", err)
-		return
-	}
-
-	subscriptionsClient, err := armsubscriptions.NewClient(cred, nil)
-	if err != nil {
-		fmt.Println("Failed to create subscriptions client:", err)
-		return
-	}
-
-	ctx := context.Background()
-
-	pager := subscriptionsClient.NewListPager(nil)
-
-	fmt.Println("Listing all VNets across all subscriptions:")
-
-	for pager.More() {
-		resp, err := pager.NextPage(ctx)
-		if err != nil {
-			fmt.Println("Failed to get the next page of subscriptions:", err)
-			return
-		}
-		for _, sub := range resp.SubscriptionListResult.Value {
-			fmt.Printf("Subscription: %s\n", *sub.SubscriptionID)
-		}
-	}
-}*/

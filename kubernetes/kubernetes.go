@@ -59,7 +59,14 @@ func (k *KubernetesClient) getClient(cluster string) (*kubernetes.Clientset, err
 func NewKubernetesClient(logger *logrus.Logger, kubeConfigFileName string) (*KubernetesClient, error) {
 	clients, err := parseK8sConfig(logger, kubeConfigFileName)
 	if err != nil {
-		logger.Errorf("Failed to parse kube config: %v", err)
+		// Propagate error instead of just logging it.
+		return nil, fmt.Errorf("failed to parse kube config: %w", err)
+	}
+
+	if len(clients) == 0 {
+		logger.Warn("Kubernetes client initialized, but no cluster clients were configured. No k8s resources will be found.")
+	} else {
+		logger.Infof("Successfully initialized Kubernetes client for %d clusters.", len(clients))
 	}
 
 	return &KubernetesClient{
@@ -69,6 +76,7 @@ func NewKubernetesClient(logger *logrus.Logger, kubeConfigFileName string) (*Kub
 }
 
 func parseK8sConfig(logger *logrus.Logger, kubeConfigFileName string) (map[string]*kubernetes.Clientset, error) {
+	logger.Info("Attempting to load Kubernetes configuration...")
 	if kubeConfigFileName == "" {
 		ok := false
 		home := homedir.HomeDir()
@@ -80,31 +88,40 @@ func parseK8sConfig(logger *logrus.Logger, kubeConfigFileName string) (map[strin
 			}
 		}
 		if !ok {
-			logger.Warnf("kube config file not provided in kubeConfigFileName parameter and not present" +
-				" in HOME/.kube/config, kuberentes clusters won't be watched")
-			return nil, nil
+			logger.Warn("kube config file not provided and not found in default location ($HOME/.kube/config). Kubernetes features will be disabled.")
+			return nil, nil // Return empty map, no error
 		}
 	}
 
+	logger.Infof("Using kubeconfig file: %s", kubeConfigFileName)
 	kubeconfigBytes, err := os.ReadFile(kubeConfigFileName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not read kubeconfig file at %s: %w", kubeConfigFileName, err)
 	}
 	config, err := clientcmd.Load(kubeconfigBytes)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not load kubeconfig: %w", err)
 	}
 
+	if len(config.Contexts) == 0 {
+		logger.Warn("Kubeconfig file is valid, but contains no contexts.")
+		return nil, nil
+	}
+
+	logger.Infof("Found %d contexts in kubeconfig. Initializing clients...", len(config.Contexts))
 	clientMap := make(map[string]*kubernetes.Clientset)
 	for ctxName, ctx := range config.Contexts {
 		cfg, err := buildConfigFromFlags(ctxName, kubeConfigFileName)
 		if err != nil {
-			return nil, err
+			logger.Warnf("Could not build config for context '%s': %v. Skipping.", ctxName, err)
+			continue
 		}
 		k8sClient, err := kubernetes.NewForConfig(cfg)
 		if err != nil {
-			return nil, err
+			logger.Warnf("Could not create clientset for context '%s': %v. Skipping.", ctxName, err)
+			continue
 		}
+		logger.Infof("Successfully created client for cluster: %s", ctx.Cluster)
 		clientMap[ctx.Cluster] = k8sClient
 	}
 
@@ -146,22 +163,41 @@ func (k *KubernetesClient) ListClusters(ctx context.Context) ([]types.Cluster, e
 }
 
 func (k *KubernetesClient) ListPods(ctx context.Context, clusterName string, labels map[string]string) (pods []types.Pod, err error) {
-	k8sClient, err := k.getClient(clusterName)
-	if err != nil {
-		return nil, err
-	}
 	var labelSelector string
 	for k, v := range labels {
 		labelSelector += fmt.Sprintf("%s=%s,", k, v)
 	}
 	labelSelector = strings.TrimSuffix(labelSelector, ",")
-	k8sPodsList, err := k8sClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{
-		LabelSelector: labelSelector,
-	})
-	if err != nil {
-		return nil, err
+
+	if clusterName != "" {
+		k8sClient, err := k.getClient(clusterName)
+		if err != nil {
+			return nil, err
+		}
+		k8sPodsList, err := k8sClient.CoreV1().Pods("").List(ctx, metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return k8sPodsToTypes(clusterName, k8sPodsList.Items), nil
 	}
-	return k8sPodsToTypes(clusterName, k8sPodsList.Items), nil
+
+	// If clusterName is empty, list pods from all configured clusters.
+	k.mtx.Lock()
+	defer k.mtx.Unlock()
+	var allPods []types.Pod
+	for cluster, client := range k.clients {
+		k8sPodsList, err := client.CoreV1().Pods("").List(ctx, metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		if err != nil {
+			k.logger.Warnf("Failed to list pods for cluster %s: %v", cluster, err)
+			continue // Continue to next cluster
+		}
+		allPods = append(allPods, k8sPodsToTypes(cluster, k8sPodsList.Items)...)
+	}
+	return allPods, nil
 }
 
 func (k *KubernetesClient) ListServices(ctx context.Context, clusterName string, labels map[string]string) ([]types.K8SService, error) {

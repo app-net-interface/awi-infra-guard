@@ -11459,7 +11459,7 @@ proto.infra.ListVPNConcentratorsResponse.prototype.hasErr = function() {
  * @private {!Array<number>}
  * @const
  */
-proto.infra.ListVpcConnectionsRequest.repeatedFields_ = [5];
+proto.infra.ListVpcConnectionsRequest.repeatedFields_ = [4];
 
 
 
@@ -11495,9 +11495,7 @@ proto.infra.ListVpcConnectionsRequest.toObject = function(includeInstance, msg) 
     provider: jspb.Message.getFieldWithDefault(msg, 1, ""),
     accountId: jspb.Message.getFieldWithDefault(msg, 2, ""),
     region: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    vpcId: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    connectionTypesList: (f = jspb.Message.getRepeatedField(msg, 5)) == null ? undefined : f,
-    labelsMap: (f = msg.getLabelsMap()) ? f.toObject(includeInstance, undefined) : [],
+    vpcIdsList: (f = jspb.Message.getRepeatedField(msg, 4)) == null ? undefined : f,
     creds: (f = msg.getCreds()) && types_pb.Credentials.toObject(includeInstance, f)
   };
 
@@ -11549,21 +11547,9 @@ proto.infra.ListVpcConnectionsRequest.deserializeBinaryFromReader = function(msg
       break;
     case 4:
       var value = /** @type {string} */ (reader.readString());
-      msg.setVpcId(value);
+      msg.addVpcIds(value);
       break;
     case 5:
-      var values = /** @type {!Array<!proto.infra.VpcConnectionType>} */ (reader.isDelimited() ? reader.readPackedEnum() : [reader.readEnum()]);
-      for (var i = 0; i < values.length; i++) {
-        msg.addConnectionTypes(values[i]);
-      }
-      break;
-    case 6:
-      var value = msg.getLabelsMap();
-      reader.readMessage(value, function(message, reader) {
-        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
-         });
-      break;
-    case 7:
       var value = new types_pb.Credentials;
       reader.readMessage(value,types_pb.Credentials.deserializeBinaryFromReader);
       msg.setCreds(value);
@@ -11618,28 +11604,17 @@ proto.infra.ListVpcConnectionsRequest.serializeBinaryToWriter = function(message
       f
     );
   }
-  f = message.getVpcId();
+  f = message.getVpcIdsList();
   if (f.length > 0) {
-    writer.writeString(
+    writer.writeRepeatedString(
       4,
       f
     );
   }
-  f = message.getConnectionTypesList();
-  if (f.length > 0) {
-    writer.writePackedEnum(
-      5,
-      f
-    );
-  }
-  f = message.getLabelsMap(true);
-  if (f && f.getLength() > 0) {
-    f.serializeBinary(6, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
-  }
   f = message.getCreds();
   if (f != null) {
     writer.writeMessage(
-      7,
+      5,
       f,
       types_pb.Credentials.serializeBinaryToWriter
     );
@@ -11702,48 +11677,30 @@ proto.infra.ListVpcConnectionsRequest.prototype.setRegion = function(value) {
 
 
 /**
- * optional string vpc_id = 4;
- * @return {string}
+ * repeated string vpc_ids = 4;
+ * @return {!Array<string>}
  */
-proto.infra.ListVpcConnectionsRequest.prototype.getVpcId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+proto.infra.ListVpcConnectionsRequest.prototype.getVpcIdsList = function() {
+  return /** @type {!Array<string>} */ (jspb.Message.getRepeatedField(this, 4));
+};
+
+
+/**
+ * @param {!Array<string>} value
+ * @return {!proto.infra.ListVpcConnectionsRequest} returns this
+ */
+proto.infra.ListVpcConnectionsRequest.prototype.setVpcIdsList = function(value) {
+  return jspb.Message.setField(this, 4, value || []);
 };
 
 
 /**
  * @param {string} value
- * @return {!proto.infra.ListVpcConnectionsRequest} returns this
- */
-proto.infra.ListVpcConnectionsRequest.prototype.setVpcId = function(value) {
-  return jspb.Message.setProto3StringField(this, 4, value);
-};
-
-
-/**
- * repeated VpcConnectionType connection_types = 5;
- * @return {!Array<!proto.infra.VpcConnectionType>}
- */
-proto.infra.ListVpcConnectionsRequest.prototype.getConnectionTypesList = function() {
-  return /** @type {!Array<!proto.infra.VpcConnectionType>} */ (jspb.Message.getRepeatedField(this, 5));
-};
-
-
-/**
- * @param {!Array<!proto.infra.VpcConnectionType>} value
- * @return {!proto.infra.ListVpcConnectionsRequest} returns this
- */
-proto.infra.ListVpcConnectionsRequest.prototype.setConnectionTypesList = function(value) {
-  return jspb.Message.setField(this, 5, value || []);
-};
-
-
-/**
- * @param {!proto.infra.VpcConnectionType} value
  * @param {number=} opt_index
  * @return {!proto.infra.ListVpcConnectionsRequest} returns this
  */
-proto.infra.ListVpcConnectionsRequest.prototype.addConnectionTypes = function(value, opt_index) {
-  return jspb.Message.addToRepeatedField(this, 5, value, opt_index);
+proto.infra.ListVpcConnectionsRequest.prototype.addVpcIds = function(value, opt_index) {
+  return jspb.Message.addToRepeatedField(this, 4, value, opt_index);
 };
 
 
@@ -11751,41 +11708,18 @@ proto.infra.ListVpcConnectionsRequest.prototype.addConnectionTypes = function(va
  * Clears the list making it empty but non-null.
  * @return {!proto.infra.ListVpcConnectionsRequest} returns this
  */
-proto.infra.ListVpcConnectionsRequest.prototype.clearConnectionTypesList = function() {
-  return this.setConnectionTypesList([]);
+proto.infra.ListVpcConnectionsRequest.prototype.clearVpcIdsList = function() {
+  return this.setVpcIdsList([]);
 };
 
 
 /**
- * map<string, string> labels = 6;
- * @param {boolean=} opt_noLazyCreate Do not create the map if
- * empty, instead returning `undefined`
- * @return {!jspb.Map<string,string>}
- */
-proto.infra.ListVpcConnectionsRequest.prototype.getLabelsMap = function(opt_noLazyCreate) {
-  return /** @type {!jspb.Map<string,string>} */ (
-      jspb.Message.getMapField(this, 6, opt_noLazyCreate,
-      null));
-};
-
-
-/**
- * Clears values from the map. The map will be non-null.
- * @return {!proto.infra.ListVpcConnectionsRequest} returns this
- */
-proto.infra.ListVpcConnectionsRequest.prototype.clearLabelsMap = function() {
-  this.getLabelsMap().clear();
-  return this;
-};
-
-
-/**
- * optional Credentials creds = 7;
+ * optional Credentials creds = 5;
  * @return {?proto.infra.Credentials}
  */
 proto.infra.ListVpcConnectionsRequest.prototype.getCreds = function() {
   return /** @type{?proto.infra.Credentials} */ (
-    jspb.Message.getWrapperField(this, types_pb.Credentials, 7));
+    jspb.Message.getWrapperField(this, types_pb.Credentials, 5));
 };
 
 
@@ -11794,7 +11728,7 @@ proto.infra.ListVpcConnectionsRequest.prototype.getCreds = function() {
  * @return {!proto.infra.ListVpcConnectionsRequest} returns this
 */
 proto.infra.ListVpcConnectionsRequest.prototype.setCreds = function(value) {
-  return jspb.Message.setWrapperField(this, 7, value);
+  return jspb.Message.setWrapperField(this, 5, value);
 };
 
 
@@ -11812,7 +11746,7 @@ proto.infra.ListVpcConnectionsRequest.prototype.clearCreds = function() {
  * @return {boolean}
  */
 proto.infra.ListVpcConnectionsRequest.prototype.hasCreds = function() {
-  return jspb.Message.getField(this, 7) != null;
+  return jspb.Message.getField(this, 5) != null;
 };
 
 
@@ -11855,9 +11789,9 @@ proto.infra.ListVpcConnectionsResponse.prototype.toObject = function(opt_include
  */
 proto.infra.ListVpcConnectionsResponse.toObject = function(includeInstance, msg) {
   var f, obj = {
-    vpcConnectionsList: jspb.Message.toObjectList(msg.getVpcConnectionsList(),
+    connectionsList: jspb.Message.toObjectList(msg.getConnectionsList(),
     types_pb.VpcConnection.toObject, includeInstance),
-    lastSyncTime: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    nextTokenMap: (f = msg.getNextTokenMap()) ? f.toObject(includeInstance, undefined) : [],
     err: (f = msg.getErr()) && types_pb.Error.toObject(includeInstance, f)
   };
 
@@ -11898,11 +11832,13 @@ proto.infra.ListVpcConnectionsResponse.deserializeBinaryFromReader = function(ms
     case 1:
       var value = new types_pb.VpcConnection;
       reader.readMessage(value,types_pb.VpcConnection.deserializeBinaryFromReader);
-      msg.addVpcConnections(value);
+      msg.addConnections(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setLastSyncTime(value);
+      var value = msg.getNextTokenMap();
+      reader.readMessage(value, function(message, reader) {
+        jspb.Map.deserializeBinary(message, reader, jspb.BinaryReader.prototype.readString, jspb.BinaryReader.prototype.readString, null, "", "");
+         });
       break;
     case 3:
       var value = new types_pb.Error;
@@ -11938,7 +11874,7 @@ proto.infra.ListVpcConnectionsResponse.prototype.serializeBinary = function() {
  */
 proto.infra.ListVpcConnectionsResponse.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getVpcConnectionsList();
+  f = message.getConnectionsList();
   if (f.length > 0) {
     writer.writeRepeatedMessage(
       1,
@@ -11946,12 +11882,9 @@ proto.infra.ListVpcConnectionsResponse.serializeBinaryToWriter = function(messag
       types_pb.VpcConnection.serializeBinaryToWriter
     );
   }
-  f = message.getLastSyncTime();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
+  f = message.getNextTokenMap(true);
+  if (f && f.getLength() > 0) {
+    f.serializeBinary(2, writer, jspb.BinaryWriter.prototype.writeString, jspb.BinaryWriter.prototype.writeString);
   }
   f = message.getErr();
   if (f != null) {
@@ -11965,10 +11898,10 @@ proto.infra.ListVpcConnectionsResponse.serializeBinaryToWriter = function(messag
 
 
 /**
- * repeated VpcConnection vpc_connections = 1;
+ * repeated VpcConnection connections = 1;
  * @return {!Array<!proto.infra.VpcConnection>}
  */
-proto.infra.ListVpcConnectionsResponse.prototype.getVpcConnectionsList = function() {
+proto.infra.ListVpcConnectionsResponse.prototype.getConnectionsList = function() {
   return /** @type{!Array<!proto.infra.VpcConnection>} */ (
     jspb.Message.getRepeatedWrapperField(this, types_pb.VpcConnection, 1));
 };
@@ -11978,7 +11911,7 @@ proto.infra.ListVpcConnectionsResponse.prototype.getVpcConnectionsList = functio
  * @param {!Array<!proto.infra.VpcConnection>} value
  * @return {!proto.infra.ListVpcConnectionsResponse} returns this
 */
-proto.infra.ListVpcConnectionsResponse.prototype.setVpcConnectionsList = function(value) {
+proto.infra.ListVpcConnectionsResponse.prototype.setConnectionsList = function(value) {
   return jspb.Message.setRepeatedWrapperField(this, 1, value);
 };
 
@@ -11988,7 +11921,7 @@ proto.infra.ListVpcConnectionsResponse.prototype.setVpcConnectionsList = functio
  * @param {number=} opt_index
  * @return {!proto.infra.VpcConnection}
  */
-proto.infra.ListVpcConnectionsResponse.prototype.addVpcConnections = function(opt_value, opt_index) {
+proto.infra.ListVpcConnectionsResponse.prototype.addConnections = function(opt_value, opt_index) {
   return jspb.Message.addToRepeatedWrapperField(this, 1, opt_value, proto.infra.VpcConnection, opt_index);
 };
 
@@ -11997,26 +11930,31 @@ proto.infra.ListVpcConnectionsResponse.prototype.addVpcConnections = function(op
  * Clears the list making it empty but non-null.
  * @return {!proto.infra.ListVpcConnectionsResponse} returns this
  */
-proto.infra.ListVpcConnectionsResponse.prototype.clearVpcConnectionsList = function() {
-  return this.setVpcConnectionsList([]);
+proto.infra.ListVpcConnectionsResponse.prototype.clearConnectionsList = function() {
+  return this.setConnectionsList([]);
 };
 
 
 /**
- * optional string last_sync_time = 2;
- * @return {string}
+ * map<string, string> next_token = 2;
+ * @param {boolean=} opt_noLazyCreate Do not create the map if
+ * empty, instead returning `undefined`
+ * @return {!jspb.Map<string,string>}
  */
-proto.infra.ListVpcConnectionsResponse.prototype.getLastSyncTime = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+proto.infra.ListVpcConnectionsResponse.prototype.getNextTokenMap = function(opt_noLazyCreate) {
+  return /** @type {!jspb.Map<string,string>} */ (
+      jspb.Message.getMapField(this, 2, opt_noLazyCreate,
+      null));
 };
 
 
 /**
- * @param {string} value
+ * Clears values from the map. The map will be non-null.
  * @return {!proto.infra.ListVpcConnectionsResponse} returns this
  */
-proto.infra.ListVpcConnectionsResponse.prototype.setLastSyncTime = function(value) {
-  return jspb.Message.setProto3StringField(this, 2, value);
+proto.infra.ListVpcConnectionsResponse.prototype.clearNextTokenMap = function() {
+  this.getNextTokenMap().clear();
+  return this;
 };
 
 

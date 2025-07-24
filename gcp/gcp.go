@@ -20,6 +20,7 @@ package gcp
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	compute "cloud.google.com/go/compute/apiv1"
 	"cloud.google.com/go/compute/apiv1/computepb"
@@ -156,11 +157,6 @@ func (c *Client) ListInternetGateways(ctx context.Context, params *infrapb.ListI
 	return nil, nil
 }
 
-func (c *Client) ListVPCEndpoints(ctx context.Context, params *infrapb.ListVPCEndpointsRequest) ([]types.VPCEndpoint, error) {
-
-	return nil, nil
-}
-
 func (c *Client) GetVPCIndex(ctx context.Context, vpcIndex *infrapb.GetVPCIndexRequest) (*types.VPCIndex, error) {
 	// This logic is handled by the DB strategy.
 	return nil, fmt.Errorf("GetVPCIndex not implemented directly in GCP client; use DB strategy")
@@ -192,4 +188,70 @@ func (c *Client) GetInstanceConnectivityGraph(ctx context.Context, params *infra
 	// TODO: Implement logic to fetch instance, network, subnetwork, routes, firewalls
 	// and build the nodes and edges specific to GCP resources.
 	return nil, nil, fmt.Errorf("GetInstanceConnectivityGraph not implemented for GCP provider")
+}
+
+// ListVpcConnections implements provider.CloudProvider interface
+func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcConnectionsRequest) ([]types.VPCConnection, error) {
+	vpcConns := []types.VPCConnection{}
+
+	if c.networksClient == nil {
+		return nil, fmt.Errorf("networks client not initialized")
+	}
+
+	// List VPC Network Peering connections across all projects
+	for projectID := range c.projectIDs {
+		req := &computepb.ListNetworksRequest{
+			Project: projectID,
+		}
+
+		it := c.networksClient.List(ctx, req)
+		for {
+			vpc, err := it.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return nil, fmt.Errorf("failed to list VPC networks: %v", err)
+			}
+
+			if vpc.Peerings == nil {
+				continue
+			}
+
+			for _, peering := range vpc.Peerings {
+				if peering.Network == nil {
+					continue
+				}
+
+				// Extract project and network from the peering network name
+				// Format: projects/PROJECT_ID/global/networks/NETWORK_NAME
+				network := *peering.Network
+				parts := strings.Split(network, "/")
+				if len(parts) != 6 {
+					continue
+				}
+				remoteProject := parts[1]
+				remoteNetwork := parts[4]
+
+				vpcConn := types.VPCConnection{
+					Provider:         providerName,
+					ID:               *peering.Name,
+					Name:             *peering.Name,
+					Account:          projectID, // Using local project as primary
+					Region:           "global",  // VPC peering is global in GCP
+					FromVpcId:        *vpc.Name,
+					ToVpcId:          remoteNetwork,
+					FromVpcAccountId: projectID,
+					ToVpcAccountId:   remoteProject,
+					FromVpcRegion:    "global",
+					ToVpcRegion:      "global",
+					Status:           *peering.State,
+				}
+
+				vpcConns = append(vpcConns, vpcConn)
+			}
+		}
+	}
+
+	return vpcConns, nil
 }
