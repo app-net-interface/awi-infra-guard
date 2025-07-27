@@ -68,11 +68,20 @@ message AzureUserAuth {
     string certificate_path = 4; // Optional: Path to certificate file for certificate-based auth
 }
 
+message VmwareUserAuth {
+    string username = 1;        // vCenter username
+    string password = 2;        // vCenter password
+    string vcenter_url = 3;     // vCenter server URL
+    bool insecure = 4;         // Skip SSL verification
+    string datacenter = 5;      // Default datacenter
+}
+
 message UserBasedAuth {
     oneof user_auth {
         AwsUserAuth aws_user_auth = 1;
         GcpUserAuth gcp_user_auth = 2;
         AzureUserAuth azure_user_auth = 3;
+        VmwareUserAuth vmware_user_auth = 4;
     }
 }
 

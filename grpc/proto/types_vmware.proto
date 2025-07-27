@@ -1,0 +1,535 @@
+// Copyright (c) 2025 Cisco Systems, Inc. and its affiliates
+// All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http:www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+syntax = "proto3";
+package infra;
+
+option go_package = "./;infrapb";
+import "google/protobuf/timestamp.proto";
+
+// Base resource fields that all VMware resources should include
+message VmwareResource {
+    string id = 1;
+    string name = 2;
+    map<string, string> labels = 3;
+    string last_sync_time = 4;
+    string self_link = 5;
+    google.protobuf.Timestamp created_at = 6;
+    google.protobuf.Timestamp updated_at = 7;
+}
+
+// Authentication for VMware vCenter
+message VmwareAuth {
+    string username = 1;
+    string password = 2;
+    string vcenter_url = 3;
+    bool insecure = 4;          // Skip SSL verification
+    string datacenter = 5;      // Default datacenter
+}
+
+// VMware Instance (Virtual Machine)
+message Instance {
+    string id = 1;
+    string name = 2;
+    string host_id = 3;
+    string cluster_id = 4;
+    string datacenter_id = 5;
+    string resource_pool_id = 6;
+    repeated string datastore_ids = 7;
+    repeated string network_interface_ids = 8;
+    
+    // State
+    string power_state = 9;     // poweredOn, poweredOff, suspended
+    string overall_status = 10;  // green, yellow, red
+    
+    // Hardware
+    int32 num_cpu = 11;
+    int64 memory_mb = 12;
+    string hardware_version = 13;
+    
+    // Tools
+    string tools_status = 14;   // toolsOk, toolsOld, toolsNotInstalled
+    string tools_version = 15;
+    
+    // Template/Snapshot info
+    bool is_template = 16;
+    string template_id = 17;    // If created from template
+    repeated string snapshot_ids = 18;
+    
+    // Network
+    repeated string ip_addresses = 19;
+    
+    // Common fields
+    map<string, string> labels = 20;
+    map<string, string> custom_attributes = 21;
+    string last_sync_time = 22;
+    string self_link = 23;
+    google.protobuf.Timestamp created_at = 24;
+    google.protobuf.Timestamp updated_at = 25;
+}
+
+// Represents a vSphere datacenter
+message Datacenter {
+    string id = 1;
+    string name = 2;
+    string provider = 3;  // Always "vmware"
+    string vcenter_id = 4;  // ID/URL of the vCenter server
+    repeated string cluster_ids = 5;
+    repeated string network_ids = 6;  // Distributed switches and port groups
+    repeated string datastore_ids = 7;
+    map<string, string> labels = 8;
+    string last_sync_time = 9;
+    string self_link = 10;
+    google.protobuf.Timestamp created_at = 11;
+    google.protobuf.Timestamp updated_at = 12;
+}
+
+// Represents a vSphere cluster
+message Cluster {
+    string id = 1;
+    string name = 2;
+    string datacenter_id = 3;
+    repeated string host_ids = 4;
+    string resource_pool_id = 5;
+    
+    // DRS (Distributed Resource Scheduler) settings
+    bool drs_enabled = 6;
+    string drs_automation_level = 7;  // manual, partiallyAutomated, fullyAutomated
+    
+    // HA (High Availability) settings
+    bool ha_enabled = 8;
+    int32 ha_admission_control_policy = 9;
+    int32 ha_host_failures_to_tolerate = 10;
+    
+    // Resource management
+    message ResourceSettings {
+        int32 reservation = 1;
+        int32 limit = 2;
+        int32 shares_level = 3;  // low, normal, high, custom
+    }
+    ResourceSettings cpu_settings = 11;
+    ResourceSettings memory_settings = 12;
+    
+    map<string, string> labels = 13;
+    string last_sync_time = 14;
+    string self_link = 15;
+    google.protobuf.Timestamp created_at = 16;
+    google.protobuf.Timestamp updated_at = 17;
+}
+
+// Represents an ESXi host
+message Host {
+    string id = 1;
+    string name = 2;
+    string cluster_id = 3;
+    string datacenter_id = 4;
+    
+    // Hardware info
+    int32 cpu_cores = 5;
+    int64 memory_size = 6;  // in bytes
+    repeated string network_adapter_ids = 7;
+    
+    // Connection state
+    string connection_state = 8;  // connected, disconnected, notResponding
+    string power_state = 9;  // poweredOn, poweredOff, standBy
+    
+    // Resource usage
+    double cpu_usage = 10;  // percentage
+    double memory_usage = 11;  // percentage
+    
+    map<string, string> labels = 12;
+    string last_sync_time = 13;
+    string self_link = 14;
+    google.protobuf.Timestamp created_at = 15;
+    google.protobuf.Timestamp updated_at = 16;
+}
+
+// Represents a distributed virtual switch
+message DistributedSwitch {
+    string id = 1;
+    string name = 2;
+    string datacenter_id = 3;
+    repeated string portgroup_ids = 4;
+    repeated string host_ids = 5;  // Connected hosts
+    
+    int32 max_ports = 6;
+    string version = 7;
+    
+    // Network policies at switch level
+    message NetworkPolicy {
+        bool promiscuous_mode = 1;
+        bool mac_changes = 2;
+        bool forged_transmits = 3;
+    }
+    NetworkPolicy security_policy = 8;
+    
+    map<string, string> labels = 9;
+    string last_sync_time = 10;
+    string self_link = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
+}
+
+// Represents a port group on a distributed switch
+message PortGroup {
+    string id = 1;
+    string name = 2;
+    string switch_id = 3;  // ID of the distributed switch
+    string type = 4;  // earlyBinding, lateBinding, ephemeral
+    
+    // VLAN configuration
+    message VlanConfig {
+        string type = 1;  // none, vlan, trunkRange
+        int32 vlan_id = 2;
+        string trunk_range = 3;  // e.g., "1-1000,2000-3000"
+    }
+    VlanConfig vlan = 5;
+    
+    // Network policies that can override switch policies
+    message NetworkPolicy {
+        bool promiscuous_mode = 1;
+        bool mac_changes = 2;
+        bool forged_transmits = 3;
+        string shaping_enabled = 4;
+        int64 average_bandwidth = 5;
+        int64 peak_bandwidth = 6;
+        int64 burst_size = 7;
+    }
+    NetworkPolicy security_policy = 6;
+    
+    map<string, string> labels = 7;
+    string last_sync_time = 8;
+    string self_link = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+// Represents a datastore in vSphere
+message Datastore {
+    string id = 1;
+    string name = 2;
+    string datacenter_id = 3;
+    repeated string host_ids = 4;  // Connected hosts
+    
+    string type = 5;  // vmfs, nfs, vsan
+    int64 capacity = 6;  // Total capacity in bytes
+    int64 free_space = 7;  // Available space in bytes
+    bool accessible = 8;
+    
+    // Datastore cluster info if part of one
+    string datastore_cluster_id = 9;
+    
+    map<string, string> labels = 10;
+    string last_sync_time = 11;
+    string self_link = 12;
+    google.protobuf.Timestamp created_at = 13;
+    google.protobuf.Timestamp updated_at = 14;
+}
+
+// Represents a resource pool
+message ResourcePool {
+    string id = 1;
+    string name = 2;
+    string parent_id = 3;  // Can be cluster_id or another resource_pool_id
+    string datacenter_id = 4;
+    
+    message ResourceConfig {
+        int32 reservation = 1;
+        int32 limit = 2;
+        int32 shares = 3;
+        string shares_level = 4;  // low, normal, high, custom
+    }
+    ResourceConfig cpu = 5;
+    ResourceConfig memory = 6;
+    
+    map<string, string> labels = 7;
+    string last_sync_time = 8;
+    string self_link = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+// VMware-specific extensions to the common Instance type
+message VmwareInstanceProperties {
+    string host_id = 1;
+    string cluster_id = 2;
+    string datacenter_id = 3;
+    string resource_pool_id = 4;
+    repeated string datastore_ids = 5;
+    
+    string power_state = 6;  // poweredOn, poweredOff, suspended
+    string vm_tools_status = 7;
+    string vm_tools_version = 8;
+    
+    message HardwareConfig {
+        int32 num_cpu = 1;
+        int64 memory_mb = 2;
+        string vm_version = 3;
+    }
+    HardwareConfig hardware = 9;
+    
+    repeated string snapshot_ids = 10;
+    string template_id = 11;  // If VM was created from template
+    
+    map<string, string> custom_attributes = 12;
+}
+
+// VMware-specific extension for networking
+message VmwareNetworkProperties {
+    string portgroup_id = 1;
+    string distributed_switch_id = 2;
+    string adapter_type = 3;  // e.g., "vmxnet3", "e1000e"
+    bool connected = 4;
+    bool connect_at_power_on = 5;
+}
+
+// Network interface for a VM
+message NetworkInterface {
+    string id = 1;
+    string name = 2;
+    string instance_id = 3;
+    string portgroup_id = 4;
+    string distributed_switch_id = 5;
+    
+    // Hardware
+    string adapter_type = 6;    // vmxnet3, e1000e, etc.
+    string mac_address = 7;
+    
+    // State
+    bool connected = 8;
+    bool connect_at_power_on = 9;
+    
+    // IP Configuration
+    string ip_address = 10;
+    repeated string secondary_ips = 11;
+    repeated string dns_servers = 12;
+    
+    // Connectivity tracking
+    string parent_device_id = 13;   // ID of the parent device (instance, router, etc)
+    string parent_device_type = 14; // Type of the parent device
+    repeated string connected_to_ids = 15;    // IDs of directly connected interfaces
+    repeated string network_path_ids = 16;    // IDs of NetworkPaths this interface is part of
+    
+    // Common fields
+    map<string, string> labels = 17;
+    string last_sync_time = 18;
+    string self_link = 19;
+    google.protobuf.Timestamp created_at = 20;
+    google.protobuf.Timestamp updated_at = 21;
+}
+
+// Security policy for networks
+message SecurityPolicy {
+    string id = 1;
+    string name = 2;
+    string datacenter_id = 3;
+    
+    message Rule {
+        string name = 1;
+        bool enabled = 2;
+        string action = 3;      // ALLOW, DENY
+        repeated string source_addresses = 4;
+        repeated string destination_addresses = 5;
+        message Service {
+            string protocol = 1;
+            string port = 2;    // Can be single port or range
+        }
+        repeated Service services = 6;
+        int32 sequence_number = 7;
+    }
+    repeated Rule rules = 4;
+    
+    // Common fields
+    map<string, string> labels = 5;
+    string last_sync_time = 6;
+    string self_link = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+// VMware Virtual Disk
+message VirtualDisk {
+    string id = 1;
+    string name = 2;
+    string instance_id = 3;     // VM this disk belongs to
+    string datastore_id = 4;
+    int64 capacity_bytes = 5;
+    string disk_mode = 6;       // persistent, independent_persistent, independent_nonpersistent
+    string thin_provisioned = 7;
+    string disk_format = 8;     // e.g., vmdk
+    
+    // Common fields
+    map<string, string> labels = 9;
+    string last_sync_time = 10;
+    string self_link = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
+}
+
+// Storage Policy
+message StoragePolicy {
+    string id = 1;
+    string name = 2;
+    string datacenter_id = 3;
+    
+    message Rule {
+        string name = 1;
+        string capability_name = 2;   // e.g., "VSAN.hostFailuresToTolerate"
+        string value = 3;
+        bool mandatory = 4;
+    }
+    repeated Rule rules = 4;
+    
+    repeated string datastore_ids = 5;  // Compatible datastores
+    
+    // Common fields
+    map<string, string> labels = 6;
+    string last_sync_time = 7;
+    string self_link = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+}
+
+// Content Library
+message ContentLibrary {
+    string id = 1;
+    string name = 2;
+    string datacenter_id = 3;
+    string type = 4;           // local, subscribed
+    repeated string datastore_ids = 5;
+    
+    message Item {
+        string id = 1;
+        string name = 2;
+        string type = 3;       // ovf, iso, vm-template
+        int64 size = 4;
+        string last_modified = 5;
+    }
+    repeated Item items = 6;
+    
+    // Common fields
+    map<string, string> labels = 7;
+    string last_sync_time = 8;
+    string self_link = 9;
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+// Tags and Categories
+message Tag {
+    string id = 1;
+    string name = 2;
+    string category_id = 3;
+    string description = 4;
+    repeated string object_ids = 5;  // Objects this tag is attached to
+    
+    // Common fields
+    string last_sync_time = 6;
+    string self_link = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+message TagCategory {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    bool cardinality_multiple = 4;
+    repeated string associable_types = 5;  // e.g., "VirtualMachine", "Datastore"
+    
+    // Common fields
+    string last_sync_time = 6;
+    string self_link = 7;
+    google.protobuf.Timestamp created_at = 8;
+    google.protobuf.Timestamp updated_at = 9;
+}
+
+// NetworkTopology represents the overall network connectivity structure
+message NetworkTopology {
+    string id = 1;
+    string name = 2;
+    string datacenter_id = 3;
+    
+    // Network elements
+    repeated string distributed_switch_ids = 4;
+    repeated string portgroup_ids = 5;
+    repeated string instance_ids = 6;
+    repeated string router_ids = 7;
+    
+    // Paths and connections
+    repeated NetworkPath network_paths = 8;
+    
+    // Common fields
+    map<string, string> labels = 9;
+    string last_sync_time = 10;
+    string self_link = 11;
+    google.protobuf.Timestamp created_at = 12;
+    google.protobuf.Timestamp updated_at = 13;
+}
+
+// NetworkPath represents a network path between two endpoints
+message NetworkPath {
+    string id = 1;
+    string source_id = 2;      // ID of the source endpoint (instance, router, etc)
+    string source_type = 3;    // Type of the source (Instance, Router, Switch)
+    string target_id = 4;      // ID of the target endpoint
+    string target_type = 5;    // Type of the target
+    
+    // Path details
+    repeated string hop_ids = 6;        // Ordered list of intermediate network elements
+    repeated string hop_types = 7;      // Types of the hops (matching hop_ids)
+    
+    // Network details
+    repeated string portgroup_ids = 8;  // Port groups involved in the path
+    repeated string switch_ids = 9;     // Switches involved in the path
+    
+    // State
+    bool active = 10;          // Whether this path is currently active
+    int32 latency_ms = 11;     // Current latency if monitored
+    
+    // Common fields
+    map<string, string> labels = 12;
+    string last_sync_time = 13;
+    google.protobuf.Timestamp created_at = 14;
+    google.protobuf.Timestamp updated_at = 15;
+}
+
+// Router represents a virtual or physical router
+message Router {
+    string id = 1;
+    string name = 2;
+    string datacenter_id = 3;
+    
+    // Interfaces
+    repeated string network_interface_ids = 4;
+    
+    // Routing
+    message Route {
+        string destination_network = 1;
+        string next_hop = 2;
+        int32 cost = 3;
+        string interface_id = 4;
+    }
+    repeated Route routes = 5;
+    
+    // Common fields
+    map<string, string> labels = 6;
+    string last_sync_time = 7;
+    string self_link = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+}
