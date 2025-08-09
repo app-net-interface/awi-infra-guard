@@ -856,6 +856,49 @@ export class CloudProviderServiceClient {
     this.methodDescriptorListVPNConcentrators);
   }
 
+  methodDescriptorGetVPCConnection = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/GetVPCConnection',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.GetVpcConnectionRequest,
+    cloud_pb.GetVpcConnectionResponse,
+    (request: cloud_pb.GetVpcConnectionRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.GetVpcConnectionResponse.deserializeBinary
+  );
+
+  getVPCConnection(
+    request: cloud_pb.GetVpcConnectionRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.GetVpcConnectionResponse>;
+
+  getVPCConnection(
+    request: cloud_pb.GetVpcConnectionRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVpcConnectionResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.GetVpcConnectionResponse>;
+
+  getVPCConnection(
+    request: cloud_pb.GetVpcConnectionRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVpcConnectionResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/GetVPCConnection',
+        request,
+        metadata || {},
+        this.methodDescriptorGetVPCConnection,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/GetVPCConnection',
+    request,
+    metadata || {},
+    this.methodDescriptorGetVPCConnection);
+  }
+
   methodDescriptorListVpcConnections = new grpcWeb.MethodDescriptor(
     '/infra.CloudProviderService/ListVpcConnections',
     grpcWeb.MethodType.UNARY,
@@ -983,6 +1026,49 @@ export class CloudProviderServiceClient {
     request,
     metadata || {},
     this.methodDescriptorGetInstanceConnectivityGraph);
+  }
+
+  methodDescriptorGetVpcConnectionGraph = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/GetVpcConnectionGraph',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.GetVpcConnectionGraphRequest,
+    cloud_pb.GetVpcConnectionGraphResponse,
+    (request: cloud_pb.GetVpcConnectionGraphRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.GetVpcConnectionGraphResponse.deserializeBinary
+  );
+
+  getVpcConnectionGraph(
+    request: cloud_pb.GetVpcConnectionGraphRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.GetVpcConnectionGraphResponse>;
+
+  getVpcConnectionGraph(
+    request: cloud_pb.GetVpcConnectionGraphRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVpcConnectionGraphResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.GetVpcConnectionGraphResponse>;
+
+  getVpcConnectionGraph(
+    request: cloud_pb.GetVpcConnectionGraphRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVpcConnectionGraphResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/GetVpcConnectionGraph',
+        request,
+        metadata || {},
+        this.methodDescriptorGetVpcConnectionGraph,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/GetVpcConnectionGraph',
+    request,
+    metadata || {},
+    this.methodDescriptorGetVpcConnectionGraph);
   }
 
   methodDescriptorListVpcGraphNodes = new grpcWeb.MethodDescriptor(
@@ -1413,6 +1499,135 @@ export class CloudProviderServiceClient {
     request,
     metadata || {},
     this.methodDescriptorSearchResources);
+  }
+
+  methodDescriptorGetVPCSecurityAnalysis = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/GetVPCSecurityAnalysis',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.GetVPCSecurityAnalysisRequest,
+    cloud_pb.GetVPCSecurityAnalysisResponse,
+    (request: cloud_pb.GetVPCSecurityAnalysisRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.GetVPCSecurityAnalysisResponse.deserializeBinary
+  );
+
+  getVPCSecurityAnalysis(
+    request: cloud_pb.GetVPCSecurityAnalysisRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.GetVPCSecurityAnalysisResponse>;
+
+  getVPCSecurityAnalysis(
+    request: cloud_pb.GetVPCSecurityAnalysisRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVPCSecurityAnalysisResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.GetVPCSecurityAnalysisResponse>;
+
+  getVPCSecurityAnalysis(
+    request: cloud_pb.GetVPCSecurityAnalysisRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetVPCSecurityAnalysisResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/GetVPCSecurityAnalysis',
+        request,
+        metadata || {},
+        this.methodDescriptorGetVPCSecurityAnalysis,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/GetVPCSecurityAnalysis',
+    request,
+    metadata || {},
+    this.methodDescriptorGetVPCSecurityAnalysis);
+  }
+
+  methodDescriptorListSecurityFindings = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/ListSecurityFindings',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.ListSecurityFindingsRequest,
+    cloud_pb.ListSecurityFindingsResponse,
+    (request: cloud_pb.ListSecurityFindingsRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.ListSecurityFindingsResponse.deserializeBinary
+  );
+
+  listSecurityFindings(
+    request: cloud_pb.ListSecurityFindingsRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.ListSecurityFindingsResponse>;
+
+  listSecurityFindings(
+    request: cloud_pb.ListSecurityFindingsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListSecurityFindingsResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.ListSecurityFindingsResponse>;
+
+  listSecurityFindings(
+    request: cloud_pb.ListSecurityFindingsRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.ListSecurityFindingsResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/ListSecurityFindings',
+        request,
+        metadata || {},
+        this.methodDescriptorListSecurityFindings,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/ListSecurityFindings',
+    request,
+    metadata || {},
+    this.methodDescriptorListSecurityFindings);
+  }
+
+  methodDescriptorGetSecurityFinding = new grpcWeb.MethodDescriptor(
+    '/infra.CloudProviderService/GetSecurityFinding',
+    grpcWeb.MethodType.UNARY,
+    cloud_pb.GetSecurityFindingRequest,
+    cloud_pb.GetSecurityFindingResponse,
+    (request: cloud_pb.GetSecurityFindingRequest) => {
+      return request.serializeBinary();
+    },
+    cloud_pb.GetSecurityFindingResponse.deserializeBinary
+  );
+
+  getSecurityFinding(
+    request: cloud_pb.GetSecurityFindingRequest,
+    metadata: grpcWeb.Metadata | null): Promise<cloud_pb.GetSecurityFindingResponse>;
+
+  getSecurityFinding(
+    request: cloud_pb.GetSecurityFindingRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetSecurityFindingResponse) => void): grpcWeb.ClientReadableStream<cloud_pb.GetSecurityFindingResponse>;
+
+  getSecurityFinding(
+    request: cloud_pb.GetSecurityFindingRequest,
+    metadata: grpcWeb.Metadata | null,
+    callback?: (err: grpcWeb.RpcError,
+               response: cloud_pb.GetSecurityFindingResponse) => void) {
+    if (callback !== undefined) {
+      return this.client_.rpcCall(
+        this.hostname_ +
+          '/infra.CloudProviderService/GetSecurityFinding',
+        request,
+        metadata || {},
+        this.methodDescriptorGetSecurityFinding,
+        callback);
+    }
+    return this.client_.unaryCall(
+    this.hostname_ +
+      '/infra.CloudProviderService/GetSecurityFinding',
+    request,
+    metadata || {},
+    this.methodDescriptorGetSecurityFinding);
   }
 
 }

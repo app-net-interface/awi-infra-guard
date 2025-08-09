@@ -734,6 +734,40 @@ func (p *providerWithDB) GetVpcConnectivityGraph(ctx context.Context, params *in
 	return nodes, edges, nil
 }
 
+func (p *providerWithDB) GetVpcConnectivityGraph2(ctx context.Context, params *infrapb.GetVpcConnectivityGraphRequest) (*types.VpcInternalGraph, error) {
+	nodesReq := &infrapb.ListVpcGraphNodesRequest{
+		Provider:  params.Provider,
+		AccountId: params.AccountId,
+		Region:    params.Region,
+		VpcId:     params.VpcId,
+		Creds:     params.Creds,
+	}
+	nodes, err := p.ListVpcGraphNodes(ctx, nodesReq)
+	if err != nil {
+		p.logger.Errorf("Failed to list VPC graph nodes for graph request (VPC %s): %v", params.VpcId, err)
+		return nil, fmt.Errorf("failed to get nodes: %w", err)
+	}
+
+	edgesReq := &infrapb.ListVpcGraphEdgesRequest{
+		Provider:  params.Provider,
+		AccountId: params.AccountId,
+		Region:    params.Region,
+		VpcId:     params.VpcId,
+		Creds:     params.Creds,
+	}
+	edges, err := p.ListVpcGraphEdges(ctx, edgesReq)
+	if err != nil {
+		p.logger.Errorf("Failed to list VPC graph edges for graph request (VPC %s): %v", params.VpcId, err)
+		return nil, fmt.Errorf("failed to get edges: %w", err)
+	}
+	vpcGraph := &types.VpcInternalGraph{
+		Nodes: nodes,
+		Edges: edges,
+	}
+
+	return vpcGraph, nil
+}
+
 func (p *providerWithDB) GetInstanceConnectivityGraph(ctx context.Context, params *infrapb.GetInstanceConnectivityGraphRequest) ([]types.InstanceGraphNode, []types.InstanceGraphEdge, error) {
 	// Delegate to the graph building logic
 	return p.buildInstanceGraph(ctx, params)

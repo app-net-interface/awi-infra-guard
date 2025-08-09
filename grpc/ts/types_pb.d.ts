@@ -218,6 +218,40 @@ export namespace AzureUserAuth {
   }
 }
 
+export class VmwareUserAuth extends jspb.Message {
+  getUsername(): string;
+  setUsername(value: string): VmwareUserAuth;
+
+  getPassword(): string;
+  setPassword(value: string): VmwareUserAuth;
+
+  getVcenterUrl(): string;
+  setVcenterUrl(value: string): VmwareUserAuth;
+
+  getInsecure(): boolean;
+  setInsecure(value: boolean): VmwareUserAuth;
+
+  getDatacenter(): string;
+  setDatacenter(value: string): VmwareUserAuth;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VmwareUserAuth.AsObject;
+  static toObject(includeInstance: boolean, msg: VmwareUserAuth): VmwareUserAuth.AsObject;
+  static serializeBinaryToWriter(message: VmwareUserAuth, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VmwareUserAuth;
+  static deserializeBinaryFromReader(message: VmwareUserAuth, reader: jspb.BinaryReader): VmwareUserAuth;
+}
+
+export namespace VmwareUserAuth {
+  export type AsObject = {
+    username: string,
+    password: string,
+    vcenterUrl: string,
+    insecure: boolean,
+    datacenter: string,
+  }
+}
+
 export class UserBasedAuth extends jspb.Message {
   getAwsUserAuth(): AwsUserAuth | undefined;
   setAwsUserAuth(value?: AwsUserAuth): UserBasedAuth;
@@ -234,6 +268,11 @@ export class UserBasedAuth extends jspb.Message {
   hasAzureUserAuth(): boolean;
   clearAzureUserAuth(): UserBasedAuth;
 
+  getVmwareUserAuth(): VmwareUserAuth | undefined;
+  setVmwareUserAuth(value?: VmwareUserAuth): UserBasedAuth;
+  hasVmwareUserAuth(): boolean;
+  clearVmwareUserAuth(): UserBasedAuth;
+
   getUserAuthCase(): UserBasedAuth.UserAuthCase;
 
   serializeBinary(): Uint8Array;
@@ -249,6 +288,7 @@ export namespace UserBasedAuth {
     awsUserAuth?: AwsUserAuth.AsObject,
     gcpUserAuth?: GcpUserAuth.AsObject,
     azureUserAuth?: AzureUserAuth.AsObject,
+    vmwareUserAuth?: VmwareUserAuth.AsObject,
   }
 
   export enum UserAuthCase { 
@@ -256,6 +296,7 @@ export namespace UserBasedAuth {
     AWS_USER_AUTH = 1,
     GCP_USER_AUTH = 2,
     AZURE_USER_AUTH = 3,
+    VMWARE_USER_AUTH = 4,
   }
 }
 
@@ -524,6 +565,11 @@ export class VPCIndex extends jspb.Message {
   hasUpdatedAt(): boolean;
   clearUpdatedAt(): VPCIndex;
 
+  getSecurityRisks(): VPCSecurityRisks | undefined;
+  setSecurityRisks(value?: VPCSecurityRisks): VPCIndex;
+  hasSecurityRisks(): boolean;
+  clearSecurityRisks(): VPCIndex;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): VPCIndex.AsObject;
   static toObject(includeInstance: boolean, msg: VPCIndex): VPCIndex.AsObject;
@@ -556,6 +602,516 @@ export namespace VPCIndex {
     region: string,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    securityRisks?: VPCSecurityRisks.AsObject,
+  }
+}
+
+export class VPCSecurityRisks extends jspb.Message {
+  getCriticalInstanceIdsList(): Array<string>;
+  setCriticalInstanceIdsList(value: Array<string>): VPCSecurityRisks;
+  clearCriticalInstanceIdsList(): VPCSecurityRisks;
+  addCriticalInstanceIds(value: string, index?: number): VPCSecurityRisks;
+
+  getCriticalSecurityGroupIdsList(): Array<string>;
+  setCriticalSecurityGroupIdsList(value: Array<string>): VPCSecurityRisks;
+  clearCriticalSecurityGroupIdsList(): VPCSecurityRisks;
+  addCriticalSecurityGroupIds(value: string, index?: number): VPCSecurityRisks;
+
+  getCriticalLbIdsList(): Array<string>;
+  setCriticalLbIdsList(value: Array<string>): VPCSecurityRisks;
+  clearCriticalLbIdsList(): VPCSecurityRisks;
+  addCriticalLbIds(value: string, index?: number): VPCSecurityRisks;
+
+  getHighRiskInstanceIdsList(): Array<string>;
+  setHighRiskInstanceIdsList(value: Array<string>): VPCSecurityRisks;
+  clearHighRiskInstanceIdsList(): VPCSecurityRisks;
+  addHighRiskInstanceIds(value: string, index?: number): VPCSecurityRisks;
+
+  getHighRiskSecurityGroupIdsList(): Array<string>;
+  setHighRiskSecurityGroupIdsList(value: Array<string>): VPCSecurityRisks;
+  clearHighRiskSecurityGroupIdsList(): VPCSecurityRisks;
+  addHighRiskSecurityGroupIds(value: string, index?: number): VPCSecurityRisks;
+
+  getHighRiskSubnetIdsList(): Array<string>;
+  setHighRiskSubnetIdsList(value: Array<string>): VPCSecurityRisks;
+  clearHighRiskSubnetIdsList(): VPCSecurityRisks;
+  addHighRiskSubnetIds(value: string, index?: number): VPCSecurityRisks;
+
+  getMediumRiskInstanceIdsList(): Array<string>;
+  setMediumRiskInstanceIdsList(value: Array<string>): VPCSecurityRisks;
+  clearMediumRiskInstanceIdsList(): VPCSecurityRisks;
+  addMediumRiskInstanceIds(value: string, index?: number): VPCSecurityRisks;
+
+  getMediumRiskSecurityGroupIdsList(): Array<string>;
+  setMediumRiskSecurityGroupIdsList(value: Array<string>): VPCSecurityRisks;
+  clearMediumRiskSecurityGroupIdsList(): VPCSecurityRisks;
+  addMediumRiskSecurityGroupIds(value: string, index?: number): VPCSecurityRisks;
+
+  getMediumRiskAclIdsList(): Array<string>;
+  setMediumRiskAclIdsList(value: Array<string>): VPCSecurityRisks;
+  clearMediumRiskAclIdsList(): VPCSecurityRisks;
+  addMediumRiskAclIds(value: string, index?: number): VPCSecurityRisks;
+
+  getUntaggedInstanceIdsList(): Array<string>;
+  setUntaggedInstanceIdsList(value: Array<string>): VPCSecurityRisks;
+  clearUntaggedInstanceIdsList(): VPCSecurityRisks;
+  addUntaggedInstanceIds(value: string, index?: number): VPCSecurityRisks;
+
+  getUntaggedSecurityGroupIdsList(): Array<string>;
+  setUntaggedSecurityGroupIdsList(value: Array<string>): VPCSecurityRisks;
+  clearUntaggedSecurityGroupIdsList(): VPCSecurityRisks;
+  addUntaggedSecurityGroupIds(value: string, index?: number): VPCSecurityRisks;
+
+  getUntaggedSubnetIdsList(): Array<string>;
+  setUntaggedSubnetIdsList(value: Array<string>): VPCSecurityRisks;
+  clearUntaggedSubnetIdsList(): VPCSecurityRisks;
+  addUntaggedSubnetIds(value: string, index?: number): VPCSecurityRisks;
+
+  getUntaggedLbIdsList(): Array<string>;
+  setUntaggedLbIdsList(value: Array<string>): VPCSecurityRisks;
+  clearUntaggedLbIdsList(): VPCSecurityRisks;
+  addUntaggedLbIds(value: string, index?: number): VPCSecurityRisks;
+
+  getIsolatedSubnetIdsList(): Array<string>;
+  setIsolatedSubnetIdsList(value: Array<string>): VPCSecurityRisks;
+  clearIsolatedSubnetIdsList(): VPCSecurityRisks;
+  addIsolatedSubnetIds(value: string, index?: number): VPCSecurityRisks;
+
+  getOverExposedSubnetIdsList(): Array<string>;
+  setOverExposedSubnetIdsList(value: Array<string>): VPCSecurityRisks;
+  clearOverExposedSubnetIdsList(): VPCSecurityRisks;
+  addOverExposedSubnetIds(value: string, index?: number): VPCSecurityRisks;
+
+  getLastRiskAnalysis(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setLastRiskAnalysis(value?: google_protobuf_timestamp_pb.Timestamp): VPCSecurityRisks;
+  hasLastRiskAnalysis(): boolean;
+  clearLastRiskAnalysis(): VPCSecurityRisks;
+
+  getRiskAnalysisVersion(): string;
+  setRiskAnalysisVersion(value: string): VPCSecurityRisks;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VPCSecurityRisks.AsObject;
+  static toObject(includeInstance: boolean, msg: VPCSecurityRisks): VPCSecurityRisks.AsObject;
+  static serializeBinaryToWriter(message: VPCSecurityRisks, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VPCSecurityRisks;
+  static deserializeBinaryFromReader(message: VPCSecurityRisks, reader: jspb.BinaryReader): VPCSecurityRisks;
+}
+
+export namespace VPCSecurityRisks {
+  export type AsObject = {
+    criticalInstanceIdsList: Array<string>,
+    criticalSecurityGroupIdsList: Array<string>,
+    criticalLbIdsList: Array<string>,
+    highRiskInstanceIdsList: Array<string>,
+    highRiskSecurityGroupIdsList: Array<string>,
+    highRiskSubnetIdsList: Array<string>,
+    mediumRiskInstanceIdsList: Array<string>,
+    mediumRiskSecurityGroupIdsList: Array<string>,
+    mediumRiskAclIdsList: Array<string>,
+    untaggedInstanceIdsList: Array<string>,
+    untaggedSecurityGroupIdsList: Array<string>,
+    untaggedSubnetIdsList: Array<string>,
+    untaggedLbIdsList: Array<string>,
+    isolatedSubnetIdsList: Array<string>,
+    overExposedSubnetIdsList: Array<string>,
+    lastRiskAnalysis?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    riskAnalysisVersion: string,
+  }
+}
+
+export class VPCSecurityAnalysis extends jspb.Message {
+  getVpcId(): string;
+  setVpcId(value: string): VPCSecurityAnalysis;
+
+  getProvider(): string;
+  setProvider(value: string): VPCSecurityAnalysis;
+
+  getAccountId(): string;
+  setAccountId(value: string): VPCSecurityAnalysis;
+
+  getRegion(): string;
+  setRegion(value: string): VPCSecurityAnalysis;
+
+  getFindingsList(): Array<SecurityFinding>;
+  setFindingsList(value: Array<SecurityFinding>): VPCSecurityAnalysis;
+  clearFindingsList(): VPCSecurityAnalysis;
+  addFindings(value?: SecurityFinding, index?: number): SecurityFinding;
+
+  getCriticalFindingsCount(): number;
+  setCriticalFindingsCount(value: number): VPCSecurityAnalysis;
+
+  getHighFindingsCount(): number;
+  setHighFindingsCount(value: number): VPCSecurityAnalysis;
+
+  getMediumFindingsCount(): number;
+  setMediumFindingsCount(value: number): VPCSecurityAnalysis;
+
+  getLowFindingsCount(): number;
+  setLowFindingsCount(value: number): VPCSecurityAnalysis;
+
+  getRiskScore(): number;
+  setRiskScore(value: number): VPCSecurityAnalysis;
+
+  getLastAnalyzed(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setLastAnalyzed(value?: google_protobuf_timestamp_pb.Timestamp): VPCSecurityAnalysis;
+  hasLastAnalyzed(): boolean;
+  clearLastAnalyzed(): VPCSecurityAnalysis;
+
+  getAnalysisVersion(): string;
+  setAnalysisVersion(value: string): VPCSecurityAnalysis;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VPCSecurityAnalysis.AsObject;
+  static toObject(includeInstance: boolean, msg: VPCSecurityAnalysis): VPCSecurityAnalysis.AsObject;
+  static serializeBinaryToWriter(message: VPCSecurityAnalysis, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VPCSecurityAnalysis;
+  static deserializeBinaryFromReader(message: VPCSecurityAnalysis, reader: jspb.BinaryReader): VPCSecurityAnalysis;
+}
+
+export namespace VPCSecurityAnalysis {
+  export type AsObject = {
+    vpcId: string,
+    provider: string,
+    accountId: string,
+    region: string,
+    findingsList: Array<SecurityFinding.AsObject>,
+    criticalFindingsCount: number,
+    highFindingsCount: number,
+    mediumFindingsCount: number,
+    lowFindingsCount: number,
+    riskScore: number,
+    lastAnalyzed?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    analysisVersion: string,
+  }
+}
+
+export class SecurityFinding extends jspb.Message {
+  getId(): string;
+  setId(value: string): SecurityFinding;
+
+  getResourceId(): string;
+  setResourceId(value: string): SecurityFinding;
+
+  getResourceType(): string;
+  setResourceType(value: string): SecurityFinding;
+
+  getRiskLevel(): SecurityFinding.RiskLevel;
+  setRiskLevel(value: SecurityFinding.RiskLevel): SecurityFinding;
+
+  getFindingType(): SecurityFinding.FindingType;
+  setFindingType(value: SecurityFinding.FindingType): SecurityFinding;
+
+  getTitle(): string;
+  setTitle(value: string): SecurityFinding;
+
+  getDescription(): string;
+  setDescription(value: string): SecurityFinding;
+
+  getRemediation(): string;
+  setRemediation(value: string): SecurityFinding;
+
+  getRelatedResourceIdsList(): Array<string>;
+  setRelatedResourceIdsList(value: Array<string>): SecurityFinding;
+  clearRelatedResourceIdsList(): SecurityFinding;
+  addRelatedResourceIds(value: string, index?: number): SecurityFinding;
+
+  getFindingDetailsMap(): jspb.Map<string, string>;
+  clearFindingDetailsMap(): SecurityFinding;
+
+  getDetectedAt(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setDetectedAt(value?: google_protobuf_timestamp_pb.Timestamp): SecurityFinding;
+  hasDetectedAt(): boolean;
+  clearDetectedAt(): SecurityFinding;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SecurityFinding.AsObject;
+  static toObject(includeInstance: boolean, msg: SecurityFinding): SecurityFinding.AsObject;
+  static serializeBinaryToWriter(message: SecurityFinding, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SecurityFinding;
+  static deserializeBinaryFromReader(message: SecurityFinding, reader: jspb.BinaryReader): SecurityFinding;
+}
+
+export namespace SecurityFinding {
+  export type AsObject = {
+    id: string,
+    resourceId: string,
+    resourceType: string,
+    riskLevel: SecurityFinding.RiskLevel,
+    findingType: SecurityFinding.FindingType,
+    title: string,
+    description: string,
+    remediation: string,
+    relatedResourceIdsList: Array<string>,
+    findingDetailsMap: Array<[string, string]>,
+    detectedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+
+  export enum RiskLevel { 
+    RISK_LEVEL_UNSPECIFIED = 0,
+    LOW = 1,
+    MEDIUM = 2,
+    HIGH = 3,
+    CRITICAL = 4,
+  }
+
+  export enum FindingType { 
+    FINDING_TYPE_UNSPECIFIED = 0,
+    OPEN_SSH_ACCESS = 1,
+    OPEN_RDP_ACCESS = 2,
+    OPEN_DATABASE_ACCESS = 3,
+    OVERLY_PERMISSIVE_SG = 4,
+    PUBLIC_INSTANCE_NO_TAGS = 5,
+    INTERNET_FACING_LB_RISKY_BACKEND = 6,
+    CROSS_SUBNET_EXPOSURE = 7,
+    UNUSED_SECURITY_GROUP = 8,
+    UNENCRYPTED_STORAGE = 9,
+    WEAK_NETWORK_ACL = 10,
+  }
+}
+
+export class InstanceSecurityStatus extends jspb.Message {
+  getOverallRiskLevel(): InstanceSecurityStatus.RiskLevel;
+  setOverallRiskLevel(value: InstanceSecurityStatus.RiskLevel): InstanceSecurityStatus;
+
+  getIsPubliclyAccessible(): boolean;
+  setIsPubliclyAccessible(value: boolean): InstanceSecurityStatus;
+
+  getHasOpenSshAccess(): boolean;
+  setHasOpenSshAccess(value: boolean): InstanceSecurityStatus;
+
+  getHasOpenRdpAccess(): boolean;
+  setHasOpenRdpAccess(value: boolean): InstanceSecurityStatus;
+
+  getHasOpenDatabasePorts(): boolean;
+  setHasOpenDatabasePorts(value: boolean): InstanceSecurityStatus;
+
+  getIsUntagged(): boolean;
+  setIsUntagged(value: boolean): InstanceSecurityStatus;
+
+  getHasOverlyPermissiveSg(): boolean;
+  setHasOverlyPermissiveSg(value: boolean): InstanceSecurityStatus;
+
+  getRiskSummaryList(): Array<string>;
+  setRiskSummaryList(value: Array<string>): InstanceSecurityStatus;
+  clearRiskSummaryList(): InstanceSecurityStatus;
+  addRiskSummary(value: string, index?: number): InstanceSecurityStatus;
+
+  getExposedPortsList(): Array<string>;
+  setExposedPortsList(value: Array<string>): InstanceSecurityStatus;
+  clearExposedPortsList(): InstanceSecurityStatus;
+  addExposedPorts(value: string, index?: number): InstanceSecurityStatus;
+
+  getRiskySecurityGroupsList(): Array<string>;
+  setRiskySecurityGroupsList(value: Array<string>): InstanceSecurityStatus;
+  clearRiskySecurityGroupsList(): InstanceSecurityStatus;
+  addRiskySecurityGroups(value: string, index?: number): InstanceSecurityStatus;
+
+  getRecommendationsList(): Array<string>;
+  setRecommendationsList(value: Array<string>): InstanceSecurityStatus;
+  clearRecommendationsList(): InstanceSecurityStatus;
+  addRecommendations(value: string, index?: number): InstanceSecurityStatus;
+
+  getLastAssessed(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setLastAssessed(value?: google_protobuf_timestamp_pb.Timestamp): InstanceSecurityStatus;
+  hasLastAssessed(): boolean;
+  clearLastAssessed(): InstanceSecurityStatus;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): InstanceSecurityStatus.AsObject;
+  static toObject(includeInstance: boolean, msg: InstanceSecurityStatus): InstanceSecurityStatus.AsObject;
+  static serializeBinaryToWriter(message: InstanceSecurityStatus, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): InstanceSecurityStatus;
+  static deserializeBinaryFromReader(message: InstanceSecurityStatus, reader: jspb.BinaryReader): InstanceSecurityStatus;
+}
+
+export namespace InstanceSecurityStatus {
+  export type AsObject = {
+    overallRiskLevel: InstanceSecurityStatus.RiskLevel,
+    isPubliclyAccessible: boolean,
+    hasOpenSshAccess: boolean,
+    hasOpenRdpAccess: boolean,
+    hasOpenDatabasePorts: boolean,
+    isUntagged: boolean,
+    hasOverlyPermissiveSg: boolean,
+    riskSummaryList: Array<string>,
+    exposedPortsList: Array<string>,
+    riskySecurityGroupsList: Array<string>,
+    recommendationsList: Array<string>,
+    lastAssessed?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+
+  export enum RiskLevel { 
+    RISK_LEVEL_UNSPECIFIED = 0,
+    SECURE = 1,
+    LOW_RISK = 2,
+    MEDIUM_RISK = 3,
+    HIGH_RISK = 4,
+    CRITICAL_RISK = 5,
+  }
+}
+
+export class SecurityGroupRiskStatus extends jspb.Message {
+  getOverallRiskLevel(): SecurityGroupRiskStatus.RiskLevel;
+  setOverallRiskLevel(value: SecurityGroupRiskStatus.RiskLevel): SecurityGroupRiskStatus;
+
+  getAllowsSshFromInternet(): boolean;
+  setAllowsSshFromInternet(value: boolean): SecurityGroupRiskStatus;
+
+  getAllowsRdpFromInternet(): boolean;
+  setAllowsRdpFromInternet(value: boolean): SecurityGroupRiskStatus;
+
+  getAllowsDatabaseFromInternet(): boolean;
+  setAllowsDatabaseFromInternet(value: boolean): SecurityGroupRiskStatus;
+
+  getHasWidePortRanges(): boolean;
+  setHasWidePortRanges(value: boolean): SecurityGroupRiskStatus;
+
+  getIsUnused(): boolean;
+  setIsUnused(value: boolean): SecurityGroupRiskStatus;
+
+  getIsUntagged(): boolean;
+  setIsUntagged(value: boolean): SecurityGroupRiskStatus;
+
+  getRiskyRulesList(): Array<string>;
+  setRiskyRulesList(value: Array<string>): SecurityGroupRiskStatus;
+  clearRiskyRulesList(): SecurityGroupRiskStatus;
+  addRiskyRules(value: string, index?: number): SecurityGroupRiskStatus;
+
+  getAffectedInstancesList(): Array<string>;
+  setAffectedInstancesList(value: Array<string>): SecurityGroupRiskStatus;
+  clearAffectedInstancesList(): SecurityGroupRiskStatus;
+  addAffectedInstances(value: string, index?: number): SecurityGroupRiskStatus;
+
+  getAttachedInstanceCount(): number;
+  setAttachedInstanceCount(value: number): SecurityGroupRiskStatus;
+
+  getRecommendationsList(): Array<string>;
+  setRecommendationsList(value: Array<string>): SecurityGroupRiskStatus;
+  clearRecommendationsList(): SecurityGroupRiskStatus;
+  addRecommendations(value: string, index?: number): SecurityGroupRiskStatus;
+
+  getLastAssessed(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setLastAssessed(value?: google_protobuf_timestamp_pb.Timestamp): SecurityGroupRiskStatus;
+  hasLastAssessed(): boolean;
+  clearLastAssessed(): SecurityGroupRiskStatus;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SecurityGroupRiskStatus.AsObject;
+  static toObject(includeInstance: boolean, msg: SecurityGroupRiskStatus): SecurityGroupRiskStatus.AsObject;
+  static serializeBinaryToWriter(message: SecurityGroupRiskStatus, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SecurityGroupRiskStatus;
+  static deserializeBinaryFromReader(message: SecurityGroupRiskStatus, reader: jspb.BinaryReader): SecurityGroupRiskStatus;
+}
+
+export namespace SecurityGroupRiskStatus {
+  export type AsObject = {
+    overallRiskLevel: SecurityGroupRiskStatus.RiskLevel,
+    allowsSshFromInternet: boolean,
+    allowsRdpFromInternet: boolean,
+    allowsDatabaseFromInternet: boolean,
+    hasWidePortRanges: boolean,
+    isUnused: boolean,
+    isUntagged: boolean,
+    riskyRulesList: Array<string>,
+    affectedInstancesList: Array<string>,
+    attachedInstanceCount: number,
+    recommendationsList: Array<string>,
+    lastAssessed?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+
+  export enum RiskLevel { 
+    RISK_LEVEL_UNSPECIFIED = 0,
+    SECURE = 1,
+    LOW_RISK = 2,
+    MEDIUM_RISK = 3,
+    HIGH_RISK = 4,
+    CRITICAL_RISK = 5,
+  }
+}
+
+export class LoadBalancerSecurityStatus extends jspb.Message {
+  getOverallRiskLevel(): LoadBalancerSecurityStatus.RiskLevel;
+  setOverallRiskLevel(value: LoadBalancerSecurityStatus.RiskLevel): LoadBalancerSecurityStatus;
+
+  getIsInternetFacing(): boolean;
+  setIsInternetFacing(value: boolean): LoadBalancerSecurityStatus;
+
+  getHasRiskyBackendInstances(): boolean;
+  setHasRiskyBackendInstances(value: boolean): LoadBalancerSecurityStatus;
+
+  getHasInsecureListeners(): boolean;
+  setHasInsecureListeners(value: boolean): LoadBalancerSecurityStatus;
+
+  getIsUntagged(): boolean;
+  setIsUntagged(value: boolean): LoadBalancerSecurityStatus;
+
+  getHasOverlyPermissiveSg(): boolean;
+  setHasOverlyPermissiveSg(value: boolean): LoadBalancerSecurityStatus;
+
+  getTotalBackendInstances(): number;
+  setTotalBackendInstances(value: number): LoadBalancerSecurityStatus;
+
+  getRiskyBackendInstances(): number;
+  setRiskyBackendInstances(value: number): LoadBalancerSecurityStatus;
+
+  getRiskyBackendInstanceIdsList(): Array<string>;
+  setRiskyBackendInstanceIdsList(value: Array<string>): LoadBalancerSecurityStatus;
+  clearRiskyBackendInstanceIdsList(): LoadBalancerSecurityStatus;
+  addRiskyBackendInstanceIds(value: string, index?: number): LoadBalancerSecurityStatus;
+
+  getInsecureListenersList(): Array<string>;
+  setInsecureListenersList(value: Array<string>): LoadBalancerSecurityStatus;
+  clearInsecureListenersList(): LoadBalancerSecurityStatus;
+  addInsecureListeners(value: string, index?: number): LoadBalancerSecurityStatus;
+
+  getSecurityGroupIssuesList(): Array<string>;
+  setSecurityGroupIssuesList(value: Array<string>): LoadBalancerSecurityStatus;
+  clearSecurityGroupIssuesList(): LoadBalancerSecurityStatus;
+  addSecurityGroupIssues(value: string, index?: number): LoadBalancerSecurityStatus;
+
+  getRecommendationsList(): Array<string>;
+  setRecommendationsList(value: Array<string>): LoadBalancerSecurityStatus;
+  clearRecommendationsList(): LoadBalancerSecurityStatus;
+  addRecommendations(value: string, index?: number): LoadBalancerSecurityStatus;
+
+  getLastAssessed(): google_protobuf_timestamp_pb.Timestamp | undefined;
+  setLastAssessed(value?: google_protobuf_timestamp_pb.Timestamp): LoadBalancerSecurityStatus;
+  hasLastAssessed(): boolean;
+  clearLastAssessed(): LoadBalancerSecurityStatus;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): LoadBalancerSecurityStatus.AsObject;
+  static toObject(includeInstance: boolean, msg: LoadBalancerSecurityStatus): LoadBalancerSecurityStatus.AsObject;
+  static serializeBinaryToWriter(message: LoadBalancerSecurityStatus, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): LoadBalancerSecurityStatus;
+  static deserializeBinaryFromReader(message: LoadBalancerSecurityStatus, reader: jspb.BinaryReader): LoadBalancerSecurityStatus;
+}
+
+export namespace LoadBalancerSecurityStatus {
+  export type AsObject = {
+    overallRiskLevel: LoadBalancerSecurityStatus.RiskLevel,
+    isInternetFacing: boolean,
+    hasRiskyBackendInstances: boolean,
+    hasInsecureListeners: boolean,
+    isUntagged: boolean,
+    hasOverlyPermissiveSg: boolean,
+    totalBackendInstances: number,
+    riskyBackendInstances: number,
+    riskyBackendInstanceIdsList: Array<string>,
+    insecureListenersList: Array<string>,
+    securityGroupIssuesList: Array<string>,
+    recommendationsList: Array<string>,
+    lastAssessed?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+  }
+
+  export enum RiskLevel { 
+    RISK_LEVEL_UNSPECIFIED = 0,
+    SECURE = 1,
+    LOW_RISK = 2,
+    MEDIUM_RISK = 3,
+    HIGH_RISK = 4,
+    CRITICAL_RISK = 5,
   }
 }
 
@@ -628,6 +1184,11 @@ export class Instance extends jspb.Message {
   getSelfLink(): string;
   setSelfLink(value: string): Instance;
 
+  getSecurityStatus(): InstanceSecurityStatus | undefined;
+  setSecurityStatus(value?: InstanceSecurityStatus): Instance;
+  hasSecurityStatus(): boolean;
+  clearSecurityStatus(): Instance;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Instance.AsObject;
   static toObject(includeInstance: boolean, msg: Instance): Instance.AsObject;
@@ -658,6 +1219,7 @@ export namespace Instance {
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     lastSyncTime: string,
     selfLink: string,
+    securityStatus?: InstanceSecurityStatus.AsObject,
   }
 }
 
@@ -917,6 +1479,11 @@ export class SecurityGroup extends jspb.Message {
   hasUpdatedAt(): boolean;
   clearUpdatedAt(): SecurityGroup;
 
+  getRiskStatus(): SecurityGroupRiskStatus | undefined;
+  setRiskStatus(value?: SecurityGroupRiskStatus): SecurityGroup;
+  hasRiskStatus(): boolean;
+  clearRiskStatus(): SecurityGroup;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): SecurityGroup.AsObject;
   static toObject(includeInstance: boolean, msg: SecurityGroup): SecurityGroup.AsObject;
@@ -941,6 +1508,7 @@ export namespace SecurityGroup {
     attachedRunningInstancesList: Array<string>,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    riskStatus?: SecurityGroupRiskStatus.AsObject,
   }
 
   export class SecurityGroupRule extends jspb.Message {
@@ -1665,6 +2233,11 @@ export class LB extends jspb.Message {
   hasUpdatedAt(): boolean;
   clearUpdatedAt(): LB;
 
+  getSecurityStatus(): LoadBalancerSecurityStatus | undefined;
+  setSecurityStatus(value?: LoadBalancerSecurityStatus): LB;
+  hasSecurityStatus(): boolean;
+  clearSecurityStatus(): LB;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): LB.AsObject;
   static toObject(includeInstance: boolean, msg: LB): LB.AsObject;
@@ -1703,6 +2276,7 @@ export namespace LB {
     selfLink: string,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
     updatedAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    securityStatus?: LoadBalancerSecurityStatus.AsObject,
   }
 
   export class Listener extends jspb.Message {
@@ -2455,6 +3029,348 @@ export namespace VpcConnection {
     TRANSIT_GATEWAY_DETAILS = 14,
     VPC_ENDPOINT_DETAILS = 15,
     TRANSIT_VPC_DETAILS = 16,
+  }
+}
+
+export class VpcInternalGraph extends jspb.Message {
+  getConnectionsList(): Array<VpcConnection>;
+  setConnectionsList(value: Array<VpcConnection>): VpcInternalGraph;
+  clearConnectionsList(): VpcInternalGraph;
+  addConnections(value?: VpcConnection, index?: number): VpcConnection;
+
+  getNodesList(): Array<VpcGraphNode>;
+  setNodesList(value: Array<VpcGraphNode>): VpcInternalGraph;
+  clearNodesList(): VpcInternalGraph;
+  addNodes(value?: VpcGraphNode, index?: number): VpcGraphNode;
+
+  getEdgesList(): Array<VpcGraphEdge>;
+  setEdgesList(value: Array<VpcGraphEdge>): VpcInternalGraph;
+  clearEdgesList(): VpcInternalGraph;
+  addEdges(value?: VpcGraphEdge, index?: number): VpcGraphEdge;
+
+  getAccountId(): string;
+  setAccountId(value: string): VpcInternalGraph;
+
+  getRegion(): string;
+  setRegion(value: string): VpcInternalGraph;
+
+  getProvider(): string;
+  setProvider(value: string): VpcInternalGraph;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): VpcInternalGraph;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): VpcInternalGraph;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcInternalGraph.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcInternalGraph): VpcInternalGraph.AsObject;
+  static serializeBinaryToWriter(message: VpcInternalGraph, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcInternalGraph;
+  static deserializeBinaryFromReader(message: VpcInternalGraph, reader: jspb.BinaryReader): VpcInternalGraph;
+}
+
+export namespace VpcInternalGraph {
+  export type AsObject = {
+    connectionsList: Array<VpcConnection.AsObject>,
+    nodesList: Array<VpcGraphNode.AsObject>,
+    edgesList: Array<VpcGraphEdge.AsObject>,
+    accountId: string,
+    region: string,
+    provider: string,
+    labelsMap: Array<[string, string]>,
+    lastSyncTime: string,
+  }
+}
+
+export class VpcConnectionGraph extends jspb.Message {
+  getNodesList(): Array<VpcConnectionGraphNode>;
+  setNodesList(value: Array<VpcConnectionGraphNode>): VpcConnectionGraph;
+  clearNodesList(): VpcConnectionGraph;
+  addNodes(value?: VpcConnectionGraphNode, index?: number): VpcConnectionGraphNode;
+
+  getEdgesList(): Array<VpcConnectionGraphEdge>;
+  setEdgesList(value: Array<VpcConnectionGraphEdge>): VpcConnectionGraph;
+  clearEdgesList(): VpcConnectionGraph;
+  addEdges(value?: VpcConnectionGraphEdge, index?: number): VpcConnectionGraphEdge;
+
+  getSrcVpcGraph(): VpcInternalGraph | undefined;
+  setSrcVpcGraph(value?: VpcInternalGraph): VpcConnectionGraph;
+  hasSrcVpcGraph(): boolean;
+  clearSrcVpcGraph(): VpcConnectionGraph;
+
+  getDestVpcGraph(): VpcInternalGraph | undefined;
+  setDestVpcGraph(value?: VpcInternalGraph): VpcConnectionGraph;
+  hasDestVpcGraph(): boolean;
+  clearDestVpcGraph(): VpcConnectionGraph;
+
+  getAccountId(): string;
+  setAccountId(value: string): VpcConnectionGraph;
+
+  getRegion(): string;
+  setRegion(value: string): VpcConnectionGraph;
+
+  getProvider(): string;
+  setProvider(value: string): VpcConnectionGraph;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): VpcConnectionGraph;
+
+  getLastSyncTime(): string;
+  setLastSyncTime(value: string): VpcConnectionGraph;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcConnectionGraph.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcConnectionGraph): VpcConnectionGraph.AsObject;
+  static serializeBinaryToWriter(message: VpcConnectionGraph, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcConnectionGraph;
+  static deserializeBinaryFromReader(message: VpcConnectionGraph, reader: jspb.BinaryReader): VpcConnectionGraph;
+}
+
+export namespace VpcConnectionGraph {
+  export type AsObject = {
+    nodesList: Array<VpcConnectionGraphNode.AsObject>,
+    edgesList: Array<VpcConnectionGraphEdge.AsObject>,
+    srcVpcGraph?: VpcInternalGraph.AsObject,
+    destVpcGraph?: VpcInternalGraph.AsObject,
+    accountId: string,
+    region: string,
+    provider: string,
+    labelsMap: Array<[string, string]>,
+    lastSyncTime: string,
+  }
+}
+
+export class VpcConnectionGraphNode extends jspb.Message {
+  getId(): string;
+  setId(value: string): VpcConnectionGraphNode;
+
+  getName(): string;
+  setName(value: string): VpcConnectionGraphNode;
+
+  getNodeType(): VpcConnectionGraphNode.NodeType;
+  setNodeType(value: VpcConnectionGraphNode.NodeType): VpcConnectionGraphNode;
+
+  getVpc(): VPC | undefined;
+  setVpc(value?: VPC): VpcConnectionGraphNode;
+  hasVpc(): boolean;
+  clearVpc(): VpcConnectionGraphNode;
+
+  getTgw(): TransitGatewayDetails | undefined;
+  setTgw(value?: TransitGatewayDetails): VpcConnectionGraphNode;
+  hasTgw(): boolean;
+  clearTgw(): VpcConnectionGraphNode;
+
+  getEndpoint(): VPCEndpoint | undefined;
+  setEndpoint(value?: VPCEndpoint): VpcConnectionGraphNode;
+  hasEndpoint(): boolean;
+  clearEndpoint(): VpcConnectionGraphNode;
+
+  getAccountId(): string;
+  setAccountId(value: string): VpcConnectionGraphNode;
+
+  getRegion(): string;
+  setRegion(value: string): VpcConnectionGraphNode;
+
+  getProvider(): string;
+  setProvider(value: string): VpcConnectionGraphNode;
+
+  getPropertiesMap(): jspb.Map<string, string>;
+  clearPropertiesMap(): VpcConnectionGraphNode;
+
+  getLabelsMap(): jspb.Map<string, string>;
+  clearLabelsMap(): VpcConnectionGraphNode;
+
+  getTypePropertiesCase(): VpcConnectionGraphNode.TypePropertiesCase;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcConnectionGraphNode.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcConnectionGraphNode): VpcConnectionGraphNode.AsObject;
+  static serializeBinaryToWriter(message: VpcConnectionGraphNode, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcConnectionGraphNode;
+  static deserializeBinaryFromReader(message: VpcConnectionGraphNode, reader: jspb.BinaryReader): VpcConnectionGraphNode;
+}
+
+export namespace VpcConnectionGraphNode {
+  export type AsObject = {
+    id: string,
+    name: string,
+    nodeType: VpcConnectionGraphNode.NodeType,
+    vpc?: VPC.AsObject,
+    tgw?: TransitGatewayDetails.AsObject,
+    endpoint?: VPCEndpoint.AsObject,
+    accountId: string,
+    region: string,
+    provider: string,
+    propertiesMap: Array<[string, string]>,
+    labelsMap: Array<[string, string]>,
+  }
+
+  export enum NodeType { 
+    NODE_TYPE_UNSPECIFIED = 0,
+    VPC = 1,
+    TRANSIT_GATEWAY = 2,
+    VPC_ENDPOINT = 3,
+    TRANSIT_VPC = 4,
+    INTERNET_GATEWAY = 5,
+    VPN_GATEWAY = 6,
+    NAT_GATEWAY = 7,
+  }
+
+  export enum TypePropertiesCase { 
+    TYPE_PROPERTIES_NOT_SET = 0,
+    VPC = 4,
+    TGW = 5,
+    ENDPOINT = 6,
+  }
+}
+
+export class VpcConnectionGraphEdge extends jspb.Message {
+  getId(): string;
+  setId(value: string): VpcConnectionGraphEdge;
+
+  getSourceNodeId(): string;
+  setSourceNodeId(value: string): VpcConnectionGraphEdge;
+
+  getTargetNodeId(): string;
+  setTargetNodeId(value: string): VpcConnectionGraphEdge;
+
+  getConnectionType(): VpcConnectionType;
+  setConnectionType(value: VpcConnectionType): VpcConnectionGraphEdge;
+
+  getPeeringDetails(): VpcPeeringConnectionDetails | undefined;
+  setPeeringDetails(value?: VpcPeeringConnectionDetails): VpcConnectionGraphEdge;
+  hasPeeringDetails(): boolean;
+  clearPeeringDetails(): VpcConnectionGraphEdge;
+
+  getTransitGatewayDetails(): TransitGatewayConnectionDetails | undefined;
+  setTransitGatewayDetails(value?: TransitGatewayConnectionDetails): VpcConnectionGraphEdge;
+  hasTransitGatewayDetails(): boolean;
+  clearTransitGatewayDetails(): VpcConnectionGraphEdge;
+
+  getEndpointDetails(): VpcEndpointConnectionDetails | undefined;
+  setEndpointDetails(value?: VpcEndpointConnectionDetails): VpcConnectionGraphEdge;
+  hasEndpointDetails(): boolean;
+  clearEndpointDetails(): VpcConnectionGraphEdge;
+
+  getTransitVpcDetails(): TransitVpcConnectionDetails | undefined;
+  setTransitVpcDetails(value?: TransitVpcConnectionDetails): VpcConnectionGraphEdge;
+  hasTransitVpcDetails(): boolean;
+  clearTransitVpcDetails(): VpcConnectionGraphEdge;
+
+  getStatus(): string;
+  setStatus(value: string): VpcConnectionGraphEdge;
+
+  getBidirectional(): boolean;
+  setBidirectional(value: boolean): VpcConnectionGraphEdge;
+
+  getAccountId(): string;
+  setAccountId(value: string): VpcConnectionGraphEdge;
+
+  getRegion(): string;
+  setRegion(value: string): VpcConnectionGraphEdge;
+
+  getProvider(): string;
+  setProvider(value: string): VpcConnectionGraphEdge;
+
+  getRouteTableIdsList(): Array<string>;
+  setRouteTableIdsList(value: Array<string>): VpcConnectionGraphEdge;
+  clearRouteTableIdsList(): VpcConnectionGraphEdge;
+  addRouteTableIds(value: string, index?: number): VpcConnectionGraphEdge;
+
+  getPropertiesMap(): jspb.Map<string, string>;
+  clearPropertiesMap(): VpcConnectionGraphEdge;
+
+  getConnectionDetailsCase(): VpcConnectionGraphEdge.ConnectionDetailsCase;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): VpcConnectionGraphEdge.AsObject;
+  static toObject(includeInstance: boolean, msg: VpcConnectionGraphEdge): VpcConnectionGraphEdge.AsObject;
+  static serializeBinaryToWriter(message: VpcConnectionGraphEdge, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): VpcConnectionGraphEdge;
+  static deserializeBinaryFromReader(message: VpcConnectionGraphEdge, reader: jspb.BinaryReader): VpcConnectionGraphEdge;
+}
+
+export namespace VpcConnectionGraphEdge {
+  export type AsObject = {
+    id: string,
+    sourceNodeId: string,
+    targetNodeId: string,
+    connectionType: VpcConnectionType,
+    peeringDetails?: VpcPeeringConnectionDetails.AsObject,
+    transitGatewayDetails?: TransitGatewayConnectionDetails.AsObject,
+    endpointDetails?: VpcEndpointConnectionDetails.AsObject,
+    transitVpcDetails?: TransitVpcConnectionDetails.AsObject,
+    status: string,
+    bidirectional: boolean,
+    accountId: string,
+    region: string,
+    provider: string,
+    routeTableIdsList: Array<string>,
+    propertiesMap: Array<[string, string]>,
+  }
+
+  export enum ConnectionDetailsCase { 
+    CONNECTION_DETAILS_NOT_SET = 0,
+    PEERING_DETAILS = 5,
+    TRANSIT_GATEWAY_DETAILS = 6,
+    ENDPOINT_DETAILS = 7,
+    TRANSIT_VPC_DETAILS = 8,
+  }
+}
+
+export class TransitGatewayDetails extends jspb.Message {
+  getTransitGatewayId(): string;
+  setTransitGatewayId(value: string): TransitGatewayDetails;
+
+  getAttachmentIdsList(): Array<string>;
+  setAttachmentIdsList(value: Array<string>): TransitGatewayDetails;
+  clearAttachmentIdsList(): TransitGatewayDetails;
+  addAttachmentIds(value: string, index?: number): TransitGatewayDetails;
+
+  getRouteTableIdsList(): Array<string>;
+  setRouteTableIdsList(value: Array<string>): TransitGatewayDetails;
+  clearRouteTableIdsList(): TransitGatewayDetails;
+  addRouteTableIds(value: string, index?: number): TransitGatewayDetails;
+
+  getState(): string;
+  setState(value: string): TransitGatewayDetails;
+
+  getAsn(): number;
+  setAsn(value: number): TransitGatewayDetails;
+
+  getPropertiesMap(): jspb.Map<string, string>;
+  clearPropertiesMap(): TransitGatewayDetails;
+
+  getAccountId(): string;
+  setAccountId(value: string): TransitGatewayDetails;
+
+  getRegion(): string;
+  setRegion(value: string): TransitGatewayDetails;
+
+  getProvider(): string;
+  setProvider(value: string): TransitGatewayDetails;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): TransitGatewayDetails.AsObject;
+  static toObject(includeInstance: boolean, msg: TransitGatewayDetails): TransitGatewayDetails.AsObject;
+  static serializeBinaryToWriter(message: TransitGatewayDetails, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): TransitGatewayDetails;
+  static deserializeBinaryFromReader(message: TransitGatewayDetails, reader: jspb.BinaryReader): TransitGatewayDetails;
+}
+
+export namespace TransitGatewayDetails {
+  export type AsObject = {
+    transitGatewayId: string,
+    attachmentIdsList: Array<string>,
+    routeTableIdsList: Array<string>,
+    state: string,
+    asn: number,
+    propertiesMap: Array<[string, string]>,
+    accountId: string,
+    region: string,
+    provider: string,
   }
 }
 

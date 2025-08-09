@@ -55,9 +55,11 @@ const (
 	CloudProviderService_ListNetworkInterfaces_FullMethodName        = "/infra.CloudProviderService/ListNetworkInterfaces"
 	CloudProviderService_ListKeyPairs_FullMethodName                 = "/infra.CloudProviderService/ListKeyPairs"
 	CloudProviderService_ListVPNConcentrators_FullMethodName         = "/infra.CloudProviderService/ListVPNConcentrators"
+	CloudProviderService_GetVPCConnection_FullMethodName             = "/infra.CloudProviderService/GetVPCConnection"
 	CloudProviderService_ListVpcConnections_FullMethodName           = "/infra.CloudProviderService/ListVpcConnections"
 	CloudProviderService_GetVpcConnectivityGraph_FullMethodName      = "/infra.CloudProviderService/GetVpcConnectivityGraph"
 	CloudProviderService_GetInstanceConnectivityGraph_FullMethodName = "/infra.CloudProviderService/GetInstanceConnectivityGraph"
+	CloudProviderService_GetVpcConnectionGraph_FullMethodName        = "/infra.CloudProviderService/GetVpcConnectionGraph"
 	CloudProviderService_ListVpcGraphNodes_FullMethodName            = "/infra.CloudProviderService/ListVpcGraphNodes"
 	CloudProviderService_ListVpcGraphEdges_FullMethodName            = "/infra.CloudProviderService/ListVpcGraphEdges"
 	CloudProviderService_GetVPCIDForCIDR_FullMethodName              = "/infra.CloudProviderService/GetVPCIDForCIDR"
@@ -68,6 +70,9 @@ const (
 	CloudProviderService_ListCloudClusters_FullMethodName            = "/infra.CloudProviderService/ListCloudClusters"
 	CloudProviderService_Summary_FullMethodName                      = "/infra.CloudProviderService/Summary"
 	CloudProviderService_SearchResources_FullMethodName              = "/infra.CloudProviderService/SearchResources"
+	CloudProviderService_GetVPCSecurityAnalysis_FullMethodName       = "/infra.CloudProviderService/GetVPCSecurityAnalysis"
+	CloudProviderService_ListSecurityFindings_FullMethodName         = "/infra.CloudProviderService/ListSecurityFindings"
+	CloudProviderService_GetSecurityFinding_FullMethodName           = "/infra.CloudProviderService/GetSecurityFinding"
 )
 
 // CloudProviderServiceClient is the client API for CloudProviderService service.
@@ -96,11 +101,15 @@ type CloudProviderServiceClient interface {
 	ListKeyPairs(ctx context.Context, in *ListKeyPairsRequest, opts ...grpc.CallOption) (*ListKeyPairsResponse, error)
 	ListVPNConcentrators(ctx context.Context, in *ListVPNConcentratorsRequest, opts ...grpc.CallOption) (*ListVPNConcentratorsResponse, error)
 	// New RPC for listing VPC to VPC connections
+	GetVPCConnection(ctx context.Context, in *GetVpcConnectionRequest, opts ...grpc.CallOption) (*GetVpcConnectionResponse, error)
+	// New RPC for listing VPC to VPC connections
 	ListVpcConnections(ctx context.Context, in *ListVpcConnectionsRequest, opts ...grpc.CallOption) (*ListVpcConnectionsResponse, error)
-	// New RPC for getting VPC connectivity graph
+	// Retrieves the full connectivity graph for a VPC
 	GetVpcConnectivityGraph(ctx context.Context, in *GetVpcConnectivityGraphRequest, opts ...grpc.CallOption) (*GetVpcConnectivityGraphResponse, error)
 	// Retrieves the connectivity graph focused on a specific instance
 	GetInstanceConnectivityGraph(ctx context.Context, in *GetInstanceConnectivityGraphRequest, opts ...grpc.CallOption) (*GetInstanceConnectivityGraphResponse, error)
+	// Retrieves connectivity graph for two connected VPC
+	GetVpcConnectionGraph(ctx context.Context, in *GetVpcConnectionGraphRequest, opts ...grpc.CallOption) (*GetVpcConnectionGraphResponse, error)
 	// New RPCs for getting nodes and edges separately
 	ListVpcGraphNodes(ctx context.Context, in *ListVpcGraphNodesRequest, opts ...grpc.CallOption) (*ListVpcGraphNodesResponse, error)
 	ListVpcGraphEdges(ctx context.Context, in *ListVpcGraphEdgesRequest, opts ...grpc.CallOption) (*ListVpcGraphEdgesResponse, error)
@@ -113,6 +122,10 @@ type CloudProviderServiceClient interface {
 	ListCloudClusters(ctx context.Context, in *ListCloudClustersRequest, opts ...grpc.CallOption) (*ListCloudClustersResponse, error)
 	Summary(ctx context.Context, in *SummaryRequest, opts ...grpc.CallOption) (*SummaryResponse, error)
 	SearchResources(ctx context.Context, in *SearchResourcesRequest, opts ...grpc.CallOption) (*SearchResourcesResponse, error)
+	// Security Analysis APIs - for drill-down into risky resources
+	GetVPCSecurityAnalysis(ctx context.Context, in *GetVPCSecurityAnalysisRequest, opts ...grpc.CallOption) (*GetVPCSecurityAnalysisResponse, error)
+	ListSecurityFindings(ctx context.Context, in *ListSecurityFindingsRequest, opts ...grpc.CallOption) (*ListSecurityFindingsResponse, error)
+	GetSecurityFinding(ctx context.Context, in *GetSecurityFindingRequest, opts ...grpc.CallOption) (*GetSecurityFindingResponse, error)
 }
 
 type cloudProviderServiceClient struct {
@@ -313,6 +326,16 @@ func (c *cloudProviderServiceClient) ListVPNConcentrators(ctx context.Context, i
 	return out, nil
 }
 
+func (c *cloudProviderServiceClient) GetVPCConnection(ctx context.Context, in *GetVpcConnectionRequest, opts ...grpc.CallOption) (*GetVpcConnectionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetVpcConnectionResponse)
+	err := c.cc.Invoke(ctx, CloudProviderService_GetVPCConnection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cloudProviderServiceClient) ListVpcConnections(ctx context.Context, in *ListVpcConnectionsRequest, opts ...grpc.CallOption) (*ListVpcConnectionsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListVpcConnectionsResponse)
@@ -337,6 +360,16 @@ func (c *cloudProviderServiceClient) GetInstanceConnectivityGraph(ctx context.Co
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetInstanceConnectivityGraphResponse)
 	err := c.cc.Invoke(ctx, CloudProviderService_GetInstanceConnectivityGraph_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cloudProviderServiceClient) GetVpcConnectionGraph(ctx context.Context, in *GetVpcConnectionGraphRequest, opts ...grpc.CallOption) (*GetVpcConnectionGraphResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetVpcConnectionGraphResponse)
+	err := c.cc.Invoke(ctx, CloudProviderService_GetVpcConnectionGraph_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -443,6 +476,36 @@ func (c *cloudProviderServiceClient) SearchResources(ctx context.Context, in *Se
 	return out, nil
 }
 
+func (c *cloudProviderServiceClient) GetVPCSecurityAnalysis(ctx context.Context, in *GetVPCSecurityAnalysisRequest, opts ...grpc.CallOption) (*GetVPCSecurityAnalysisResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetVPCSecurityAnalysisResponse)
+	err := c.cc.Invoke(ctx, CloudProviderService_GetVPCSecurityAnalysis_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cloudProviderServiceClient) ListSecurityFindings(ctx context.Context, in *ListSecurityFindingsRequest, opts ...grpc.CallOption) (*ListSecurityFindingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSecurityFindingsResponse)
+	err := c.cc.Invoke(ctx, CloudProviderService_ListSecurityFindings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cloudProviderServiceClient) GetSecurityFinding(ctx context.Context, in *GetSecurityFindingRequest, opts ...grpc.CallOption) (*GetSecurityFindingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSecurityFindingResponse)
+	err := c.cc.Invoke(ctx, CloudProviderService_GetSecurityFinding_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CloudProviderServiceServer is the server API for CloudProviderService service.
 // All implementations must embed UnimplementedCloudProviderServiceServer
 // for forward compatibility
@@ -469,11 +532,15 @@ type CloudProviderServiceServer interface {
 	ListKeyPairs(context.Context, *ListKeyPairsRequest) (*ListKeyPairsResponse, error)
 	ListVPNConcentrators(context.Context, *ListVPNConcentratorsRequest) (*ListVPNConcentratorsResponse, error)
 	// New RPC for listing VPC to VPC connections
+	GetVPCConnection(context.Context, *GetVpcConnectionRequest) (*GetVpcConnectionResponse, error)
+	// New RPC for listing VPC to VPC connections
 	ListVpcConnections(context.Context, *ListVpcConnectionsRequest) (*ListVpcConnectionsResponse, error)
-	// New RPC for getting VPC connectivity graph
+	// Retrieves the full connectivity graph for a VPC
 	GetVpcConnectivityGraph(context.Context, *GetVpcConnectivityGraphRequest) (*GetVpcConnectivityGraphResponse, error)
 	// Retrieves the connectivity graph focused on a specific instance
 	GetInstanceConnectivityGraph(context.Context, *GetInstanceConnectivityGraphRequest) (*GetInstanceConnectivityGraphResponse, error)
+	// Retrieves connectivity graph for two connected VPC
+	GetVpcConnectionGraph(context.Context, *GetVpcConnectionGraphRequest) (*GetVpcConnectionGraphResponse, error)
 	// New RPCs for getting nodes and edges separately
 	ListVpcGraphNodes(context.Context, *ListVpcGraphNodesRequest) (*ListVpcGraphNodesResponse, error)
 	ListVpcGraphEdges(context.Context, *ListVpcGraphEdgesRequest) (*ListVpcGraphEdgesResponse, error)
@@ -486,6 +553,10 @@ type CloudProviderServiceServer interface {
 	ListCloudClusters(context.Context, *ListCloudClustersRequest) (*ListCloudClustersResponse, error)
 	Summary(context.Context, *SummaryRequest) (*SummaryResponse, error)
 	SearchResources(context.Context, *SearchResourcesRequest) (*SearchResourcesResponse, error)
+	// Security Analysis APIs - for drill-down into risky resources
+	GetVPCSecurityAnalysis(context.Context, *GetVPCSecurityAnalysisRequest) (*GetVPCSecurityAnalysisResponse, error)
+	ListSecurityFindings(context.Context, *ListSecurityFindingsRequest) (*ListSecurityFindingsResponse, error)
+	GetSecurityFinding(context.Context, *GetSecurityFindingRequest) (*GetSecurityFindingResponse, error)
 	mustEmbedUnimplementedCloudProviderServiceServer()
 }
 
@@ -550,6 +621,9 @@ func (UnimplementedCloudProviderServiceServer) ListKeyPairs(context.Context, *Li
 func (UnimplementedCloudProviderServiceServer) ListVPNConcentrators(context.Context, *ListVPNConcentratorsRequest) (*ListVPNConcentratorsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVPNConcentrators not implemented")
 }
+func (UnimplementedCloudProviderServiceServer) GetVPCConnection(context.Context, *GetVpcConnectionRequest) (*GetVpcConnectionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVPCConnection not implemented")
+}
 func (UnimplementedCloudProviderServiceServer) ListVpcConnections(context.Context, *ListVpcConnectionsRequest) (*ListVpcConnectionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVpcConnections not implemented")
 }
@@ -558,6 +632,9 @@ func (UnimplementedCloudProviderServiceServer) GetVpcConnectivityGraph(context.C
 }
 func (UnimplementedCloudProviderServiceServer) GetInstanceConnectivityGraph(context.Context, *GetInstanceConnectivityGraphRequest) (*GetInstanceConnectivityGraphResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInstanceConnectivityGraph not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) GetVpcConnectionGraph(context.Context, *GetVpcConnectionGraphRequest) (*GetVpcConnectionGraphResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVpcConnectionGraph not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) ListVpcGraphNodes(context.Context, *ListVpcGraphNodesRequest) (*ListVpcGraphNodesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVpcGraphNodes not implemented")
@@ -588,6 +665,15 @@ func (UnimplementedCloudProviderServiceServer) Summary(context.Context, *Summary
 }
 func (UnimplementedCloudProviderServiceServer) SearchResources(context.Context, *SearchResourcesRequest) (*SearchResourcesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchResources not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) GetVPCSecurityAnalysis(context.Context, *GetVPCSecurityAnalysisRequest) (*GetVPCSecurityAnalysisResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVPCSecurityAnalysis not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) ListSecurityFindings(context.Context, *ListSecurityFindingsRequest) (*ListSecurityFindingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSecurityFindings not implemented")
+}
+func (UnimplementedCloudProviderServiceServer) GetSecurityFinding(context.Context, *GetSecurityFindingRequest) (*GetSecurityFindingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSecurityFinding not implemented")
 }
 func (UnimplementedCloudProviderServiceServer) mustEmbedUnimplementedCloudProviderServiceServer() {}
 
@@ -944,6 +1030,24 @@ func _CloudProviderService_ListVPNConcentrators_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudProviderService_GetVPCConnection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVpcConnectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).GetVPCConnection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudProviderService_GetVPCConnection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).GetVPCConnection(ctx, req.(*GetVpcConnectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CloudProviderService_ListVpcConnections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListVpcConnectionsRequest)
 	if err := dec(in); err != nil {
@@ -994,6 +1098,24 @@ func _CloudProviderService_GetInstanceConnectivityGraph_Handler(srv interface{},
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CloudProviderServiceServer).GetInstanceConnectivityGraph(ctx, req.(*GetInstanceConnectivityGraphRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CloudProviderService_GetVpcConnectionGraph_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVpcConnectionGraphRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).GetVpcConnectionGraph(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudProviderService_GetVpcConnectionGraph_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).GetVpcConnectionGraph(ctx, req.(*GetVpcConnectionGraphRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1178,6 +1300,60 @@ func _CloudProviderService_SearchResources_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CloudProviderService_GetVPCSecurityAnalysis_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetVPCSecurityAnalysisRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).GetVPCSecurityAnalysis(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudProviderService_GetVPCSecurityAnalysis_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).GetVPCSecurityAnalysis(ctx, req.(*GetVPCSecurityAnalysisRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CloudProviderService_ListSecurityFindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSecurityFindingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).ListSecurityFindings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudProviderService_ListSecurityFindings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).ListSecurityFindings(ctx, req.(*ListSecurityFindingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CloudProviderService_GetSecurityFinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSecurityFindingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CloudProviderServiceServer).GetSecurityFinding(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CloudProviderService_GetSecurityFinding_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CloudProviderServiceServer).GetSecurityFinding(ctx, req.(*GetSecurityFindingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CloudProviderService_ServiceDesc is the grpc.ServiceDesc for CloudProviderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1262,6 +1438,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CloudProviderService_ListVPNConcentrators_Handler,
 		},
 		{
+			MethodName: "GetVPCConnection",
+			Handler:    _CloudProviderService_GetVPCConnection_Handler,
+		},
+		{
 			MethodName: "ListVpcConnections",
 			Handler:    _CloudProviderService_ListVpcConnections_Handler,
 		},
@@ -1272,6 +1452,10 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetInstanceConnectivityGraph",
 			Handler:    _CloudProviderService_GetInstanceConnectivityGraph_Handler,
+		},
+		{
+			MethodName: "GetVpcConnectionGraph",
+			Handler:    _CloudProviderService_GetVpcConnectionGraph_Handler,
 		},
 		{
 			MethodName: "ListVpcGraphNodes",
@@ -1312,6 +1496,18 @@ var CloudProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchResources",
 			Handler:    _CloudProviderService_SearchResources_Handler,
+		},
+		{
+			MethodName: "GetVPCSecurityAnalysis",
+			Handler:    _CloudProviderService_GetVPCSecurityAnalysis_Handler,
+		},
+		{
+			MethodName: "ListSecurityFindings",
+			Handler:    _CloudProviderService_ListSecurityFindings_Handler,
+		},
+		{
+			MethodName: "GetSecurityFinding",
+			Handler:    _CloudProviderService_GetSecurityFinding_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

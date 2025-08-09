@@ -120,6 +120,12 @@ func (c *Client) GetVpcConnectivityGraph(ctx context.Context, params *infrapb.Ge
 	return nil, nil, fmt.Errorf("GetVpcConnectivityGraph not implemented directly in Azure client; use DB strategy")
 }
 
+// Update placeholder implementation for GetVpcConnectionGraph
+func (c *Client) GetVpcConnectionGraph(ctx context.Context, params *infrapb.GetVpcConnectionGraphRequest) (*types.VpcConnectionGraph, error) {
+	// This logic is handled by the DB strategy.
+	return nil, fmt.Errorf("GetVpcConnectionGraph not implemented directly in AWS client; use DB strategy")
+}
+
 // GetInstanceConnectivityGraph is a placeholder implementation.
 func (c *Client) GetInstanceConnectivityGraph(ctx context.Context, params *infrapb.GetInstanceConnectivityGraphRequest) ([]types.InstanceGraphNode, []types.InstanceGraphEdge, error) {
 	c.logger.Infof("GetInstanceConnectivityGraph called for Azure VM %s (Not Implemented)", params.InstanceId)

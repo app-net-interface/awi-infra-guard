@@ -185,6 +185,29 @@ func (s *Server) GetVpcConnectivityGraph(ctx context.Context, in *infrapb.GetVpc
 	}, nil
 }
 
+func (s *Server) GetVpcConnectionGraph(ctx context.Context, in *infrapb.GetVpcConnectionGraphRequest) (*infrapb.GetVpcConnectionGraphResponse, error) {
+	cloudProvider, err := s.strategy.GetProvider(ctx, in.Provider)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get provider: %w", err)
+	}
+
+	graph, err := cloudProvider.GetVpcConnectionGraph(ctx, in)
+	if err != nil {
+		return &infrapb.GetVpcConnectionGraphResponse{
+			Err: &infrapb.Error{
+				Code:         500,
+				ErrorMessage: err.Error(),
+				Serverity:    "ERROR",
+			},
+		}, nil
+	}
+
+	grpcGraph := typesVpcConnectionGraphToGrpc(graph)
+	return &infrapb.GetVpcConnectionGraphResponse{
+		VpcConnectionGraph: grpcGraph,
+	}, nil
+}
+
 func (s *Server) ListInstances(ctx context.Context, in *infrapb.ListInstancesRequest) (*infrapb.ListInstancesResponse, error) {
 	var errorMessage string
 

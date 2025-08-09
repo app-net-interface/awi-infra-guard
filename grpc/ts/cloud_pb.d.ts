@@ -1373,6 +1373,73 @@ export namespace ListVPNConcentratorsResponse {
   }
 }
 
+export class GetVpcConnectionRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): GetVpcConnectionRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): GetVpcConnectionRequest;
+
+  getRegion(): string;
+  setRegion(value: string): GetVpcConnectionRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): GetVpcConnectionRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetVpcConnectionRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetVpcConnectionRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVpcConnectionRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVpcConnectionRequest): GetVpcConnectionRequest.AsObject;
+  static serializeBinaryToWriter(message: GetVpcConnectionRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVpcConnectionRequest;
+  static deserializeBinaryFromReader(message: GetVpcConnectionRequest, reader: jspb.BinaryReader): GetVpcConnectionRequest;
+}
+
+export namespace GetVpcConnectionRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 5,
+  }
+}
+
+export class GetVpcConnectionResponse extends jspb.Message {
+  getConnection(): types_pb.VpcConnection | undefined;
+  setConnection(value?: types_pb.VpcConnection): GetVpcConnectionResponse;
+  hasConnection(): boolean;
+  clearConnection(): GetVpcConnectionResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetVpcConnectionResponse;
+  hasErr(): boolean;
+  clearErr(): GetVpcConnectionResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVpcConnectionResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVpcConnectionResponse): GetVpcConnectionResponse.AsObject;
+  static serializeBinaryToWriter(message: GetVpcConnectionResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVpcConnectionResponse;
+  static deserializeBinaryFromReader(message: GetVpcConnectionResponse, reader: jspb.BinaryReader): GetVpcConnectionResponse;
+}
+
+export namespace GetVpcConnectionResponse {
+  export type AsObject = {
+    connection?: types_pb.VpcConnection.AsObject,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
 export class ListVpcConnectionsRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): ListVpcConnectionsRequest;
@@ -1950,6 +2017,21 @@ export class Counters extends jspb.Message {
   getInternetGateways(): number;
   setInternetGateways(value: number): Counters;
 
+  getLoadBalancers(): number;
+  setLoadBalancers(value: number): Counters;
+
+  getNetworkInterfaces(): number;
+  setNetworkInterfaces(value: number): Counters;
+
+  getKeyPairs(): number;
+  setKeyPairs(value: number): Counters;
+
+  getVpcConnections(): number;
+  setVpcConnections(value: number): Counters;
+
+  getVpnConcentrators(): number;
+  setVpnConcentrators(value: number): Counters;
+
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Counters.AsObject;
   static toObject(includeInstance: boolean, msg: Counters): Counters.AsObject;
@@ -1977,6 +2059,11 @@ export namespace Counters {
     vpcEndpoints: number,
     publicIps: number,
     internetGateways: number,
+    loadBalancers: number,
+    networkInterfaces: number,
+    keyPairs: number,
+    vpcConnections: number,
+    vpnConcentrators: number,
   }
 }
 
@@ -1989,6 +2076,15 @@ export class StatusSummary extends jspb.Message {
 
   getVmTypesMap(): jspb.Map<string, number>;
   clearVmTypesMap(): StatusSummary;
+
+  getLbTypesMap(): jspb.Map<string, number>;
+  clearLbTypesMap(): StatusSummary;
+
+  getRegionDistributionMap(): jspb.Map<string, number>;
+  clearRegionDistributionMap(): StatusSummary;
+
+  getHealthStatusMap(): jspb.Map<string, number>;
+  clearHealthStatusMap(): StatusSummary;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): StatusSummary.AsObject;
@@ -2003,6 +2099,107 @@ export namespace StatusSummary {
     vmStatusMap: Array<[string, number]>,
     podStatusMap: Array<[string, number]>,
     vmTypesMap: Array<[string, number]>,
+    lbTypesMap: Array<[string, number]>,
+    regionDistributionMap: Array<[string, number]>,
+    healthStatusMap: Array<[string, number]>,
+  }
+}
+
+export class SecuritySummary extends jspb.Message {
+  getOpenSecurityGroups(): number;
+  setOpenSecurityGroups(value: number): SecuritySummary;
+
+  getUnrestrictedAcls(): number;
+  setUnrestrictedAcls(value: number): SecuritySummary;
+
+  getUntaggedResources(): number;
+  setUntaggedResources(value: number): SecuritySummary;
+
+  getPubliclyAccessibleResources(): number;
+  setPubliclyAccessibleResources(value: number): SecuritySummary;
+
+  getUnencryptedResources(): number;
+  setUnencryptedResources(value: number): SecuritySummary;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): SecuritySummary.AsObject;
+  static toObject(includeInstance: boolean, msg: SecuritySummary): SecuritySummary.AsObject;
+  static serializeBinaryToWriter(message: SecuritySummary, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): SecuritySummary;
+  static deserializeBinaryFromReader(message: SecuritySummary, reader: jspb.BinaryReader): SecuritySummary;
+}
+
+export namespace SecuritySummary {
+  export type AsObject = {
+    openSecurityGroups: number,
+    unrestrictedAcls: number,
+    untaggedResources: number,
+    publiclyAccessibleResources: number,
+    unencryptedResources: number,
+  }
+}
+
+export class NetworkTopologySummary extends jspb.Message {
+  getIsolatedVpcs(): number;
+  setIsolatedVpcs(value: number): NetworkTopologySummary;
+
+  getConnectedVpcs(): number;
+  setConnectedVpcs(value: number): NetworkTopologySummary;
+
+  getPeeringConnections(): number;
+  setPeeringConnections(value: number): NetworkTopologySummary;
+
+  getTransitGatewayAttachments(): number;
+  setTransitGatewayAttachments(value: number): NetworkTopologySummary;
+
+  getVpnConnections(): number;
+  setVpnConnections(value: number): NetworkTopologySummary;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): NetworkTopologySummary.AsObject;
+  static toObject(includeInstance: boolean, msg: NetworkTopologySummary): NetworkTopologySummary.AsObject;
+  static serializeBinaryToWriter(message: NetworkTopologySummary, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): NetworkTopologySummary;
+  static deserializeBinaryFromReader(message: NetworkTopologySummary, reader: jspb.BinaryReader): NetworkTopologySummary;
+}
+
+export namespace NetworkTopologySummary {
+  export type AsObject = {
+    isolatedVpcs: number,
+    connectedVpcs: number,
+    peeringConnections: number,
+    transitGatewayAttachments: number,
+    vpnConnections: number,
+  }
+}
+
+export class ResourceHealthSummary extends jspb.Message {
+  getHealthyResources(): number;
+  setHealthyResources(value: number): ResourceHealthSummary;
+
+  getDegradedResources(): number;
+  setDegradedResources(value: number): ResourceHealthSummary;
+
+  getUnhealthyResources(): number;
+  setUnhealthyResources(value: number): ResourceHealthSummary;
+
+  getStoppedResources(): number;
+  setStoppedResources(value: number): ResourceHealthSummary;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ResourceHealthSummary.AsObject;
+  static toObject(includeInstance: boolean, msg: ResourceHealthSummary): ResourceHealthSummary.AsObject;
+  static serializeBinaryToWriter(message: ResourceHealthSummary, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ResourceHealthSummary;
+  static deserializeBinaryFromReader(message: ResourceHealthSummary, reader: jspb.BinaryReader): ResourceHealthSummary;
+}
+
+export namespace ResourceHealthSummary {
+  export type AsObject = {
+    healthyResources: number,
+    degradedResources: number,
+    unhealthyResources: number,
+    stoppedResources: number,
   }
 }
 
@@ -2016,6 +2213,21 @@ export class SummaryResponse extends jspb.Message {
   setStatuses(value?: StatusSummary): SummaryResponse;
   hasStatuses(): boolean;
   clearStatuses(): SummaryResponse;
+
+  getSecurity(): SecuritySummary | undefined;
+  setSecurity(value?: SecuritySummary): SummaryResponse;
+  hasSecurity(): boolean;
+  clearSecurity(): SummaryResponse;
+
+  getNetworkTopology(): NetworkTopologySummary | undefined;
+  setNetworkTopology(value?: NetworkTopologySummary): SummaryResponse;
+  hasNetworkTopology(): boolean;
+  clearNetworkTopology(): SummaryResponse;
+
+  getHealth(): ResourceHealthSummary | undefined;
+  setHealth(value?: ResourceHealthSummary): SummaryResponse;
+  hasHealth(): boolean;
+  clearHealth(): SummaryResponse;
 
   getErr(): types_pb.Error | undefined;
   setErr(value?: types_pb.Error): SummaryResponse;
@@ -2034,6 +2246,9 @@ export namespace SummaryResponse {
   export type AsObject = {
     count?: Counters.AsObject,
     statuses?: StatusSummary.AsObject,
+    security?: SecuritySummary.AsObject,
+    networkTopology?: NetworkTopologySummary.AsObject,
+    health?: ResourceHealthSummary.AsObject,
     err?: types_pb.Error.AsObject,
   }
 }
@@ -2311,6 +2526,69 @@ export namespace GetVpcConnectivityGraphResponse {
   }
 }
 
+export class GetVpcConnectionGraphRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): GetVpcConnectionGraphRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): GetVpcConnectionGraphRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): GetVpcConnectionGraphRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetVpcConnectionGraphRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetVpcConnectionGraphRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVpcConnectionGraphRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVpcConnectionGraphRequest): GetVpcConnectionGraphRequest.AsObject;
+  static serializeBinaryToWriter(message: GetVpcConnectionGraphRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVpcConnectionGraphRequest;
+  static deserializeBinaryFromReader(message: GetVpcConnectionGraphRequest, reader: jspb.BinaryReader): GetVpcConnectionGraphRequest;
+}
+
+export namespace GetVpcConnectionGraphRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    vpcId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 7,
+  }
+}
+
+export class GetVpcConnectionGraphResponse extends jspb.Message {
+  getVpcConnectionGraph(): types_pb.VpcConnectionGraph | undefined;
+  setVpcConnectionGraph(value?: types_pb.VpcConnectionGraph): GetVpcConnectionGraphResponse;
+  hasVpcConnectionGraph(): boolean;
+  clearVpcConnectionGraph(): GetVpcConnectionGraphResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetVpcConnectionGraphResponse;
+  hasErr(): boolean;
+  clearErr(): GetVpcConnectionGraphResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVpcConnectionGraphResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVpcConnectionGraphResponse): GetVpcConnectionGraphResponse.AsObject;
+  static serializeBinaryToWriter(message: GetVpcConnectionGraphResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVpcConnectionGraphResponse;
+  static deserializeBinaryFromReader(message: GetVpcConnectionGraphResponse, reader: jspb.BinaryReader): GetVpcConnectionGraphResponse;
+}
+
+export namespace GetVpcConnectionGraphResponse {
+  export type AsObject = {
+    vpcConnectionGraph?: types_pb.VpcConnectionGraph.AsObject,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
 export class GetInstanceConnectivityGraphRequest extends jspb.Message {
   getProvider(): string;
   setProvider(value: string): GetInstanceConnectivityGraphRequest;
@@ -2508,6 +2786,260 @@ export class ListVpcGraphEdgesResponse extends jspb.Message {
 export namespace ListVpcGraphEdgesResponse {
   export type AsObject = {
     edgesList: Array<types_pb.VpcGraphEdge.AsObject>,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
+export class GetVPCSecurityAnalysisRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): GetVPCSecurityAnalysisRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): GetVPCSecurityAnalysisRequest;
+
+  getRegion(): string;
+  setRegion(value: string): GetVPCSecurityAnalysisRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): GetVPCSecurityAnalysisRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetVPCSecurityAnalysisRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetVPCSecurityAnalysisRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVPCSecurityAnalysisRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVPCSecurityAnalysisRequest): GetVPCSecurityAnalysisRequest.AsObject;
+  static serializeBinaryToWriter(message: GetVPCSecurityAnalysisRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVPCSecurityAnalysisRequest;
+  static deserializeBinaryFromReader(message: GetVPCSecurityAnalysisRequest, reader: jspb.BinaryReader): GetVPCSecurityAnalysisRequest;
+}
+
+export namespace GetVPCSecurityAnalysisRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 5,
+  }
+}
+
+export class GetVPCSecurityAnalysisResponse extends jspb.Message {
+  getAnalysis(): types_pb.VPCSecurityAnalysis | undefined;
+  setAnalysis(value?: types_pb.VPCSecurityAnalysis): GetVPCSecurityAnalysisResponse;
+  hasAnalysis(): boolean;
+  clearAnalysis(): GetVPCSecurityAnalysisResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetVPCSecurityAnalysisResponse;
+  hasErr(): boolean;
+  clearErr(): GetVPCSecurityAnalysisResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetVPCSecurityAnalysisResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetVPCSecurityAnalysisResponse): GetVPCSecurityAnalysisResponse.AsObject;
+  static serializeBinaryToWriter(message: GetVPCSecurityAnalysisResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetVPCSecurityAnalysisResponse;
+  static deserializeBinaryFromReader(message: GetVPCSecurityAnalysisResponse, reader: jspb.BinaryReader): GetVPCSecurityAnalysisResponse;
+}
+
+export namespace GetVPCSecurityAnalysisResponse {
+  export type AsObject = {
+    analysis?: types_pb.VPCSecurityAnalysis.AsObject,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
+export class ListSecurityFindingsRequest extends jspb.Message {
+  getProvider(): string;
+  setProvider(value: string): ListSecurityFindingsRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): ListSecurityFindingsRequest;
+
+  getRegion(): string;
+  setRegion(value: string): ListSecurityFindingsRequest;
+
+  getVpcId(): string;
+  setVpcId(value: string): ListSecurityFindingsRequest;
+  hasVpcId(): boolean;
+  clearVpcId(): ListSecurityFindingsRequest;
+
+  getResourceId(): string;
+  setResourceId(value: string): ListSecurityFindingsRequest;
+  hasResourceId(): boolean;
+  clearResourceId(): ListSecurityFindingsRequest;
+
+  getResourceType(): string;
+  setResourceType(value: string): ListSecurityFindingsRequest;
+  hasResourceType(): boolean;
+  clearResourceType(): ListSecurityFindingsRequest;
+
+  getRiskLevelsList(): Array<types_pb.SecurityFinding.RiskLevel>;
+  setRiskLevelsList(value: Array<types_pb.SecurityFinding.RiskLevel>): ListSecurityFindingsRequest;
+  clearRiskLevelsList(): ListSecurityFindingsRequest;
+  addRiskLevels(value: types_pb.SecurityFinding.RiskLevel, index?: number): ListSecurityFindingsRequest;
+
+  getFindingTypesList(): Array<types_pb.SecurityFinding.FindingType>;
+  setFindingTypesList(value: Array<types_pb.SecurityFinding.FindingType>): ListSecurityFindingsRequest;
+  clearFindingTypesList(): ListSecurityFindingsRequest;
+  addFindingTypes(value: types_pb.SecurityFinding.FindingType, index?: number): ListSecurityFindingsRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): ListSecurityFindingsRequest;
+  hasCreds(): boolean;
+  clearCreds(): ListSecurityFindingsRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListSecurityFindingsRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: ListSecurityFindingsRequest): ListSecurityFindingsRequest.AsObject;
+  static serializeBinaryToWriter(message: ListSecurityFindingsRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListSecurityFindingsRequest;
+  static deserializeBinaryFromReader(message: ListSecurityFindingsRequest, reader: jspb.BinaryReader): ListSecurityFindingsRequest;
+}
+
+export namespace ListSecurityFindingsRequest {
+  export type AsObject = {
+    provider: string,
+    accountId: string,
+    region: string,
+    vpcId?: string,
+    resourceId?: string,
+    resourceType?: string,
+    riskLevelsList: Array<types_pb.SecurityFinding.RiskLevel>,
+    findingTypesList: Array<types_pb.SecurityFinding.FindingType>,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum VpcIdCase { 
+    _VPC_ID_NOT_SET = 0,
+    VPC_ID = 4,
+  }
+
+  export enum ResourceIdCase { 
+    _RESOURCE_ID_NOT_SET = 0,
+    RESOURCE_ID = 5,
+  }
+
+  export enum ResourceTypeCase { 
+    _RESOURCE_TYPE_NOT_SET = 0,
+    RESOURCE_TYPE = 6,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 9,
+  }
+}
+
+export class ListSecurityFindingsResponse extends jspb.Message {
+  getFindingsList(): Array<types_pb.SecurityFinding>;
+  setFindingsList(value: Array<types_pb.SecurityFinding>): ListSecurityFindingsResponse;
+  clearFindingsList(): ListSecurityFindingsResponse;
+  addFindings(value?: types_pb.SecurityFinding, index?: number): types_pb.SecurityFinding;
+
+  getTotalCount(): number;
+  setTotalCount(value: number): ListSecurityFindingsResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): ListSecurityFindingsResponse;
+  hasErr(): boolean;
+  clearErr(): ListSecurityFindingsResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ListSecurityFindingsResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: ListSecurityFindingsResponse): ListSecurityFindingsResponse.AsObject;
+  static serializeBinaryToWriter(message: ListSecurityFindingsResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ListSecurityFindingsResponse;
+  static deserializeBinaryFromReader(message: ListSecurityFindingsResponse, reader: jspb.BinaryReader): ListSecurityFindingsResponse;
+}
+
+export namespace ListSecurityFindingsResponse {
+  export type AsObject = {
+    findingsList: Array<types_pb.SecurityFinding.AsObject>,
+    totalCount: number,
+    err?: types_pb.Error.AsObject,
+  }
+}
+
+export class GetSecurityFindingRequest extends jspb.Message {
+  getFindingId(): string;
+  setFindingId(value: string): GetSecurityFindingRequest;
+
+  getProvider(): string;
+  setProvider(value: string): GetSecurityFindingRequest;
+
+  getAccountId(): string;
+  setAccountId(value: string): GetSecurityFindingRequest;
+
+  getCreds(): types_pb.Credentials | undefined;
+  setCreds(value?: types_pb.Credentials): GetSecurityFindingRequest;
+  hasCreds(): boolean;
+  clearCreds(): GetSecurityFindingRequest;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetSecurityFindingRequest.AsObject;
+  static toObject(includeInstance: boolean, msg: GetSecurityFindingRequest): GetSecurityFindingRequest.AsObject;
+  static serializeBinaryToWriter(message: GetSecurityFindingRequest, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetSecurityFindingRequest;
+  static deserializeBinaryFromReader(message: GetSecurityFindingRequest, reader: jspb.BinaryReader): GetSecurityFindingRequest;
+}
+
+export namespace GetSecurityFindingRequest {
+  export type AsObject = {
+    findingId: string,
+    provider: string,
+    accountId: string,
+    creds?: types_pb.Credentials.AsObject,
+  }
+
+  export enum CredsCase { 
+    _CREDS_NOT_SET = 0,
+    CREDS = 4,
+  }
+}
+
+export class GetSecurityFindingResponse extends jspb.Message {
+  getFinding(): types_pb.SecurityFinding | undefined;
+  setFinding(value?: types_pb.SecurityFinding): GetSecurityFindingResponse;
+  hasFinding(): boolean;
+  clearFinding(): GetSecurityFindingResponse;
+
+  getRemediationStepsList(): Array<string>;
+  setRemediationStepsList(value: Array<string>): GetSecurityFindingResponse;
+  clearRemediationStepsList(): GetSecurityFindingResponse;
+  addRemediationSteps(value: string, index?: number): GetSecurityFindingResponse;
+
+  getRelatedFindingsList(): Array<string>;
+  setRelatedFindingsList(value: Array<string>): GetSecurityFindingResponse;
+  clearRelatedFindingsList(): GetSecurityFindingResponse;
+  addRelatedFindings(value: string, index?: number): GetSecurityFindingResponse;
+
+  getErr(): types_pb.Error | undefined;
+  setErr(value?: types_pb.Error): GetSecurityFindingResponse;
+  hasErr(): boolean;
+  clearErr(): GetSecurityFindingResponse;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): GetSecurityFindingResponse.AsObject;
+  static toObject(includeInstance: boolean, msg: GetSecurityFindingResponse): GetSecurityFindingResponse.AsObject;
+  static serializeBinaryToWriter(message: GetSecurityFindingResponse, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): GetSecurityFindingResponse;
+  static deserializeBinaryFromReader(message: GetSecurityFindingResponse, reader: jspb.BinaryReader): GetSecurityFindingResponse;
+}
+
+export namespace GetSecurityFindingResponse {
+  export type AsObject = {
+    finding?: types_pb.SecurityFinding.AsObject,
+    remediationStepsList: Array<string>,
+    relatedFindingsList: Array<string>,
     err?: types_pb.Error.AsObject,
   }
 }

@@ -20,31 +20,32 @@ package db
 import "github.com/app-net-interface/awi-infra-guard/types"
 
 const (
-	vpcTable               = "vpcs"
-	vpcIndexTable          = "vpc_index"
-	regionTable            = "regions"
-	instanceTable          = "instances"
-	subnetTable            = "subnets"
-	clusterTable           = "clusters"
-	podTable               = "pods"
-	kubernetesServiceTable = "kubernetes_services"
-	kubernetesNodeTable    = "kubernetes_nodes"
-	namespaceTable         = "namespaces"
-	accountTable           = "accounts"
-	routeTableTable        = "route_tables"
-	aclTable               = "acls"
-	securityGroupTable     = "security_groups"
-	ngTable                = "nat_gateways"
-	routerTable            = "routers"
-	igwTable               = "igws"
-	vpcEndpointTable       = "vpcEndpoints"
-	publicIPTable          = "publicIPs"
-	lbTable                = "lbs"
-	networkInterfaceTable  = "network_interfaces"
-	syncTimeTable          = "sync_time"
-	keyPairTable           = "keyPairs"
-	vpnConcentratorTable   = "vpnConcentrators"
-	vpcConnectionTable     = "vpcConnections"
+	vpcTable                = "vpcs"
+	vpcIndexTable           = "vpc_index"
+	regionTable             = "regions"
+	instanceTable           = "instances"
+	subnetTable             = "subnets"
+	clusterTable            = "clusters"
+	podTable                = "pods"
+	kubernetesServiceTable  = "kubernetes_services"
+	kubernetesNodeTable     = "kubernetes_nodes"
+	namespaceTable          = "namespaces"
+	accountTable            = "accounts"
+	routeTableTable         = "route_tables"
+	aclTable                = "acls"
+	securityGroupTable      = "security_groups"
+	ngTable                 = "nat_gateways"
+	routerTable             = "routers"
+	igwTable                = "igws"
+	vpcEndpointTable        = "vpcEndpoints"
+	publicIPTable           = "publicIPs"
+	lbTable                 = "lbs"
+	networkInterfaceTable   = "network_interfaces"
+	syncTimeTable           = "sync_time"
+	keyPairTable            = "keyPairs"
+	vpnConcentratorTable    = "vpnConcentrators"
+	vpcConnectionTable      = "vpcConnections"
+	vpcConnectionGraphTable = "vpc_connection_graph"
 )
 
 // Add bolt db table to this list; or it will cause a panic
@@ -74,6 +75,7 @@ var tableNames = []string{
 	keyPairTable,
 	vpnConcentratorTable,
 	vpcConnectionTable,
+	vpcConnectionGraphTable,
 }
 
 type DbObject interface {
@@ -228,6 +230,9 @@ type Client interface {
 
 	// Add SyncVPCIndexes to the interface.
 	SyncVPCIndexes() error
+
+	// Security post-processing for VPC resources
+	SyncVpcPostProcess() error
 
 	// VPC Connection
 	ListVpcConnections() ([]*types.VPCConnection, error)

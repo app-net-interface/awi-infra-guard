@@ -470,6 +470,12 @@ func (s *Syncer) syncVPC(ctx context.Context) {
 func (s *Syncer) syncVPCIndex(ctx context.Context) {
 	if err := s.dbClient.SyncVPCIndexes(); err != nil {
 		s.logger.Errorf("Sync error: failed to finalize VPC indexes: %v", err)
+		return
+	}
+
+	// Run security post-processing after VPC indexing is complete
+	if err := s.dbClient.SyncVpcPostProcess(); err != nil {
+		s.logger.Errorf("Sync error: failed to perform VPC security post-processing: %v", err)
 	}
 }
 

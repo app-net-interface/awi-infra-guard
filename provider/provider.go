@@ -74,6 +74,9 @@ type CloudProvider interface {
 	ListVpcGraphEdges(ctx context.Context, input *infrapb.ListVpcGraphEdgesRequest) ([]types.VpcGraphEdge, error)
 	// Add the new method signature for GetVpcConnectivityGraph
 	GetVpcConnectivityGraph(ctx context.Context, input *infrapb.GetVpcConnectivityGraphRequest) ([]types.VpcGraphNode, []types.VpcGraphEdge, error)
+
+	// Add the new method signature for inter vpc connection graph
+	GetVpcConnectionGraph(ctx context.Context, input *infrapb.GetVpcConnectionGraphRequest) (*types.VpcConnectionGraph, error)
 	// New method for instance graph
 	GetInstanceConnectivityGraph(ctx context.Context, params *infrapb.GetInstanceConnectivityGraphRequest) ([]types.InstanceGraphNode, []types.InstanceGraphEdge, error)
 	// GetSubnet returns single subnet based on it's ID

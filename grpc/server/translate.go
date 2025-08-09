@@ -92,6 +92,7 @@ func typesInstanceToGrpc(in []types.Instance) []*infrapb.Instance {
 			SelfLink:         instance.SelfLink,
 			CreatedAt:        createdAtPb,
 			UpdatedAt:        updatedAtPb,
+			SecurityStatus:   typesInstanceSecurityStatusToGrpc(instance.SecurityStatus),
 		})
 	}
 	return out
@@ -300,6 +301,7 @@ func typesSgsToGrpc(in []types.SecurityGroup) []*infrapb.SecurityGroup {
 			Rules:        rules,
 			LastSyncTime: acl.LastSyncTime,
 			SelfLink:     acl.SelfLink,
+			RiskStatus:   typesSecurityGroupRiskStatusToGrpc(acl.SecurityStatus),
 		})
 	}
 	return out
@@ -407,6 +409,7 @@ func typesLBToGrpc(in []types.LB) []*infrapb.LB {
 			Labels:                 lb.Labels,
 			Project:                lb.Project,
 			CreatedAt:              timestamppb.New(lb.CreatedAt),
+			SecurityStatus:         typesLoadBalancerSecurityStatusToGrpc(lb.SecurityStatus),
 		})
 	}
 	return out
@@ -511,77 +514,186 @@ func typesVPCIndexToGrpc(in types.VPCIndex) *infrapb.VPCIndex {
 		VpcEndpointIds:      in.VpcEndpointIds,
 		VpnConcentratorIds:  in.VpnConcentratorIds,
 		RouterIds:           in.RouterIds,
+		SecurityRisks:       typesVPCSecurityRisksToGrpc(in.SecurityRisks),
 	}
 }
 
 func typesVpcGraphNodesToGrpc(in []types.VpcGraphNode) []*infrapb.VpcGraphNode {
-	out := make([]*infrapb.VpcGraphNode, 0, len(in))
-	for _, node := range in {
-		if node.Properties == nil {
-			// Ensure properties map is not nil for gRPC message
-			node.Properties = make(map[string]string)
-		}
-		out = append(out, &infrapb.VpcGraphNode{
+	if in == nil {
+		return nil
+	}
+	out := make([]*infrapb.VpcGraphNode, len(in))
+	for i, node := range in {
+		out[i] = &infrapb.VpcGraphNode{
 			Id:           node.ID,
 			ResourceType: node.ResourceType,
 			Name:         node.Name,
 			Properties:   node.Properties,
 			Provider:     node.Provider,
 			AccountId:    node.AccountId,
-		})
+			Region:       node.Region,
+		}
+	}
+	return out
+}
+
+func typesVpcConnectionGraphNodeToGrpc(in *types.VpcConnectionGraphNode) *infrapb.VpcConnectionGraphNode {
+	if in == nil {
+		return nil
+	}
+
+	nodeType := infrapb.VpcConnectionGraphNode_NODE_TYPE_UNSPECIFIED
+	switch in.NodeType {
+	case "vpc":
+		nodeType = infrapb.VpcConnectionGraphNode_VPC
+	case "transit_gateway":
+		nodeType = infrapb.VpcConnectionGraphNode_TRANSIT_GATEWAY
+	case "vpc_endpoint":
+		nodeType = infrapb.VpcConnectionGraphNode_VPC_ENDPOINT
+	case "transit_vpc":
+		nodeType = infrapb.VpcConnectionGraphNode_TRANSIT_VPC
+	case "internet_gateway":
+		nodeType = infrapb.VpcConnectionGraphNode_INTERNET_GATEWAY
+	case "vpn_gateway":
+		nodeType = infrapb.VpcConnectionGraphNode_VPN_GATEWAY
+	case "nat_gateway":
+		nodeType = infrapb.VpcConnectionGraphNode_NAT_GATEWAY
+	}
+
+	return &infrapb.VpcConnectionGraphNode{
+		Id:         in.Id,
+		Name:       in.Name,
+		NodeType:   nodeType,
+		Provider:   in.Provider,
+		AccountId:  in.AccountId,
+		Region:     in.Region,
+		Properties: in.Properties,
+		Labels:     in.Labels,
+	}
+}
+
+func typesVpcConnectionGraphNodesToGrpc(in []*types.VpcConnectionGraphNode) []*infrapb.VpcConnectionGraphNode {
+	if in == nil {
+		return nil
+	}
+	out := make([]*infrapb.VpcConnectionGraphNode, len(in))
+	for i, node := range in {
+		out[i] = typesVpcConnectionGraphNodeToGrpc(node)
+	}
+	return out
+}
+
+func typesVpcConnectionGraphEdgeToGrpc(in *types.VpcConnectionGraphEdge) *infrapb.VpcConnectionGraphEdge {
+	if in == nil {
+		return nil
+	}
+
+	connType := infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_UNSPECIFIED
+	switch in.ConnectionType {
+	case "peering":
+		connType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_PEERING
+	case "transit_gateway":
+		connType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_TRANSIT_GATEWAY
+	case "vpc_endpoint":
+		connType = infrapb.VpcConnectionType_VPC_ENDPOINT
+	case "transit_vpc":
+		connType = infrapb.VpcConnectionType_TRANSIT_VPC
+	}
+
+	return &infrapb.VpcConnectionGraphEdge{
+		Id:             in.Id,
+		SourceNodeId:   in.SourceNodeId,
+		TargetNodeId:   in.TargetNodeId,
+		ConnectionType: connType,
+		Status:         in.Status,
+		Bidirectional:  in.Bidirectional,
+		AccountId:      in.AccountId,
+		Region:         in.Region,
+		Provider:       in.Provider,
+		RouteTableIds:  in.RouteTableIds,
+		Properties:     in.Properties,
+	}
+}
+
+func typesVpcConnectionGraphEdgesToGrpc(in []*types.VpcConnectionGraphEdge) []*infrapb.VpcConnectionGraphEdge {
+	if in == nil {
+		return nil
+	}
+	out := make([]*infrapb.VpcConnectionGraphEdge, len(in))
+	for i, edge := range in {
+		out[i] = typesVpcConnectionGraphEdgeToGrpc(edge)
 	}
 	return out
 }
 
 func typesVpcGraphEdgesToGrpc(in []types.VpcGraphEdge) []*infrapb.VpcGraphEdge {
-	out := make([]*infrapb.VpcGraphEdge, 0, len(in))
-	for _, edge := range in {
-		out = append(out, &infrapb.VpcGraphEdge{
+	if in == nil {
+		return nil
+	}
+	out := make([]*infrapb.VpcGraphEdge, len(in))
+	for i, edge := range in {
+		out[i] = &infrapb.VpcGraphEdge{
 			SourceNodeId:     edge.SourceNodeID,
 			TargetNodeId:     edge.TargetNodeID,
 			RelationshipType: edge.RelationshipType,
 			Provider:         edge.Provider,
 			AccountId:        edge.AccountId,
-		})
-	}
-	return out
-}
-
-func typesInstanceNodesToGrpc(in []types.InstanceGraphNode) []*infrapb.InstanceGraphNode {
-	out := make([]*infrapb.InstanceGraphNode, 0, len(in))
-	for _, node := range in {
-		out = append(out, &infrapb.InstanceGraphNode{
-			Id:           node.ID,
-			ResourceType: node.ResourceType,
-			Name:         node.Name,
-			Properties:   node.Properties,
-			Provider:     node.Provider,
-			AccountId:    node.AccountID,
-			Region:       node.Region,
-		})
-	}
-	return out
-}
-
-func typesInstanceEdgesToGrpc(in []types.InstanceGraphEdge) []*infrapb.InstanceGraphEdge {
-	out := make([]*infrapb.InstanceGraphEdge, 0, len(in))
-	for _, edge := range in {
-		out = append(out, &infrapb.InstanceGraphEdge{
-			SourceNodeId:     edge.SourceNodeID,
-			TargetNodeId:     edge.TargetNodeID,
-			RelationshipType: edge.RelationshipType,
-			Provider:         edge.Provider,
-			AccountId:        edge.AccountID,
 			Region:           edge.Region,
-		})
+		}
 	}
+	return out
+}
+
+func typesVpcInternalGraphToGrpc(in *types.VpcInternalGraph) *infrapb.VpcInternalGraph {
+	if in == nil {
+		return nil
+	}
+
+	out := &infrapb.VpcInternalGraph{
+		Nodes:        typesVpcGraphNodesToGrpc(in.Nodes),
+		Edges:        typesVpcGraphEdgesToGrpc(in.Edges),
+		AccountId:    in.AccountId,
+		Region:       in.Region,
+		Provider:     in.Provider,
+		Labels:       in.Labels,
+		LastSyncTime: in.LastSyncTime,
+	}
+	return out
+}
+
+func typesVpcConnectionGraphToGrpc(in *types.VpcConnectionGraph) *infrapb.VpcConnectionGraph {
+	if in == nil {
+		return nil
+	}
+
+	out := &infrapb.VpcConnectionGraph{
+		Nodes:        typesVpcConnectionGraphNodesToGrpc(in.Nodes),
+		Edges:        typesVpcConnectionGraphEdgesToGrpc(in.Edges),
+		Provider:     in.Provider,
+		AccountId:    in.Provider,   // Switched from Accounts list to single account
+		Region:       in.Regions[0], // Taking first region since proto only supports single region
+		Labels:       in.Labels,
+		LastSyncTime: in.LastSyncTime,
+	}
+
+	if in.SrcVpcGraph != nil {
+		out.SrcVpcGraph = typesVpcInternalGraphToGrpc(in.SrcVpcGraph)
+	}
+
+	if in.DestVpcGraph != nil {
+		out.DestVpcGraph = typesVpcInternalGraphToGrpc(in.DestVpcGraph)
+	}
+
 	return out
 }
 
 func typesVpcConnectionsToGrpc(in []*types.VPCConnection) []*infrapb.VpcConnection {
-	out := make([]*infrapb.VpcConnection, 0, len(in))
-	for _, conn := range in {
-		grpcConn := &infrapb.VpcConnection{
+	if in == nil {
+		return nil
+	}
+	out := make([]*infrapb.VpcConnection, len(in))
+	for i, conn := range in {
+		out[i] = &infrapb.VpcConnection{
 			Id:             conn.ID,
 			Name:           conn.Name,
 			Provider:       conn.Provider,
@@ -593,21 +705,188 @@ func typesVpcConnectionsToGrpc(in []*types.VPCConnection) []*infrapb.VpcConnecti
 			VpcId_2:        conn.ToVpcId,
 			Vpc_2AccountId: conn.ToVpcAccountId,
 			Vpc_2Region:    conn.ToVpcRegion,
-			ConnectionType: infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_PEERING, // Default to peering
 			Status:         conn.Status,
 		}
 
-		if conn.ConnectionType == "transit_gateway" {
-			grpcConn.ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_TRANSIT_GATEWAY
-		} else if conn.ConnectionType == "peering" {
-			grpcConn.ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_PEERING // Default to peering
-		} else if conn.ConnectionType == "vpc_endpoint" {
-			grpcConn.ConnectionType = infrapb.VpcConnectionType_VPC_ENDPOINT
-		} else {
-			grpcConn.ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_UNSPECIFIED
+		// Set connection type
+		switch conn.ConnectionType {
+		case "transit_gateway":
+			out[i].ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_TRANSIT_GATEWAY
+		case "peering":
+			out[i].ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_PEERING
+		case "vpc_endpoint":
+			out[i].ConnectionType = infrapb.VpcConnectionType_VPC_ENDPOINT
+		case "transit_vpc":
+			out[i].ConnectionType = infrapb.VpcConnectionType_TRANSIT_VPC
+		default:
+			out[i].ConnectionType = infrapb.VpcConnectionType_VPC_CONNECTION_TYPE_UNSPECIFIED
 		}
-
-		out = append(out, grpcConn)
 	}
 	return out
+}
+
+// Security status translation functions
+
+func typesVPCSecurityRisksToGrpc(in *types.VPCSecurityRisks) *infrapb.VPCSecurityRisks {
+	if in == nil {
+		return nil
+	}
+
+	var lastRiskAnalysisPb *timestamppb.Timestamp
+	if in.LastRiskAnalysis != nil {
+		lastRiskAnalysisPb = timestamppb.New(*in.LastRiskAnalysis)
+	}
+
+	return &infrapb.VPCSecurityRisks{
+		CriticalInstanceIds:        in.CriticalInstanceIds,
+		CriticalSecurityGroupIds:   in.CriticalSecurityGroupIds,
+		CriticalLbIds:              in.CriticalLbIds,
+		HighRiskInstanceIds:        in.HighRiskInstanceIds,
+		HighRiskSecurityGroupIds:   in.HighRiskSecurityGroupIds,
+		HighRiskSubnetIds:          in.HighRiskSubnetIds,
+		MediumRiskInstanceIds:      in.MediumRiskInstanceIds,
+		MediumRiskSecurityGroupIds: in.MediumRiskSecurityGroupIds,
+		MediumRiskAclIds:           in.MediumRiskAclIds,
+		UntaggedInstanceIds:        in.UntaggedInstanceIds,
+		UntaggedSecurityGroupIds:   in.UntaggedSecurityGroupIds,
+		UntaggedSubnetIds:          in.UntaggedSubnetIds,
+		UntaggedLbIds:              in.UntaggedLbIds,
+		IsolatedSubnetIds:          in.IsolatedSubnetIds,
+		OverExposedSubnetIds:       in.OverExposedSubnetIds,
+		LastRiskAnalysis:           lastRiskAnalysisPb,
+	}
+}
+
+func typesInstanceSecurityStatusToGrpc(in *types.InstanceSecurityStatus) *infrapb.InstanceSecurityStatus {
+	if in == nil {
+		return nil
+	}
+
+	riskLevel := infrapb.InstanceSecurityStatus_RISK_LEVEL_UNSPECIFIED
+	switch in.RiskLevel {
+	case types.RiskLevelSecure:
+		riskLevel = infrapb.InstanceSecurityStatus_SECURE
+	case types.RiskLevelLow:
+		riskLevel = infrapb.InstanceSecurityStatus_LOW_RISK
+	case types.RiskLevelMedium:
+		riskLevel = infrapb.InstanceSecurityStatus_MEDIUM_RISK
+	case types.RiskLevelHigh:
+		riskLevel = infrapb.InstanceSecurityStatus_HIGH_RISK
+	case types.RiskLevelCritical:
+		riskLevel = infrapb.InstanceSecurityStatus_CRITICAL_RISK
+	}
+
+	var lastAssessedPb *timestamppb.Timestamp
+	// TODO: Parse the timestamp string if needed
+	// if in.LastSecurityScan != "" {
+	//     lastAssessedPb = ... (implement timestamp parsing if needed)
+	// }
+
+	return &infrapb.InstanceSecurityStatus{
+		OverallRiskLevel:      riskLevel,
+		IsPubliclyAccessible:  in.IsPubliclyAccessible,
+		HasOpenSshAccess:      in.HasOpenSSHAccess,
+		HasOpenRdpAccess:      in.HasOpenRDPAccess,
+		HasOpenDatabasePorts:  in.HasOpenDatabasePorts,
+		IsUntagged:            in.IsUntagged,
+		HasOverlyPermissiveSg: in.HasOverlyPermissiveSg,
+		RiskSummary:           in.RiskSummary,
+		ExposedPorts:          in.ExposedPorts,
+		RiskySecurityGroups:   in.RiskySecurityGroups,
+		Recommendations:       in.Recommendations,
+		LastAssessed:          lastAssessedPb,
+	}
+}
+
+func typesSecurityGroupRiskStatusToGrpc(in *types.SecurityGroupRiskStatus) *infrapb.SecurityGroupRiskStatus {
+	if in == nil {
+		return nil
+	}
+
+	riskLevel := infrapb.SecurityGroupRiskStatus_RISK_LEVEL_UNSPECIFIED
+	switch in.RiskLevel {
+	case types.RiskLevelSecure:
+		riskLevel = infrapb.SecurityGroupRiskStatus_SECURE
+	case types.RiskLevelLow:
+		riskLevel = infrapb.SecurityGroupRiskStatus_LOW_RISK
+	case types.RiskLevelMedium:
+		riskLevel = infrapb.SecurityGroupRiskStatus_MEDIUM_RISK
+	case types.RiskLevelHigh:
+		riskLevel = infrapb.SecurityGroupRiskStatus_HIGH_RISK
+	case types.RiskLevelCritical:
+		riskLevel = infrapb.SecurityGroupRiskStatus_CRITICAL_RISK
+	}
+
+	var lastAssessedPb *timestamppb.Timestamp
+	// TODO: Parse the timestamp string if needed
+	// if in.LastSecurityScan != "" {
+	//     lastAssessedPb = ... (implement timestamp parsing if needed)
+	// }
+
+	// Convert affected instances count to string array
+	affectedInstancesStr := []string{}
+	if in.AffectedInstances > 0 {
+		// For now, just add a placeholder - in real implementation, this would be actual instance IDs
+		affectedInstancesStr = append(affectedInstancesStr, fmt.Sprintf("%d instances", in.AffectedInstances))
+	}
+
+	return &infrapb.SecurityGroupRiskStatus{
+		OverallRiskLevel:           riskLevel,
+		AllowsSshFromInternet:      in.AllowsSSHFromInternet,
+		AllowsRdpFromInternet:      in.AllowsRDPFromInternet,
+		AllowsDatabaseFromInternet: in.AllowsHTTPFromInternet, // Map HTTP to database for now
+		HasWidePortRanges:          in.HasOverlyPermissiveRules,
+		IsUnused:                   false, // Would need to determine from actual usage
+		IsUntagged:                 in.IsUntagged,
+		RiskyRules:                 in.RiskyRules,
+		AffectedInstances:          affectedInstancesStr,
+		AttachedInstanceCount:      in.AffectedInstances,
+		Recommendations:            in.Recommendations,
+		LastAssessed:               lastAssessedPb,
+	}
+}
+
+func typesLoadBalancerSecurityStatusToGrpc(in *types.LoadBalancerSecurityStatus) *infrapb.LoadBalancerSecurityStatus {
+	if in == nil {
+		return nil
+	}
+
+	riskLevel := infrapb.LoadBalancerSecurityStatus_RISK_LEVEL_UNSPECIFIED
+	switch in.RiskLevel {
+	case types.RiskLevelSecure:
+		riskLevel = infrapb.LoadBalancerSecurityStatus_SECURE
+	case types.RiskLevelLow:
+		riskLevel = infrapb.LoadBalancerSecurityStatus_LOW_RISK
+	case types.RiskLevelMedium:
+		riskLevel = infrapb.LoadBalancerSecurityStatus_MEDIUM_RISK
+	case types.RiskLevelHigh:
+		riskLevel = infrapb.LoadBalancerSecurityStatus_HIGH_RISK
+	case types.RiskLevelCritical:
+		riskLevel = infrapb.LoadBalancerSecurityStatus_CRITICAL_RISK
+	}
+
+	var lastAssessedPb *timestamppb.Timestamp
+	// TODO: Parse the timestamp string if needed
+	// if in.LastSecurityScan != "" {
+	//     lastAssessedPb = ... (implement timestamp parsing if needed)
+	// }
+
+	// Calculate risky backend instance count
+	riskyBackendCount := int32(len(in.BackendInstanceRisks))
+
+	return &infrapb.LoadBalancerSecurityStatus{
+		OverallRiskLevel:         riskLevel,
+		IsInternetFacing:         in.IsInternetFacing,
+		HasRiskyBackendInstances: len(in.BackendInstanceRisks) > 0,
+		HasInsecureListeners:     in.HasInsecureListeners,
+		IsUntagged:               in.IsUntagged,
+		HasOverlyPermissiveSg:    in.HasOpenSecurityGroups,
+		TotalBackendInstances:    0, // Would need to be calculated from actual backend data
+		RiskyBackendInstances:    riskyBackendCount,
+		RiskyBackendInstanceIds:  in.BackendInstanceRisks,
+		InsecureListeners:        in.InsecureProtocols,
+		SecurityGroupIssues:      in.SecurityGroupRisks,
+		Recommendations:          in.Recommendations,
+		LastAssessed:             lastAssessedPb,
+	}
 }

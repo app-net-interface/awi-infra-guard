@@ -145,6 +145,200 @@ message VPCIndex {
     string region = 20;
     google.protobuf.Timestamp created_at = 21;
     google.protobuf.Timestamp updated_at = 22;
+    
+    // Security risk classifications - populated during post-processing
+    VPCSecurityRisks security_risks = 23;
+}
+
+// Security risk categorization for VPC resources
+message VPCSecurityRisks {
+    // Critical risk resources (immediate attention required)
+    repeated string critical_instance_ids = 1;          // Instances with public IP + open SSH/RDP
+    repeated string critical_security_group_ids = 2;    // SGs with 0.0.0.0/0 on critical ports
+    repeated string critical_lb_ids = 3;                // Internet-facing LBs with risky backends
+    
+    // High risk resources (significant security concerns)
+    repeated string high_risk_instance_ids = 4;         // Public instances with database ports exposed
+    repeated string high_risk_security_group_ids = 5;   // SGs with wide port ranges open
+    repeated string high_risk_subnet_ids = 6;           // Subnets with mixed public/private resources
+    
+    // Medium risk resources (best practice violations)
+    repeated string medium_risk_instance_ids = 7;       // Untagged instances
+    repeated string medium_risk_security_group_ids = 8; // Unused or overly permissive SGs
+    repeated string medium_risk_acl_ids = 9;            // ACLs with broad rules
+    
+    // Compliance violations
+    repeated string untagged_instance_ids = 10;
+    repeated string untagged_security_group_ids = 11;
+    repeated string untagged_subnet_ids = 12;
+    repeated string untagged_lb_ids = 13;
+    
+    // Network topology risks
+    repeated string isolated_subnet_ids = 14;           // Subnets with no route to internet
+    repeated string over_exposed_subnet_ids = 15;       // Subnets with multiple IGW routes
+    
+    google.protobuf.Timestamp last_risk_analysis = 16;  // When risk analysis was performed
+    string risk_analysis_version = 17;                  // Version of risk analysis rules used
+}
+
+// Detailed security analysis for a VPC - companion to VPCIndex
+message VPCSecurityAnalysis {
+    string vpc_id = 1;
+    string provider = 2;
+    string account_id = 3;
+    string region = 4;
+    
+    // Detailed risk findings with context
+    repeated SecurityFinding findings = 5;
+    
+    // Risk summary metrics
+    int32 critical_findings_count = 6;
+    int32 high_findings_count = 7;
+    int32 medium_findings_count = 8;
+    int32 low_findings_count = 9;
+    
+    // Overall risk score (0-100, where 100 is highest risk)
+    int32 risk_score = 10;
+    
+    google.protobuf.Timestamp last_analyzed = 11;
+    string analysis_version = 12;
+}
+
+// Individual security finding with actionable details
+message SecurityFinding {
+    string id = 1;                          // Unique finding ID
+    string resource_id = 2;                 // The resource that has the issue
+    string resource_type = 3;               // "Instance", "SecurityGroup", "LoadBalancer", etc.
+    
+    enum RiskLevel {
+        RISK_LEVEL_UNSPECIFIED = 0;
+        LOW = 1;
+        MEDIUM = 2;
+        HIGH = 3;
+        CRITICAL = 4;
+    }
+    RiskLevel risk_level = 4;
+    
+    enum FindingType {
+        FINDING_TYPE_UNSPECIFIED = 0;
+        OPEN_SSH_ACCESS = 1;                // SSH (22) open to 0.0.0.0/0
+        OPEN_RDP_ACCESS = 2;                // RDP (3389) open to 0.0.0.0/0
+        OPEN_DATABASE_ACCESS = 3;           // Database ports open to internet
+        OVERLY_PERMISSIVE_SG = 4;           // Security group with broad rules
+        PUBLIC_INSTANCE_NO_TAGS = 5;        // Public instance without proper tags
+        INTERNET_FACING_LB_RISKY_BACKEND = 6; // Internet-facing LB with insecure backends
+        CROSS_SUBNET_EXPOSURE = 7;          // Network path allowing unintended access
+        UNUSED_SECURITY_GROUP = 8;          // Security group not attached to any resource
+        UNENCRYPTED_STORAGE = 9;            // Storage without encryption
+        WEAK_NETWORK_ACL = 10;              // Network ACL with overly broad rules
+    }
+    FindingType finding_type = 5;
+    
+    string title = 6;                       // Human-readable title
+    string description = 7;                 // Detailed description of the issue
+    string remediation = 8;                 // Suggested fix
+    
+    // Contextual information for drill-down
+    repeated string related_resource_ids = 9; // Other resources involved in this finding
+    map<string, string> finding_details = 10; // Additional context (ports, CIDRs, etc.)
+    
+    google.protobuf.Timestamp detected_at = 11;
+}
+
+// Security status for an individual instance - for UI warnings and alerts
+message InstanceSecurityStatus {
+    enum RiskLevel {
+        RISK_LEVEL_UNSPECIFIED = 0;
+        SECURE = 1;          // No security issues detected
+        LOW_RISK = 2;        // Minor issues (untagged, etc.)
+        MEDIUM_RISK = 3;     // Notable concerns (public IP with some exposure)
+        HIGH_RISK = 4;       // Significant issues (database ports exposed)
+        CRITICAL_RISK = 5;   // Immediate attention needed (SSH/RDP open to world)
+    }
+    RiskLevel overall_risk_level = 1;
+    
+    // Quick status flags for UI display
+    bool is_publicly_accessible = 2;           // Has public IP
+    bool has_open_ssh_access = 3;              // SSH (22) open to 0.0.0.0/0
+    bool has_open_rdp_access = 4;              // RDP (3389) open to 0.0.0.0/0
+    bool has_open_database_ports = 5;          // Database ports exposed to internet
+    bool is_untagged = 6;                      // Missing required tags
+    bool has_overly_permissive_sg = 7;         // Security groups with broad access
+    
+    // Summary for UI tooltips/details
+    repeated string risk_summary = 8;          // Human-readable risk descriptions
+    repeated string exposed_ports = 9;         // List of risky ports that are exposed
+    repeated string risky_security_groups = 10; // SG IDs that contribute to risk
+    
+    // Action recommendations for UI
+    repeated string recommendations = 11;       // Suggested actions to improve security
+    
+    google.protobuf.Timestamp last_assessed = 12;  // When security was last evaluated
+}
+
+// Security risk status for a security group - for UI warnings
+message SecurityGroupRiskStatus {
+    enum RiskLevel {
+        RISK_LEVEL_UNSPECIFIED = 0;
+        SECURE = 1;          // No concerning rules
+        LOW_RISK = 2;        // Minor issues (untagged, etc.)
+        MEDIUM_RISK = 3;     // Some overly broad rules
+        HIGH_RISK = 4;       // Database ports open to internet
+        CRITICAL_RISK = 5;   // SSH/RDP open to 0.0.0.0/0
+    }
+    RiskLevel overall_risk_level = 1;
+    
+    // Quick flags for UI display
+    bool allows_ssh_from_internet = 2;         // SSH (22) from 0.0.0.0/0
+    bool allows_rdp_from_internet = 3;         // RDP (3389) from 0.0.0.0/0
+    bool allows_database_from_internet = 4;    // Database ports from 0.0.0.0/0
+    bool has_wide_port_ranges = 5;             // Rules with large port ranges
+    bool is_unused = 6;                        // Not attached to any instances
+    bool is_untagged = 7;                      // Missing required tags
+    
+    // Details for UI tooltips
+    repeated string risky_rules = 8;           // Human-readable descriptions of risky rules
+    repeated string affected_instances = 9;    // Instance IDs that use this SG
+    int32 attached_instance_count = 10;        // Number of instances using this SG
+    
+    // Recommendations
+    repeated string recommendations = 11;       // Suggested security improvements
+    
+    google.protobuf.Timestamp last_assessed = 12;
+}
+
+// Security status for load balancers - for UI warnings
+message LoadBalancerSecurityStatus {
+    enum RiskLevel {
+        RISK_LEVEL_UNSPECIFIED = 0;
+        SECURE = 1;          // Internal LB with secure backends
+        LOW_RISK = 2;        // Minor issues (untagged, etc.)
+        MEDIUM_RISK = 3;     // Internet-facing with some concerns
+        HIGH_RISK = 4;       // Internet-facing with risky backend instances
+        CRITICAL_RISK = 5;   // Internet-facing with critically exposed backends
+    }
+    RiskLevel overall_risk_level = 1;
+    
+    // Quick flags for UI display
+    bool is_internet_facing = 2;              // Scheme is "internet-facing"
+    bool has_risky_backend_instances = 3;     // Backend instances have security issues
+    bool has_insecure_listeners = 4;          // HTTP instead of HTTPS
+    bool is_untagged = 5;                     // Missing required tags
+    bool has_overly_permissive_sg = 6;        // Associated SGs have broad access
+    
+    // Backend security details
+    int32 total_backend_instances = 7;        // Total instances behind this LB
+    int32 risky_backend_instances = 8;        // Backend instances with security issues
+    repeated string risky_backend_instance_ids = 9; // IDs of risky backend instances
+    
+    // Listener security details
+    repeated string insecure_listeners = 10;  // Listeners using HTTP instead of HTTPS
+    repeated string security_group_issues = 11; // SG-related security concerns
+    
+    // Recommendations
+    repeated string recommendations = 12;      // Suggested security improvements
+    
+    google.protobuf.Timestamp last_assessed = 13;
 }
 
 message Instance {
@@ -168,6 +362,9 @@ message Instance {
     google.protobuf.Timestamp updated_at = 18;
     string last_sync_time = 19;
     string self_link = 20;
+    
+    // Security risk assessment - populated during post-processing
+    InstanceSecurityStatus security_status = 21;
 }
 
 message Subnet {
@@ -238,6 +435,9 @@ message SecurityGroup {
     repeated string attached_running_instances = 12;
     google.protobuf.Timestamp created_at = 17;
     google.protobuf.Timestamp updated_at = 18;
+    
+    // Security risk assessment - populated during post-processing
+    SecurityGroupRiskStatus risk_status = 19;
 }
 
 
@@ -421,6 +621,9 @@ message LB {
     string self_link = 26;
     google.protobuf.Timestamp created_at = 27;
     google.protobuf.Timestamp updated_at = 28;
+    
+    // Security risk assessment - populated during post-processing
+    LoadBalancerSecurityStatus security_status = 29;
 }
 
 message NetworkInterface {
@@ -660,4 +863,128 @@ message VpcConnection {
     google.protobuf.Timestamp created_at = 19;
     string self_link = 20;
     string last_sync_time = 21;
+}
+
+message VpcInternalGraph {
+
+
+    // All VPC connections discovered in the account
+    repeated VpcConnection connections = 1;
+
+    // All nodes representing VPCs, Transit Gateways, etc.
+    repeated VpcGraphNode nodes = 2;
+
+    // All edges representing connections between nodes
+    repeated VpcGraphEdge edges = 3;
+
+    // Cross-account/region information
+    string account_id = 4;
+    string region = 5;
+    string provider = 6;
+
+    map<string, string> labels = 7;
+    string last_sync_time = 8;
+}
+
+// Represents a complete view of VPC connectivity across accounts and regions
+message VpcConnectionGraph {
+    // All nodes in the graph (VPCs, Transit Gateways, VPC Endpoints, etc)
+    repeated VpcConnectionGraphNode nodes = 1;
+    
+    // All edges representing connections between nodes
+    repeated VpcConnectionGraphEdge edges = 2;
+
+    VpcInternalGraph src_vpc_graph = 3;
+    VpcInternalGraph dest_vpc_graph = 4; // The source VPC connectivity graph this is derived from
+    
+    // Graph metadata
+    // Cross-account/region information
+    string account_id = 5;
+    string region = 6;
+    string provider = 7;
+
+    map<string, string> labels = 8;
+    string last_sync_time = 9;
+}
+
+// Enhanced node type that can represent any component in the VPC connection graph
+message VpcConnectionGraphNode {
+    string id = 1;
+    string name = 2;
+    
+    // The type of resource this node represents
+    enum NodeType {
+        NODE_TYPE_UNSPECIFIED = 0;
+        VPC = 1;
+        TRANSIT_GATEWAY = 2;
+        VPC_ENDPOINT = 3;
+        TRANSIT_VPC = 4;
+        INTERNET_GATEWAY = 5;
+        VPN_GATEWAY = 6;
+        NAT_GATEWAY = 7;
+    }
+    NodeType node_type = 3;
+    
+    // Node properties based on type
+    oneof type_properties {
+        VPC vpc = 4;
+        TransitGatewayDetails tgw = 5;
+        VPCEndpoint endpoint = 6;
+    }
+    
+    // Cross-account/region information
+    string account_id = 7;
+    string region = 8;
+    string provider = 9;
+    
+    // Additional metadata
+    map<string, string> properties = 10;
+    map<string, string> labels = 11;
+}
+
+// Enhanced edge type for VPC connection graph
+message VpcConnectionGraphEdge {
+    string id = 1;
+    string source_node_id = 2;
+    string target_node_id = 3;
+    
+    // The type of connection this edge represents
+    VpcConnectionType connection_type = 4;
+    
+    // Connection details based on type
+    oneof connection_details {
+        VpcPeeringConnectionDetails peering_details = 5;
+        TransitGatewayConnectionDetails transit_gateway_details = 6;
+        VpcEndpointConnectionDetails endpoint_details = 7;
+        TransitVpcConnectionDetails transit_vpc_details = 8;
+    }
+    
+    // Edge properties
+    string status = 9;          // active, pending, failed
+    bool bidirectional = 10;    // Whether traffic can flow both ways
+
+     // Cross-account/region information
+    string account_id = 11;
+    string region = 12;
+    string provider = 13;
+    
+    
+    // Cross-account/region metadata
+    repeated string route_table_ids = 14;  // Route tables implementing this connection
+    map<string, string> properties = 15;   // Additional properties (bandwidth, latency, etc)
+}
+
+// Additional details for Transit Gateway nodes
+message TransitGatewayDetails {
+    string transit_gateway_id = 1;
+    repeated string attachment_ids = 2;
+    repeated string route_table_ids = 3;
+    string state = 4;
+    uint32 asn = 5;
+    map<string, string> properties = 6;
+
+    // Cross-account/region information
+    string account_id = 11;
+    string region = 12;
+    string provider = 13;
 }

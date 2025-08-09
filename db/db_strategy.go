@@ -698,3 +698,35 @@ func (p *providerWithDB) ListVPNConcentrators(ctx context.Context, params *infra
 	}
 	return providerVPNConcentrators, nil
 }
+
+func (p *providerWithDB) GetVPCConnection(ctx context.Context, params *infrapb.GetVpcConnectionRequest) (*types.VPCConnection, error) {
+	// Get the connection from DB using the VPC ID
+	connection, err := p.dbClient.GetVpcConnection(params.GetVpcId())
+	if err != nil {
+		p.logger.Errorf("Failed to get VPC connection from db: %v", err)
+		return nil, fmt.Errorf("failed to get VPC connection: %w", err)
+	}
+
+	// If connection not found
+	if connection == nil {
+		p.logger.Warnf("VPC connection for VPC %s not found", params.GetVpcId())
+		return nil, fmt.Errorf("VPC connection for VPC %s not found", params.GetVpcId())
+	}
+
+	// Verify the provider matches
+	if strings.ToLower(connection.Provider) != strings.ToLower(p.realProvider.GetName()) {
+		p.logger.Warnf("VPC connection provider mismatch. Expected: %s, Got: %s", p.realProvider.GetName(), connection.Provider)
+		return nil, fmt.Errorf("VPC connection for VPC %s not found for provider %s", params.GetVpcId(), p.realProvider.GetName())
+	}
+
+	// If account ID is specified, verify it matches
+	if params.GetAccountId() != "" && params.GetAccountId() != connection.FromVpcAccountId && params.GetAccountId() != connection.ToVpcAccountId {
+		p.logger.Warnf("VPC connection account mismatch. Expected: %s, Got from: %s, to: %s",
+			params.GetAccountId(), connection.FromVpcAccountId, connection.ToVpcAccountId)
+		return nil, fmt.Errorf("VPC connection for VPC %s does not belong to account %s",
+			params.GetVpcId(), params.GetAccountId())
+	}
+
+	p.logger.Debugf("Successfully retrieved VPC connection for VPC %s", params.GetVpcId())
+	return connection, nil
+}

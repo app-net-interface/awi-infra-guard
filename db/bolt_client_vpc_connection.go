@@ -29,7 +29,20 @@ func (client *boltClient) PutVpcConnection(v *types.VPCConnection) error {
 }
 
 func (client *boltClient) GetVpcConnection(id string) (*types.VPCConnection, error) {
-	return get[types.VPCConnection](client, id, vpcConnectionTable)
+	vpcConnections, err := list[types.VPCConnection](client, vpcConnectionTable)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list vpc connections: %w", err)
+	}
+
+	for _, conn := range vpcConnections {
+		fmt.Printf("DEBUG: Checking VPC connection with FromVpcId: %s or ToVpcId: %s against %s\n",
+			conn.FromVpcId, conn.ToVpcId, id)
+		// Check both FromVpcId and ToVpcId since the connection could be in either direction
+		if conn.FromVpcId == id || conn.ToVpcId == id {
+			return conn, nil
+		}
+	}
+	return nil, fmt.Errorf("vpc connection with vpc id %s not found", id)
 }
 
 func (client *boltClient) ListVpcConnections() ([]*types.VPCConnection, error) {

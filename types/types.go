@@ -33,36 +33,120 @@ const (
 )
 
 const (
-	AccountType          = "Account"
-	RegionType           = "Region"
-	VPCType              = "VPC"
-	InstanceType         = "Instance"
-	SubnetType           = "Subnet"
-	ACLType              = "ACL"
-	SecurityGroupType    = "SecurityGroup"
-	RouteTableType       = "RouteTable"
-	NATGatewayType       = "NATGateway"
-	RouterType           = "Router"
-	IGWType              = "IGW"
-	VPCEndpointType      = "VPCEndpoint"
-	VPCIndexType         = "VPCIndex"
-	PublicIPType         = "PublicIP"
-	ClusterType          = "Cluster"
-	PodsType             = "Pod"
-	K8sServiceType       = "K8sService"
-	K8sNodeType          = "K8sNode"
-	NamespaceType        = "Namespace"
-	LBType               = "LB"
-	NetworkInterfaceType = "NetworkInterface"
-	KeyPairType          = "KeyPair"
-	VPNConcentratorType  = "VPNConcentrator"
-	VPCConnectionType    = "VPCConnection"
+	AccountType            = "Account"
+	RegionType             = "Region"
+	VPCType                = "VPC"
+	InstanceType           = "Instance"
+	SubnetType             = "Subnet"
+	ACLType                = "ACL"
+	SecurityGroupType      = "SecurityGroup"
+	RouteTableType         = "RouteTable"
+	NATGatewayType         = "NATGateway"
+	RouterType             = "Router"
+	IGWType                = "IGW"
+	VPCEndpointType        = "VPCEndpoint"
+	VPCIndexType           = "VPCIndex"
+	PublicIPType           = "PublicIP"
+	ClusterType            = "Cluster"
+	PodsType               = "Pod"
+	K8sServiceType         = "K8sService"
+	K8sNodeType            = "K8sNode"
+	NamespaceType          = "Namespace"
+	LBType                 = "LB"
+	NetworkInterfaceType   = "NetworkInterface"
+	KeyPairType            = "KeyPair"
+	VPNConcentratorType    = "VPNConcentrator"
+	VPCConnectionType      = "VPCConnection"
+	VPCConnectionGraphType = "VPCConnectionGraph"
+)
+
+// Risk level constants for security analysis
+const (
+	RiskLevelSecure   = "SECURE"
+	RiskLevelLow      = "LOW_RISK"
+	RiskLevelMedium   = "MEDIUM_RISK"
+	RiskLevelHigh     = "HIGH_RISK"
+	RiskLevelCritical = "CRITICAL_RISK"
 )
 
 type Error struct {
 	code     int32
 	message  string
 	severity string
+}
+
+// Security status structures for cross-resource risk analysis
+
+// VPCSecurityRisks represents overall security metrics for a VPC
+type VPCSecurityRisks struct {
+	// Critical risk resources (immediate attention required)
+	CriticalInstanceIds      []string `json:"critical_instance_ids,omitempty"`       // Instances with public IP + open SSH/RDP
+	CriticalSecurityGroupIds []string `json:"critical_security_group_ids,omitempty"` // SGs with 0.0.0.0/0 on critical ports
+	CriticalLbIds            []string `json:"critical_lb_ids,omitempty"`             // Internet-facing LBs with risky backends
+	// High risk resources (significant security concerns)
+	HighRiskInstanceIds      []string `json:"high_risk_instance_ids,omitempty"`       // Public instances with database ports exposed
+	HighRiskSecurityGroupIds []string `json:"high_risk_security_group_ids,omitempty"` // SGs with wide port ranges open
+	HighRiskSubnetIds        []string `json:"high_risk_subnet_ids,omitempty"`         // Subnets with mixed public/private resources
+	// Medium risk resources (best practice violations)
+	MediumRiskInstanceIds      []string `json:"medium_risk_instance_ids,omitempty"`       // Untagged instances
+	MediumRiskSecurityGroupIds []string `json:"medium_risk_security_group_ids,omitempty"` // Unused or overly permissive SGs
+	MediumRiskAclIds           []string `json:"medium_risk_acl_ids,omitempty"`            // ACLs with broad rules
+	// Compliance violations
+	UntaggedInstanceIds      []string `json:"untagged_instance_ids,omitempty"`
+	UntaggedSecurityGroupIds []string `json:"untagged_security_group_ids,omitempty"`
+	UntaggedSubnetIds        []string `json:"untagged_subnet_ids,omitempty"`
+	UntaggedLbIds            []string `json:"untagged_lb_ids,omitempty"`
+	// Network topology risks
+	IsolatedSubnetIds    []string   `json:"isolated_subnet_ids,omitempty"`     // Subnets with no route to internet
+	OverExposedSubnetIds []string   `json:"over_exposed_subnet_ids,omitempty"` // Subnets with multiple IGW routes
+	LastRiskAnalysis     *time.Time `json:"last_risk_analysis,omitempty"`      // When risk analysis was performed
+}
+
+// InstanceSecurityStatus represents security analysis for an instance
+type InstanceSecurityStatus struct {
+	RiskLevel             string   `json:"overall_risk_level,omitempty"`       // SECURE, LOW_RISK, MEDIUM_RISK, HIGH_RISK, CRITICAL_RISK
+	IsPubliclyAccessible  bool     `json:"is_publicly_accessible,omitempty"`   // Quick UI flag
+	HasOpenSSHAccess      bool     `json:"has_open_ssh_access,omitempty"`      // Quick UI flag
+	HasOpenRDPAccess      bool     `json:"has_open_rdp_access,omitempty"`      // Quick UI flag
+	HasOpenDatabasePorts  bool     `json:"has_open_database_ports,omitempty"`  // Database ports exposed to internet
+	IsUntagged            bool     `json:"is_untagged,omitempty"`              // Quick UI flag
+	HasOverlyPermissiveSg bool     `json:"has_overly_permissive_sg,omitempty"` // Security groups with broad access
+	RiskSummary           []string `json:"risk_summary,omitempty"`             // Human-readable risk descriptions
+	ExposedPorts          []string `json:"exposed_ports,omitempty"`            // List of risky ports that are exposed
+	RiskySecurityGroups   []string `json:"risky_security_groups,omitempty"`    // SG IDs that contribute to risk
+	Recommendations       []string `json:"recommendations,omitempty"`          // Actionable security recommendations
+	LastSecurityScan      string   `json:"last_assessed,omitempty"`            // Timestamp of last analysis
+}
+
+// SecurityGroupRiskStatus represents security analysis for a security group
+type SecurityGroupRiskStatus struct {
+	RiskLevel                string   `json:"risk_level,omitempty"`                  // SECURE, LOW_RISK, MEDIUM_RISK, HIGH_RISK, CRITICAL_RISK
+	AllowsInternetAccess     bool     `json:"allows_internet_access,omitempty"`      // Quick UI flag
+	AllowsSSHFromInternet    bool     `json:"allows_ssh_from_internet,omitempty"`    // Quick UI flag
+	AllowsRDPFromInternet    bool     `json:"allows_rdp_from_internet,omitempty"`    // Quick UI flag
+	AllowsHTTPFromInternet   bool     `json:"allows_http_from_internet,omitempty"`   // Quick UI flag
+	AllowsHTTPSFromInternet  bool     `json:"allows_https_from_internet,omitempty"`  // Quick UI flag
+	HasOverlyPermissiveRules bool     `json:"has_overly_permissive_rules,omitempty"` // Quick UI flag
+	IsUntagged               bool     `json:"is_untagged,omitempty"`                 // Quick UI flag
+	RiskyRules               []string `json:"risky_rules,omitempty"`                 // List of concerning rules
+	AffectedInstances        int32    `json:"affected_instances,omitempty"`          // Count of instances using this SG
+	Recommendations          []string `json:"recommendations,omitempty"`             // Actionable security recommendations
+	LastSecurityScan         string   `json:"last_security_scan,omitempty"`          // Timestamp of last analysis
+}
+
+// LoadBalancerSecurityStatus represents security analysis for a load balancer
+type LoadBalancerSecurityStatus struct {
+	RiskLevel             string   `json:"risk_level,omitempty"`               // SECURE, LOW_RISK, MEDIUM_RISK, HIGH_RISK, CRITICAL_RISK
+	IsInternetFacing      bool     `json:"is_internet_facing,omitempty"`       // Quick UI flag
+	HasInsecureListeners  bool     `json:"has_insecure_listeners,omitempty"`   // Quick UI flag for HTTP vs HTTPS
+	HasOpenSecurityGroups bool     `json:"has_open_security_groups,omitempty"` // Quick UI flag
+	AccessLogsDisabled    bool     `json:"access_logs_disabled,omitempty"`     // Quick UI flag
+	IsUntagged            bool     `json:"is_untagged,omitempty"`              // Quick UI flag
+	InsecureProtocols     []string `json:"insecure_protocols,omitempty"`       // List of HTTP listeners
+	SecurityGroupRisks    []string `json:"security_group_risks,omitempty"`     // List of risky security groups
+	BackendInstanceRisks  []string `json:"backend_instance_risks,omitempty"`   // List of risky backend instances
+	Recommendations       []string `json:"recommendations,omitempty"`          // Actionable security recommendations
+	LastSecurityScan      string   `json:"last_security_scan,omitempty"`       // Timestamp of last analysis
 }
 
 /* Start SyncTime types */
@@ -220,9 +304,10 @@ type Instance struct {
 	InterfaceIDs     []string
 	LastSyncTime     string
 	SelfLink         string
-	Cost             float64    `json:"cost,omitempty"` // Added field for cost
-	CreatedAt        *time.Time `json:"created_at,omitempty"`
-	UpdatedAt        *time.Time `json:"updated_at,omitempty"`
+	Cost             float64                 `json:"cost,omitempty"` // Added field for cost
+	CreatedAt        *time.Time              `json:"created_at,omitempty"`
+	UpdatedAt        *time.Time              `json:"updated_at,omitempty"`
+	SecurityStatus   *InstanceSecurityStatus `json:"security_status,omitempty"` // Security analysis results
 }
 
 func (v Instance) DbId() string {
@@ -482,17 +567,18 @@ func (v *VPCEndpoint) GetProvider() string {
 }
 
 type SecurityGroup struct {
-	Name         string
-	ID           string
-	Provider     string
-	VpcID        string
-	Region       string
-	Labels       map[string]string
-	AccountID    string
-	Rules        []SecurityGroupRule
-	SelfLink     string
-	LastSyncTime string
-	Instances    []string
+	Name           string
+	ID             string
+	Provider       string
+	VpcID          string
+	Region         string
+	Labels         map[string]string
+	AccountID      string
+	Rules          []SecurityGroupRule
+	SelfLink       string
+	LastSyncTime   string
+	Instances      []string
+	SecurityStatus *SecurityGroupRiskStatus `json:"security_status,omitempty"` // Security analysis results
 }
 
 type SecurityGroupRule struct {
@@ -600,6 +686,7 @@ type LB struct {
 	LastSyncTime           string
 	SelfLink               string
 	CreatedAt              time.Time
+	SecurityStatus         *LoadBalancerSecurityStatus `json:"security_status,omitempty"` // Security analysis results
 }
 
 func (lb *LB) DbId() string {
@@ -738,6 +825,7 @@ type VPCIndex struct {
 	Region              string                 `json:"region,omitempty"`
 	CreatedAt           *timestamppb.Timestamp `json:"created_at,omitempty"`
 	UpdatedAt           *timestamppb.Timestamp `json:"updated_at,omitempty"`
+	SecurityRisks       *VPCSecurityRisks      `json:"security_risks,omitempty"` // Overall VPC security metrics
 }
 
 func (v *VPCIndex) DbId() string {
@@ -842,5 +930,97 @@ func (v *VPCConnection) DbId() string {
 }
 
 func (v *VPCConnection) SetSyncTime(t string) {
+	// empty since VPC Connections don't need sync time
+}
+
+type VpcInternalGraph struct {
+
+	// All nodes representing VPCs, Transit Gateways, etc.
+	Nodes []VpcGraphNode `protobuf:"bytes,2,rep,name=nodes,proto3" json:"nodes,omitempty"`
+	// All edges representing connections between nodes
+	Edges []VpcGraphEdge `protobuf:"bytes,3,rep,name=edges,proto3" json:"edges,omitempty"`
+	// Cross-account/region information
+	AccountId    string            `protobuf:"bytes,4,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	Region       string            `protobuf:"bytes,5,opt,name=region,proto3" json:"region,omitempty"`
+	Provider     string            `protobuf:"bytes,6,opt,name=provider,proto3" json:"provider,omitempty"`
+	Labels       map[string]string `protobuf:"bytes,7,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	LastSyncTime string            `protobuf:"bytes,8,opt,name=last_sync_time,json=lastSyncTime,proto3" json:"last_sync_time,omitempty"`
+}
+
+type VpcConnectionGraph struct {
+	Id string `json:"id,omitempty"`
+	// All nodes in the graph (VPCs, Transit Gateways, VPC Endpoints, etc)
+	Nodes []*VpcConnectionGraphNode `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
+	// All edges representing connections between nodes
+	Edges []*VpcConnectionGraphEdge `protobuf:"bytes,2,rep,name=edges,proto3" json:"edges,omitempty"`
+
+	SrcVpcGraph  *VpcInternalGraph `protobuf:"bytes,3,opt,name=src_vpc_graph,json=srcVpcGraph,proto3" json:"src_vpc_graph,omitempty"`
+	DestVpcGraph *VpcInternalGraph `protobuf:"bytes,4,opt,name=dest_vpc_graph,json=destVpcGraph,proto3" json:"dest_vpc_graph,omitempty"` // The source VPC connectivity graph this is derived from
+
+	// Graph metadata
+	Accounts []string `protobuf:"bytes,3,rep,name=accounts,proto3" json:"accounts,omitempty"` // List of account IDs included in the graph
+	Regions  []string `protobuf:"bytes,4,rep,name=regions,proto3" json:"regions,omitempty"`   // List of regions included in the graph
+	Provider string   `json:"provider,omitempty"`
+
+	Labels       map[string]string `protobuf:"bytes,5,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	LastSyncTime string            `protobuf:"bytes,6,opt,name=last_sync_time,json=lastSyncTime,proto3" json:"last_sync_time,omitempty"`
+}
+
+type VpcConnectionGraphNode struct {
+	Id       string `json:"id,omitempty"`
+	Name     string `json:"name,omitempty"`
+	NodeType string `json:"node_type,omitempty"`
+	// Node properties based on type
+	//
+	// Types that are assignable to TypeProperties:
+	//
+	//	*VpcConnectionGraphNode_Vpc
+	//	*VpcConnectionGraphNode_Tgw
+	//	*VpcConnectionGraphNode_Endpoint
+	// Cross-account/region information
+	AccountId string `json:"account_id,omitempty"`
+	Region    string `json:"region,omitempty"`
+	Provider  string `json:"provider,omitempty"`
+	// Additional metadata
+	Properties map[string]string `json:"properties,omitempty"`
+	Labels     map[string]string `json:"labels,omitempty"`
+}
+
+type VpcConnectionGraphEdge struct {
+	Id           string `json:"id,omitempty"`
+	SourceNodeId string `json:"source_node_id,omitempty"`
+	TargetNodeId string `json:"target_node_id,omitempty"`
+	// The type of connection this edge represents
+	ConnectionType string `json:"connection_type,omitempty"`
+	// Connection details based on type
+	//
+	// Types that are assignable to ConnectionDetails:
+	//
+	//	*VpcConnectionGraphEdge_PeeringDetails
+	//	*VpcConnectionGraphEdge_TransitGatewayDetails
+	//	*VpcConnectionGraphEdge_EndpointDetails
+	//	*VpcConnectionGraphEdge_TransitVpcDetails
+	// Edge properties
+	Status        string `json:"status,omitempty"`        // active, pending, failed
+	Bidirectional bool   `json:"bidirectional,omitempty"` // Whether traffic can flow both ways
+	// Cross-account/region information
+	AccountId string `json:"account_id,omitempty"`
+	Region    string `json:"region,omitempty"`
+	Provider  string `json:"provider,omitempty"`
+	// Cross-account/region metadata
+	RouteTableIds []string          `json:"route_table_ids,omitempty"`                                       // Route tables implementing this connection
+	Properties    map[string]string `json:"properties,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3"` // Additional properties (bandwidth, latency, etc)
+}
+
+// VPCConnection helper methods to implement db.DbObject interface
+func (v *VpcConnectionGraph) GetProvider() string {
+	return v.Provider
+}
+
+func (v *VpcConnectionGraph) DbId() string {
+	return v.Id
+}
+
+func (v *VpcConnectionGraph) SetSyncTime(t string) {
 	// empty since VPC Connections don't need sync time
 }

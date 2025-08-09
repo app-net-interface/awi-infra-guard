@@ -59,15 +59,20 @@ service CloudProviderService {
     rpc ListVPNConcentrators (ListVPNConcentratorsRequest) returns (ListVPNConcentratorsResponse) {}
 
     // New RPC for listing VPC to VPC connections
+    rpc GetVPCConnection (GetVpcConnectionRequest) returns (GetVpcConnectionResponse) {}
+
+    // New RPC for listing VPC to VPC connections
     rpc ListVpcConnections (ListVpcConnectionsRequest) returns (ListVpcConnectionsResponse) {}
 
-    // New RPC for getting VPC connectivity graph
+    // Retrieves the full connectivity graph for a VPC
     rpc GetVpcConnectivityGraph (GetVpcConnectivityGraphRequest) returns (GetVpcConnectivityGraphResponse) {}
 
-  // Retrieves the connectivity graph focused on a specific instance
-  rpc GetInstanceConnectivityGraph(GetInstanceConnectivityGraphRequest) returns (GetInstanceConnectivityGraphResponse);
+    // Retrieves the connectivity graph focused on a specific instance
+    rpc GetInstanceConnectivityGraph(GetInstanceConnectivityGraphRequest) returns (GetInstanceConnectivityGraphResponse);
 
-  // Retrieves the full connectivity graph for a VPC
+    // Retrieves connectivity graph for two connected VPC
+    rpc GetVpcConnectionGraph(GetVpcConnectionGraphRequest) returns (GetVpcConnectionGraphResponse) {}
+
 
     // New RPCs for getting nodes and edges separately
     rpc ListVpcGraphNodes (ListVpcGraphNodesRequest) returns (ListVpcGraphNodesResponse) {}
@@ -89,6 +94,11 @@ service CloudProviderService {
     rpc Summary(SummaryRequest) returns (SummaryResponse);
 
     rpc SearchResources (SearchResourcesRequest) returns (SearchResourcesResponse) {}
+    
+    // Security Analysis APIs - for drill-down into risky resources
+    rpc GetVPCSecurityAnalysis (GetVPCSecurityAnalysisRequest) returns (GetVPCSecurityAnalysisResponse) {}
+    rpc ListSecurityFindings (ListSecurityFindingsRequest) returns (ListSecurityFindingsResponse) {}
+    rpc GetSecurityFinding (GetSecurityFindingRequest) returns (GetSecurityFindingResponse) {}
 }
 
 // VPCIndex definitions updated per request
@@ -374,7 +384,19 @@ message ListVPNConcentratorsResponse {
     Error err = 3;
 }
 
-// ListVpcConnections
+// GetVpcConnection
+message GetVpcConnectionRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    string vpc_id = 4;
+    optional Credentials creds = 5;
+}
+
+message GetVpcConnectionResponse {
+    VpcConnection connection = 1;
+    Error err = 2;
+}
 message ListVpcConnectionsRequest {
     string provider = 1;
     string account_id = 2;
@@ -503,18 +525,59 @@ message Counters {
     int32 vpc_endpoints = 15;
     int32 public_ips = 16;
     int32 internet_gateways = 17;
+    
+    // Additional network resources
+    int32 load_balancers = 18;
+    int32 network_interfaces = 19;
+    int32 key_pairs = 20;
+    int32 vpc_connections = 21;
+    int32 vpn_concentrators = 22;
 }
 
 message StatusSummary {
     map<string, int32> vm_status = 1;
     map<string, int32> pod_status = 2;
     map<string, int32> vm_types = 3;
+    
+    // Additional status summaries
+    map<string, int32> lb_types = 4;
+    map<string, int32> region_distribution = 5;
+    map<string, int32> health_status = 6;
+}
+
+// Security and compliance summary
+message SecuritySummary {
+    int32 open_security_groups = 1;
+    int32 unrestricted_acls = 2;
+    int32 untagged_resources = 3;
+    int32 publicly_accessible_resources = 4;
+    int32 unencrypted_resources = 5;
+}
+
+// Network topology summary
+message NetworkTopologySummary {
+    int32 isolated_vpcs = 1;
+    int32 connected_vpcs = 2;
+    int32 peering_connections = 3;
+    int32 transit_gateway_attachments = 4;
+    int32 vpn_connections = 5;
+}
+
+// Resource health summary
+message ResourceHealthSummary {
+    int32 healthy_resources = 1;
+    int32 degraded_resources = 2;
+    int32 unhealthy_resources = 3;
+    int32 stopped_resources = 4;
 }
 
 message SummaryResponse {
     Counters count = 1;
     StatusSummary statuses = 2;
-    Error err = 3;
+    SecuritySummary security = 3;
+    NetworkTopologySummary network_topology = 4;
+    ResourceHealthSummary health = 5;
+    Error err = 6;
 }
 
 // Request message for searching resources
@@ -591,6 +654,24 @@ message GetVpcConnectivityGraphResponse {
     Error err = 3;
 }
 
+// Request message for GetVpcConnectivityGraph
+message GetVpcConnectionGraphRequest {
+    string provider = 1;
+    string account_id = 2;
+    // vpc_id is mandatory to define the scope of the graph
+    string vpc_id = 4;
+    // Optional: Specify starting points or specific resource types to focus the graph
+    // repeated string start_resource_ids = 5;
+    // repeated string include_resource_types = 6;
+    optional Credentials creds = 7;
+}
+
+message GetVpcConnectionGraphResponse {
+    VpcConnectionGraph vpc_connection_graph = 1; // The VPC connection graph containing nodes and edges
+    Error err = 3; // Error information if any
+}
+
+
 // Request message for getting the connectivity graph of a specific instance
 message GetInstanceConnectivityGraphRequest {
     string provider = 1;
@@ -641,4 +722,57 @@ message ListVpcGraphEdgesRequest {
 message ListVpcGraphEdgesResponse {
     repeated VpcGraphEdge edges = 1;
     Error err = 2;
+}
+
+// Security Analysis API Messages
+
+// Request to get VPC security analysis
+message GetVPCSecurityAnalysisRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    string vpc_id = 4;
+    optional Credentials creds = 5;
+}
+
+// Response with VPC security analysis
+message GetVPCSecurityAnalysisResponse {
+    VPCSecurityAnalysis analysis = 1;
+    Error err = 2;
+}
+
+// Request to list security findings with filters
+message ListSecurityFindingsRequest {
+    string provider = 1;
+    string account_id = 2;
+    string region = 3;
+    optional string vpc_id = 4;                    // Filter by specific VPC
+    optional string resource_id = 5;               // Filter by specific resource
+    optional string resource_type = 6;             // Filter by resource type
+    repeated SecurityFinding.RiskLevel risk_levels = 7;  // Filter by risk levels
+    repeated SecurityFinding.FindingType finding_types = 8; // Filter by finding types
+    optional Credentials creds = 9;
+}
+
+// Response with list of security findings
+message ListSecurityFindingsResponse {
+    repeated SecurityFinding findings = 1;
+    int32 total_count = 2;                         // Total number of findings (for pagination)
+    Error err = 3;
+}
+
+// Request to get a specific security finding
+message GetSecurityFindingRequest {
+    string finding_id = 1;
+    string provider = 2;
+    string account_id = 3;
+    optional Credentials creds = 4;
+}
+
+// Response with detailed security finding
+message GetSecurityFindingResponse {
+    SecurityFinding finding = 1;
+    repeated string remediation_steps = 2;         // Detailed remediation steps
+    repeated string related_findings = 3;          // Related finding IDs
+    Error err = 4;
 }
