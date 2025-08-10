@@ -38,6 +38,9 @@ func (client *boltClient) SyncVpcPostProcess() error {
 	}
 
 	for _, vpcIndex := range vpcIndexes {
+		if vpcIndex == nil {
+			continue
+		}
 		if err := client.analyzeVPCSecurity(vpcIndex); err != nil {
 			// Continue with other VPCs even if one fails
 			continue
@@ -50,6 +53,9 @@ func (client *boltClient) SyncVpcPostProcess() error {
 
 // analyzeVPCSecurity performs comprehensive security analysis for a single VPC
 func (client *boltClient) analyzeVPCSecurity(vpcIndex *types.VPCIndex) error {
+	if vpcIndex == nil {
+		return fmt.Errorf("vpcIndex is nil")
+	}
 
 	// Initialize security risks structure
 	securityRisks := &types.VPCSecurityRisks{
@@ -71,24 +77,32 @@ func (client *boltClient) analyzeVPCSecurity(vpcIndex *types.VPCIndex) error {
 		LastRiskAnalysis:           &time.Time{},
 	}
 
-	// Analyze instances
-	if err := client.analyzeInstancesSecurity(vpcIndex, securityRisks); err != nil {
-		return fmt.Errorf("failed to analyze instances security: %v", err)
+	// Analyze instances - skip if no instances are synced
+	if len(vpcIndex.InstanceIds) > 0 {
+		if err := client.analyzeInstancesSecurity(vpcIndex, securityRisks); err != nil {
+			return fmt.Errorf("failed to analyze instances security: %v", err)
+		}
 	}
 
-	// Analyze security groups
-	if err := client.analyzeSecurityGroupsSecurity(vpcIndex, securityRisks); err != nil {
-		return fmt.Errorf("failed to analyze security groups security: %v", err)
+	// Analyze security groups - skip if no security groups are synced
+	if len(vpcIndex.SecurityGroupIds) > 0 {
+		if err := client.analyzeSecurityGroupsSecurity(vpcIndex, securityRisks); err != nil {
+			return fmt.Errorf("failed to analyze security groups security: %v", err)
+		}
 	}
 
-	// Analyze load balancers
-	if err := client.analyzeLoadBalancersSecurity(vpcIndex, securityRisks); err != nil {
-		return fmt.Errorf("failed to analyze load balancers security: %v", err)
+	// Analyze load balancers - skip if no load balancers are synced
+	if len(vpcIndex.LbIds) > 0 {
+		if err := client.analyzeLoadBalancersSecurity(vpcIndex, securityRisks); err != nil {
+			return fmt.Errorf("failed to analyze load balancers security: %v", err)
+		}
 	}
 
-	// Analyze subnets
-	if err := client.analyzeSubnetsSecurity(vpcIndex, securityRisks); err != nil {
-		return fmt.Errorf("failed to analyze subnets security: %v", err)
+	// Analyze subnets - skip if no subnets are synced
+	if len(vpcIndex.SubnetIds) > 0 {
+		if err := client.analyzeSubnetsSecurity(vpcIndex, securityRisks); err != nil {
+			return fmt.Errorf("failed to analyze subnets security: %v", err)
+		}
 	}
 
 	// Set analysis timestamp
@@ -166,8 +180,6 @@ func (client *boltClient) analyzeInstanceSecurity(instance *types.Instance) *typ
 		LastSecurityScan:      time.Now().Format(time.RFC3339),
 	}
 
-
-
 	// Check if instance has public IP
 	if instance.PublicIP != "" {
 		status.IsPubliclyAccessible = true
@@ -181,19 +193,22 @@ func (client *boltClient) analyzeInstanceSecurity(instance *types.Instance) *typ
 		status.Recommendations = append(status.Recommendations, "Add required tags for compliance and resource management")
 	}
 
-	// Analyze security groups
+	// Analyze security groups - handle cases where instance references SGs that aren't synced
 	riskyPorts := []string{}
-	for _, sgId := range instance.SecurityGroupIDs {
-		sg, err := client.GetSecurityGroup(sgId)
-		if err != nil || sg == nil {
-			continue
-		}
+	if instance.SecurityGroupIDs != nil {
+		for _, sgId := range instance.SecurityGroupIDs {
+			sg, err := client.GetSecurityGroup(sgId)
+			if err != nil || sg == nil {
+				// Security group not found or not synced - skip but log the missing reference
+				continue
+			}
 
-		// Analyze security group rules
-		risks := client.analyzeSecurityGroupRules(sg.Rules)
-		if len(risks) > 0 {
-			status.RiskySecurityGroups = append(status.RiskySecurityGroups, sgId)
-			riskyPorts = append(riskyPorts, risks...)
+			// Analyze security group rules
+			risks := client.analyzeSecurityGroupRules(sg.Rules)
+			if len(risks) > 0 {
+				status.RiskySecurityGroups = append(status.RiskySecurityGroups, sgId)
+				riskyPorts = append(riskyPorts, risks...)
+			}
 		}
 	}
 
@@ -297,13 +312,15 @@ func (client *boltClient) analyzeInstanceSecurity(instance *types.Instance) *typ
 	// Set exposed ports
 	status.ExposedPorts = removeDuplicates(riskyPorts)
 
-	// Check for unrestricted access (0.0.0.0/0 rules)
-	if client.hasUnrestrictedAccess(instance.SecurityGroupIDs) {
-		status.HasOverlyPermissiveSg = true
-		if status.RiskLevel == types.RiskLevelSecure {
-			status.RiskLevel = types.RiskLevelHigh
+	// Check for unrestricted access (0.0.0.0/0 rules) - only if SG IDs exist
+	if instance.SecurityGroupIDs != nil && len(instance.SecurityGroupIDs) > 0 {
+		if client.hasUnrestrictedAccess(instance.SecurityGroupIDs) {
+			status.HasOverlyPermissiveSg = true
+			if status.RiskLevel == types.RiskLevelSecure {
+				status.RiskLevel = types.RiskLevelHigh
+			}
+			status.Recommendations = append(status.Recommendations, "Restrict security group rules to specific IP ranges instead of 0.0.0.0/0")
 		}
-		status.Recommendations = append(status.Recommendations, "Restrict security group rules to specific IP ranges instead of 0.0.0.0/0")
 	}
 
 	return status
@@ -377,124 +394,128 @@ func (client *boltClient) analyzeSecurityGroupSecurity(sg *types.SecurityGroup) 
 		status.Recommendations = append(status.Recommendations, "Add required tags for compliance and resource management")
 	}
 
-	// Analyze rules
-	for _, rule := range sg.Rules {
-		// Check for internet access (0.0.0.0/0)
-		hasInternetAccess := false
-		for _, source := range rule.Source {
-			if strings.Contains(source, "0.0.0.0/0") || strings.Contains(source, "::/0") {
-				hasInternetAccess = true
-				status.AllowsInternetAccess = true
-				break
-			}
-		}
-
-		if hasInternetAccess {
-			// Check specific ports for different risk levels
-			if strings.Contains(rule.PortRange, "22") {
-				status.AllowsSSHFromInternet = true
-				status.RiskLevel = types.RiskLevelCritical
-				status.RiskyRules = append(status.RiskyRules, "SSH (22) open to internet")
-				status.Recommendations = append(status.Recommendations, "Restrict SSH access to specific IP ranges or use bastion host")
-			}
-
-			if strings.Contains(rule.PortRange, "3389") {
-				status.AllowsRDPFromInternet = true
-				status.RiskLevel = types.RiskLevelCritical
-				status.RiskyRules = append(status.RiskyRules, "RDP (3389) open to internet")
-				status.Recommendations = append(status.Recommendations, "Restrict RDP access to specific IP ranges or use VPN")
-			}
-
-			if strings.Contains(rule.PortRange, "23") {
-				status.RiskLevel = types.RiskLevelCritical
-				status.RiskyRules = append(status.RiskyRules, "Telnet (23) open to internet")
-				status.Recommendations = append(status.Recommendations, "Disable Telnet immediately - use SSH instead")
-			}
-
-			// Database ports
-			dbPorts := []string{"3306", "5432", "1433", "1521", "27017"}
-			for _, dbPort := range dbPorts {
-				if strings.Contains(rule.PortRange, dbPort) {
-					status.RiskLevel = types.RiskLevelCritical
-					status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Database port %s open to internet", dbPort))
-					status.Recommendations = append(status.Recommendations, "Move database to private subnet and restrict access")
-				}
-			}
-
-			// Windows file sharing
-			winPorts := []string{"135", "139", "445"}
-			for _, winPort := range winPorts {
-				if strings.Contains(rule.PortRange, winPort) {
-					status.RiskLevel = types.RiskLevelCritical
-					status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Windows file sharing port %s open to internet", winPort))
-					status.Recommendations = append(status.Recommendations, "Block Windows file sharing from internet access")
-				}
-			}
-
-			if strings.Contains(rule.PortRange, "21") {
-				status.RiskLevel = types.RiskLevelHigh
-				status.RiskyRules = append(status.RiskyRules, "FTP (21) open to internet")
-				status.Recommendations = append(status.Recommendations, "Replace FTP with SFTP or FTPS")
-			}
-
-			if strings.Contains(rule.PortRange, "6379") {
-				status.RiskLevel = types.RiskLevelCritical
-				status.RiskyRules = append(status.RiskyRules, "Redis (6379) open to internet")
-				status.Recommendations = append(status.Recommendations, "Secure Redis with authentication and move to private network")
-			}
-
-			if strings.Contains(rule.PortRange, "80") {
-				status.AllowsHTTPFromInternet = true
-				status.RiskyRules = append(status.RiskyRules, "HTTP (80) open to internet")
-				if status.RiskLevel == types.RiskLevelSecure {
-					status.RiskLevel = types.RiskLevelMedium
-				}
-				status.Recommendations = append(status.Recommendations, "Consider redirecting HTTP to HTTPS")
-			}
-
-			if strings.Contains(rule.PortRange, "443") {
-				status.AllowsHTTPSFromInternet = true
-				status.RiskyRules = append(status.RiskyRules, "HTTPS (443) open to internet")
-				status.Recommendations = append(status.Recommendations, "Ensure SSL certificates are current and use strong ciphers")
-			}
-
-			// Check for wide port ranges
-			if strings.Contains(rule.PortRange, "-") {
-				parts := strings.Split(rule.PortRange, "-")
-				if len(parts) == 2 {
-					start, _ := strconv.Atoi(strings.TrimSpace(parts[0]))
-					end, _ := strconv.Atoi(strings.TrimSpace(parts[1]))
-					portCount := end - start + 1
-					
-					if portCount > 1000 { // Very wide range
-						status.HasOverlyPermissiveRules = true
-						status.RiskLevel = types.RiskLevelCritical
-						status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Extremely wide port range %s (%d ports) open to internet", rule.PortRange, portCount))
-						status.Recommendations = append(status.Recommendations, "Restrict to specific ports only - wide ranges are dangerous")
-					} else if portCount > 100 { // Wide range
-						status.HasOverlyPermissiveRules = true
-						if status.RiskLevel == types.RiskLevelSecure {
-							status.RiskLevel = types.RiskLevelHigh
-						}
-						status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Wide port range %s (%d ports) open to internet", rule.PortRange, portCount))
-						status.Recommendations = append(status.Recommendations, "Narrow down port ranges to only necessary ports")
-					} else if portCount > 20 { // Moderately wide range
-						status.HasOverlyPermissiveRules = true
-						if status.RiskLevel == types.RiskLevelSecure {
-							status.RiskLevel = types.RiskLevelMedium
-						}
-						status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Port range %s (%d ports) open to internet", rule.PortRange, portCount))
-						status.Recommendations = append(status.Recommendations, "Consider reducing port range to minimum required ports")
+	// Analyze rules - handle nil or empty rules safely
+	if sg.Rules != nil {
+		for _, rule := range sg.Rules {
+			// Check for internet access (0.0.0.0/0)
+			hasInternetAccess := false
+			if rule.Source != nil {
+				for _, source := range rule.Source {
+					if strings.Contains(source, "0.0.0.0/0") || strings.Contains(source, "::/0") {
+						hasInternetAccess = true
+						status.AllowsInternetAccess = true
+						break
 					}
 				}
 			}
-			
-			// Check for "all ports" indicators
-			if strings.Contains(rule.PortRange, "0-65535") || strings.Contains(rule.PortRange, "1-65535") {
-				status.HasOverlyPermissiveRules = true
-				status.RiskLevel = types.RiskLevelCritical
-				status.RiskyRules = append(status.RiskyRules, "All ports (0-65535) open to internet")
-				status.Recommendations = append(status.Recommendations, "CRITICAL: All ports open to internet - restrict immediately")
+
+			if hasInternetAccess {
+				// Check specific ports for different risk levels
+				if strings.Contains(rule.PortRange, "22") {
+					status.AllowsSSHFromInternet = true
+					status.RiskLevel = types.RiskLevelCritical
+					status.RiskyRules = append(status.RiskyRules, "SSH (22) open to internet")
+					status.Recommendations = append(status.Recommendations, "Restrict SSH access to specific IP ranges or use bastion host")
+				}
+
+				if strings.Contains(rule.PortRange, "3389") {
+					status.AllowsRDPFromInternet = true
+					status.RiskLevel = types.RiskLevelCritical
+					status.RiskyRules = append(status.RiskyRules, "RDP (3389) open to internet")
+					status.Recommendations = append(status.Recommendations, "Restrict RDP access to specific IP ranges or use VPN")
+				}
+
+				if strings.Contains(rule.PortRange, "23") {
+					status.RiskLevel = types.RiskLevelCritical
+					status.RiskyRules = append(status.RiskyRules, "Telnet (23) open to internet")
+					status.Recommendations = append(status.Recommendations, "Disable Telnet immediately - use SSH instead")
+				}
+
+				// Database ports
+				dbPorts := []string{"3306", "5432", "1433", "1521", "27017"}
+				for _, dbPort := range dbPorts {
+					if strings.Contains(rule.PortRange, dbPort) {
+						status.RiskLevel = types.RiskLevelCritical
+						status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Database port %s open to internet", dbPort))
+						status.Recommendations = append(status.Recommendations, "Move database to private subnet and restrict access")
+					}
+				}
+
+				// Windows file sharing
+				winPorts := []string{"135", "139", "445"}
+				for _, winPort := range winPorts {
+					if strings.Contains(rule.PortRange, winPort) {
+						status.RiskLevel = types.RiskLevelCritical
+						status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Windows file sharing port %s open to internet", winPort))
+						status.Recommendations = append(status.Recommendations, "Block Windows file sharing from internet access")
+					}
+				}
+
+				if strings.Contains(rule.PortRange, "21") {
+					status.RiskLevel = types.RiskLevelHigh
+					status.RiskyRules = append(status.RiskyRules, "FTP (21) open to internet")
+					status.Recommendations = append(status.Recommendations, "Replace FTP with SFTP or FTPS")
+				}
+
+				if strings.Contains(rule.PortRange, "6379") {
+					status.RiskLevel = types.RiskLevelCritical
+					status.RiskyRules = append(status.RiskyRules, "Redis (6379) open to internet")
+					status.Recommendations = append(status.Recommendations, "Secure Redis with authentication and move to private network")
+				}
+
+				if strings.Contains(rule.PortRange, "80") {
+					status.AllowsHTTPFromInternet = true
+					status.RiskyRules = append(status.RiskyRules, "HTTP (80) open to internet")
+					if status.RiskLevel == types.RiskLevelSecure {
+						status.RiskLevel = types.RiskLevelMedium
+					}
+					status.Recommendations = append(status.Recommendations, "Consider redirecting HTTP to HTTPS")
+				}
+
+				if strings.Contains(rule.PortRange, "443") {
+					status.AllowsHTTPSFromInternet = true
+					status.RiskyRules = append(status.RiskyRules, "HTTPS (443) open to internet")
+					status.Recommendations = append(status.Recommendations, "Ensure SSL certificates are current and use strong ciphers")
+				}
+
+				// Check for wide port ranges
+				if strings.Contains(rule.PortRange, "-") {
+					parts := strings.Split(rule.PortRange, "-")
+					if len(parts) == 2 {
+						start, _ := strconv.Atoi(strings.TrimSpace(parts[0]))
+						end, _ := strconv.Atoi(strings.TrimSpace(parts[1]))
+						portCount := end - start + 1
+
+						if portCount > 1000 { // Very wide range
+							status.HasOverlyPermissiveRules = true
+							status.RiskLevel = types.RiskLevelCritical
+							status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Extremely wide port range %s (%d ports) open to internet", rule.PortRange, portCount))
+							status.Recommendations = append(status.Recommendations, "Restrict to specific ports only - wide ranges are dangerous")
+						} else if portCount > 100 { // Wide range
+							status.HasOverlyPermissiveRules = true
+							if status.RiskLevel == types.RiskLevelSecure {
+								status.RiskLevel = types.RiskLevelHigh
+							}
+							status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Wide port range %s (%d ports) open to internet", rule.PortRange, portCount))
+							status.Recommendations = append(status.Recommendations, "Narrow down port ranges to only necessary ports")
+						} else if portCount > 20 { // Moderately wide range
+							status.HasOverlyPermissiveRules = true
+							if status.RiskLevel == types.RiskLevelSecure {
+								status.RiskLevel = types.RiskLevelMedium
+							}
+							status.RiskyRules = append(status.RiskyRules, fmt.Sprintf("Port range %s (%d ports) open to internet", rule.PortRange, portCount))
+							status.Recommendations = append(status.Recommendations, "Consider reducing port range to minimum required ports")
+						}
+					}
+				}
+
+				// Check for "all ports" indicators
+				if strings.Contains(rule.PortRange, "0-65535") || strings.Contains(rule.PortRange, "1-65535") {
+					status.HasOverlyPermissiveRules = true
+					status.RiskLevel = types.RiskLevelCritical
+					status.RiskyRules = append(status.RiskyRules, "All ports (0-65535) open to internet")
+					status.Recommendations = append(status.Recommendations, "CRITICAL: All ports open to internet - restrict immediately")
+				}
 			}
 		}
 	}
@@ -662,13 +683,19 @@ func (client *boltClient) analyzeSubnetsSecurity(vpcIndex *types.VPCIndex, secur
 func (client *boltClient) analyzeSecurityGroupRules(rules []types.SecurityGroupRule) []string {
 	riskyPorts := []string{}
 
+	if rules == nil {
+		return riskyPorts
+	}
+
 	for _, rule := range rules {
 		// Check if rule allows access from internet
 		hasInternetAccess := false
-		for _, source := range rule.Source {
-			if strings.Contains(source, "0.0.0.0/0") || strings.Contains(source, "::/0") {
-				hasInternetAccess = true
-				break
+		if rule.Source != nil {
+			for _, source := range rule.Source {
+				if strings.Contains(source, "0.0.0.0/0") || strings.Contains(source, "::/0") {
+					hasInternetAccess = true
+					break
+				}
 			}
 		}
 
@@ -686,16 +713,24 @@ func (client *boltClient) analyzeSecurityGroupRules(rules []types.SecurityGroupR
 
 // hasUnrestrictedAccess checks if any security group has unrestricted (0.0.0.0/0) access
 func (client *boltClient) hasUnrestrictedAccess(sgIds []string) bool {
+	if sgIds == nil {
+		return false
+	}
+
 	for _, sgId := range sgIds {
 		sg, err := client.GetSecurityGroup(sgId)
 		if err != nil || sg == nil {
 			continue
 		}
 
-		for _, rule := range sg.Rules {
-			for _, source := range rule.Source {
-				if strings.Contains(source, "0.0.0.0/0") || strings.Contains(source, "::/0") {
-					return true
+		if sg.Rules != nil {
+			for _, rule := range sg.Rules {
+				if rule.Source != nil {
+					for _, source := range rule.Source {
+						if strings.Contains(source, "0.0.0.0/0") || strings.Contains(source, "::/0") {
+							return true
+						}
+					}
 				}
 			}
 		}
