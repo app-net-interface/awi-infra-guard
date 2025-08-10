@@ -57,8 +57,8 @@ func (c *Client) createPeeringConnection(pc awstypes.VpcPeeringConnection, regio
 func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcConnectionsRequest) ([]types.VPCConnection, error) {
 	var allVpcConns []types.VPCConnection
 
-	c.logger.Debugf("Starting VPC connection enumeration for account %s", input.AccountId)
-	c.logger.Debugf("Client configuration - Default Account: %s, Default Region: %s", c.defaultAccountID, c.defaultRegion)
+	//c.logger.Debugf("Starting VPC connection enumeration for account %s", input.AccountId)
+	//c.logger.Debugf("Client configuration - Default Account: %s, Default Region: %s", c.defaultAccountID, c.defaultRegion)
 
 	// Get all available AWS regions
 	regions, err := c.getAllRegions(ctx, input.AccountId)
@@ -67,10 +67,10 @@ func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcC
 		return nil, err
 	}
 
-	c.logger.Debugf("Processing %d AWS regions", len(regions))
+	//c.logger.Debugf("Processing %d AWS regions", len(regions))
 	for _, region := range regions {
 		regionName := aws.ToString(region.RegionName)
-		c.logger.Debugf("Processing region %s", regionName)
+		//c.logger.Debugf("Processing region %s", regionName)
 
 		// Get EC2 client for this region
 		client, err := c.getEC2Client(ctx, input.AccountId, regionName)
@@ -80,18 +80,18 @@ func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcC
 		}
 
 		// Process VPC peering connections
-		c.logger.Debugf("Calling DescribeVpcPeeringConnections for account %s in region %s", input.AccountId, regionName)
+		//c.logger.Debugf("Calling DescribeVpcPeeringConnections for account %s in region %s", input.AccountId, regionName)
 		peeringConnections, err := client.DescribeVpcPeeringConnections(ctx, &ec2.DescribeVpcPeeringConnectionsInput{})
 		if err != nil {
 			c.logger.Warnf("Failed to list VPC peering connections in region %s: %v", regionName, err)
 		} else {
-			c.logger.Debugf("Found %d VPC peering connections in region %s", len(peeringConnections.VpcPeeringConnections), regionName)
+			//c.logger.Debugf("Found %d VPC peering connections in region %s", len(peeringConnections.VpcPeeringConnections), regionName)
 			for _, pc := range peeringConnections.VpcPeeringConnections {
-				c.logger.Debugf("Processing VPC peering connection: ID=%s, RequesterVPC=%s, AccepterVPC=%s, Status=%s",
-					aws.ToString(pc.VpcPeeringConnectionId),
-					aws.ToString(pc.RequesterVpcInfo.VpcId),
-					aws.ToString(pc.AccepterVpcInfo.VpcId),
-					string(pc.Status.Code))
+				//c.logger.Debugf("Processing VPC peering connection: ID=%s, RequesterVPC=%s, AccepterVPC=%s, Status=%s",
+				//aws.ToString(pc.VpcPeeringConnectionId),
+				//aws.ToString(pc.RequesterVpcInfo.VpcId),
+				//aws.ToString(pc.AccepterVpcInfo.VpcId),
+				//string(pc.Status.Code))
 				allVpcConns = append(allVpcConns, c.createPeeringConnection(pc, regionName))
 			}
 		}
@@ -130,7 +130,7 @@ func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcC
 
 		// For each TGW, check route tables to find actual VPC-to-VPC connectivity
 		for tgwID, attachments := range attachmentsByTGW {
-			c.logger.Debugf("Processing TGW %s with %d VPC attachments", tgwID, len(attachments))
+			//c.logger.Debugf("Processing TGW %s with %d VPC attachments", tgwID, len(attachments))
 
 			// Get route tables for this TGW
 			for _, rt := range tgwRouteTables.TransitGatewayRouteTables {
@@ -166,9 +166,9 @@ func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcC
 					}
 				}
 
-				c.logger.Debugf("Route table %s has %d active attachments",
-					aws.ToString(rt.TransitGatewayRouteTableId),
-					len(activeAttachments))
+				//c.logger.Debugf("Route table %s has %d active attachments",
+				//	aws.ToString(rt.TransitGatewayRouteTableId),
+				//	len(activeAttachments))
 
 				// If there are routes in this table, all active attachments can potentially communicate
 				if len(routes.Routes) > 0 {
@@ -189,7 +189,7 @@ func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcC
 								continue
 							}
 
-							c.logger.Debugf("Creating TGW connection between attachments: %s and %s", att1ID, att2ID)
+							//c.logger.Debugf("Creating TGW connection between attachments: %s and %s", att1ID, att2ID)
 							allVpcConns = append(allVpcConns, types.VPCConnection{
 								Provider:         providerName,
 								ID:               fmt.Sprintf("%s:%s:%s", tgwID, att1ID, att2ID),
@@ -205,7 +205,7 @@ func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcC
 								Status:           "inactive",
 								ConnectionType:   "transit_gateway",
 							})
-							c.logger.Debugf("Found valid routes between VPCs: %s and %s", aws.ToString(att1.ResourceId), aws.ToString(att2.ResourceId))
+							//c.logger.Debugf("Found valid routes between VPCs: %s and %s", aws.ToString(att1.ResourceId), aws.ToString(att2.ResourceId))
 							allVpcConns = append(allVpcConns, types.VPCConnection{
 								Provider:         providerName,
 								ID:               fmt.Sprintf("%s-%s-%s", tgwID, att1ID, att2ID),
@@ -228,6 +228,6 @@ func (c *Client) ListVpcConnections(ctx context.Context, input *infrapb.ListVpcC
 		}
 	}
 
-	c.logger.Debugf("Found %d VPC connections across all regions for account %s", len(allVpcConns), input.AccountId)
+	//c.logger.Debugf("Found %d VPC connections across all regions for account %s", len(allVpcConns), input.AccountId)
 	return allVpcConns, nil
 }

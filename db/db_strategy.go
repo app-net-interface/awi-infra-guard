@@ -727,6 +727,6 @@ func (p *providerWithDB) GetVPCConnection(ctx context.Context, params *infrapb.G
 			params.GetVpcId(), params.GetAccountId())
 	}
 
-	p.logger.Debugf("Successfully retrieved VPC connection for VPC %s", params.GetVpcId())
+	//p.logger.Debugf("Successfully retrieved VPC connection for VPC %s", params.GetVpcId())
 	return connection, nil
 }

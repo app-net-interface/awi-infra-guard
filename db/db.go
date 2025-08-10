@@ -17,7 +17,9 @@
 
 package db
 
-import "github.com/app-net-interface/awi-infra-guard/types"
+import (
+	"github.com/app-net-interface/awi-infra-guard/types"
+)
 
 const (
 	vpcTable                = "vpcs"
@@ -88,6 +90,12 @@ type Client interface {
 	Open(filename string) error
 	Close() error
 	DropDB() error
+
+	// Time
+	PutSyncTime(time *types.SyncTime) error
+	GetSyncTime(id string) (*types.SyncTime, error)
+	ListSyncTimes() ([]*types.SyncTime, error)
+	DeleteSyncTime(id string) error
 
 	// VPC
 	PutRegion(region *types.Region) error
@@ -179,6 +187,31 @@ type Client interface {
 	GetKeyPair(string) (*types.KeyPair, error)
 	DeleteKeyPair(string) error
 
+	// VPNConcentrator
+	ListVPNConcentrators() ([]*types.VPNConcentrator, error)
+	PutVPNConcentrator(*types.VPNConcentrator) error
+	GetVPNConcentrator(string) (*types.VPNConcentrator, error)
+	DeleteVPNConcentrator(string) error
+
+	// VPNConcentrator
+	ListVPCIndex() ([]*types.VPCIndex, error)
+	PutVPCIndex(*types.VPCIndex) error
+	GetVPCIndex(string) (*types.VPCIndex, error)
+	DeleteVPCIndex(string) error
+
+	// Add SyncVPCIndexes to the interface.
+	SyncVPCIndexes() error
+
+	// Security post-processing for VPC resources
+	SyncVpcPostProcess() error
+
+	// VPC Connection
+	ListVpcConnections() ([]*types.VPCConnection, error)
+	PutVpcConnection(*types.VPCConnection) error
+	GetVpcConnection(string) (*types.VPCConnection, error)
+	DeleteVpcConnection(string) error
+	SyncVpcConnections() error
+
 	/* End of cloud provider functions */
 
 	// Begining Kubernets
@@ -209,35 +242,4 @@ type Client interface {
 	GetNamespace(id string) (*types.Namespace, error)
 	ListNamespaces() ([]*types.Namespace, error)
 	DeleteNamespace(id string) error
-
-	// Time
-	PutSyncTime(time *types.SyncTime) error
-	GetSyncTime(id string) (*types.SyncTime, error)
-	ListSyncTimes() ([]*types.SyncTime, error)
-	DeleteSyncTime(id string) error
-
-	// VPNConcentrator
-	ListVPNConcentrators() ([]*types.VPNConcentrator, error)
-	PutVPNConcentrator(*types.VPNConcentrator) error
-	GetVPNConcentrator(string) (*types.VPNConcentrator, error)
-	DeleteVPNConcentrator(string) error
-
-	// VPNConcentrator
-	ListVPCIndex() ([]*types.VPCIndex, error)
-	PutVPCIndex(*types.VPCIndex) error
-	GetVPCIndex(string) (*types.VPCIndex, error)
-	DeleteVPCIndex(string) error
-
-	// Add SyncVPCIndexes to the interface.
-	SyncVPCIndexes() error
-
-	// Security post-processing for VPC resources
-	SyncVpcPostProcess() error
-
-	// VPC Connection
-	ListVpcConnections() ([]*types.VPCConnection, error)
-	PutVpcConnection(*types.VPCConnection) error
-	GetVpcConnection(string) (*types.VPCConnection, error)
-	DeleteVpcConnection(string) error
-	SyncVpcConnections() error
 }

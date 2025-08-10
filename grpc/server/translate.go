@@ -318,7 +318,7 @@ func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
 				Status:      r.Status,
 			})
 		}
-		fmt.Printf("DEBUG: RouteTable Subnets %v\n", rt.SubnetIds)
+		//fmt.Printf("DEBUG: RouteTable Subnets %v\n", rt.SubnetIds)
 
 		out = append(out, &infrapb.RouteTable{
 			Provider:     rt.Provider,
@@ -337,7 +337,7 @@ func typesRouteTableToGrpc(in []types.RouteTable) []*infrapb.RouteTable {
 			SelfLink:     rt.SelfLink,
 		})
 	}
-	fmt.Printf("DEBUG: RouteTable %v\n", out)
+	//fmt.Printf("DEBUG: RouteTable %v\n", out)
 	return out
 }
 

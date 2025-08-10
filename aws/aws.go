@@ -394,7 +394,7 @@ func (c *Client) getEKSClient(_ context.Context, account, region string) (*eks.C
 // It accepts operationalAccountID to ensure it uses the correct context for client creation
 // and returns the AWS SDK's region type.
 func (c *Client) getAllRegions(ctx context.Context, operationalAccountID string) ([]awstypes.Region, error) {
-	c.logger.Debugf("[AccountID: %s] getAllRegions called.", operationalAccountID)
+	//c.logger.Debugf("[AccountID: %s] getAllRegions called.", operationalAccountID)
 
 	// Get an EC2 client configured for the operationalAccountID.
 	// DescribeRegions is a global call, but getEC2Client needs a region.
@@ -406,7 +406,7 @@ func (c *Client) getAllRegions(ctx context.Context, operationalAccountID string)
 		return nil, fmt.Errorf("failed to get EC2 client for account %s: %w", operationalAccountID, err)
 	}
 
-	c.logger.Debugf("[AccountID: %s] getAllRegions: Calling DescribeRegions API.", operationalAccountID)
+	//c.logger.Debugf("[AccountID: %s] getAllRegions: Calling DescribeRegions API.", operationalAccountID)
 	output, err := ec2ClientService.DescribeRegions(ctx, &ec2.DescribeRegionsInput{
 		AllRegions: aws.Bool(false), // Typically, you want only opt-in regions
 	})
@@ -419,7 +419,7 @@ func (c *Client) getAllRegions(ctx context.Context, operationalAccountID string)
 	var enabledSdkRegions []awstypes.Region
 	for _, sdkRegion := range output.Regions {
 		if sdkRegion.OptInStatus != nil && *sdkRegion.OptInStatus != "opt-in-not-required" && *sdkRegion.OptInStatus != "opted-in" {
-			c.logger.Debugf("[AccountID: %s] getAllRegions: Skipping region '%s' due to OptInStatus: '%s'", operationalAccountID, aws.ToString(sdkRegion.RegionName), *sdkRegion.OptInStatus)
+			//c.logger.Debugf("[AccountID: %s] getAllRegions: Skipping region '%s' due to OptInStatus: '%s'", operationalAccountID, aws.ToString(sdkRegion.RegionName), *sdkRegion.OptInStatus)
 			continue
 		}
 		enabledSdkRegions = append(enabledSdkRegions, sdkRegion)

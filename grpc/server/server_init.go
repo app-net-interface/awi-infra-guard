@@ -35,6 +35,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/app-net-interface/awi-infra-guard/db"
+	sqlitedb "github.com/app-net-interface/awi-infra-guard/db/sqlite"
 	"github.com/app-net-interface/awi-infra-guard/grpc/config"
 	"github.com/app-net-interface/awi-infra-guard/grpc/go/infrapb"
 	"github.com/app-net-interface/awi-infra-guard/provider"
@@ -177,7 +178,7 @@ func Run() {
 	responseStrategy = providerStrategy
 	if c.UseLocalDB {
 		logger.Infof("Initializing local database")
-		dbClient := db.NewBoltClient()
+		dbClient := sqlitedb.NewSQLiteClient().(db.Client)
 		if err := dbClient.Open(c.SyncConfig.DbFileName); err != nil {
 			logger.Errorf("could not opend db: %v", err)
 			return

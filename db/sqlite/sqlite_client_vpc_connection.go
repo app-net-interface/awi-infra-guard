@@ -15,7 +15,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package db
+package sqlite
 
 import (
 	"fmt"
@@ -24,58 +24,45 @@ import (
 	"github.com/app-net-interface/awi-infra-guard/types"
 )
 
-func (client *boltClient) PutVpcConnection(v *types.VPCConnection) error {
-	return update(client, v, v.DbId(), vpcConnectionTable)
+func (client *sqliteClient) PutVpcConnection(v *types.VPCConnection) error {
+	return client.putObject(v, v.DbId(), vpcConnectionTable)
 }
 
-func (client *boltClient) GetVpcConnection(id string) (*types.VPCConnection, error) {
-	vpcConnections, err := list[types.VPCConnection](client, vpcConnectionTable)
+func (client *sqliteClient) GetVpcConnection(id string) (*types.VPCConnection, error) {
+	vpcConnection := &types.VPCConnection{}
+	err := client.getObject(id, vpcConnectionTable, vpcConnection)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list vpc connections: %w", err)
+		return nil, err
 	}
-
-	for _, conn := range vpcConnections {
-		fmt.Printf("DEBUG: Checking VPC connection with FromVpcId: %s or ToVpcId: %s against %s\n",
-			conn.FromVpcId, conn.ToVpcId, id)
-		// Check both FromVpcId and ToVpcId since the connection could be in either direction
-		if conn.FromVpcId == id || conn.ToVpcId == id {
-			return conn, nil
-		}
-	}
-	return nil, fmt.Errorf("vpc connection with vpc id %s not found", id)
+	return vpcConnection, nil
 }
 
-func (client *boltClient) ListVpcConnections() ([]*types.VPCConnection, error) {
-	return list[types.VPCConnection](client, vpcConnectionTable)
+func (client *sqliteClient) ListVpcConnections() ([]*types.VPCConnection, error) {
+	objects, err := client.listObjects(vpcConnectionTable, func() interface{} { return &types.VPCConnection{} })
+	if err != nil {
+		return nil, err
+	}
+
+	vpcConnections := make([]*types.VPCConnection, len(objects))
+	for i, obj := range objects {
+		vpcConnections[i] = obj.(*types.VPCConnection)
+	}
+	return vpcConnections, nil
 }
 
-func (client *boltClient) DeleteVpcConnection(id string) error {
-	return delete_(client, id, vpcConnectionTable)
-}
-
-// hasTransitGatewayRoute checks if a route table has a route to the specified transit gateway
-func hasTransitGatewayRoute(rt *types.RouteTable, tgwID string) bool {
-	if rt == nil {
-		return false
-	}
-	for _, route := range rt.Routes {
-		// Check if the route target contains the TGW ID
-		if route.Target == tgwID {
-			return true
-		}
-	}
-	return false
+func (client *sqliteClient) DeleteVpcConnection(id string) error {
+	return client.deleteObject(id, vpcConnectionTable)
 }
 
 // SyncVpcConnections is now handled in the sync package instead of here
-func (client *boltClient) SyncVpcConnections() error {
+func (client *sqliteClient) SyncVpcConnections() error {
 	// No-op: Sync logic moved to sync package
 	return nil
 }
 
 // UpdateVpcConnectionStatus analyzes cached route tables to determine actual connectivity status
 // of Transit Gateway connections based on route table configurations
-func (client *boltClient) UpdateVpcConnectionStatus() error {
+func (client *sqliteClient) UpdateVpcConnectionStatus() error {
 	// Get all VPC connections
 	connections, err := client.ListVpcConnections()
 	if err != nil {
